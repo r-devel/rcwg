@@ -11,13 +11,14 @@ Dev guide like devguide.python.org
  - how to do patch reviews
  - document process of "promotion" to R core
 
-References
-[Contributing to GNU R](https://bookdown.org/lionel/contributing/)
-[Bug Reporting](https://www.r-project.org/bugs.html)
-[R can use your help reviewing bug reports](https://developer.r-project.org/Blog/public/2019/10/09/r-can-use-your-help-reviewing-bug-reports/index.html)
-[Bugzilla mirror on GitHub](https://github.com/MichaelChirico/r-bugs)
-[CI (Continuous Integration) for R-devel](https://github.com/MichaelChirico/r-core-builder)
-[Mirror of R svn server with Github actions CI for testing patches](https://github.com/jeroen/r-svn)
+### References
+
+[Contributing to GNU R](https://bookdown.org/lionel/contributing/)  
+[Bug Reporting](https://www.r-project.org/bugs.html)  
+[R can use your help reviewing bug reports](https://developer.r-project.org/Blog/public/2019/10/09/r-can-use-your-help-reviewing-bug-reports/index.html)  
+[Bugzilla mirror on GitHub](https://github.com/MichaelChirico/r-bugs)  
+[CI (Continuous Integration) for R-devel](https://github.com/MichaelChirico/r-core-builder)  
+[Mirror of R svn server with Github actions CI for testing patches](https://github.com/jeroen/r-svn)  
 Tips on finding the source relevant to a bug [Access R Source](https://github.com/jennybc/access-r-source#function-is-an-s3-generic), [lookup package](https://github.com/jimhester/lookup#readme)
 
 ## Improve use of Bugzilla

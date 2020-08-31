@@ -4,7 +4,7 @@ This is the home for a collaboration between R Core, Forwards and other R commun
 
 ## Current Work
 
-Following our [kick-off meeting on 2020-07-24](https://github.com/forwards/rcontribution/blob/master/team_minutes/2020-07-24.md) we are spending August developing ideas and proposals for initiatives, that we will discuss and prioritise at a meeting on Tuesday September 8, 21:00-22:00 UTC ([Convert time](https://arewemeetingyet.com/London/2020-09-08/22:00/On-ramps%20to%20R%20core), [agenda](https://hackmd.io/GzIGWM4ZTdmM3B3q6C24RA), email rowforwards@gmail.com for invite).
+Following our [kick-off meeting on 2020-07-24](https://github.com/forwards/rcontribution/blob/master/team_minutes/2020-07-24.md) we are spending August developing ideas and proposals for initiatives, that we will discuss and prioritise at a meeting on Tuesday September 8, 21:00-22:00 UTC ([local time](https://arewemeetingyet.com/London/2020-09-08/22:00/On-ramps%20to%20R%20core), [agenda](https://hackmd.io/GzIGWM4ZTdmM3B3q6C24RA), email rowforwards@gmail.com for invite).
 
 ## Get Involved
 

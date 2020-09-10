@@ -4,7 +4,14 @@ This is the home for a collaboration between R Core, Forwards and other R commun
 
 ## Current Work
 
-Following our [kick-off meeting on 2020-07-24](https://github.com/forwards/rcontribution/blob/master/team_minutes/2020-07-24.md) we are spending August developing ideas and proposals for initiatives, that we will discuss and prioritise at a meeting on Tuesday September 8, 21:00-22:00 UTC ([local time](https://arewemeetingyet.com/London/2020-09-08/22:00/On-ramps%20to%20R%20core), [agenda](https://hackmd.io/GzIGWM4ZTdmM3B3q6C24RA), email rowforwards@gmail.com for invite).
+We are starting work on initiatives discussed at the [team meeting on 2020-09-08](https://github.com/forwards/rcontribution/blob/master/team_minutes/2020-09-08.md). See the issues on this repo for more detail.
+
+## Next meetings
+
+- Friday October 9, 15:00-16:00 UTC ([local time](https://arewemeetingyet.com/London/2020-10-09/15:00/On-ramps%20to%20R%20core)).
+- Tuesday November 10, 21:00-22:00 UTC ([local time](https://arewemeetingyet.com/London/2020-11-10/22:00/On-ramps%20to%20R%20core)).
+
+Email rowforwards@gmail.com to be added to/removed from invite list.
 
 ## Get Involved
 
@@ -16,46 +23,9 @@ We welcome anyone from the R community that supports our objectives and would li
 
 Everyone participating in this project agrees to follow the [Contributor Code of Conduct](https://github.com/forwards/rcontribution/blob/master/CONDUCT.md).
 
-## Proposal Process
+## Team chat
 
-R Contribution Team/Forwards members can add any idea to [ideas_for_initiatives.md](https://github.com/forwards/rcontribution/blob/master/ideas_for_initiatives.md) in a relevant section. However, this is just a place to put ideas so we don't forget them. To take things forward, we will use a more formal proposal process, that will allow us to discuss each idea and fill out the detail.
-
-### Sponsor an Idea
-
-R Contribution Team/Forwards members can sponsor an idea. This means they (or their delegate) will put it forward at the September meeting. The meeting will then decide to 
-
-1. Adopt idea as a current task for the R Contribution Team and start work/determine next steps.
-2. Postpone decision till next meeting allowing for further discussion on GitHub/more volunteers to be found/relevant information to be gathered.
-3. Reject idea for the short-term.
-
-In order to sponsor an idea, it must first be proposed on GitHub, at least a week before the meeting.
-
-### Propose an Idea on GitHub
-
-Each participant can propose up to two ideas: one related to a short-term goal (that may be at least partially implemented by the end of 2020) and one related to a long-term goal (that we can do some preparatory work towards by the end of 2020).
-
-1. Open an issue to propose your idea. If you are a R Contribution Team/Forwards member, this makes you the sponsor of the idea.
-2. Label it as <kbd>short term goal</kbd> or <kbd>long term goal</kbd>.
-3. If you are not a R Contribution Team/Forwards member, label it as <kbd>needs sponsor</kbd>.
-
-### Discuss Ideas on GitHub
-
-All participants are encouraged to discuss the ideas proposed in GitHub issues. 
-
-Use comments to:
- - Give suggestions for refinements/implementation details.
- - Offer to sponsor an idea that needs a sponsor (then remove the <kbd>needs sponsor</kbd> label).
- - Offer to contribute to implementing the idea; if possible, specify what role(s) you could play.
- 
-Use emoji to:
- - Show your support for the idea.
- - Agree with other people's comments.
- 
-Assign yourself to the issue if you are already working on it.
-
-## General Discussion
-
-Some ideas may need more involved discussion and/or discussion within the team rather than in public, e.g. suggesting particular ideas for technical projects, or suggesting candidates for a mentoring scheme. Issues like this can be discussed by R Contribution Team/Forwards members in the [team chat](https://github.com/orgs/forwards/teams/r-core-contribution).
+Outside of the regular conference calls, issues/topics can be discussed privately on the [team chat](https://github.com/orgs/forwards/teams/r-core-contribution).
 
 ## Code of Conduct
 

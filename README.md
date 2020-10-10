@@ -8,7 +8,6 @@ We are starting work on initiatives discussed at the [team meeting on 2020-09-08
 
 ## Next meetings
 
-- Friday October 9, 15:00-16:00 UTC ([local time](https://arewemeetingyet.com/London/2020-10-09/15:00/On-ramps%20to%20R%20core)).
 - Tuesday November 10, 21:00-22:00 UTC ([local time](https://arewemeetingyet.com/London/2020-11-10/21:00/On-ramps%20to%20R%20core)).
 
 Email rowforwards@gmail.com to be added to/removed from invite list.

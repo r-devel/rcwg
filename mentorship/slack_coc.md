@@ -60,7 +60,16 @@ The administrators reserves the right to determine the appropriate response for 
 
 ### What To Do If You Witness or Are Subject To Unacceptable Behaviour
 
+Take screenshots of offending posts (deleted posts cannot be seen even by admins).
+
 View the [Admins & Owners](https://r-devel.slack.com/account/workspace-settings#admins) in the workspace settings (only available to members). Email or message one or more administrators listed to report the behaviour.
+
+If the admins are unable to respond in a timely manner, you may flag the issue by responding to the offending post with a brief comment, e.g.
+
+ - This comment is inappropriate, please delete it.
+ - This goes against the code of conduct, I have reported it.
+
+There is no obligation to respond if you don't feel comfortable. Don't get drawn into an argument or pile on an offender, a brief comment is enough to signal the issue and give the offender a chance to make it right.
 
 ### Acknowledgements
 

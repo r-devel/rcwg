@@ -15,7 +15,7 @@ To create a welcoming and supportive workspace, we ask members to:
 - Avoid sarcasm or belittling language.
 - Respect people's technology choices.
 - Provide direct links vs "RTFM"/"Just Google it" responses.
-- Use gender-neutral language.
+- Use gender-neutral language (see e.g. this [factsheet on gender inclusive language](https://services.anu.edu.au/human-resources/respect-inclusion/gender-inclusive-language)).
 
 The [administrators](https://r-devel.slack.com/account/workspace-settings#admins) will remind people of the posting guide if necessary and reserve the right to deactivate the membership of anyone persistently acting against the ethos of the workspace.
 

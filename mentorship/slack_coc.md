@@ -56,7 +56,7 @@ Members who behave in a manner deemed inappropriate are subject to actions liste
 The administrators reserves the right to determine the appropriate response for all code of conduct violations. Potential responses include:
 
  - a formal warning to stop harassing behaviour
- - temporarily/permanently deactivate membership
+ - temporarily/permanently deactivating membership of the workspace
 
 ### What To Do If You Witness or Are Subject To Unacceptable Behaviour
 

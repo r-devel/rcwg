@@ -44,7 +44,7 @@ Behaviour that is unacceptable includes, but is not limited to:
  - Sustained or willful disruption of discussion.
  - Use of sexual or discriminatory imagery, comments, or jokes.
  - Offensive comments related to age, gender, sexual orientation, disability, race or religion.
- - Inappropriate simulated physical contact, e.g. textual descriptions like "hug" or "backrub", without consent.
+ - Inappropriate simulated physical contact, e.g. textual descriptions like "hug" or "backrub" or custom emoji representing such contact, without consent.
  - Unwelcome sexual attention, which can include inappropriate questions of a sexual nature, asking for sexual favours or repeatedly asking for dates or contact information.
 
 If you are asked to stop harassing behaviour you should stop immediately, even if your behaviour was meant to be friendly or a joke, it was clearly not taken that way and for the comfort of all members you should stop.

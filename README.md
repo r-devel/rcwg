@@ -1,9 +1,14 @@
-# gh-pages-template
-A GitHub pages template based on [minimal Jekyll theme.](https://github.com/pages-themes/minimal)
-Couple of additional futures such as a navigation bar and a full page layout are added to the minimal theme.
+# Source for [R Contribution Site](https://github.com/forwards/rcontribution)
 
-- [Preview the theme](https://kbsezginel.github.io/gh-pages-template/)
-- [See the original theme in action](https://pages-themes.github.io/minimal/)
+A GitHub pages site, using the modified minimal Jekyll theme by [kbsezginel](https://github.com/kbsezginel/gh-pages-template).
 
-## Usage
-See [setup and customization instructions](https://kbsezginel.github.io/gh-pages-template/setup) to start using the theme.
+See [setup and customization instructions](https://kbsezginel.github.io/gh-pages-template/setup).
+
+Build the site and make it available on a local server (requires Jekyll install, see https://jekyllrb.com/docs/ for installation instructions for common operating systems).
+
+```
+bundle exec jekyll serve
+```
+
+Browse to http://localhost:4000 to preview, `Ctrl+C` to stop. 
+Restart the server if you add/remove variables from `_config.yml`.

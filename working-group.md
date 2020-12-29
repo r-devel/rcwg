@@ -14,4 +14,4 @@ The group maintains a [GitHub repo](https://github.com/forwards/rcontribution), 
 
 Anyone from the R community that supports the group's objectives and would like to contribute, is welcome to get involved. This can range from commenting on GitHub issues to actively working on initiatives. The [rcontribution GitHub repo](https://github.com/forwards/rcontribution) has more details, including how to join the mailing list to be invited to group meetings.
 
-Several members of the working group are also on the [R-devel Slack](slack) and discuss issues relevant to outreach on the `#outreach` channel.
+Several members of the working group are also on the [R-devel Slack](slack) and discuss issues relevant to outreach on the `#core-outreach` channel.

@@ -14,7 +14,8 @@ We meet every 1-2 months, alternating between the second Friday of the month, 15
 
 Next planned meeting(s):
 
-- Friday January 8, 2021, 15:00-16:00 UTC ([local time](https://arewemeetingyet.com/London/2021-01-08/15:00/On-ramps%20to%20R%20core)).
+- Tuesday February 9, 2021, 21:00-22:00 UTC ([local time](https://arewemeetingyet.com/UTC/2021-02-09/21:00/R%20Contribution%20Working%20Group)).
+- Friday March 12, 2021, 15:00-16:00 UTC ([local time](https://arewemeetingyet.com/UTC/2021-03-12/15:00/R%20Contribution%20Working%20Group)).
 
 Email rowforwards@gmail.com to be added to/removed from invite list.
 

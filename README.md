@@ -14,8 +14,8 @@ We meet every 1-2 months, alternating between the second Friday of the month, 15
 
 Next planned meeting(s):
 
-- Tuesday February 9, 2021, 21:00-22:00 UTC ([local time](https://arewemeetingyet.com/UTC/2021-02-09/21:00/R%20Contribution%20Working%20Group)).
 - Friday March 12, 2021, 15:00-16:00 UTC ([local time](https://arewemeetingyet.com/UTC/2021-03-12/15:00/R%20Contribution%20Working%20Group)).
+- Tuesday April 13, 2021, 21:00-22:00 UTC ([local time](https://arewemeetingyet.com/UTC/2021-02-09/21:00/R%20Contribution%20Working%20Group)).
 
 Email rowforwards@gmail.com to be added to/removed from invite list.
 

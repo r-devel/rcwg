@@ -10,11 +10,11 @@ We are currently working on initiatives discussed at the [team meeting on 2020-0
 
 ## Next Meetings
 
-We meet every 1-2 months, alternating between the second Friday of the month, 15:00 UTC and the second Tuesday of the month, 21:00 UTC.
+We meet every 1-2 months, alternating between the second Friday of the month, 15:00 UTC and the second Tuesday of the month, 21:00 UTC (+1 during Daylight Savings Time). 
 
 Next planned meeting(s):
 
-- Tuesday April 13, 2021, 20:00-21:00 UTC ([local time](https://arewemeetingyet.com/UTC/2021-04-13/20:00/R%20Contribution%20Working%20Group)).
+- Tuesday April 13, 2021, 03:00-04:00 UTC ([local time](https://arewemeetingyet.com/UTC/2021-04-13/03:00/R%20Contribution%20Working%20Group)). Differs from usual time to allow Saranjeet Kaur to present.
 - Friday May 14, 2021, 14:00-15:00 UTC ([local time](https://arewemeetingyet.com/UTC/2021-05-14/14:00/R%20Contribution%20Working%20Group)).
 
 Email rowforwards@gmail.com to be added to/removed from invite list.

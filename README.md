@@ -15,7 +15,8 @@ We meet (on Google Meet) every 1-2 months, alternating between the fourth Friday
 Next planned meeting(s):
 
 - Tuesday May 25, 2021, 20:00-21:00 UTC ([local time](https://arewemeetingyet.com/UTC/2021-05-25/20:00/R%20Contribution%20Working%20Group))
-- Friday June 25, 2021, 14:00-15:00 UTC ([local time](https://arewemeetingyet.com/UTC/2021-06-25/14:00/R%20Contribution%20Working%20Group)).
+- ~~Friday June 25, 2021, 14:00-15:00 UTC ([local time](https://arewemeetingyet.com/UTC/2021-06-25/14:00/R%20Contribution%20Working%20Group))~~. CANCELLED.
+- Friday July 23, 2021, 14:00-15:00 UTC ([local time](https://arewemeetingyet.com/UTC/2021-07-23/14:00/R%20Contribution%20Working%20Group)).
 
 Email rowforwards@gmail.com to be added to/removed from the email list to receive meeting invitations.
 

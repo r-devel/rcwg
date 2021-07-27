@@ -11,14 +11,13 @@ We are currently working on initiatives discussed at the [team meeting on 2020-0
 ## Next Meetings
 
 We meet (on Google Meet) every 1-2 months, alternating between the fourth Friday of the month, 15:00 UTC and the fourth Tuesday of the month, 21:00 UTC (-1hr during Daylight Savings Time). 
-* 15:00 UTC is *09:00 MDT / 08:00 Pacific Time*
-* 21:00 UTC is *15:00 MDT / 16:00 Pacific Time*
 
 Next planned meeting(s):
-- Friday July 23, 2021, 14:00-15:00 UTC ([local time](https://arewemeetingyet.com/UTC/2021-07-23/14:00/R%20Contribution%20Working%20Group)).
-- *To be posted*
+- No meeting in August.
+- Friday September 24, 2021, 14:00-15:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2021-09-24/14:00/R%20Contribution%20Working%20Group)).
+<!-- - Tuesday, October 26, 2021, 20:00-21:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2021-10-26/20:00/R%20Contribution%20Working%20Group)). -->
 
-Email rowforwards@gmail.com to be added to/removed from the email list to receive meeting invitations.
+Meeting details will be posted on the [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), or you can email rowforwards@gmail.com to be added to/removed from the mailing list to receive meeting invitations.
 
 ## Get Involved
 

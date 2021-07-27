@@ -1,14 +1,16 @@
 # R Contribution Working Group
 
-The R Contribution Working Group is a collaboration between R Core, Forwards and other R community groups aiming to encourage new contributors to R core (the code and documentation that gets distributed as base R), with a focus on diversity and inclusion.
+The R Contribution Working Group is a collaboration between R Core, Forwards and other R community groups, aiming to encourage new contributors to R core (the code and documentation that gets distributed as base R), with a focus on diversity and inclusion. Anyone from the R community that supports our objectives is welcome to attend our [meetings](#meetings) and to [get involved](#get-involved) as they have time and interest.
 
 If you are interested in contributing to R, please visit the [R Contribution Site](https://forwards.github.io/rcontribution/).
 
 ## Current Work
 
-We are currently working on initiatives discussed at the [team meeting on 2020-09-08](https://github.com/forwards/rcontribution/blob/master/team_minutes/2020-09-08.md). See the issues on this repo for more detail.
+Following our [end-of-Year-1 meeting on 2021-07-23](https://github.com/forwards/rcontribution/blob/master/team_minutes/2021-07-23.md) we are now developing ideas and proposals for Year 2, that we will discuss and prioritise at the next meeting in September.
 
-## Next Meetings
+<!-- We are currently working on initiatives discussed at the [team meeting on 2020-09-08](https://github.com/forwards/rcontribution/blob/master/team_minutes/2020-09-08.md). See the issues on this repo for more detail. -->
+
+## Meetings
 
 We meet (on Google Meet) every 1-2 months, alternating between the fourth Friday of the month, 15:00 UTC and the fourth Tuesday of the month, 21:00 UTC (-1hr during Daylight Savings Time). 
 
@@ -21,19 +23,15 @@ Meeting details will be posted on the [R-Devel Slack Group](https://forwards.git
 
 ## Get Involved
 
-We welcome anyone from the R community that supports our objectives and would like to contribute, to get involved.
+Besides attending meetings, we welcome R community members to contribute in the following ways:
 
-1. **Outside observers**: may comment on ideas/proposals discussed in [issues](https://github.com/forwards/rcontribution/issues). They may also open issues, with the understanding that any idea needs a sponsor from the R Contribution Working Group and agreement at a group meeting to be taken forward. Outside observers may also join the [R-devel Slack group](https://forwards.github.io/rcontribution/slack), a general space for contributors to R core - discussion related to outreach takes place on the `#core-outreach` channel.
-2. **R Contribution Working Group members**: have write access to this repo, so they can open issues and be allocated to work on particular issues. They can also join in the team chat on GitHub and attend working group meetings. To ask to join the working group, contact rowforwards@gmail.com, saying a little about yourself and stating your GitHub username.
+1. **Join related discussion on the [R-devel Slack group](https://forwards.github.io/rcontribution/slack)**. The `#core-outreach` channel provides an informal space to discuss the work of the Working Group and related topics, such similar initiatives in other programming communities.
+2. **Propose/discuss initiatives via [issues](https://github.com/forwards/rcontribution/issues)**. Occasionally, we will dedicate a few weeks to proposing and discussing initiatives to work on via issues on this repository, however comments on issues or new issues are welcome at any time. An idea will need support from the R Contribution Working Group to be taken forward; this works best if the proposer or another sponsor of the idea brings it to a Working Group meeting.
+3. **Volunteer to work on initiatives**. This can be done at a Working Group meeting, by volunteering on the R-devel Slack or corresponding GitHub issue, or by contacting rowforwards@gmail.com.
 
-(Note for Forwards members: invites to the R Contribution Working group meetings are sent to all Forwards sub-teams. Please ask to be added to the GitHub R Contribution Team to get write access to this repo.)
+Everyone participating in this project agrees to follow the [Contributor Code of Conduct](https://github.com/forwards/rcontribution/blob/master/CONDUCT.md). The R-Devel Slack has a separate [Code of Conduct](https://forwards.github.io/rcontribution/slack).
 
-Everyone participating in this project agrees to follow the [Contributor Code of Conduct](https://github.com/forwards/rcontribution/blob/master/CONDUCT.md).
-
-## Team chat
-
-Outside of the regular conference calls, issues/topics can be discussed on the [R-devel Slack group](https://forwards.github.io/rcontribution/slack), which is an open group. 
-Alternatively, issues can be discussed privately on the [GitHub team chat](https://github.com/orgs/forwards/teams/r-core-contribution).
+This repo is part of the Forwards GitHub organization and all Forwards members have write access. The organization has an [R Contribution Working Group](https://github.com/orgs/forwards/teams/r-contribution-working-group) team to manage access of outside collaborators. This enables outside collaborators to be allocated to issues and to show their involvement by displaying membership of the Forwards GitHub organization on their GitHub profile. To ask to join the team, contact rowforwards@gmail.com, saying a little about yourself and stating your GitHub username.
 
 ## Code of Conduct
 

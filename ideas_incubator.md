@@ -18,7 +18,8 @@ and [meeting minutes](https://github.com/forwards/rcontribution/tree/master/team
 
 ## Propose Ideas on GitHub 
 
-**Deadline: Friday September 17, 2021, 14:00-15:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2021-09-17/14:00/R%20Contribution%20Working%20Group))**
+**From: Now!**  
+**To: Friday September 17, 2021, 14:00-15:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2021-09-17/14:00/R%20Contribution%20Working%20Group))**
 
 As in the past year, you may propose an idea for an initiative that could be implemented in the short-term (completed with the year) or a bigger idea that we can make a contribution to progressing.
 
@@ -29,6 +30,8 @@ As in the past year, you may propose an idea for an initiative that could be imp
 The proposer or a sponsor should be willing to make the case for the idea at the RCWG meeting. Ideally, they would also be willing to carry the idea forward with support from the group, but that is not essential.
 
 ## Discuss Ideas on GitHub
+
+**From: Now!**  
 
 Everyone is encouraged to discuss the ideas proposed in GitHub issues. 
 
@@ -43,6 +46,8 @@ Use emoji to:
 
 ## Prioritise Ideas at the September RCWG meeting
 
+**Date: Friday September 24, 2021, 14:00-15:00 UTC  ([find your local time](https://arewemeetingyet.com/UTC/2021-09-24/14:00/R%20Contribution%20Working%20Group))**
+
 Proposors/sponsors will put the ideas forward at the September meeting. The meeting will then decide to 
 
 1. Adopt idea as a current task for the R Contribution Team and start work/determine next steps.
@@ -50,3 +55,5 @@ Proposors/sponsors will put the ideas forward at the September meeting. The meet
 3. Reject idea for the short-term.
 
 In order to sponsor an idea, it must first be proposed on GitHub, at least a week before the meeting.
+
+Meeting details will be posted on the [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), or you can email rowforwards@gmail.com to be added to/removed from the mailing list to receive meeting invitations.

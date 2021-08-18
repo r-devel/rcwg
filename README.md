@@ -12,7 +12,7 @@ Si está interesado en contribuir a R, visite el sitio de contribuciones de R.
 
 ## Current Work
 
-Following our [end-of-Year-1 meeting on 2021-07-23](https://github.com/forwards/rcontribution/blob/master/team_minutes/2021-07-23.md) we are now developing ideas and proposals for Year 2, that we will discuss and prioritise at the next meeting in September, see the [Ideas Incubator 2021](https://github.com/forwards/rcontribution/blob/master/ideas_incubator.md) page.
+Following our [end-of-Year-1 meeting on 2021-07-23](https://github.com/forwards/rcontribution/blob/master/team_minutes/2021-07-23.md) we are now developing ideas and proposals for Year 2, that we will discuss and prioritise at the next meeting in September, see the [Ideas Incubator 2021](ideas_incubator.md) page.
 
 <!-- We are currently working on initiatives discussed at the [team meeting on 2020-09-08](https://github.com/forwards/rcontribution/blob/master/team_minutes/2020-09-08.md). See the issues on this repo for more detail. -->
 

@@ -6,9 +6,9 @@ If you are interested in contributing to R, please visit the [R Contribution Sit
 
 ---
 # Grupo de trabajo de contribución R
-El R Contribution Working Group es una colaboración entre R Core, Forwards y otros grupos de la comunidad R, con el objetivo de alentar a nuevos contribuyentes a R core (el código y la documentación que se distribuye como base R), con un enfoque en la diversidad y la inclusión. Cualquier persona de la comunidad R que apoye nuestros objetivos puede asistir a nuestras reuniones y participar si tiene tiempo e interés.
+El R Contribution Working Group es una colaboración entre R Core, Forwards y otros grupos de la comunidad R, con el objetivo de alentar a nuevos contribuyentes a R core (el código y la documentación que se distribuye como base R), con un enfoque en la diversidad y la inclusión. Cualquier persona de la comunidad R que apoye nuestros objetivos puede asistir a nuestras [reuniones](#meetings) y [participar](#get-involved) si tiene tiempo e interés.
 
-Si está interesado en contribuir a R, visite el sitio de contribuciones de R.
+Si está interesado en contribuir a R, visite el sitio de [contribuciones de R.](https://forwards.github.io/rcontribution/)
 
 ## Current Work
 
@@ -18,7 +18,7 @@ Following our [end-of-Year-1 meeting on 2021-07-23](https://github.com/forwards/
 
 ---
 ## Trabajo actual
-Después de nuestra reunión de fin de año 1 el 2021-07-23, ahora estamos desarrollando ideas y propuestas para el año 2, que discutiremos y priorizaremos en la próxima reunión de septiembre, consulte la página de la incubadora de ideas 2021.
+Después de nuestra reunión de fin de año 1 el [2021-07-23](https://github.com/forwards/rcontribution/blob/master/team_minutes/2021-07-23.md), ahora estamos desarrollando ideas y propuestas para el año 2, que discutiremos y priorizaremos en la próxima reunión de septiembre, consulte la página de la [incubadora de ideas 2021](ideas_incubator.md).
 
 
 ## Meetings
@@ -39,7 +39,7 @@ Nos reunimos (en Google Meet) cada uno o dos meses, alternando entre el cuarto v
 Próximas reuniones planificadas:
 
 - No hay reunión en agosto.
-- Viernes 24 de septiembre de 2021, 14: 00-15: 00 UTC (encuentre su hora local).
+- Viernes 24 de septiembre de 2021, 14: 00-15: 00 UTC [encuentre su hora local](https://arewemeetingyet.com/UTC/2021-09-24/14:00/R%20Contribution%20Working%20Group).
 Los detalles de la reunión se publicarán en R-Devel Slack Group, o puede enviar un correo electrónico a rowforwards@gmail.com para que lo agreguen o eliminen de la lista de correo para recibir invitaciones a reuniones.
 
 
@@ -59,13 +59,13 @@ This repo is part of the Forwards GitHub organization and all Forwards members h
 ## Involucrarse
 Además de asistir a las reuniones, damos la bienvenida a los miembros de la comunidad R para que contribuyan de las siguientes maneras:
 
-1. Únase a la discusión relacionada en el grupo R-devel Slack. El canal # core-outreach proporciona un espacio informal para discutir el trabajo del Grupo de Trabajo y temas relacionados, como iniciativas similares en otras comunidades de programación.
-2. Proponer / discutir iniciativas a través de temas. Ocasionalmente, dedicaremos algunas semanas a proponer y discutir iniciativas para trabajar a través de temas en este repositorio, sin embargo, los comentarios sobre temas o temas nuevos son bienvenidos en cualquier momento. Una idea necesitará el apoyo del Grupo de Trabajo de Contribución de R para ser llevada adelante; esto funciona mejor si el proponente u otro patrocinador de la idea la lleva a una reunión del Grupo de Trabajo.
+1. Únase a la discusión relacionada en el grupo [R-devel Slack group](https://forwards.github.io/rcontribution/slack). El canal # core-outreach proporciona un espacio informal para discutir el trabajo del Grupo de Trabajo y temas relacionados, como iniciativas similares en otras comunidades de programación.
+2. Proponer / discutir iniciativas a través de [temas](https://github.com/forwards/rcontribution/issues). Ocasionalmente, dedicaremos algunas semanas a proponer y discutir iniciativas para trabajar a través de temas en este repositorio, sin embargo, los comentarios sobre temas o temas nuevos son bienvenidos en cualquier momento. Una idea necesitará el apoyo del Grupo de Trabajo de Contribución de R para ser llevada adelante; esto funciona mejor si el proponente u otro patrocinador de la idea la lleva a una reunión del Grupo de Trabajo.
 3. Ofrécete como voluntario para trabajar en iniciativas. Esto se puede hacer en una reunión del Grupo de trabajo, como voluntario en R-devel Slack o en el problema correspondiente de GitHub, o poniéndose en contacto con rowforwards@gmail.com.
 
-Todos los que participan en este proyecto aceptan seguir el Código de conducta para colaboradores. R-Devel Slack tiene un Código de conducta independiente.
+Todos los que participan en este proyecto aceptan seguir [el Código de conducta para colaboradores](https://github.com/forwards/rcontribution/blob/master/CONDUCT.md). R-Devel Slack tiene un Código de [conducta independiente.](https://forwards.github.io/rcontribution/slack)
 
-Este repositorio es parte de la organización Forwards GitHub y todos los miembros de Forwards tienen acceso de escritura. La organización cuenta con un equipo de Grupo de trabajo de contribución R para administrar el acceso de colaboradores externos. Esto permite que los colaboradores externos se asignen a problemas y muestren su participación mostrando la pertenencia a la organización Forwards GitHub en su perfil de GitHub. Para solicitar unirse al equipo, comuníquese con rowforwards@gmail.com, comentando un poco sobre usted e indicando su nombre de usuario de GitHub.
+Este repositorio es parte de la organización Forwards GitHub y todos los miembros de Forwards tienen acceso de escritura. La organización cuenta con un equipo de [Grupo de trabajo de contribución](https://github.com/orgs/forwards/teams/r-contribution-working-group) R para administrar el acceso de colaboradores externos. Esto permite que los colaboradores externos se asignen a problemas y muestren su participación mostrando la pertenencia a la organización Forwards GitHub en su perfil de GitHub. Para solicitar unirse al equipo, comuníquese con rowforwards@gmail.com, comentando un poco sobre usted e indicando su nombre de usuario de GitHub.
 
 
 ## Code of Conduct
@@ -75,5 +75,5 @@ By participating in this project you agree to abide by its terms.
 
 ---
 ## Código de conducta
-Tenga en cuenta que este proyecto tiene un Código de conducta para colaboradores. Al participar en este proyecto, acepta cumplir sus términos.
+Tenga en cuenta que este proyecto tiene un [Código de conducta para colaboradores](https://github.com/forwards/rcontribution/blob/master/CONDUCT.md). Al participar en este proyecto, acepta cumplir sus términos.
 

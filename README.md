@@ -12,36 +12,36 @@ Si está interesado en contribuir a R, visite el sitio de [contribuciones de R.]
 
 ## Current Work
 
-Following our [end-of-Year-1 meeting on 2021-07-23](https://github.com/forwards/rcontribution/blob/master/team_minutes/2021-07-23.md) we are now developing ideas and proposals for Year 2, that we will discuss and prioritise at the next meeting in September, see the [Ideas Incubator 2021](ideas_incubator.md) page.
-
-<!-- We are currently working on initiatives discussed at the [team meeting on 2020-09-08](https://github.com/forwards/rcontribution/blob/master/team_minutes/2020-09-08.md). See the issues on this repo for more detail. -->
+Following the [Ideas Incubator](ideas_incubator.md) in August-September 2021 we have a fresh batch of [issues](https://github.com/forwards/rcontribution/issues) to work on over the next year or so. See the [R Contribution Working Group project board](https://github.com/forwards/rcontribution/projects/1#card-69991106) for an overview ("To Do", "In Progress" and "Done").
 
 ---
+
 ## Trabajo actual
-Después de nuestra reunión de fin de año 1 el [2021-07-23](https://github.com/forwards/rcontribution/blob/master/team_minutes/2021-07-23.md), ahora estamos desarrollando ideas y propuestas para el año 2, que discutiremos y priorizaremos en la próxima reunión de septiembre, consulte la página de la [incubadora de ideas 2021](ideas_incubator.md).
+
+Después de la [Incubadora de ideas](ideas_incubator.md) en agosto-septiembre de 2021, tenemos un nuevo lote de [problemas](https://github.com/forwards/rcontribution/issues) en los que trabajar durante el próximo año. Consulte el [tablero del proyecto del Grupo de trabajo de contribución R](https://github.com/forwards/rcontribution/projects/1#card-69991106) para obtener una descripción general ("Tareas pendientes", "En progreso" y "Listo").
 
 
 ## Meetings
 
-We meet (on Google Meet) every 1-2 months, alternating between the fourth Friday of the month, 15:00 UTC and the fourth Tuesday of the month, 21:00 UTC (-1hr during Daylight Savings Time). 
+We meet (on Zoom) every 1-2 months, alternating between the fourth Friday of the month, 15:00 UTC and the fourth Tuesday of the month, 21:00 UTC (-1hr during Daylight Savings Time). 
 
 Next planned meeting(s):
-- No meeting in August.
-- Friday September 24, 2021, 14:00-15:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2021-09-24/14:00/R%20Contribution%20Working%20Group)).
-<!-- - Tuesday, October 26, 2021, 20:00-21:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2021-10-26/20:00/R%20Contribution%20Working%20Group)). -->
+- Tuesday, October 26, 2021, 20:00-21:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2021-10-26/20:00/R%20Contribution%20Working%20Group)).
+- Friday, November 26, 2021, 14:00-15:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2021-11-26/14:00/R%20Contribution%20Working%20Group)).
 
 Meeting details will be posted on the [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), or you can email rowforwards@gmail.com to be added to/removed from the mailing list to receive meeting invitations.
 
 ---
 ## Reuniones
-Nos reunimos (en Google Meet) cada uno o dos meses, alternando entre el cuarto viernes del mes a las 15:00 UTC y el cuarto martes del mes a las 21:00 UTC (-1 hora durante el horario de verano).
+
+Nos reunimos (en Zoom) cada 1-2 meses, alternando entre el cuarto viernes del mes, 15:00 UTC y el cuarto martes del mes, 21:00 UTC (-1 hora durante el horario de verano).
 
 Próximas reuniones planificadas:
 
-- No hay reunión en agosto.
-- Viernes 24 de septiembre de 2021, 14: 00-15: 00 UTC [encuentre su hora local](https://arewemeetingyet.com/UTC/2021-09-24/14:00/R%20Contribution%20Working%20Group).
-Los detalles de la reunión se publicarán en R-Devel Slack Group, o puede enviar un correo electrónico a rowforwards@gmail.com para que lo agreguen o eliminen de la lista de correo para recibir invitaciones a reuniones.
+- Martes, 26 de octubre de 2021, 20: 00-21: 00 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2021-10-26/20:00/Grupo%20de%20trabajo%20de%20contribución%20R)).
+- Viernes 26 de noviembre de 2021, 14: 00-15: 00 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2021-11-26/14:00/Grupo%20de%20trabajo%20de%20contribución%20R)).
 
+Los detalles de la reunión se publicarán en [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), o puede enviar un correo electrónico a rowforwards@gmail.com para que lo agreguen o eliminen de la lista de correo para recibir invitaciones a reuniones.
 
 ## Get Involved
 

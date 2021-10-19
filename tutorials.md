@@ -4,6 +4,18 @@ layout: custom
 
 # Tutorials
 
+## Contributing to R
+
+Prepared by Gabriel Becker and Martin Maechler.
+
+Did you always want to contribute to (base) R but don't know how?
+
+In this video tutorial recorded at useR! 2021, Gabriel Becker and Martin Maechler show cases where and how users have contributed actively to (base) R, by submitting bug reports with minimal reproducible examples, how testing, reading source code, and providing patches to the R source code has helped making R better.
+
+A selection of past bug reports are provided for you to practice debugging. For bugs that have been resolved you can check what happened after the bug was reported.
+
+[Contributing to R tutorial](contributing-to-r)
+
 ## Translating R to your Language
 
 Prepared by Michael Chirico and Michael Lawrence.

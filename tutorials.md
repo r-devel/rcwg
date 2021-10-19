@@ -14,4 +14,4 @@ The standard tools for providing translations can be somewhat esoteric; this tut
 
 Recording and slides are available:
 
-[Translating R to your Language tutorial](/translating-r-to-your-language)
+[Translating R to your Language tutorial](translating-r-to-your-language)

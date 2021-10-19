@@ -10,7 +10,6 @@ Our real-time participants were focused on Spanish, Bahasa Indonesia, and Hungar
 
 <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/S3Qhqf9u6ao" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-The slides are publicly available via Google Drive:
-
-https://docs.google.com/presentation/d/16700QHu2YbqK0zCukscSqBOUtTMBAxsa_U7xEUWbT8o/edit#slide=id.p
+<br>
+The [tutorial presentation slides](https://docs.google.com/presentation/d/16700QHu2YbqK0zCukscSqBOUtTMBAxsa_U7xEUWbT8o/edit#slide=id.p) are publicly available in Google Slides format.
 

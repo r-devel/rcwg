@@ -26,8 +26,8 @@ Después de la [Incubadora de ideas](ideas_incubator.md) en agosto-septiembre de
 We meet (on Zoom) every 1-2 months, alternating between the fourth Friday of the month, 15:00 UTC and the fourth Tuesday of the month, 21:00 UTC (-1hr during Daylight Savings Time). 
 
 Next planned meeting(s):
-- Tuesday, October 26, 2021, 20:00-21:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2021-10-26/20:00/R%20Contribution%20Working%20Group)).
-- Friday, November 26, 2021, 14:00-15:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2021-11-26/14:00/R%20Contribution%20Working%20Group)).
+- Friday, December 10, 2021, 15:00-16:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2021-12-10/15:00/R%20Contribution%20Working%20Group)).
+<!-- - Tuesday, October 26, 2021, 20:00-21:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2021-10-26/20:00/R%20Contribution%20Working%20Group)). -->
 
 Meeting details will be posted on the [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), or you can email rowforwards@gmail.com to be added to/removed from the mailing list to receive meeting invitations.
 
@@ -38,8 +38,8 @@ Nos reunimos (en Zoom) cada 1-2 meses, alternando entre el cuarto viernes del me
 
 Próximas reuniones planificadas:
 
-- Martes, 26 de octubre de 2021, 20: 00-21: 00 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2021-10-26/20:00/Grupo%20de%20trabajo%20de%20contribución%20R)).
-- Viernes 26 de noviembre de 2021, 14: 00-15: 00 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2021-11-26/14:00/Grupo%20de%20trabajo%20de%20contribución%20R)).
+- Viernes 10 de diciembre de 2021, 15:00-16:00 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2021-12-10/15:00/Grupo%20de%20trabajo%20de%20contribución%20R)).
+<!-- - Martes, 26 de octubre de 2021, 20: 00-21: 00 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2021-10-26/20:00/Grupo%20de%20trabajo%20de%20contribución%20R)). -->
 
 Los detalles de la reunión se publicarán en [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), o puede enviar un correo electrónico a rowforwards@gmail.com para que lo agreguen o eliminen de la lista de correo para recibir invitaciones a reuniones.
 

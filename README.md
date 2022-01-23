@@ -23,11 +23,11 @@ Después de la [Incubadora de ideas](ideas_incubator.md) en agosto-septiembre de
 
 ## Meetings
 
-We meet (on Zoom) every 1-2 months, alternating between the fourth Friday of the month, 15:00 UTC and the fourth Tuesday of the month, 21:00 UTC (-1hr during Daylight Savings Time). 
+We meet (on Zoom) every 1-2 months, alternating between the third Friday of the month, 15:00 UTC and the third Tuesday of the month, 21:00 UTC (-1hr during Daylight Savings Time). 
 
 Next planned meeting(s):
-<!-- - Friday, December 10, 2021, 15:00-16:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2021-12-10/15:00/R%20Contribution%20Working%20Group)). -->
- - Tuesday, January 18, 2022, 20:00-21:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2022-01-18/20:00/R%20Contribution%20Working%20Group)).
+ - Friday, February 18, 2021, 15:00-16:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2022-02-18/15:00/R%20Contribution%20Working%20Group)). 
+<!-- - Tuesday, January 18, 2022, 20:00-21:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2022-01-18/20:00/R%20Contribution%20Working%20Group)). -->
 
 Meeting details will be posted on the [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), or you can email rowforwards@gmail.com to be added to/removed from the mailing list to receive meeting invitations.
 
@@ -38,8 +38,8 @@ Nos reunimos (en Zoom) cada 1-2 meses, alternando entre el cuarto viernes del me
 
 Próximas reuniones planificadas:
 
-<!-- - Viernes 10 de diciembre de 2021, 15:00-16:00 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2021-12-10/15:00/Grupo%20de%20trabajo%20de%20contribución%20R)). -->
-- Martes, 18 de enero de 2022, 20:00-21:00 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2022-01-18/20:00/Grupo%20de%20trabajo%20de%20contribución%20R)).
+ - Viernes 18 de febrero de 2022, 15:00-16:00 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2022-02-18/15:00/Grupo%20de%20trabajo%20de%20contribución%20R)).
+<!-- - Martes, 18 de enero de 2022, 20:00-21:00 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2022-01-18/20:00/Grupo%20de%20trabajo%20de%20contribución%20R)). -->
 
 Los detalles de la reunión se publicarán en [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), o puede enviar un correo electrónico a rowforwards@gmail.com para que lo agreguen o eliminen de la lista de correo para recibir invitaciones a reuniones.
 

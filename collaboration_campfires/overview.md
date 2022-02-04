@@ -2,7 +2,7 @@
 
 * Activate/introduce the R Development guide
 * Build some community around it
-    - Specifically: usher participants into the useR! conference with a little bit more knowledge + community, prepare participants for participation in Bug Barbecue ([#11](/issues/11))
+    - Specifically: usher participants into the useR! conference with a little bit more knowledge + community, prepare participants for participation in Bug Barbecue ([#11](https://github.com/r-devel/rcontribution/issues/11))
 * 90 minute sessions, every 4th Tuesday of the month 16:00 - 17:00UTC
 
 

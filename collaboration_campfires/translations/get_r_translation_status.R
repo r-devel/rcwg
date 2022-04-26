@@ -2,23 +2,30 @@
 
 library(withr)
 library(data.table)
-r_dir <- "~/github/r-svn"
+script_wd <- "collaboration_campfires/translations"
+r_dir <- "../../../r-svn"
+setwd(script_wd)
 
+## hashes of all commits in git repo
 all_commits <- with_dir(r_dir, system('git log --pretty="format:%H %b"', intern=TRUE))
 all_commits <- all_commits[nzchar(all_commits)]
 hashes <- substr(grep("^[0-9a-f]{40} ", all_commits, value=TRUE), 1, 40)
 
+## hash of latest checked out commit
 trunk_hash <- head(hashes, 1L)
+
+## commit where translations were introduced?
 # grep("trunk@33000", all_commits, value = TRUE)
 oldest_commit <- "34e784f86c1457eabd46a8ca4e40ca315cdbeb54"
 
+## sample of 100 commits from current to oldest commit with translations
 hash_idx_grid <- as.integer(seq(1L, match(oldest_commit, hashes), length.out = 100L))
 
 for (idx in hash_idx_grid) {
     hash <- hashes[idx]
     writeLines(paste("Getting translation status for r-svn commit", hash))
     with_dir(r_dir, system(paste("git reset --quiet --hard", hash)))
-    system(paste("./get_r_translation_status_for_revision.R", hash))
+    system(paste("Rscript get_r_translation_status_for_revision.R", hash, r_dir))
 }
 
 withr::with_dir(r_dir, system("git reset --quiet --hard upstream/master"))

@@ -3,8 +3,10 @@
 library(potools)
 suppressPackageStartupMessages(library(data.table))
 
-script_wd = setwd("~/github/r-svn")
-GIT_COMMIT = if (interactive()) readline('git commit: ') else commandArgs(TRUE)
+GIT_COMMIT = if (interactive()) readline('git commit: ') else commandArgs(TRUE)[1]
+r_dir = if (interactive()) readline('path to r-svn: ') else commandArgs(TRUE)[2]
+script_wd = getwd()
+setwd(r_dir)
 setwd('src/library')
 
 get_po_messages <- potools:::get_po_messages

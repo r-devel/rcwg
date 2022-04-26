@@ -7,8 +7,6 @@ src_lib <- file.path(r_svn, "src", "library")
 library(ISOcodes)
 library(countrycode)
 library(dplyr)
-library(forcats)
-library(ggplot2)
 library(purrr)
 library(readr)
 library(tidyr)
@@ -123,20 +121,3 @@ message_status <- pmap_df(languages[c("package", "po_file")],
 
 write_csv(message_status,
           file.path(out_dir, paste0("message_status_", sha, "_", date, ".csv")))
-
-# Example plot ------------------------------------------------------------
-
-## barplot of translated messages, by language
-
-plot_dat <- left_join(message_status, languages) |>
-    mutate(dialect = ifelse(is.na(variant),
-                            gsub("([^ ;]+).*", "\\1", language),
-                            paste(language, variant, sep = "_")))
-
-ggplot(filter(plot_dat, translated),
-       aes(x = fct_infreq(dialect))) +
-    geom_bar(stat = "count", fill = "steelblue") +
-    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
-          legend.position = "none") +
-    labs(x = NULL, y = "# translated messages",
-         subtitle = "Translated messages in base and default packages")

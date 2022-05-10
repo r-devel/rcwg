@@ -26,8 +26,9 @@ Después de la [Incubadora de ideas](ideas_incubator.md) en agosto-septiembre de
 We meet (on Zoom) every 1-2 months, alternating between the third Friday of the month, 15:00 UTC and the third Tuesday of the month, 19:30 UTC (-1hr during Daylight Savings Time in Europe). 
 
 Next planned meeting(s):
-<!-- - Friday, February 18, 2021, 15:00-16:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2022-02-18/15:00/R%20Contribution%20Working%20Group)). --> 
+<!--  --> 
  - Tuesday, May 17, 2022, 18:30-19:30 UTC ([find your local time](https://arewemeetingyet.com/UTC/2022-05-17/18:30/R%20Contribution%20Working%20Group)).
+ - Friday, June 17, 2022, 15:00-16:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2022-06-17/15:00/R%20Contribution%20Working%20Group)).
 
 Meeting details will be posted on the [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), or you can email rowforwards@gmail.com to be added to/removed from the mailing list to receive meeting invitations.
 
@@ -40,6 +41,7 @@ Próximas reuniones planificadas:
 
 <!-- - Viernes 18 de febrero de 2022, 15:00-16:00 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2022-02-18/15:00/Grupo%20de%20trabajo%20de%20contribución%20R)). -->
  - Martes, 17 de mayo de 2022, 18:30-19:30 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2022-05-17/18:30/Grupo%20de%20trabajo%20de%20contribución%20R)).
+ - Viernes 17 de junio de 2022, 15:00-16:00 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2022-06-17/15:00/Grupo%20de%20trabajo%20de%20contribución%20R)).
 
 Los detalles de la reunión se publicarán en [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), o puede enviar un correo electrónico a rowforwards@gmail.com para que lo agreguen o eliminen de la lista de correo para recibir invitaciones a reuniones.
 

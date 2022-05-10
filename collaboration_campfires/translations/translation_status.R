@@ -1,17 +1,19 @@
 # set location of r-svn repo and output dir
 out_dir <- "collaboration_campfires/translations"
-r_svn <- "../../r-svn"
+r_svn <- "../r-svn"
 src_lib <- file.path(r_svn, "src", "library")
 
 # packages required
 library(ISOcodes)
-library(countrycode)
 library(dplyr)
 library(purrr)
 library(readr)
 library(tidyr)
 library(utf8)
 library(withr)
+
+# update SVN repo
+with_dir(r_svn, system("git pull"))
 
 # git commit and date for reference
 sha <- with_dir(r_svn, system("git rev-parse --short HEAD", intern = TRUE))
@@ -20,7 +22,6 @@ date <- with_dir(r_svn,
                         intern = TRUE))
 
 # Identify packages with po files -----------------------------------------
-
 po_dir <- dir(src_lib, pattern = "^[^.]*po$",
               include.dirs = TRUE, recursive = TRUE)
 pkg <- sub("/po", "", po_dir)
@@ -33,25 +34,25 @@ translations_present <- function(pkg) {
            po_file = dir(file.path(src_lib, pkg, "po"), pattern = ".po$"),
            po = sub(".po", "", po_file)) |>
         separate(po, c("component", "code"), "-", fill = "left") |>
-        separate(code, c("code", "variant"), "_", fill = "right") |>
+        separate(code, c("code", "region"), "_", fill = "right") |>
         replace_na(list(component = "C")) |>
-        arrange(component, code, variant)
+        arrange(component, code, region)
 }
 
-languages <- map_df(pkg, translations_present)
+translations <- map_df(pkg, translations_present)
 
-# add language
-languages <- left_join(languages, ISO_639_2[c("Alpha_2", "Name")],
+# convert ISO 639 code and region to (regional) language name
+translations <- left_join(translations, ISO_639_2[c("Alpha_2", "Name")],
                        by = c(code = "Alpha_2")) |>
-    rename(language = Name)
+    rename(language = Name) |>
+    mutate(language = gsub("([^;]+).*", "\\1", language),
+           language = ifelse(is.na(region), language,
+                             paste(language, region, sep = "_"))) |>
+    select(-code, -region)
 
-# add country for variant
-languages <- languages |>
-    mutate(country = countrycode(variant, "iso2c", "country.name"))
-
-write_csv(languages,
-          file.path(out_dir, paste0("languages_", sha, "_", date, ".csv")))
-
+# add in sha and date
+translations <- bind_cols(tibble(sha = sha, date = date),
+                          translations)
 
 # Get metadata for po files -----------------------------------------------
 
@@ -65,8 +66,8 @@ get_metadata <- function(package, po_file) {
     trans_id <- grep("Last-Translator:", txt)
     team_id <- grep("Language-Team:", txt)
 
-    gsub_value <- function(x) gsub("(.+[:] )([^\\]*)([\\].*)", "\\2", x)
-    gsub_date <- function(x) gsub("(.+[:] )([^ \\]*)[ \\](.*)", "\\2", x)
+    gsub_value <- function(x) gsub(".+[:] ([^\\]*)[\\].*", "\\1", x)
+    gsub_date <- function(x) gsub(".+[:] ([^ \\]*)[ \\].*", "\\1", x)
     tibble(package = package,
            po_file = po_file,
            r_version = gsub("[^0-9.]", "", txt[R_id]),
@@ -77,10 +78,12 @@ get_metadata <- function(package, po_file) {
            team = gsub_value(txt[team_id]))
 }
 
-metadata <- pmap_df(languages[c("package", "po_file")], get_metadata)
+metadata <- pmap_df(translations[c("package", "po_file")], get_metadata)
 
-write_csv(metadata,
-          file.path(out_dir, paste0("metadata_", sha, "_", date, ".csv")))
+## add in translations data (information from file name)
+metadata <- left_join(translations, metadata)
+
+write_csv(metadata, file.path(out_dir, paste0("metadata.csv")))
 
 # Categorise message status -----------------------------------------------
 
@@ -98,11 +101,11 @@ get_message_status <- function(package, po_file) {
     entries <- split(txt, grp)[-1]
 
     # ignore old messages
+    any_grepl <- function(x, pattern) any(grepl(pattern, x))
     old <- vapply(entries, any_grepl, logical(1), "#~")
     entries <- entries[!old]
 
     # fuzzy translations
-    any_grepl <- function(x, pattern) any(grepl(pattern, x))
     fuzzy <- vapply(entries, any_grepl, logical(1), "^#,.*fuzzy.*")
 
     # translated messages
@@ -116,8 +119,11 @@ get_message_status <- function(package, po_file) {
            fuzzy = fuzzy)
 }
 
-message_status <- pmap_df(languages[c("package", "po_file")],
+message_status <- pmap_df(translations[c("package", "po_file")],
                           get_message_status)
 
+## add in translations data (information from file name)
+message_status <- left_join(translations, message_status)
+
 write_csv(message_status,
-          file.path(out_dir, paste0("message_status_", sha, "_", date, ".csv")))
+          file.path(out_dir, paste0("message_status.csv")))

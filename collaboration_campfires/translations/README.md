@@ -6,31 +6,25 @@ translations from a local clone of <https://github.com/r-devel/r-svn>, a
 mirror of the SVN repository containing the source code for R. The
 script is designed to be run interactively and requires the file path of
 the `r-svn` repo and an output directory to be specified. The datasets
-are saved in the output directory with the short SHA and date of the git
-commit on which they were based as a suffix.
+are saved in the output directory with the names `metadata.csv` and
+`message_status.csv`.
 
-## Languages CSV
+## Metadata CSV
 
-A CSV with the variables:
+A CSV with one record per PO file in the R sources. Includes the
+variables:
 
+-   `sha`: the shortened SHA for the git commit of the r-svn repo that
+    the data were obtained from
+-   `date`: the date of the git commit of the r-svn repo that the data
+    were obtained from
 -   `package`: the name of a package containing messages to be
     translated
 -   `po_file`: the name of `.po` files in the package sources
 -   `component`: the “component” of the package the PO file relates to,
     either “C”, “R”, “RGui” (the latter is only in the base package)
--   `code`: the ISO 639 code for the language the PO file relates to
--   `variant`: the variant of the language, if applicable (e.g. BR for
-    pt-BR)
--   `language`: the name of the language in English
--   `country`: the country corresponding to the variant
-
-## Metadata CSV
-
-A CSV with the variables:
-
--   `package`: the name of a package containing messages to be
-    translated
--   `po_file`: the name of `.po` files in the package sources
+-   `language`: the name of the language in English with the region as a
+    suffix if applicable (e.g. “English_GB” vs “English”)
 -   `r_version`: the name of the R version to PO file relates do (does
     not always match `pot_creation_date`)
 -   `bug_reports`: where to report bugs related to this PO file
@@ -43,11 +37,10 @@ A CSV with the variables:
 
 ## Message status CSV
 
-A CSV with the variables:
+A CSV with one record per message in each PO file in the R source.
+Includes the variables `sha`, `date`, `package`, `po_file`, `component`,
+and `language` as above, plus
 
--   `package`: the name of a package containing messages to be
-    translated
--   `po_file`: the name of `.po` files in the package sources
 -   `message`: a message in the PO file
 -   `translated`: a logical value indicating if the message has been
     translated
@@ -65,36 +58,23 @@ library(readr)
 ```
 
 ``` r
-message_status <- read_csv("message_status_4168b6f_2022-04-25.csv")
-languages <- read_csv("languages_4168b6f_2022-04-25.csv")
+message_status <- read_csv("message_status.csv")
 ```
 
-First a little tidying to create short names for the dialects
+Plot the counts of correctly translated messages from the C or R code
 
 ``` r
-plot_dat <- left_join(message_status, languages) |>
-    mutate(dialect = ifelse(is.na(variant),
-                            gsub("([^;]+).*", "\\1", language),
-                            paste(language, variant, sep = "_")))
-```
-
-    ## Joining, by = c("package", "po_file")
-
-Then we can plot the counts of correctly translated messages from the C
-or R code
-
-``` r
-ggplot(filter(plot_dat, translated, !fuzzy, component != "RGui"),
-       aes(x = fct_infreq(dialect))) +
+ggplot(filter(message_status, translated, !fuzzy, component != "RGui"),
+       aes(x = fct_infreq(language))) +
     geom_bar(stat = "count", fill = "steelblue") +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
           legend.position = "none") +
     labs(x = NULL, y = "# translated messages",
-         subtitle = "Correctly ranslated messages in base and default packages")
+         subtitle = "Correctly translated messages in base and default packages")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- --> There is one
-message translation in standard English - this is to add information
+![](README_files/figure-gfm/message_status_plot-1.png)<!-- --> There is
+one message translation in standard English - this is to add information
 about the locale to the startup message in R.
 
 ## Alternative script and data

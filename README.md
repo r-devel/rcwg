@@ -27,19 +27,19 @@ We meet (on Zoom) every 1-2 months, alternating between the third Friday of the 
 
 Next planned meeting(s):
 <!-- - Friday, February 18, 2021, 15:00-16:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2022-02-18/15:00/R%20Contribution%20Working%20Group)). --> 
- - Tuesday, March 15, 2022, 19:30-20:30 UTC ([find your local time](https://arewemeetingyet.com/UTC/2022-03-15/19:30/R%20Contribution%20Working%20Group)).
+ - Tuesday, May 17, 2022, 18:30-19:30 UTC ([find your local time](https://arewemeetingyet.com/UTC/2022-05-17/18:30/R%20Contribution%20Working%20Group)).
 
 Meeting details will be posted on the [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), or you can email rowforwards@gmail.com to be added to/removed from the mailing list to receive meeting invitations.
 
 ---
 ## Reuniones
 
-Nos reunimos (en Zoom) cada 1-2 meses, alternando entre el cuarto viernes del mes, 15:00 UTC y el cuarto martes del mes, 21:00 UTC (-1 hora durante el horario de verano).
+Nos reunimos (en Zoom) cada 1-2 meses, alternando entre el cuarto viernes del mes, 15:00 UTC y el cuarto martes del mes, 19:30 UTC (-1 hora durante el horario de verano).
 
 Próximas reuniones planificadas:
 
 <!-- - Viernes 18 de febrero de 2022, 15:00-16:00 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2022-02-18/15:00/Grupo%20de%20trabajo%20de%20contribución%20R)). -->
- - Martes, 18 de marzo de 2022, 19:30-20:30 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2022-03-15/19:30/Grupo%20de%20trabajo%20de%20contribución%20R)).
+ - Martes, 17 de mayo de 2022, 18:30-19:30 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2022-05-17/18:30/Grupo%20de%20trabajo%20de%20contribución%20R)).
 
 Los detalles de la reunión se publicarán en [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), o puede enviar un correo electrónico a rowforwards@gmail.com para que lo agreguen o eliminen de la lista de correo para recibir invitaciones a reuniones.
 

@@ -26,7 +26,6 @@ po_dir <- dir(src_lib, pattern = "^[^.]*po$",
               include.dirs = TRUE, recursive = TRUE)
 pkg <- sub("/po", "", po_dir)
 
-
 # Determine translations present, per package -----------------------------
 
 translations_present <- function(pkg) {
@@ -49,6 +48,20 @@ translations <- left_join(translations, ISO_639_2[c("Alpha_2", "Name")],
            language = ifelse(is.na(region), language,
                              paste(language, region, sep = "_"))) |>
     select(-code, -region)
+
+# Determine full set of possible translations -----------------------------
+
+pot <- list.files(src_lib, pattern = paste0("*[.]pot$"), recursive = TRUE)
+split_po <- strsplit(pot, "/po/", fixed = TRUE)
+tib <- tibble(pot = pot)
+tib <- tib |>
+    separate(pot, c("package", "pot"), sep = "/po/") |>
+    mutate(component = ifelse(grepl("^R-", pot), "R",
+                              ifelse(grepl("^RGui", pot), "RGui", "C"))) |>
+    select(package, component, pot)
+lang <- tibble(language = unique(translations$language))
+tib <- left_join(tib, lang, by = character())
+translations <- left_join(tib, translations)
 
 # add in sha and date
 translations <- bind_cols(tibble(sha = sha, date = date),
@@ -78,10 +91,12 @@ get_metadata <- function(package, po_file) {
            team = gsub_value(txt[team_id]))
 }
 
-metadata <- pmap_df(translations[c("package", "po_file")], get_metadata)
+metadata <- pmap_df(na.omit(translations[c("package", "po_file")]),
+                    get_metadata)
 
 ## add in translations data (information from file name)
-metadata <- left_join(translations, metadata)
+metadata <- left_join(translations, metadata) |>
+    select(-pot)
 
 write_csv(metadata, file.path(out_dir, paste0("metadata.csv")))
 
@@ -95,8 +110,9 @@ get_message_status <- function(package, po_file) {
     msgstr_id <- grep('^msgstr( \\"|\\[0).*', txt)[-1]
 
     # split text into entries for each message
-    new_entry <- which(txt == "")
-    n_lines <- diff(c(0, new_entry, length(txt)))
+    n <- length(txt)
+    new_entry <- which(txt[1:(n - 1)] == "" & txt[-1] != "")
+    n_lines <- diff(c(0, new_entry, n))
     grp <- rep.int(x = seq(0, length(n_lines) - 1), times = n_lines)
     entries <- split(txt, grp)[-1]
 
@@ -104,6 +120,11 @@ get_message_status <- function(package, po_file) {
     any_grepl <- function(x, pattern) any(grepl(pattern, x))
     old <- vapply(entries, any_grepl, logical(1), "#~")
     entries <- entries[!old]
+
+    # (first line of) message
+    msg <- sub("msgid ", "", txt[msg_id])
+    empty <- msg == "\"\""
+    msg[empty] <- txt[msg_id[empty] + 1]
 
     # fuzzy translations
     fuzzy <- vapply(entries, any_grepl, logical(1), "^#,.*fuzzy.*")
@@ -114,16 +135,30 @@ get_message_status <- function(package, po_file) {
 
     tibble(package = package,
            po_file = po_file,
-           message = txt[msg_id],
+           message = msg,
            translated = translated,
            fuzzy = fuzzy)
 }
 
-message_status <- pmap_df(translations[c("package", "po_file")],
+message_status <- pmap_df(na.omit(translations[c("package", "po_file")]),
                           get_message_status)
 
 ## add in translations data (information from file name)
-message_status <- left_join(translations, message_status)
+message_status <- inner_join(translations, message_status)
+
+## fill in missing translations
+pot <- distinct(translations[c("package", "pot")]) |>
+    rename("po_file" = "pot")
+message <- pmap_df(pot, get_message_status) |>
+    rename("pot" = "po_file")
+
+missing_status <- anti_join(translations, message_status)
+
+missing_status <- left_join(missing_status, message)
+
+message_status <- bind_rows(message_status, missing_status) |>
+    arrange(package, component, language) |>
+    select(-pot)
 
 write_csv(message_status,
           file.path(out_dir, paste0("message_status.csv")))

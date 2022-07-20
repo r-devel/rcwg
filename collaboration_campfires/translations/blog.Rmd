@@ -9,16 +9,17 @@ library(forcats)
 library(ggplot2)
 library(lubridate)
 library(readr)
+library(tidyr)
+library(svglite)
 ```
 
 ```{r messages_status_data, message = FALSE}
 metadata <- read_csv("metadata.csv")
 message_status <- read_csv("message_status.csv")
+format_date <- format(metadata$date[1], "%d %B %Y")
 ```
 
-General overview
-
-```{r message_status_plot}
+```{r message_status_plot, fig.width = 7.5, fig.height = 4.5, dev = "svg"}
 tally_status <- message_status |>
     mutate(group = ifelse(fuzzy, "fuzzy", 
                           ifelse(translated, "translated",
@@ -30,38 +31,33 @@ tally_status <- message_status |>
 ggplot(tally_status, aes(fill = group, x = fct_inorder(language), y = n)) +
     geom_bar(stat = "identity", position = "stack") +
     labs(x = NULL, y = "Number of messages",
-         subtitle = "Translation status in base and default packages") + 
+         subtitle = paste0("Translation status in base and default packages (", 
+                           format_date, ")")) + 
     scale_fill_manual(values = c("grey", "steelblue", "orange")) + 
     scale_y_continuous(expand = c(0, 0)) +
-    theme_minimal() +
+    theme_minimal(base_size = 14) +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
           legend.title=element_blank())
 ```
 
-
 ```{r}
-xtabs(!is.na(po_file) ~ language + component, metadata)
+pivot_wider(tally_status, names_from = group, values_from = n)
 ```
-Looking into date of last translation (what happened to Italian, Korean,...?)
 
-```{r update_plot}
+```{r update_plot, fig.width = 7.5, fig.height = 4.5, dev = "svg"}
 metadata <-  metadata |>
     mutate(diff_date = interval(pot_creation_date, po_revision_date) %/% years(1))
-ggplot(na.omit(metadata), aes(x = fct_reorder(language, diff_date, .fun = mean, 
-                                              .desc = TRUE), y = diff_date)) +
-    geom_jitter(width = 0.3) +
+ggplot(na.omit(select(metadata, language, diff_date)), 
+               aes(x = fct_reorder(language, diff_date, .fun = mean, 
+                                   .desc = TRUE), y = diff_date)) +
+    geom_jitter(width = 0.2) +
     labs(x = NULL, y = "Lag (years)",
-         subtitle = "Lag in translating messages") + 
-    theme_minimal() + 
+         subtitle = paste0("Lag in translation (", format_date, ")")) + 
+    theme_minimal(base_size = 14) + 
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 ```
-Coverage by package (Korean has some of all)
 
-Norwegian and Spanish - only base and graphics
-Turkish - plus stats and stats4
-Portuguese and Danish - some of all packages, but in some cases only a small proportion: utils and tools
-
-```{r status_by_package, fig.width = 6, fig.height = 5}
+```{r status_by_package, fig.width = 7.5, fig.height = 7, dev = "svg"}
 select_lang <- c("Norwegian Nynorsk", "Portuguese_BR", 
                            "Turkish", "Danish", "Spanish")
 tally_status <- message_status |>
@@ -78,11 +74,19 @@ ggplot(tally_status, aes(fill = group, x = fct_inorder(language), y = n)) +
     geom_bar(stat = "identity", position = "stack") +
     facet_wrap(~ package, scale = "free_y") + 
     labs(x = NULL, y = "Number of messages",
-         subtitle = "Translation status for low coverage languages") + 
+         subtitle = paste0("Translation status for low coverage languages (", 
+                           format_date, ")")) + 
     scale_fill_manual(values = c("grey", "steelblue", "orange")) + 
     scale_y_continuous(expand = c(0, 0)) +
-    theme_minimal() +
+    theme_minimal(base_size = 14) +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
           legend.title=element_blank())
+```
+
+```{r}
+pivot_wider(tally_status, names_from = group, values_from = n) |>
+    arrange(package) |>
+    mutate(total = translated  + fuzzy) |>
+    select(-untranslated)
 ```
 

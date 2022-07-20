@@ -1,0 +1,4 @@
+ - Introduction to R Contribution
+ - The R Development Guide
+ - Bug-tracking in R
+ - Exploring R's Bugzilla

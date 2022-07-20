@@ -1,0 +1,4 @@
+ - Browsing bugs on R's Bugzilla
+ - Assessing new bug reports
+ - Reviewing discussions of bugs
+ - Q\&A with current contributors

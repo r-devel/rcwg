@@ -1,0 +1,4 @@
+ - Tools for translation
+ - Review of PO and POT files
+ - Updating a PO file using a text editor
+ - Updating a PO file using Poedit

@@ -1,0 +1,3 @@
+ - Introduction to Localization in R
+ - Motivations for contributing translations
+ - Exploring the current status of translations

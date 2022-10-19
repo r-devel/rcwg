@@ -57,11 +57,12 @@ Nearly a half of bugs were not addressed at all by the Bug BBQ:
 Over a third of bugs were addressed during the Bug BBQ:
  - 3 were discussed with no resolution, but typically an analysis was posted on the GitHub repo: [Bug 17279](https://bugs.r-project.org/show_bug.cgi?id=17279), [Bug 15027](https://bugs.r-project.org/show_bug.cgi?id=15027), [Bug 18226](https://bugs.r-project.org/show_bug.cgi?id=18226)
  - 3 proposed to close or proposed at least a partial fix: [Bug 4073](https://bugs.r-project.org/show_bug.cgi?id=4073) (close?), [Issue 24](https://github.com/r-devel/bug-bbq/issues/24), (proposal on GitHub), [Issue 2](https://github.com/r-devel/bug-bbq/issues/2), (patches submitted on Bugzilla, one accepted)
- - 4 were fixed: [Bug 18008] (https://bugs.r-project.org/show_bug.cgi?id=18008), [Bug 17616](https://bugs.r-project.org/show_bug.cgi?id=17616), [Bug 18367](https://bugs.r-project.org/show_bug.cgi?id=18367), [Bug 18174](https://bugs.r-project.org/show_bug.cgi?id=18174)
+ - 4 were fixed: [Bug 18008](https://bugs.r-project.org/show_bug.cgi?id=18008), [Bug 17616](https://bugs.r-project.org/show_bug.cgi?id=17616), [Bug 18367](https://bugs.r-project.org/show_bug.cgi?id=18367), [Bug 18174](https://bugs.r-project.org/show_bug.cgi?id=18174)
 
 A few were addressed shortly afterwards as a result of reviewing the status of bugs selected for the BBQ:
  - 2 with analysis and proposed fix on Bugzilla, [Bug 18281](https://bugs.r-project.org/show_bug.cgi?id=18281), [Bug 16629](https://bugs.r-project.org/show_bug.cgi?id=16629)
  - 1 with a volunteer but no apparent progress [Bug 18362](https://bugs.r-project.org/show_bug.cgi?id=18362)
+
 The first two of these were identified as ones for more experienced volunteers, where help was welcome.
 
 ## What went well

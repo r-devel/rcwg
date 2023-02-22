@@ -12,13 +12,13 @@ Si está interesado en contribuir a R, visite el sitio de [contribuciones de R.]
 
 ## Current Work
 
-Following the [Ideas Incubator](ideas_incubator.md) in August-September 2021 we have a fresh batch of [issues](https://github.com/forwards/rcontribution/issues) to work on over the next year or so. See the [R Contribution Working Group project board](https://github.com/forwards/rcontribution/projects/1#card-69991106) for an overview ("To Do", "In Progress" and "Done").
+Following the [Ideas Incubator](ideas_incubator.md) in August-September 2022 we have a fresh batch of [issues](https://github.com/forwards/rcontribution/issues) to work on over the next year or so. See the [R Contribution Working Group project board](https://github.com/forwards/rcontribution/projects/1#card-69991106) for an overview ("To Do", "In Progress" and "Done").
 
 ---
 
 ## Trabajo actual
 
-Después de la [Incubadora de ideas](ideas_incubator.md) en agosto-septiembre de 2021, tenemos un nuevo lote de [problemas](https://github.com/forwards/rcontribution/issues) en los que trabajar durante el próximo año. Consulte el [tablero del proyecto del Grupo de trabajo de contribución R](https://github.com/forwards/rcontribution/projects/1#card-69991106) para obtener una descripción general ("Tareas pendientes", "En progreso" y "Listo").
+Después de la [Incubadora de ideas](ideas_incubator.md) en agosto-septiembre de 2022, tenemos un nuevo lote de [problemas](https://github.com/forwards/rcontribution/issues) en los que trabajar durante el próximo año. Consulte el [tablero del proyecto del Grupo de trabajo de contribución R](https://github.com/forwards/rcontribution/projects/1#card-69991106) para obtener una descripción general ("Tareas pendientes", "En progreso" y "Listo").
 
 
 ## Meetings
@@ -53,7 +53,7 @@ Besides attending meetings, we welcome R community members to contribute in the 
 
 Everyone participating in this project agrees to follow the [Contributor Code of Conduct](https://github.com/forwards/rcontribution/blob/master/CONDUCT.md). The R-Devel Slack has a separate [Code of Conduct](https://forwards.github.io/rcontribution/slack).
 
-This repo is part of the Forwards GitHub organization and all Forwards members have write access. The organization has an [R Contribution Working Group](https://github.com/orgs/forwards/teams/r-contribution-working-group) team to manage access of outside collaborators. This enables outside collaborators to be allocated to issues and to show their involvement by displaying membership of the Forwards GitHub organization on their GitHub profile. To ask to join the team, contact rowforwards@gmail.com, saying a little about yourself and stating your GitHub username.
+This repo is part of the R-Devel GitHub organization and all members have write access. This enables collaborators to be allocated to issues and to show their involvement by displaying membership of the R-Devel GitHub organization on their GitHub profile. To ask to join the organization, contact rowforwards@gmail.com, saying a little about yourself and stating your GitHub username.
 
 ---
 ## Involucrarse
@@ -65,8 +65,7 @@ Además de asistir a las reuniones, damos la bienvenida a los miembros de la com
 
 Todos los que participan en este proyecto aceptan seguir [el Código de conducta para colaboradores](https://github.com/forwards/rcontribution/blob/master/CONDUCT.md). R-Devel Slack tiene un Código de [conducta independiente.](https://forwards.github.io/rcontribution/slack)
 
-Este repositorio es parte de la organización Forwards GitHub y todos los miembros de Forwards tienen acceso de escritura. La organización cuenta con un equipo de [Grupo de trabajo de contribución](https://github.com/orgs/forwards/teams/r-contribution-working-group) R para administrar el acceso de colaboradores externos. Esto permite que los colaboradores externos se asignen a problemas y muestren su participación mostrando la pertenencia a la organización Forwards GitHub en su perfil de GitHub. Para solicitar unirse al equipo, comuníquese con rowforwards@gmail.com, comentando un poco sobre usted e indicando su nombre de usuario de GitHub.
-
+Este repo forma parte de la organización R-Devel GitHub y todos los miembros tienen acceso a la escritura. Esto permite a los colaboradores ser asignados a temas y mostrar su participación mostrando la pertenencia a la organización R-Devel GitHub en su perfil GitHub. Para solicitar unirse a la organización, comuníquese con rowforwards@gmail.com, diciendo un poco sobre usted y indicando su nombre de usuario GitHub.
 
 ## Code of Conduct
 

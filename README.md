@@ -65,7 +65,7 @@ Además de asistir a las reuniones, damos la bienvenida a los miembros de la com
 
 Todos los que participan en este proyecto aceptan seguir [el Código de conducta para colaboradores](https://github.com/forwards/rcontribution/blob/master/CONDUCT.md). R-Devel Slack tiene un Código de [conducta independiente.](https://forwards.github.io/rcontribution/slack)
 
-Este repo forma parte de la organización R-Devel GitHub y todos los miembros tienen acceso a la escritura. Esto permite a los colaboradores ser asignados a temas y mostrar su participación mostrando la pertenencia a la organización R-Devel GitHub en su perfil GitHub. Para solicitar unirse a la organización, comuníquese con rowforwards@gmail.com, diciendo un poco sobre usted y indicando su nombre de usuario GitHub.
+Este repo forma parte de la organización R-Devel en GitHub y todos los miembros tienen acceso de escritura. Esto permite a las personas que colaboran ser asignadas a los temas y mostrar su participación enseñando que pertenecen a la organización R-Devel en su perfil de GitHub. Para solicitar unirse a la organización, comunícate con rowforwards@gmail.com, contándonos un poco sobre ti e indicando tu nombre de usuario GitHub.
 
 ## Code of Conduct
 

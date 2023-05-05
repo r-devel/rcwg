@@ -37,9 +37,8 @@ Meeting details will be posted on the [R-Devel Slack Group](https://forwards.git
 Nos reunimos (en Zoom) cada 1-2 meses, alternando entre el cuarto viernes del mes, 15:00 UTC y el cuarto martes del mes, 19:30 UTC (-1 hora durante el horario de verano).
 
 Próximas reuniones planificadas:
-
- - Viernes 19 de mayo de 2023, 15:00-16:00 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2023-05-19/15:00/Grupo%20de%20trabajo%20de%20contribución%20R)).
- - Martes 20 de junio de 2023, 19:30-20:30 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2023-06-20/19:30/Grupo%20de%20trabajo%20de%20contribución%20R)).
+ - viernes 19 de mayo de 2023, 14:00-15:00 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2023-05-19/14:00/Grupo%20de%20trabajo%20de%20contribución%20R)).
+ - martes 20 de junio de 2023, 18:30-19:30 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2023-06-20/18:30/Grupo%20de%20trabajo%20de%20contribución%20R)).
 
 Los detalles de la reunión se publicarán en [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), o puede enviar un correo electrónico a rowforwards@gmail.com para que lo agreguen o eliminen de la lista de correo para recibir invitaciones a reuniones.
 

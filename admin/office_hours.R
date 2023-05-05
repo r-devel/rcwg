@@ -37,16 +37,26 @@ office_hour_toot <- function(month, day, time, #UTC
             post_toot(status = amer_toot)
         }
         print(emea_apac_toot, amer_toot, sep = "\n\n")
+    } else if (venue == "slack"){
+        print(glue("📢 Contributor Office Hours, {weekdays(date)} {month} {day}\n\n",
+                   "Join an online Office Hour to\n",
+                   " - discuss how to get started contributing to R\n",
+                   " - get help/feedback on contributions you are working on\n",
+                   " - look at open bugs/work on translations together\n\n",
+                   "EMEA/APAC, {time[1]}-{add_hours(time[1], 1)} UTC: {meetup[1]}\n",
+                   "AMER, {time[2]}-{add_hours(time[1], 1)} {tz}: {meetup[2]}\n"))
+    } else if (venue == "R weekly"){
+        print(glue("R Contributor Office Hours, {weekdays(date)} {month} {day}: ",
+                   "[Europe/Middle East/Asia-Pacific Hour]({meetup[1]}) or ",
+                   "[Americas Hour]({meetup[2]})\n\n",
+                   "Join an online Office Hour at the time that suits you to:\n",
+                   " - discuss how to get started contributing to R\n",
+                   " - get help/feedback on contributions you are working on\n",
+                   " - look at open bugs/work on translations together"))
     }
-    glue("📢 Contributor Office Hours, {weekdays(date)} {month} {day}\n\n",
-         "Join an online Office Hour to\n",
-         " - discuss how to get started contributing to R\n",
-         " - get help/feedback on contributions you are working on\n",
-         " - look at open bugs/work on translations together\n\n",
-         "EMEA/APAC, {time[1]}-{add_hours(time[1], 1)} UTC: {meetup[1]}\n",
-         "AMER, {time[2]}-{add_hours(time[1], 1)} {tz}: {meetup[2]}\n")
 }
 
+# venues: Twitter, Mastodon, Slack, R Weekly
 # copy and paste output to Twitter
 # - cut and re-paste meetup link to display card properly
 month <- "May"
@@ -54,5 +64,5 @@ day <- 11
 office_hour_toot(month, day, c("09:00", "16:30"),
                  c("https://www.meetup.com/r-contributors/events/xwxrdtyfchbpb/",
                    "https://www.meetup.com/r-contributors/events/txxrdtyfchbpb/"),
-                 venue = "slack")
+                 venue = "R weekly")
 

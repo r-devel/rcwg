@@ -12,6 +12,7 @@ library(tidyr)
 library(utf8)
 library(withr)
 
+print(2+5)
 # update SVN repo
 with_dir(r_svn, system("git pull"))
 

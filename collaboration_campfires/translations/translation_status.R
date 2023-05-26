@@ -1,4 +1,5 @@
 # set location of r-svn repo and output dir
+getwd()
 out_dir <- "collaboration_campfires/translations"
 r_svn <- "../r-svn"
 src_lib <- file.path(r_svn, "src", "library")

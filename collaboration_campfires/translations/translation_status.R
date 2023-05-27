@@ -13,21 +13,21 @@ library(tidyr)
 library(utf8)
 library(withr)
 
-print(2+5)
+print(1+1)
 # update SVN repo
 with_dir(r_svn, system("git pull"))
-
+print(1+2)
 # git commit and date for reference
 sha <- with_dir(r_svn, system("git rev-parse --short HEAD", intern = TRUE))
 date <- with_dir(r_svn,
                  system("git show -s --date=format:%Y-%m-%d --format=%cd",
                         intern = TRUE))
-
+print(1+3)
 # Identify packages with po files -----------------------------------------
 po_dir <- dir(src_lib, pattern = "^[^.]*po$",
               include.dirs = TRUE, recursive = TRUE)
 pkg <- sub("/po", "", po_dir)
-
+print(1+4)
 # Determine translations present, per package -----------------------------
 
 translations_present <- function(pkg) {
@@ -41,7 +41,7 @@ translations_present <- function(pkg) {
 }
 
 translations <- map_df(pkg, translations_present)
-
+print(1+5)
 # convert ISO 639 code and region to (regional) language name
 translations <- left_join(translations, ISO_639_2[c("Alpha_2", "Name")],
                        by = c(code = "Alpha_2")) |>
@@ -50,7 +50,7 @@ translations <- left_join(translations, ISO_639_2[c("Alpha_2", "Name")],
            language = ifelse(is.na(region), language,
                              paste(language, region, sep = "_"))) |>
     select(-code, -region)
-
+print(1+6)
 # Determine full set of possible translations -----------------------------
 
 pot <- list.files(src_lib, pattern = paste0("*[.]pot$"), recursive = TRUE)
@@ -64,11 +64,11 @@ tib <- tib |>
 lang <- tibble(language = unique(translations$language))
 tib <- left_join(tib, lang, by = character())
 translations <- left_join(tib, translations)
-
+print(1+7)
 # add in sha and date
 translations <- bind_cols(tibble(sha = sha, date = date),
                           translations)
-
+print(1+8)
 # Get metadata for po files -----------------------------------------------
 
 get_metadata <- function(package, po_file) {
@@ -95,13 +95,13 @@ get_metadata <- function(package, po_file) {
 
 metadata <- pmap_df(na.omit(translations[c("package", "po_file")]),
                     get_metadata)
-
+print(1+9)
 ## add in translations data (information from file name)
 metadata <- left_join(translations, metadata) |>
     select(-pot)
 
 write_csv(metadata, file.path(out_dir, paste0("metadata.csv")))
-
+print(1+10)
 # Categorise message status -----------------------------------------------
 
 get_message_status <- function(package, po_file) {
@@ -144,10 +144,10 @@ get_message_status <- function(package, po_file) {
 
 message_status <- pmap_df(na.omit(translations[c("package", "po_file")]),
                           get_message_status)
-
+print(1+11)
 ## add in translations data (information from file name)
 message_status <- inner_join(translations, message_status)
-
+print(1+12)
 ## fill in missing translations
 pot <- distinct(translations[c("package", "pot")]) |>
     rename("po_file" = "pot")
@@ -164,3 +164,4 @@ message_status <- bind_rows(message_status, missing_status) |>
 
 write_csv(message_status,
           file.path(out_dir, paste0("message_status.csv")))
+print(1+13)

@@ -110,27 +110,27 @@ get_message_status <- function(package, po_file) {
     # get lines for untranslated and (potentially) translated strings
     msg_id <- grep("^msgid ", txt)[-1]
     msgstr_id <- grep('^msgstr( \\"|\\[0).*', txt)[-1]
-
+print(20)
     # split text into entries for each message
     n <- length(txt)
     new_entry <- which(txt[1:(n - 1)] == "" & txt[-1] != "")
     n_lines <- diff(c(0, new_entry, n))
     grp <- rep.int(x = seq(0, length(n_lines) - 1), times = n_lines)
     entries <- split(txt, grp)[-1]
-
+print(21)
     # ignore old messages
     any_grepl <- function(x, pattern) any(grepl(pattern, x))
     old <- vapply(entries, any_grepl, logical(1), "#~")
     entries <- entries[!old]
-
+print(22)
     # (first line of) message
     msg <- sub("msgid ", "", txt[msg_id])
     empty <- msg == "\"\""
     msg[empty] <- txt[msg_id[empty] + 1]
-
+print(23)
     # fuzzy translations
     fuzzy <- vapply(entries, any_grepl, logical(1), "^#,.*fuzzy.*")
-
+print(24)
     # translated messages
     translated <- grepl('\\".+\\"', txt[msgstr_id]) |
         grepl('\\".+\\"', txt[msgstr_id + 1])
@@ -141,7 +141,7 @@ get_message_status <- function(package, po_file) {
            translated = translated,
            fuzzy = fuzzy)
 }
-
+print(25)
 message_status <- pmap_df(na.omit(translations[c("package", "po_file")]),
                           get_message_status)
 print(1+11)

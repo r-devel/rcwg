@@ -134,7 +134,7 @@ print(24)
     # translated messages
     translated <- grepl('\\".+\\"', txt[msgstr_id]) |
         grepl('\\".+\\"', txt[msgstr_id + 1])
-
+    print(length(translated))
     tibble(package = package,
            po_file = po_file,
            message = msg,

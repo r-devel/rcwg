@@ -144,6 +144,7 @@ print(24)
 print(25)
 kcs<-na.omit(translations[c("package", "po_file")])
 print(dim(kcs))
+print(head(kcs))
 message_status <- pmap_df(na.omit(translations[c("package", "po_file")]),
                           get_message_status)
 print(1+11)

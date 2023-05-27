@@ -62,7 +62,7 @@ tib <- tib |>
                               ifelse(grepl("^RGui", pot), "RGui", "C"))) |>
     select(package, component, pot)
 lang <- tibble(language = unique(translations$language))
-tib <- left_join(tib, lang, by = character())
+tib <- cross_join(tib, lang)
 translations <- left_join(tib, translations)
 print(1+7)
 # add in sha and date

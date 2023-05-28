@@ -108,8 +108,7 @@ print(1+10)
 # Categorise message status -----------------------------------------------
 
 get_message_status <- function(package, po_file) {
-    txt <- readLines(file.path(src_lib, package, "po", po_file),
-                     encoding = "UTF-8")
+    txt <- readLines(file.path(src_lib, package, "po", po_file))
     txt <- iconv(txt, from = "UTF-8")
     # get lines for untranslated and (potentially) translated strings
     msg_id <- grep("^msgid ", txt)[-1]

@@ -73,8 +73,7 @@ print(1+8)
 
 get_metadata <- function(package, po_file) {
     txt <- readLines(file.path(src_lib, package, "po", po_file),
-                     encoding = "UTF-8")
-    txt <- iconv(txt, from = "UTF-8")
+                     encoding = "unknown")
     R_id <- grep("Project-Id-Version:", txt)
     Bug_id <- grep("Report-Msgid-Bugs-To:", txt)
     POT_id <- grep("POT-Creation-Date:", txt)

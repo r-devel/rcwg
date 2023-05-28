@@ -73,7 +73,8 @@ print(1+8)
 
 get_metadata <- function(package, po_file) {
     txt <- readLines(file.path(src_lib, package, "po", po_file),
-                     encoding = "unknown")
+                     encoding = "UTF-8")
+    txt<-iconv(txt,from="UTF-8")
     R_id <- grep("Project-Id-Version:", txt)
     Bug_id <- grep("Report-Msgid-Bugs-To:", txt)
     POT_id <- grep("POT-Creation-Date:", txt)
@@ -107,7 +108,7 @@ print(1+10)
 # Categorise message status -----------------------------------------------
 
 get_message_status <- function(package, po_file) {
-    txt <- readLines(file.path(src_lib, package, "po", po_file))
+    txt <- readLines(file.path(src_lib, package, "po", po_file),encoding="unknown")
     # get lines for untranslated and (potentially) translated strings
     msg_id <- grep("^msgid ", txt)[-1]
     msgstr_id <- grep('^msgstr( \\"|\\[0).*', txt)[-1]

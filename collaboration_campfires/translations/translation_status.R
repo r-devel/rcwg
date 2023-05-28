@@ -132,6 +132,7 @@ get_message_status <- function(package, po_file) {
     translated <- grepl('\\".+\\"', txt[msgstr_id]) |
         grepl('\\".+\\"', txt[msgstr_id + 1])
     print(length(translated))
+    warnings()
     tibble(package = package,
            po_file = po_file,
            message = msg,

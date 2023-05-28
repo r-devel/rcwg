@@ -147,7 +147,7 @@ print(dim(kcs))
 print(head(kcs))
 print(kcs[13,1])
 print(kcs[13,2])
-message_status <- pmap_df(kcs[-13,],
+message_status <- pmap_df(kcs[-c(13,24),],
                           get_message_status)
 print(1+11)
 ## add in translations data (information from file name)

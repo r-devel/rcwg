@@ -113,6 +113,7 @@ get_message_status <- function(package, po_file) {
     # get lines for untranslated and (potentially) translated strings
     msg_id <- grep("^msgid ", txt)[-1]
     msgstr_id <- grep('^msgstr( \\"|\\[0).*', txt)[-1]
+    print(length(msgstr_id))
     # split text into entries for each message
     n <- length(txt)
     new_entry <- which(txt[1:(n - 1)] == "" & txt[-1] != "")

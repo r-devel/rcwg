@@ -109,7 +109,6 @@ print(1+10)
 
 get_message_status <- function(package, po_file) {
     txt <- readLines(file.path(src_lib, package, "po", po_file))
-    txt <- iconv(txt, from = "UTF-8")
     # get lines for untranslated and (potentially) translated strings
     msg_id <- grep("^msgid ", txt)[-1]
     msgstr_id <- grep('^msgstr( \\"|\\[0).*', txt)[-1]

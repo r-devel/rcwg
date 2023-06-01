@@ -26,8 +26,8 @@ Después de la [Incubadora de ideas](ideas_incubator.md) en agosto-septiembre de
 We meet (on Zoom) every 1-2 months, usually alternating between the third Friday of the month, 15:00 UTC and the third Tuesday of the month, 19:30 UTC (-1hr during Daylight Savings Time in Europe). 
 
 Next planned meeting(s):
- - Friday, May 19, 2023, 14:00-15:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2023-05-19/14:00/R%20Contribution%20Working%20Group)).
  - Tuesday, June 20, 2023, 18:30-19:30 UTC ([find your local time](https://arewemeetingyet.com/UTC/2023-06-20/18:30/R%20Contribution%20Working%20Group)).
+ - Friday, July 21, 2023, 14:00-15:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2023-07-21/14:00/R%20Contribution%20Working%20Group)).
 
 Meeting details will be posted on the [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), or you can email rowforwards@gmail.com to be added to/removed from the mailing list to receive meeting invitations.
 
@@ -37,8 +37,8 @@ Meeting details will be posted on the [R-Devel Slack Group](https://forwards.git
 Nos reunimos (en Zoom) cada 1-2 meses, alternando entre el cuarto viernes del mes, 15:00 UTC y el cuarto martes del mes, 19:30 UTC (-1 hora durante el horario de verano).
 
 Próximas reuniones planificadas:
- - viernes 19 de mayo de 2023, 14:00-15:00 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2023-05-19/14:00/Grupo%20de%20trabajo%20de%20contribución%20R)).
  - martes 20 de junio de 2023, 18:30-19:30 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2023-06-20/18:30/Grupo%20de%20trabajo%20de%20contribución%20R)).
+ - viernes 21 de julio de 2023, 14:00-15:00 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2023-07-21/14:00/Grupo%20de%20trabajo%20de%20contribución%20R)).
 
 Los detalles de la reunión se publicarán en [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), o puede enviar un correo electrónico a rowforwards@gmail.com para que lo agreguen o eliminen de la lista de correo para recibir invitaciones a reuniones.
 

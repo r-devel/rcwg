@@ -53,16 +53,17 @@ office_hour_toot <- function(month, day, time, #UTC
                    " - discuss how to get started contributing to R\n",
                    " - get help/feedback on contributions you are working on\n",
                    " - look at open bugs/work on translations together"))
-    }
+        browseURL("https://github.com/rweekly/rweekly.org/edit/gh-pages/draft.md")
+    } else warning("venue misspelt, nothing done!")
 }
 
 # venues: Twitter, Mastodon, Slack, R Weekly
 # copy and paste output to Twitter
 # - cut and re-paste meetup link to display card properly
-month <- "May"
-day <- 11
-office_hour_toot(month, day, c("09:00", "16:30"),
-                 c("https://www.meetup.com/r-contributors/events/xwxrdtyfchbpb/",
-                   "https://www.meetup.com/r-contributors/events/txxrdtyfchbpb/"),
+month <- "June"
+day <- 8
+office_hour_toot(month, day, c("09:00", "16:30"), # UTC times
+                 c("https://www.meetup.com/r-contributors/events/cjsfftyfcjblb/",
+                   "https://www.meetup.com/r-contributors/events/sjsfftyfcjblb/"),
                  venue = "R weekly")
 

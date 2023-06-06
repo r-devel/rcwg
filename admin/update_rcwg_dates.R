@@ -44,5 +44,5 @@ update_meeting <- function(id, # which number meeting to update? (1 or 2)
     writeLines(md, "README.md")
 }
 
-update_meeting(1, "May", 3, "Friday", "15:00", 2023)
-update_meeting(2, "June", 3, "Tuesday", "19:30", 2023)
+update_meeting(1, "June", 3, "Tuesday", "19:30", 2023)
+update_meeting(2, "July", 3, "Friday", "15:00", 2023)

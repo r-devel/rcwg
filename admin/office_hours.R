@@ -1,20 +1,20 @@
 
 # Social media posts ------------------------------------------------------
 
-source("R/social_post.R")
+source("admin/R/social_post.R")
 
 # auth_setup() # choose user token and login as RContributors on Mastodon
 
 # venues: twitter, mastodon, slack, R weekly
 # copy and paste output to Twitter
 # - cut and re-paste meetup link to display card properly
-month <- "June"
-day <- 8
+EMEA <- "https://www.meetup.com/r-contributors/events/cjsfftyfckbrb/"
+AMER <- "https://www.meetup.com/r-contributors/events/sjsfftyfckbrb/"
+month <- "July"
+day <- 13
 office_hour_toot(month, day, c("09:00", "16:30"), # UTC times
-                 c("https://www.meetup.com/r-contributors/events/cjsfftyfcjblb/",
-                   "https://www.meetup.com/r-contributors/events/sjsfftyfcjblb/"),
-                 venue = "R weekly")
-
+                 c(EMEA, AMER),
+                 venue = "slack")
 
 # LinkedIn event ----------------------------------------------------------
 

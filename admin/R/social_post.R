@@ -4,54 +4,50 @@ library(hms)
 library(glue)
 library(rtoot)
 conflicts_prefer(hms::hms)
+conflicts_prefer(lubridate::hours)
 
 add_hours <- function(time, hours) substr(hms(hm(time) + hours(hours)), 1, 5)
 
 office_hour_toot <- function(month, day, time, #UTC
-                             meetup, venue){
+                             meetup, venue, templates, ask = TRUE){
     # convert AMER time from UTC to PDT/PST
     date <- as.POSIXct(paste(ymd(glue("2000-{match(month, month.name)}-{day}")),
                              time[2]), tz = "UTC")
     date <- with_tz(date, "US/Pacific")
     tz <- substr(capture.output(print(date)), 26, 28)
     time[2] <- format(date, "%H:%M")
-    # function to write toot/tweet
-    make_toot <- function(region, month, day, time, timezone,
-                          meetup){
-        glue("📢 Contributor Office Hour ({region})\n",
-             "📅 {month} {day}, {time} - {add_hours(time, 1)} {timezone}\n",
-             "Join an online Office Hour to\n",
-             " - discuss how to get started contributing to R\n",
-             " - get help/feedback on contributions you are working on\n",
-             " - look at open bugs/work on translations together\n",
-             meetup)
-    }
+    # make post
+    social_post(region = c("EMEA/APAC", "AMER"),
+                month = month, day = day, time = time,
+                date = date, timezone = c("UTC", tz),
+                meetup = meetup, venue = venue, templates = templates,
+                ask = ask)
+}
 
-    if (venue %in% c("mastodon", "twitter")) {
-        emea_apac_toot <- make_toot("EMEA/APAC", month, day, time[1], "UTC",
-                                    meetup[1])
-        amer_toot <- make_toot("AMER", month, day, time[2], tz, meetup[2])
-        if (venue == "mastodon"){
-            post_toot(status = emea_apac_toot)
-            post_toot(status = amer_toot)
+
+social_post <- function(...,
+                        venue = c("mastodon", "twitter", "slack", "rweekly"),
+                        templates,
+                        ask = TRUE){
+    args <- list(...)
+    template_file <- switch(venue,
+                            mastodon = "toot.txt",
+                            twitter = "toot.txt",
+                            slack = "slack.txt",
+                            rweekly = "rweekly.txt",
+                            "none")
+    if (template_file == "none")
+        stop("`venue` not recognized.",
+             "Should be one of ", paste(venue, collapse = ", "))
+    template_file <- file.path(templates, template_file)
+    post_template <- readChar(template_file, file.info(template_file)$size)
+    post <- glue_data(args, post_template)
+    cat(post, sep = "\n\n")
+    if (venue == "mastodon"){
+        if (ask && askYesNo("Post toots on Mastodon?")){
+            for (i in seq_along(post)){
+                post_toot(status = post[i])
+            }
         }
-        print(emea_apac_toot, amer_toot, sep = "\n\n")
-    } else if (venue == "slack"){
-        print(glue("📢 Contributor Office Hours, {weekdays(date)} {month} {day}\n\n",
-                   "Join an online Office Hour to\n",
-                   " - discuss how to get started contributing to R\n",
-                   " - get help/feedback on contributions you are working on\n",
-                   " - look at open bugs/work on translations together\n\n",
-                   "EMEA/APAC, {time[1]}-{add_hours(time[1], 1)} UTC: {meetup[1]}\n",
-                   "AMER, {time[2]}-{add_hours(time[1], 1)} {tz}: {meetup[2]}\n"))
-    } else if (venue == "R weekly"){
-        print(glue("R Contributor Office Hours, {weekdays(date)} {month} {day}: ",
-                   "[Europe/Middle East/Asia-Pacific Hour]({meetup[1]}) or ",
-                   "[Americas Hour]({meetup[2]})\n\n",
-                   "Join an online Office Hour at the time that suits you to:\n",
-                   " - discuss how to get started contributing to R\n",
-                   " - get help/feedback on contributions you are working on\n",
-                   " - look at open bugs/work on translations together"))
-        browseURL("https://github.com/rweekly/rweekly.org/edit/gh-pages/draft.md")
-    } else warning("venue misspelt, nothing done!")
+    }
 }

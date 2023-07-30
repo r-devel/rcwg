@@ -1,4 +1,6 @@
-linkedin_signin <- function(page, username, key = "LinkedIn password"){
+library(RSelenium)
+
+linkedin_signin <- function(browser, page, username, key = "LinkedIn password"){
     browser$navigate(page)
 
     # cookie control
@@ -19,21 +21,17 @@ linkedin_signin <- function(page, username, key = "LinkedIn password"){
 
 # untested as function, might need to add some pauses to run all at once,
 # e.g. to wait for dropdowns to appear
-linkedin_createevent <- function(image, alttext,
-                                 eventtype = "^External event link",
-                                 name, tz, startday, starttime,
-                                 endday = startday, endtime,
-                                 eventlink, postcontent,
-                                 ask = TRUE){ #ask before submitting each page
-    # Get name of organisation
-    elem <- browser$findElement(using = 'xpath',
-                                "//div[@class='org-admin-page-header__company-name-container']")
-    company <- elem$getElementAttribute("title")[[1]]
-
-    # Start creating an event for this organisation
-    aria <- sprintf("[aria-label='Create an event hosted by %s']", company)
-    elem <- browser$findElement(using = "css", aria)
-    elem$clickElement()
+linkedin_createevent <- function(
+        browser,
+        image, alttext,
+        eventtype = "^External event link",
+        name, tz, startday, startmonth, starttime,
+        endday = startday, endmonth = startmonth, endtime,
+        eventlink, description, postcontent,
+        ask = TRUE){ #ask before submitting each page
+    url <- browser$getCurrentUrl()[[1]]
+    browser$navigate(paste0(url, "/?createEvent=true"))
+    Sys.sleep(1) # pause for page to load
 
     # Add image with alt text
     # actual <input id = "file-upload-input-background_edit" ... type="file">
@@ -57,6 +55,7 @@ linkedin_createevent <- function(image, alttext,
     elem <- browser$findElement(using = 'id',
                                 "ef-event-type-dropdown")
     elem$clickElement()
+    Sys.sleep(1)  # pause for drop-down elements to appear
     # To find hidden elements in Chrome inspector tools (not sure how in firefox)
     # - Three dots menu > more tools > rendering
     # - Inspect element that you click on for drop down
@@ -65,7 +64,7 @@ linkedin_createevent <- function(image, alttext,
     # "//ul[@role='listbox']/li[@role='option']"
     elem <- browser$findElements(using = "xpath", "//li[@role='option']")
     options <- unlist(lapply(elem, function(x) {x$getElementText()}))
-    elem <- elem[[grep("^External event link", options)]]
+    elem <- elem[[grep("eventtype", options)]]
     elem$clickElement()
 
     # event name
@@ -75,6 +74,7 @@ linkedin_createevent <- function(image, alttext,
     # time zone
     elem <- browser$findElement(using = 'id', "timezone-picker-dropdown-trigger")
     elem$clickElement()
+    Sys.sleep(1)  # pause for drop-down elements to appear
 
     elem <- browser$findElements(using = "xpath", "//div[@class='artdeco-dropdown__content-inner']/ul/li/div[@class='artdeco-dropdown__item artdeco-dropdown__item--is-dropdown ember-view']")
     options <- unlist(lapply(elem, function(x) {x$getElementText()}))
@@ -82,9 +82,13 @@ linkedin_createevent <- function(image, alttext,
     elem$clickElement()
 
     # select dates and times
-    selectDate(startday, type = "start")
+    addmonth <- match(startmonth, month.name) -
+        match(format(Sys.Date(), "%B"), month.name)
+    selectDate(startday, addmonth, type = "start")
     selectTime(starttime, type = "start")
 
+    addmonth <- match(endmonth, month.name) -
+        match(format(Sys.Date(), "%B"), month.name)
     selectDate(endday, type = "end")
     selectTime(endtime, type = "end")
 
@@ -114,7 +118,7 @@ linkedin_createevent <- function(image, alttext,
                                 "//span[text()='Post']")
     elem$clickElement()
 
-    # need to pause here
+    Sys.sleep(5) # pause while element created
 
     # don't invite my connections to the event
     elem <- browser$findElement(using = 'xpath',
@@ -122,18 +126,23 @@ linkedin_createevent <- function(image, alttext,
     elem$clickElement()
 }
 
-selectDate <- function(daynum = 1, type = "start"){
+selectDate <- function(daynum = 1, addmonth = 0, type = "start"){
     aria <- sprintf("[aria-label='Select %s date']", type)
     elem <- browser$findElement(using = 'css', aria)
     elem$clickElement()
 
+    # move to correct month
+    elem <- browser$findElement(using = 'xpath',
+                                "//li-icon[@type='arrow-right-icon']")
+    for (i in seq_len(addmonth)) elem$clickElement()
+
     # same calendar widget used for both, assume start = 1st, end = 2nd
     id <- pmatch(type, c("start", "end"))
 
-    # first check we are in the right month (TODO: change month)
-    elem <- browser$findElements(using = 'xpath',
-                                 "//h1[@class='artdeco-calendar__month']")[[id]]
-    month <- elem$getElementText()[[1]] # "July 2023"
+    ## first check we are in the right month (TODO: change month)
+    #elem <- browser$findElements(using = 'xpath',
+    #                             "//h1[@class='artdeco-calendar__month']")[[id]]
+    #month <- elem$getElementText()[[1]] # "July 2023"
 
     # pick day (end date must be >= start date, else does nothing)
     xpath <- sprintf("//button[@data-daynum='%d']", daynum)

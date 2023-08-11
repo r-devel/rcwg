@@ -132,7 +132,7 @@ you may need to change your Global Options or add the PATH setting to
 2.  Create the build directory in the `BUILDDIR`:
 
     ``` sh
-    export BUILDDIR="$HOME/bin/R"
+    export BUILDDIR="$HOME/build/R-devel"
     mkdir -p "$BUILDDIR"
     cd "$BUILDDIR"
     ```

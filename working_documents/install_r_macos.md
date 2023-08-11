@@ -49,7 +49,7 @@ Open Terminal.app and follow these instructions:
     account own the existing R framework folder
 
     ``` sh
-    sudo chown -R /Library/Frameworks/R.framework/
+    sudo chown -R $USER /Library/Frameworks/R.framework/
     ```
 
     Otherwise, download the installer for the latest release of R from
@@ -132,7 +132,7 @@ you may need to change your Global Options or add the PATH setting to
 2.  Create the build directory in the `BUILDDIR`:
 
     ``` sh
-    export BUILDDIR="$HOME/build/R-devel"
+    export BUILDDIR="$HOME/bin/R"
     mkdir -p "$BUILDDIR"
     cd "$BUILDDIR"
     ```

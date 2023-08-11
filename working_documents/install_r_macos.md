@@ -6,11 +6,6 @@ Installing R from Source on macOS
 
 ### Set up R installation directory
 
-It is best to uninstall any existing version of R to set up macOS for
-building from source. Once you are set up, you will be able to install
-multiple R versions side-by-side (from source or binaries) without
-uninstalling previous versions.
-
 Open Terminal.app and follow these instructions:
 
 1.  Set `LOCAL` as an environment variable to match your architecture
@@ -20,20 +15,9 @@ Open Terminal.app and follow these instructions:
     set LOCAL=/opt/R/arm64  # Apple Silicon (e.g. M1)
     ```
 
-2.  If you have previously installed R from a binary, remove everything
-    installed by the installer
-
-    ``` sh
-    sudo rm -Rf /Library/Frameworks/R.framework /Applications/R.app \
-    /usr/local/bin/R /usr/local/bin/Rscript $LOCAL  
-    ```
-
-3.  Install the latest release version of R from CRAN. This will install
-    into the path specified by `LOCAL`.
-
-4.  Make your account own `/opt/R` so that we can install prerequisites
-    for building from source with the helper R script the next
-    subsection.
+2.  Make your account own `/opt/R` so that we can install prerequisites
+    for building from source with the helper R script described in the
+    next subsection.
 
     ``` sh
     sudo chown -R $USER /opt/R
@@ -52,7 +36,7 @@ Open Terminal.app and follow these instructions:
 
     </details>
 
-5.  Add `$LOCAL/bin` to your path
+3.  Add `$LOCAL/bin` to your path
 
     ``` sh
     cat << EOF >> /Users/$USER/.zprofile
@@ -61,10 +45,21 @@ Open Terminal.app and follow these instructions:
     EOF
     ```
 
-### Install prerequisties
+4.  If you have previously installed R on the computer, make your
+    account own the existing R framework folder
 
-It is best to install prerequisites at this stage, even if you think you
-may have installed them before.
+    ``` sh
+    sudo chown -R /Library/Frameworks/R.framework/
+    ```
+
+    Otherwise, download the installer for the latest release of R from
+    CRAN and install with the default settings.
+
+### Install prerequisites
+
+It is best to install prerequisites before first building R from source,
+even if you think you may have installed some of the prerequisites
+before.
 
 1.  Install Xcode Command Line Tools from the terminal
 
@@ -110,6 +105,15 @@ may have installed them before.
 ## Build R
 
 Run the following commands within Terminal.app:
+
+<details>
+<summary>
+Note if you prefer to use an RStudio terminal
+</summary>
+The PATH setting in `~/.zprofile` will only work for a zsh terminal, so
+you may need to change your Global Options or add the PATH setting to
+`~/.bash_profile`
+</details>
 
 0.  Retrieve R source code into `TOP_SRCDIR`, note that we retrieve the
     `r-devel` source code:
@@ -194,8 +198,8 @@ Run the following commands within Terminal.app:
     customize the version name use `--enable-R-framework FW=VERSION`
     where e.g. VERSION=4.4-dev. The compilation options in [R-admin
     manual](https://cran.r-project.org/doc/manuals/r-devel/R-admin.html#Prerequisites)
-    to define the location of X11 and tcltk libraries does not seem to
-    be necessary.
+    to define the location of X11 and tcltk libraries do not seem to be
+    necessary.
 
     </details>
 
@@ -210,6 +214,8 @@ Run the following commands within Terminal.app:
     ``` sh
     make check
     ```
+
+    `make` will exit with an error if there are any problems.
 
     <details>
     <summary>

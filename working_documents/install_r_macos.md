@@ -128,7 +128,7 @@ Run the following commands within Terminal.app:
 2.  Create the build directory in the `BUILDDIR`:
 
     ``` sh
-    export BUILDDIR="$HOME/bin/R"
+    export BUILDDIR="$HOME/build/R-devel"
     mkdir -p "$BUILDDIR"
     cd "$BUILDDIR"
     ```

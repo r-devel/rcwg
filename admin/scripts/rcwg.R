@@ -1,7 +1,9 @@
 # Update meeting dates in README
 
-update_meeting(1, "July", 3, "Friday", "15:00", 2023)
-update_meeting(2, "August", 3, "Tuesday", "19:30", 2023)
+source("admin/R/update_readme_dates.R")
+
+update_readme_dates(1, "August", 3, "Tuesday", "19:30", 2023)
+update_readme_dates(2, "September", 3, "Friday", "15:00", 2023)
 
 # Social media posts ------------------------------------------------------
 

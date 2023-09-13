@@ -31,7 +31,7 @@ linkedin_createevent <- function(
         ask = TRUE){ #ask before submitting each page
     url <- browser$getCurrentUrl()[[1]]
     browser$navigate(paste0(url, "/?createEvent=true"))
-    Sys.sleep(1) # pause for page to load
+    Sys.sleep(4) # pause for page to load
 
     # Add image with alt text
     # actual <input id = "file-upload-input-background_edit" ... type="file">
@@ -39,6 +39,7 @@ linkedin_createevent <- function(
     elem <- browser$findElement(using = "id",
                                 "file-upload-input-background_edit")
     elem$sendKeysToElement(list(image))
+    Sys.sleep(1) # pause for image to load
 
     elem <- browser$findElement(using = 'xpath',
                                 "//span[text()='Alt text']")
@@ -50,6 +51,7 @@ linkedin_createevent <- function(
     elem <- browser$findElement(using = 'xpath',
                                 "//span[text()='Apply']")
     elem$clickElement()
+    Sys.sleep(1) # pause to go back to main dialog
 
     # define event type
     elem <- browser$findElement(using = 'id',
@@ -64,7 +66,7 @@ linkedin_createevent <- function(
     # "//ul[@role='listbox']/li[@role='option']"
     elem <- browser$findElements(using = "xpath", "//li[@role='option']")
     options <- unlist(lapply(elem, function(x) {x$getElementText()}))
-    elem <- elem[[grep("eventtype", options)]]
+    elem <- elem[[grep(eventtype, options)]]
     elem$clickElement()
 
     # event name
@@ -107,6 +109,7 @@ linkedin_createevent <- function(
     elem <- browser$findElement(using = 'xpath',
                                 "//span[text()='Next']")
     elem$clickElement()
+    Sys.sleep(1) # pause while draft post is loaded
 
     elem <- browser$findElement(using = 'xpath',
                                 "//div[@role='textbox']")

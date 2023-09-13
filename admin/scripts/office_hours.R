@@ -22,6 +22,28 @@ office_hour_toot(month, day, c("09:00", "16:30"), # UTC times
                  templates = "admin/posts/office_hour_reminder",
                  ask = TRUE)
 
+# Email r-contribution-wg@r-project.org -----------------------------------
+
+"
+subject: R Contributor office hours - Sep 14
+
+Dear All,
+
+Reminder of R Contributor Office Hours tomorrow (Thursday September 14):
+
+EMEA/APAC, 09:00-10:00 UTC: https://www.meetup.com/r-contributors/events/295673493/
+AMER, 09:30-10:00 PDT: https://www.meetup.com/r-contributors/events/295680950/
+
+Meetup sign-up is helpful so we have an idea who to expect, but here are the zoom links to join directly:
+
+EMEA/APAC: {zoom1}
+AMER: {zoom2}
+
+They will also be shared on Slack near the start of the hour.
+
+Best wishes,
+"
+
 # LinkedIn event ----------------------------------------------------------
 
 # WIP: currently very specific to my machine

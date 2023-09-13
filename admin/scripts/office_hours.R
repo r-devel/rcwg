@@ -1,9 +1,9 @@
 # Data for next office hours ----------------------------------------------
 
-day <- 10
-month <- "August"
-emea <- "https://www.meetup.com/r-contributors/events/cjsfftyfclbnb/"
-amer <- "https://www.meetup.com/r-contributors/events/sjsfftyfclbnb/"
+day <- 14
+month <- "September"
+emea <- "https://www.meetup.com/r-contributors/events/295673493/"
+amer <- "https://www.meetup.com/r-contributors/events/295680950/"
 
 # Social media posts ------------------------------------------------------
 
@@ -14,22 +14,13 @@ source("admin/R/social_post.R")
 # venues: twitter, mastodon, slack, R weekly
 # copy and paste output to Twitter
 # - cut and re-paste meetup link to display card properly
-
+# use "office_hour" for main post,
+# "office_hour_reminder" for twitter/mastodon/slack reminders
 office_hour_toot(month, day, c("09:00", "16:30"), # UTC times
                  c(emea, amer),
                  venue = "slack",
-                 templates = "admin/posts/office_hour",
+                 templates = "admin/posts/office_hour_reminder",
                  ask = TRUE)
-
-# TODO: add reminder one
-"
-Tomorrow (Thursday August 10): Contributor Office Hours
-
-EMEA/APAC hour, 09:00 - 10:00 UTC: https://buff.ly/3OzxuVl
-AMER hour, 09:30 - 10:30 PDT: https://buff.ly/3OzxuVl
-
-Join whichever suits, or both!
-"
 
 # LinkedIn event ----------------------------------------------------------
 

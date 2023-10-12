@@ -19,8 +19,7 @@ linkedin_signin <- function(browser, page, username, key = "LinkedIn password"){
     elem$clickElement()
 }
 
-# untested as function, might need to add some pauses to run all at once,
-# e.g. to wait for dropdowns to appear
+# press enter in console to continue, don't click next button!
 linkedin_createevent <- function(
         browser,
         image, alttext,

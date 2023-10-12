@@ -2,8 +2,8 @@
 
 source("admin/R/update_readme_dates.R")
 
-update_readme_dates(1, "August", 3, "Tuesday", "19:30", 2023)
-update_readme_dates(2, "September", 3, "Friday", "15:00", 2023)
+update_readme_dates(1, "October", 3, "Tuesday", "19:30", 2023)
+update_readme_dates(2, "November", 3, "Friday", "15:00", 2023)
 
 # Social media posts ------------------------------------------------------
 
@@ -15,13 +15,14 @@ source("admin/R/social_post.R")
 # copy and paste output to Twitter
 # - cut and re-paste meetup link to display card properly
 
-month <- "July"
-day <- 21
+month <- "September"
+day <- 15
 time <- "14:00"
 weekday <- get_weekday(day, month, abbreviate = TRUE)
 agenda = c(
-"- Preparation for R Project Sprint 2023
-- Updates on GSoC projects (R Development Container, Translations Dashboard)"
+"- Review of R Project Sprint 2023
+- Follow-on work/keeping up the momentum
+- Updates on GSoC projects"
 )
 social_post(weekday = weekday,
             day = day,

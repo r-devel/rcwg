@@ -5,11 +5,13 @@ library(glue)
 library(rtoot)
 conflicts_prefer(hms::hms)
 conflicts_prefer(lubridate::hours)
+source("admin/R/misc.R")
 
 add_hours <- function(time, hours) substr(hms(hm(time) + hours(hours)), 1, 5)
 
-office_hour_toot <- function(month, day, time, #UTC
-                             meetup, venue, templates, ask = TRUE){
+office_hour_post <- function(month, day, time, #UTC
+                             meetup, zoom,
+                             venue, templates, ask = TRUE){
     # convert AMER time from UTC to PDT/PST
     date <- as.POSIXct(paste(ymd(glue("2000-{match(month, month.name)}-{day}")),
                              time[2]), tz = "UTC")
@@ -20,13 +22,15 @@ office_hour_toot <- function(month, day, time, #UTC
     social_post(region = c("EMEA/APAC", "AMER"),
                 month = month, day = day, time = time,
                 date = date, timezone = c("UTC", tz),
-                meetup = meetup, venue = venue, templates = templates,
+                meetup = meetup, zoom = zoom,
+                venue = venue, templates = templates,
                 ask = ask)
 }
 
 
 social_post <- function(...,
-                        venue = c("mastodon", "twitter", "slack", "rweekly"),
+                        venue = c("mastodon", "twitter", "slack",
+                                  "email", "rweekly"),
                         templates,
                         ask = TRUE){
     args <- list(...)
@@ -34,6 +38,7 @@ social_post <- function(...,
                             mastodon = "toot.txt",
                             twitter = "toot.txt",
                             slack = "slack.txt",
+                            email = "email.txt",
                             rweekly = "rweekly.txt",
                             "none")
     if (template_file == "none")

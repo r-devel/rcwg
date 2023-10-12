@@ -1,9 +1,11 @@
 # Data for next office hours ----------------------------------------------
 
-day <- 14
-month <- "September"
-emea <- "https://www.meetup.com/r-contributors/events/295673493/"
-amer <- "https://www.meetup.com/r-contributors/events/295680950/"
+day <- 12
+month <- "October"
+emea <- "https://www.meetup.com/r-contributors/events/296272398/"
+amer <- "https://www.meetup.com/r-contributors/events/296278616/"
+emea_zoom <- "https://us02web.zoom.us/j/85095818373?pwd=d2xUalQ5bXA4a0JCRGxJUUNkYityUT09"
+amer_zoom <- "https://us02web.zoom.us/j/85424493663?pwd=L3hjVGo2MW9TcVlsTVZUREEvYWVwUT09"
 
 # Social media posts ------------------------------------------------------
 
@@ -11,38 +13,21 @@ source("admin/R/social_post.R")
 
 # auth_setup() # choose user token and login as RContributors on Mastodon
 
-# venues: twitter, mastodon, slack, R weekly
+# venues: email, twitter, mastodon, slack, R weekly
 # copy and paste output to Twitter
 # - cut and re-paste meetup link to display card properly
 # use "office_hour" for main post,
 # "office_hour_reminder" for twitter/mastodon/slack reminders
-office_hour_toot(month, day, c("09:00", "16:30"), # UTC times
-                 c(emea, amer),
-                 venue = "slack",
-                 templates = "admin/posts/office_hour_reminder",
+office_hour_post(month, day, c("09:00", "16:30"), # UTC times
+                 c(emea, amer), c(emea_zoom, amer_zoom),
+                 venue = "email",
+                 templates = "admin/posts/office_hour",
                  ask = TRUE)
 
 # Email r-contribution-wg@r-project.org -----------------------------------
 
-"
-subject: R Contributor office hours - Sep 14
-
-Dear All,
-
-Reminder of R Contributor Office Hours tomorrow (Thursday September 14):
-
-EMEA/APAC, 09:00-10:00 UTC: https://www.meetup.com/r-contributors/events/295673493/
-AMER, 09:30-10:00 PDT: https://www.meetup.com/r-contributors/events/295680950/
-
-Meetup sign-up is helpful so we have an idea who to expect, but here are the zoom links to join directly:
-
-EMEA/APAC: {zoom1}
-AMER: {zoom2}
-
-They will also be shared on Slack near the start of the hour.
-
-Best wishes,
-"
+# can unsubscribe info be added to footer of each email?
+# couldn't log in as admin just now
 
 # LinkedIn event ----------------------------------------------------------
 

@@ -70,12 +70,24 @@ install.libs("r-base-dev")
 install.libs("pango")
     ```
 6.  TODO, guidance for installing MacTex for those that need it
-7.  NEEDS CHECKING - Do we also need subversion or is this in r-base-dev? 
-If so,
-    ```{r}
-install.libs("subversion", dep = FALSE)
+7.  In the terminal, check if you already have Subversion installed:
+
+    ```{sh}
+    which svn
     ```
-8. (Recommended)  Install RSwitch from <https://rud.is/rswitch/>.
+    
+    This with show a path where Subversion is installed, or `svn not found`. 
+    If necessary, install Subversion from within R:
+
+    ```{r}
+    install.libs("subversion", dep = FALSE)
+    ```
+    
+    <details><summary>Troubleshooting</summary> If this does not work, try installing via your preferred package manage, e.g. with Homebrew: <code>brew install svn</code>.
+    </details>
+    
+8. (Recommended)  If you are not already using a tool such as [rig](https://github.com/r-lib/rig) 
+to install and manage multiple R versions, install RSwitch from <https://rud.is/rswitch/>.
     
 [//]: # (
 * Skip readline (use editline) 
@@ -93,7 +105,7 @@ dependencies at same time
 
 Run the following commands within Terminal.app: 
 
-<details><summary>Note if you prefer to use an RStudio terminal</summary> The PATH setting in `~/.zprofile` will only work for a zsh terminal, so you may need to change your Global Options or add the PATH setting to `~/.bash_profile`
+<details><summary>Note if you prefer to use an RStudio terminal</summary> The PATH setting in <code>~/.zprofile</code> will only work for a zsh terminal, so you may need to change your Global Options or add the PATH setting to <code>~/.bash_profile</code>
 </details>
 
 0. Retrieve R source code into `TOP_SRCDIR`, note that we retrieve the `r-devel` source code:
@@ -131,10 +143,11 @@ cat << EOF >> config.site
 CFLAGS="-falign-functions=8 -g -O0"
 FFLAGS="-g -O2 -mmacosx-version-min=11.0"
 FCFLAGS="-g -O2 -mmacosx-version-min=11.0"
-LDFLAGS=-L/opt/R/arm64/lib
+LDFLAGS=-L$LOCAL/lib
+CPPFLAGS="-isystem $LOCAL/include -I$LOCAL/include"
 EOF
     ```
-    <details><summary>Details</summary> Some modifications: `-O0` to enable debugging symbols and disable compiler optimisations for better debugging experience; `-mmacos-version-min` corrected [?] to `-mmacosx-version-min`; `LDFLAGS=-L/opt/R/arm64/lib` added so that liblzma can be found.
+    <details><summary>Details</summary> Some modifications to th: `-O0` to enable debugging symbols and disable compiler optimisations for better debugging experience; `-mmacos-version-min` corrected [?] to `-mmacosx-version-min`; `LDFLAGS=-L$LOCAL/lib` added so that liblzma can be found. CPPFLAGS modified for Apple Silicon to link to the headers for liblzma.
     </details>
 
 4. Configure the R installation with `--enable-R-framework` to install as an application framework so that we can switch between R versions with Rswitch:
@@ -156,4 +169,4 @@ make check
     <details><summary>Note if you are using RStudio terminal</summary> `make check` will fail unless you run `unset R_HOME` first
     </details>
     
-The built version of R will now be your default version of R. To switch versions, use Rswitch.
+The built version of R will now be your default version of R. To switch versions, use RSwitch or rig.

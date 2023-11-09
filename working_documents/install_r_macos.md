@@ -93,14 +93,34 @@ before.
 
 6.  TODO, guidance for installing MacTex for those that need it
 
-7.  NEEDS CHECKING - Do we also need subversion or is this in
-    r-base-dev? If so,
+7.  In the terminal, check if you already have Subversion installed:
+
+    ``` sh
+    which svn
+    ```
+
+    This with show a path where Subversion is installed, or
+    `svn not found`. If necessary, install Subversion from within R:
 
     ``` r
     install.libs("subversion", dep = FALSE)
     ```
 
-8.  (Recommended) Install RSwitch from <https://rud.is/rswitch/>.
+    <details>
+    <summary>
+
+    Troubleshooting
+
+    </summary>
+
+    If this does not work, try installing via your preferred package
+    manage, e.g. with Homebrew: <code>brew install svn</code>.
+
+    </details>
+
+8.  (Recommended) If you are not already using a tool such as
+    [rig](https://github.com/r-lib/rig) to install and manage multiple R
+    versions, install RSwitch from <https://rud.is/rswitch/>.
 
 ## Build R
 
@@ -110,9 +130,9 @@ Run the following commands within Terminal.app:
 <summary>
 Note if you prefer to use an RStudio terminal
 </summary>
-The PATH setting in `~/.zprofile` will only work for a zsh terminal, so
-you may need to change your Global Options or add the PATH setting to
-`~/.bash_profile`
+The PATH setting in <code>~/.zprofile</code> will only work for a zsh
+terminal, so you may need to change your Global Options or add the PATH
+setting to <code>~/.bash_profile</code>
 </details>
 
 0.  Retrieve R source code into `TOP_SRCDIR`, note that we retrieve the
@@ -160,7 +180,8 @@ you may need to change your Global Options or add the PATH setting to
     CFLAGS="-falign-functions=8 -g -O0"
     FFLAGS="-g -O2 -mmacosx-version-min=11.0"
     FCFLAGS="-g -O2 -mmacosx-version-min=11.0"
-    LDFLAGS=-L/opt/R/arm64/lib
+    LDFLAGS=-L$LOCAL/lib
+    CPPFLAGS="-isystem $LOCAL/include -I$LOCAL/include"
     EOF
     ```
 
@@ -171,10 +192,11 @@ you may need to change your Global Options or add the PATH setting to
 
     </summary>
 
-    Some modifications: `-O0` to enable debugging symbols and disable
-    compiler optimisations for better debugging experience;
+    Some modifications to th: `-O0` to enable debugging symbols and
+    disable compiler optimisations for better debugging experience;
     `-mmacos-version-min` corrected \[?\] to `-mmacosx-version-min`;
-    `LDFLAGS=-L/opt/R/arm64/lib` added so that liblzma can be found.
+    `LDFLAGS=-L$LOCAL/lib` added so that liblzma can be found. CPPFLAGS
+    modified for Apple Silicon to link to the headers for liblzma.
 
     </details>
 
@@ -229,4 +251,4 @@ you may need to change your Global Options or add the PATH setting to
     </details>
 
 The built version of R will now be your default version of R. To switch
-versions, use Rswitch.
+versions, use RSwitch or rig.

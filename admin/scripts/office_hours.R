@@ -1,11 +1,11 @@
 # Data for next office hours ----------------------------------------------
 
-day <- 12
-month <- "October"
-emea <- "https://www.meetup.com/r-contributors/events/296272398/"
-amer <- "https://www.meetup.com/r-contributors/events/296278616/"
-emea_zoom <- "https://us02web.zoom.us/j/85095818373?pwd=d2xUalQ5bXA4a0JCRGxJUUNkYityUT09"
-amer_zoom <- "https://us02web.zoom.us/j/85424493663?pwd=L3hjVGo2MW9TcVlsTVZUREEvYWVwUT09"
+day <- 9
+month <- "November"
+emea <- "https://www.meetup.com/r-contributors/events/296721315/"
+amer <- "https://www.meetup.com/r-contributors/events/296859037/"
+emea_zoom <- "https://us02web.zoom.us/j/82797972945?pwd=cnZmL0h1LzM1dXoxaDlmNk9BLzRldz09"
+amer_zoom <- "https://us02web.zoom.us/j/84394094425?pwd=SjJpZVBpcGgwcWxocmV3YzRtc3JKZz09"
 
 # Social media posts ------------------------------------------------------
 
@@ -18,9 +18,9 @@ source("admin/R/social_post.R")
 # - cut and re-paste meetup link to display card properly
 # use "office_hour" for main post,
 # "office_hour_reminder" for twitter/mastodon/slack reminders
-office_hour_post(month, day, c("09:00", "16:30"), # UTC times
+office_hour_post(month, day, c("10:00", "17:30"), # UTC times
                  c(emea, amer), c(emea_zoom, amer_zoom),
-                 venue = "email",
+                 venue = "slack",
                  templates = "admin/posts/office_hour",
                  ask = TRUE)
 
@@ -75,8 +75,8 @@ linkedin_createevent(browser = browser,
                      tz = "(UTC+00:00) Coordinated Universal Time",
                      startday = day,
                      startmonth = month,
-                     starttime = "09:00",
-                     endtime = "10:00",
+                     starttime = "10:00",
+                     endtime = "11:00",
                      eventlink = emea,
                      description = description,
                      postcontent = postcontent)

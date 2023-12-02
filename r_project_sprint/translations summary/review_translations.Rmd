@@ -1,0 +1,349 @@
+---
+title: "Review of Translations Work at the Sprint"
+output: github_document
+date: "2023-10-19"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load packages
+
+```{r packages, message = FALSE}
+library(anytime)
+library(dplyr)
+library(forcats)
+library(ggplot2)
+library(lubridate)
+library(RColorBrewer)
+library(tidyr)
+library(readr)
+```
+
+## Data for analysis
+
+Load all changes on Weblate since the `https://translate.rx.studio` server was set up, until the last day of the sprint (see `weblate_change_date.R` for how CSV was generated).
+
+```{r all_changes}
+all_changes <- read_csv("all_changes_before_2023-09-01.csv", na = "NA", trim_ws = FALSE)
+```
+
+We are only interested in changes to translated strings here, identified by the translation "unit". So we can ignore changes where the unit is `NA` or where the string has been removed.
+
+```{r remove_na_units}
+all_changes <- filter(all_changes, !is.na(unit) | action == 63)
+
+all_changes <- read_csv("all_changes_before_2023-09-01.csv", na = "NA", trim_ws = FALSE)
+all_changes |>
+    mutate(translation = sub(".*/([A-Za-z_]+)/", "\\1", translation)) |>
+    separate_wider_regex(component,
+                         c("https://translate.rx.studio/api/components/",
+                           project = "[^/]*", "/", component = "[^/]*", "/")) |>
+    distinct(unit, .keep_all = TRUE) |>
+    count(project, component, translation)
+```
+
+Find actions when the string is empty:
+
+```{r empty}
+all_changes |>
+  filter(target == "") |>
+  count(action_name)
+```
+
+We can ignore some of these here, the following reasons:
+
+-   Comment added: not a substantive change to a translation
+
+-   Found duplicated string: an administrative change
+
+-   New contributor: an administrative change
+
+-   New source string: can be ignored as "String updated in the repository" at same time.
+
+"String updated in the repository" is the most important here: since we filtered to empty target strings, this means that there is a new source string that has not yet been translated in the target language. "New string added" is the equivalent for the glossary. "Translation changed" is also relevant: this means a previous translation has been deleted.
+
+Filtering out these uninteresting changes, we can determine whether units that existed before the sprint were translated or not at the start of the sprint
+
+```{r status}
+all_changes <- all_changes |> 
+    filter(!action_name %in% c("Comment added", "Found duplicated string", 
+                               "New contributor", "New source string"))
+
+# find latest change to translation before the sprint
+sprint_start <- "2023-08-30"
+sprint_end <- "2023-09-01"
+last_change <- all_changes |>
+    filter(timestamp < iso8601(anytime(sprint_start)) & action_name %in% 
+               c("String updated in the repository", "New string added", 
+                 "Translation uploaded",
+                 "New translation", "Translation changed", 
+                 "Suggestion accepted", "Translation approved")) |>
+    group_by(unit) |>
+    filter(timestamp == max(timestamp))
+```
+
+Changes during sprint - ignore any changes before last string change in the repository or last translation uploaded as these changes effectively over-ride any previous contributions.
+
+```{r sprint_changes}
+sprint_changes <- all_changes |>
+    filter(timestamp >= iso8601(anytime(sprint_start)) &
+               timestamp < iso8601(anytime(sprint_end) + days(1))) |>
+    mutate(repo_change = action_name %in% 
+               c("String updated in the repository", "Translation uploaded")) |>
+    group_by(unit) |>
+    mutate(exclude = row_number() < max(c(which(repo_change), 1))) |>
+    ungroup() |>
+    filter(!exclude)
+```
+
+For strings added during the sprint, we determine whether they were already translated when first added to the repository (and assume this was done outside the sprint), then combine with the existing translations
+
+We filter to interesting changes made during the sprint
+
+```{r interesting_changes}
+interesting_changes <- sprint_changes |>
+    bind_rows(last_change[last_change$unit %in% sprint_changes$unit,])
+
+interesting_changes |>
+    count(action_name)
+```
+
+Then we tidy up some variables
+
+```{r merg-and-tidy}
+interesting_changes <- interesting_changes |>
+    mutate(translation = sub(".*/([A-Za-z_]+)/", "\\1", translation)) |>
+    separate_wider_regex(component,
+                         c("https://translate.rx.studio/api/components/",
+                           project = "[^/]*", "/", component = "[^/]*", "/"))
+```
+
+Now we can summarize the overall change for each unit over the sprint.
+
+```{r unit-summary}
+overall_change <- function(start_time, target, action_name, timestamp){
+    # \036\036 is used to separate singular and plural translations 
+    # remove for easier comparison with empty string
+    target <- gsub("[\036]", "", target)
+    # Get target at the start of the sprint
+    target_start <- target[which.min(timestamp)]
+    # Remove actions before the sprint
+    before <- timestamp < start_time
+    action_name <- action_name[!before]
+    target <- target[!before]
+    timestamp <- timestamp[!before]
+    ord <- order(timestamp)
+    # Get last change to translation string during sprint
+    string_updated <- action_name %in% 
+               c("String updated in the repository", "New string added", 
+                 "Translation uploaded",
+                 "New translation", "Translation changed", 
+                 "Suggestion accepted", "Translation approved")
+    target_end <- ifelse(!any(string_updated), target_start,
+                         target[max(ord[string_updated])])
+    # Define overall status
+    # \036\036 is used to separate singular and plural translations even if empty 
+    new_translation <- target_start == "" && target_end != ""
+    updated_translation <- target_start != "" && target_end != "" &&
+        target_start != target_end 
+    deleted_translation <- target_start != "" && target_end == ""
+    if (any(action_name %in% "Translation approved")){
+        # check not changed since last approved
+        mark <- max(ord[action_name == "Translation approved"])
+        approved <- !any(string_updated[ord > mark])
+    } else approved <- FALSE
+    if (any(action_name == "Marked for edit")){
+        # check not changed since marked for edit
+        mark <- max(ord[action_name == "Marked for edit"])
+        marked_for_edit <- !any(string_updated[ord > mark])
+    } else marked_for_edit <- FALSE
+    if (any(action_name == "Suggestion added")){
+        # check if suggestion still present at the end
+        mark <- max(ord[action_name == "Suggestion added"])
+        later_action <- action_name[ord > mark]
+        suggestion_added <- !any(grepl("Suggestion removed", action_name[later_action]))
+    } else suggestion_added <- FALSE
+    # These cases might be filtered out in advance, but don't assume here
+    if (any(action_name == "Translation uploaded")){
+        # check not changed since last uploaded
+        mark <- max(ord[action_name == "Translation uploaded"])
+        translation_uploaded <- target[mark] == target_end
+    } else translation_uploaded <- FALSE
+    if (any(action_name %in% c("String updated in the repository", "New string added"))){
+        # check not changed since last uploaded
+        mark <- max(ord[action_name %in%
+                            c("String updated in the repository", "New string added")])
+        external_update <- target[mark] == target_end
+    } else external_update <- FALSE
+    status <- case_when(
+        !new_translation & !updated_translation & approved ~ "approved",
+        # new/updated translation that will be used on commit
+        new_translation & !marked_for_edit & approved ~ "new translation, approved",
+        updated_translation & !marked_for_edit & approved ~ "updated translation, approved",
+        new_translation & !marked_for_edit & !approved ~ "new translation",
+        updated_translation & !marked_for_edit & !approved ~ "updated translation",
+        # new/updated/unchanged translation that will not be used (marked as fuzzy)
+        marked_for_edit ~ "marked for edit",
+        # unchanged translation (missing/needs editing) but we have a new suggestion
+        target_end == "" & suggestion_added ~ "suggestion for new translation",
+        target_end != "" & target_start == target_end & suggestion_added ~ 
+            "suggestion for updated translation",
+        # deleted translation
+        deleted_translation ~ "translation deleted",
+        # other
+        translation_uploaded  ~ "translation uploaded",
+        external_update ~ "external update",
+        target_start == target_end & !approved ~ "no change overall", # changes were reverted
+        .default = "other" 
+    )
+    if (status == "other") browser()
+    status
+}
+unit_summary <- interesting_changes |>
+    summarise(progress = overall_change(start_time = iso8601(anytime(sprint_start)),
+                                        target, action_name, timestamp), 
+              .by = c(project, translation, component, unit)) 
+write_csv(unit_summary, "unit_summary.csv")
+```
+
+## Analysis
+
+```{r load-unit-summary, eval = TRUE}
+unit_summary <- read_csv("unit_summary.csv")
+```
+
+Pre-processing - only leaves changes from R project (not recommended packages)
+
+```{r}
+progress_lev <- c("approved", "updated translation, approved", "new translation, approved",
+                  "updated translation", "new translation", "marked for edit",
+                  "suggestion for updated translation", "suggestion for new translation",
+                  "translation deleted")
+translation_lev <- c("Arabic", "Bengali", "Catalan", "Danish", "German", "English",
+                     "English_GB", "Spanish", "Persian", "French", "Hindi", "Hungarian",
+                     "Indonesian", "Italian", "Japanese", "Korean", "Lithuanian", "Nepali",
+                     "Dutch", "Norwegian Norsk", "Polish", "Portuguese_BR", "Russian",
+                     "Albanian", "Turkish", "ignore", "Urdu", "Chinese_CN", "Chinese_TW")
+unit_summary <- unit_summary |>
+    mutate(translation = factor(translation, labels = translation_lev)) |>
+    filter(!progress %in% c("external update", "no change overall", 
+                            "translation uploaded")) |>
+    mutate(progress = factor(progress, progress_lev)) 
+```
+
+Across languages
+
+```{r languages}
+col <- c(brewer.pal(4, "Greens")[-1], brewer.pal(4, "Oranges")[2:3], brewer.pal(4, "Blues"))
+unit_summary |>
+    ggplot(aes(fill = progress, x = fct_infreq(translation))) + 
+    geom_bar() + 
+    scale_fill_manual(values = col) +
+    labs(x = NULL, y = NULL) +
+    theme_minimal(base_size = 36) +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+          legend.title=element_blank())
+
+ggsave(here::here(dir, "translations.png"), width = 20, height = 11, units = "in", device = "png", dpi = 320)
+
+```
+
+Try plot for Turkish first - ideally want x scale to be total number of messages for that package. Join with all messages as at end date? Number of strings is not constant across languages for base c
+
+```{r plot-r}
+unit_summary |>
+    filter(translation == "Hungarian") |>
+    ggplot(aes(fill = progress, x = progress)) + 
+    geom_bar() + 
+    scale_x_discrete(drop = FALSE) +
+    scale_fill_manual(values = col, drop = FALSE) + 
+    facet_wrap(~component) + #, scales = "free_x") +
+    coord_flip() + 
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+          legend.title=element_blank())
+
+```
+
+Simply categories
+
+```{r}
+unit_summary <- unit_summary |>
+    mutate(progress_main = case_when(
+        progress %in% c("approved", "updated translation, approved", 
+                        "new translation, approved") ~ "approved",
+        progress %in% c("updated translation", "new translation") ~ "new/updated translation",
+        progress %in% c("suggestion for updated translation", 
+                        "suggestion for new translation") ~ "suggestion",
+        .default = progress),
+        progress_main = factor(progress_main, c("approved", "new/updated translation", "marked for edit", "suggestion", "translation deleted")))
+
+col <- c(brewer.pal(5, "Greens")[5], brewer.pal(5, "Oranges")[3], brewer.pal(6, "Blues")[4:3], "grey80")
+unit_summary |>
+    ggplot(aes(fill = progress_main, x = fct_infreq(translation))) + 
+    geom_bar() + 
+    scale_fill_manual(values = col) +
+    labs(x = NULL, y = NULL) +
+    theme_minimal(base_size = 36) +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+          legend.title=element_blank())
+
+ggsave(here::here(dir, "translations_simpler.png"), width = 20, height = 11, units = "in", device = "png", dpi = 320)
+
+unit_summary |>
+    filter(translation == "Hungarian" & component != "glossary") |>
+    count(component, progress) |> 
+    print(n = Inf)
+
+unit_summary |>
+    filter(component != "glossary") |>
+    count(translation) |> 
+    print(n = Inf)
+```
+
+In terms of translation infrastructure goals in the original proposal:
+
+\- [x] Updating the R Development Guide to cover contributing translations via Weblate.
+
+\- [x] Drafting guidelines for translation teams, building on the existing wiki.
+
+\- [x] Guidelines/tooling to support the use of glossaries (glossaries were incorporated in the guidelines)
+
+In terms of translation goals in the original proposal:
+
+\- [ ] Hindi: Finish translating R and C messages in the base package
+
+\- Japanese:
+
+-   [x] Add translations for the parallel package (\~50 strings across R and C code)
+
+-   [ ] Translations for C messages in the utils package (\~50 strings).
+
+\- [ ] Spanish: Finish translating R messages in the base package (\~400 strings) and review translations marked as "needs editing".
+
+-   [ ] Brazilian Portuguese: Finish translating R messages in the tools package (\~100 strings) and review translations marked as "needs editing".
+
+-   [ ] Arabic: Add translations for the Windows GUI (\~250 strings).
+
+However, alternative translation targets were achieved:
+
+\- Arabic:
+
+-   Mac GUI (85/505 translated, remainder marked for edit/as suggestions)
+
+-   tcltk package (10/10 C messages; 26/30 R messages + 4 marked for edit)
+
+-   Other base packages/Windows GUI (56 translated + 6 marked for edit)
+
+-   Brazilian-Portuguese:
+
+-   Base C: 193 new/updated translations
+
+-   Base R GUI: 248 messages approved
+
+-   stats R: 290 new/updated translations
+
+-   utils R: 97 new/updated translations
+
+-   

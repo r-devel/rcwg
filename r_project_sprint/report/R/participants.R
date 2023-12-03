@@ -3,6 +3,7 @@ library(forcats)
 library(ggplot2)
 library(here)
 library(readr)
+library(rnaturalearth)
 
 here::i_am("r_project_sprint/report/R/participants.R")
 dir <- "r_project_sprint/report/"
@@ -11,26 +12,40 @@ dir <- "r_project_sprint/report/"
 
 location <- read_csv(here(dir, "data", "location.csv"))
 
-world_map <- map_data("world") %>%
-    filter(region != "Antarctica")
-
 dat <- location |>
-    mutate(`Country of residence` = case_when(
-        `Country of residence` == "United States of America" ~ "USA",
-        `Country of residence` == "United Kingdom" ~ "UK",
-        `Country of residence` == "Russian Federation" ~ "Russia",
-        .default = `Country of residence`)
-    ) |>
-    count(`Country of residence`) |>
-    full_join(world_map, by = c("Country of residence" = "region"))
+  mutate(Country = case_when(
+    `Country of residence` == "Russian Federation" ~ "Russia",
+    .default = `Country of residence`
+  )) |>
+  count(Country)
 
-ggplot(dat, aes(long, lat, group = group))+
-    geom_polygon(aes(fill = n ), color = NA)+
-    scale_fill_viridis_c(option = "C") +
-    theme_void()
+my_world <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf") |>
+  select(-geometry) |>
+  # filter(sovereignt != "Antarctica") |>
+  rename("Country" = name)
 
-ggsave("participant_map.png", path = here(dir, "figures"), device = "png",
-       dpi = 320, width = 14)
+my_world |>
+  full_join(dat, by = "Country") |>
+  ggplot() +
+  geom_sf(aes(fill = n)) +
+  coord_sf(crs = "+proj=eqearth +wktext") +
+  scale_fill_viridis_c(
+    option = "C",
+    breaks = seq(1, 13, 2),
+    na.value = "grey85"
+  ) +
+  theme(
+    panel.background = element_rect(fill = "azure"),
+    panel.grid = element_line(color = "#ebebeb"),
+    legend.position = c(0.97, 0.84),
+    legend.background = element_blank(),
+    panel.border = element_rect(fill = NA),
+  )
+
+ggsave("participant_map.png",
+  path = here(dir, "figures"), device = "png",
+  dpi = 320, width = 10, height = 5
+)
 
 location |>
     count(Online)

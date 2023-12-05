@@ -7,12 +7,13 @@ library(RColorBrewer)
 library(tidyr)
 library(readr)
 
-unit_summary <- read_csv("unit_summary.csv")
+here::i_am("r_project_sprint/report/R/translations.R")
+dir <- "r_project_sprint/report"
+unit_summary <- read_csv(here::here(dir, "data", "unit_summary.csv"))
 
 
-Pre-processing - only leaves changes from R project (not recommended packages)
+# Pre-processing - only leaves changes from R project (not recommended packages)
 
-```{r}
 progress_lev <- c("approved", "updated translation, approved", "new translation, approved",
                   "updated translation", "new translation", "marked for edit",
                   "suggestion for updated translation", "suggestion for new translation",
@@ -27,11 +28,9 @@ unit_summary <- unit_summary |>
     filter(!progress %in% c("external update", "no change overall",
                             "translation uploaded")) |>
     mutate(progress = factor(progress, progress_lev))
-```
 
-Across languages
+#Across languages
 
-```{r languages}
 col <- c(brewer.pal(4, "Greens")[-1], brewer.pal(4, "Oranges")[2:3], brewer.pal(4, "Blues"))
 unit_summary |>
     ggplot(aes(fill = progress, x = fct_infreq(translation))) +

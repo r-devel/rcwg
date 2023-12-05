@@ -46,6 +46,14 @@ ggsave("participant_map.png",
   path = here(dir, "figures"), device = "png",
   dpi = 320, width = 10, height = 5
 )
+ggsave("participant_map.svg",
+  path = here(dir, "figures"), device = svg,
+  width = 10, height = 5
+)
+ggsave("participant_map.pdf",
+  path = here(dir, "figures"), device = cairo_pdf,
+  width = 10, height = 5
+)
 
 location |>
     count(Online)
@@ -75,6 +83,10 @@ contributor_level |>
 
 ggsave("contributor_level.png", path = here(dir, "figures"), device = "png",
        dpi = 320, width = 5, height = 3)
+ggsave("contributor_level.svg", path = here(dir, "figures"), device = svg,
+       width = 5, height = 3)
+ggsave("contributor_level.pdf", path = here(dir, "figures"), device = cairo_pdf,
+       width = 5, height = 3)
 
 translator_level <- read_csv(here(dir, "data", "translator_level.csv"))
 
@@ -94,5 +106,9 @@ translator_level |>
 
 ggsave("translator_level.png", path = here(dir, "figures"), device = "png",
        dpi = 320, width = 5, height = 3)
+ggsave("translator_level.pdf", path = here(dir, "figures"), device = cairo_pdf,
+       width = 5, height = 3)
+ggsave("translator_level.svg", path = here(dir, "figures"), device = svg,
+       width = 5, height = 3)
 
 

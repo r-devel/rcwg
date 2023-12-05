@@ -45,3 +45,5 @@ unit_summary |>
           panel.grid.major.x = element_blank())
 
 ggsave(here::here(dir, "figures", "translations.png"), width = 20, height = 11, units = "in", device = "png", dpi = 320)
+ggsave(here::here(dir, "figures", "translations.svg"), width = 20, height = 11, units = "in", device = svg)
+ggsave(here::here(dir, "figures", "translations.pdf"), width = 20, height = 11, units = "in", device = cairo_pdf)

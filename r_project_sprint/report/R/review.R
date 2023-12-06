@@ -77,9 +77,7 @@ review |>
           panel.grid.minor = element_blank(),
           panel.grid.major.y = element_blank())
 
-ggsave("bug_review.png", path = here(dir, "figures"),
-       device = "png", dpi = 320, width = 8, height = 4)
 ggsave("bug_review.pdf", path = here(dir, "figures"),
-       device = cairo_pdf, width = 8, height = 4)
+       device = cairo_pdf, width = 8, height = 3)
 ggsave("bug_review.svg", path = here(dir, "figures"),
-       device = svg, width = 8, height = 4)
+       device = svg, width = 8, height = 3)

@@ -70,8 +70,6 @@ activities2 |>
           panel.grid.minor = element_blank(),
           panel.grid.major.y = element_blank())
 
-ggsave("sprint_activities.png", path = here(dir, "figures"), device = "png",
-       dpi = 320, width = 8, height = 5)
 ggsave("sprint_activities.pdf", path = here(dir, "figures"), device = cairo_pdf,
        width = 8, height = 5)
 ggsave("sprint_activities.svg", path = here(dir, "figures"), device = svg,
@@ -131,8 +129,6 @@ firsts2 |>
           panel.grid.minor = element_blank(),
           panel.grid.major.y = element_blank())
 
-ggsave("first_activities.png", path = here(dir, "figures"), device = "png",
-       dpi = 320, width = 11, height = 3)
 ggsave("first_activities.svg", path = here(dir, "figures"), device = svg,
        width = 11, height = 3)
 ggsave("first_activities.pdf", path = here(dir, "figures"), device = cairo_pdf,

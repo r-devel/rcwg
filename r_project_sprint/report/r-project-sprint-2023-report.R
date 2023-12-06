@@ -5,31 +5,108 @@
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 
-## ----photos, fig.cap = "Photos of sprint participants on Day 2 (top) and Day 3 (bottom), including online participants on screen (not all participants photographed).", fig.alt = c("A photo of 27 in-person participants and two online participants on day 2 of the sprint.", "A photo of 38 in-person participants and two online participants on day 3 of the sprint."), out.width = "100%", fig.show = "hold"----
-knitr::include_graphics(c('images/group_thursday.png', 'images/group_friday.png'))
+## ----photos-------------------------------------------------------------------
+#| fig.cap = paste(
+#|   "Photos of sprint participants on Day 2 (top) and Day 3 (bottom)",
+#|   "including online participants on screen (not all participants photographed)."),
+#| fig.alt = c(
+#|   "A photo of 27 in-person participants and two online participants on day 2 of the sprint.",
+#|   "A photo of 38 in-person participants and two online participants on day 3 of the sprint."),
+#| out.width = "100%",
+#| fig.show = "hold"
+knitr::include_graphics(c('images/group_thursday.jpeg', 'images/group_friday.jpeg'))
 
 
-## ----map, fig.cap = "Chloropleth showing the distribution of participants on the world map", fig.alt = c("Continents in order of number of participants. Europe: UK - 8, Germany and Netherlands - 2, Hungary, Italy, Luxembourg, Switzerland - 1. North America: USA - 13, Canada - 1. Asia: India - 5, Nepal and Russia 1. Latin America: Argentina - 3, Brazil - 2, Colombia - 1. Africa: Nigeria - 2, Kenya, Senegal, Uganda - 1. Oceania: New Zealand - 4. Middle East: Oman, Saudi Arabia, United Arab Emirates - 1."), out.width = "100%"----
-knitr::include_graphics('figures/participant_map.png')
+## ----map----------------------------------------------------------------------
+#| fig.cap = "Choropleth showing the distribution of participants on the world map.",
+#| fig.alt = paste(
+#|   "Continents in order of number of participants.",
+#|   "Europe: UK - 8, Germany and Netherlands - 2, Hungary, Italy, Luxembourg, Switzerland - 1.",
+#|   "North America: USA - 13, Canada - 1. Asia: India - 5, Nepal and Russia 1.",
+#|   "Latin America: Argentina - 3, Brazil - 2, Colombia - 1.",
+#|   "Africa: Nigeria - 2, Kenya, Senegal, Uganda - 1. Oceania: New Zealand - 4.",
+#|   "Middle East: Oman, Saudi Arabia, United Arab Emirates - 1."),
+#| out.width = "100%"
+knitr::include_graphics('figures/participant_map.png', auto_pdf = TRUE)
 
 
-## ----skills, fig.cap = "Skills of external contributors as judged by the selection committee. Left: level of expertise in R contribution. Right: potential as a translator of English to other languages.", fig.alt = c("Bar chart of contributor level. R-core: 11; Advanced: 12; Intermediate: 20, Beginner: 12", "Bar chart of translator potential: R-core: 11; Translator: 14; Possible: 8; No evidence: 22."), out.width = "50%", fig.show = "hold"----
-knitr::include_graphics(c('figures/contributor_level.png',
-                          'figures/translator_level.png'))
+## ----skills-------------------------------------------------------------------
+#| fig.cap = paste(
+#|   "Skills of external contributors as judged by the selection committee.",
+#|   "Left: level of expertise in R contribution.",
+#|   "Right: potential as a translator of English to other languages."),
+#| fig.alt = c(
+#|   "Bar chart of contributor level. R-core: 11; Advanced: 12; Intermediate: 20, Beginner: 12",
+#|   "Bar chart of translator potential: R-core: 11; Translator: 14; Possible: 8; No evidence: 22."),
+#| out.width = "50%",
+#| fig.show = "hold"
+knitr::include_graphics(c('figures/contributor_level.svg',
+                          'figures/translator_level.svg'), auto_pdf = TRUE)
 
 
-## ----translation, fig.cap = "Changes in the R Project components on Weblate during the three days of the sprint", fig.alt = "Stacked bar chart of translation activities by language, in order of magnitude. Brazilian Portuguese: around 900 translations, about one third new, one third updated and one third approved; Hungarian: around 800 translations, about 500 suggestions and 300 new translations; Spanish: around 600 new translations; Hindi, around 500 suggestions and 100 new/updated translations; Arabic, around 400 suggestions and 200 new translations; Nepali and Turkish, nearly 500 suggestions each; Japanese and Simplified Chinese, around 50 new/updated translations each; French, Bengali, German, Italian, Dutch and Catalan a handful of suggestions/translations each.", out.width = "100%"----
-knitr::include_graphics('figures/translations.png')
+## ----translation--------------------------------------------------------------
+#| fig.cap = "Changes in the R Project components on Weblate during the three days of the sprint",
+#| fig.alt = paste(
+#|   "Stacked bar chart of translation activities by language, in order of magnitude.",
+#|   "Brazilian Portuguese: around 900 translations, about one third new, one third updated and one third approved;",
+#|   "Hungarian: around 800 translations, about 500 suggestions and 300 new translations;",
+#|   "Spanish: around 600 new translations; Hindi, around 500 suggestions and 100 new/updated translations;",
+#|   "Arabic, around 400 suggestions and 200 new translations; Nepali and Turkish, nearly 500 suggestions each;",
+#|   "Japanese and Simplified Chinese, around 50 new/updated translations each;",
+#|   "French, Bengali, German, Italian, Dutch and Catalan a handful of suggestions/translations each."),
+#| out.width = "100%"
+knitr::include_graphics('figures/translations.svg', auto_pdf = TRUE)
 
 
-## ----issues, fig.cap = "Status of issues at the end of the sprint and two months after", fig.alt = "Stacked bar chart of issue status by issue type, in order of magnitude, split into two timepoints: end of spint and two months after. Low-level bugs (16): At end of sprint, 3 unstarted, 5 discussion, 1 roadmap, 4 work in progress, 3 patch; Two months after, 3 discussion, 3 work in progress, 3 patch and 7 closed. Documentation bugs (14): at end of sprint, 1 roadmap, 6 patch, 7 closed; two months after, 2 moved from patch to closed. Packages (5): at end of sprint 1 discussion, 1 roadmap, 1 work in progress, 2 patch; two months later, 1 roadmap moved to work in progress. Translation (5): at end of sprint, 1, discussion, 1 roadmap, 1 work in progress and 2 patches; two months later, 1 road map moved to work in progress.  Statistics (3) at end of sprint 2 work in progress, 1 patch; two months later 1 work in progress, 1 patch, 1 closed. Accessibility (2) at end of sprint 2 working progress; two months later, 2 closed. Graphics (2): at end of sprint 1 patch, 1 closed; two months later: the same.", out.width = "100%"----
-knitr::include_graphics('figures/bug_review.png')
+## ----issues-------------------------------------------------------------------
+#| fig.cap = "Status of issues at the end of the sprint and two months after",
+#| fig.alt = paste(
+#|   "Stacked bar chart of issue status by issue type, in order of magnitude, split into two timepoints:",
+#|   "end of spint and two months after.",
+#|   "Low-level bugs (16): At end of sprint, 3 unstarted, 5 discussion, 1 roadmap, 4 work in progress, 3 patch;",
+#|   "Two months after, 3 discussion, 3 work in progress, 3 patch and 7 closed.",
+#|   "Documentation bugs (14): at end of sprint, 1 roadmap, 6 patch, 7 closed;",
+#|   "two months after, 2 moved from patch to closed.",
+#|   "Packages (5): at end of sprint 1 discussion, 1 roadmap, 1 work in progress, 2 patch;",
+#|   "two months after, 1 roadmap moved to work in progress.",
+#|   "Translation (5): at end of sprint, 1, discussion, 1 roadmap, 1 work in progress and 2 patches;",
+#|   "two months later, 1 road map moved to work in progress.",
+#|   "Statistics (3) at end of sprint 2 work in progress, 1 patch;",
+#|   "two months later 1 work in progress, 1 patch, 1 closed.",
+#|   "Accessibility (2) at end of sprint 2 working progress; two months later, 2 closed.",
+#|   "Graphics (2): at end of sprint 1 patch, 1 closed; two months later: the same."),
+#| out.width = "100%"
+knitr::include_graphics('figures/bug_review.svg', auto_pdf = TRUE)
 
 
-## ----activities, fig.cap = "Activities of external contributors, based on 32 responses to participant survey.", fig.alt = "Four bar charts of activities across four areas. Code (n = 23): Bug analysis/issue discussion - 19, Creating a patch - 12, Bug fixing - 10, Developing improved/new functionality - 10, Optimizing/refactoring code - 5, Creating/running tests - 4, Reviewing a patch - 3. Documentation (n = 13): Bug analysis/issue discussion - 7, Creating a patch - 7, Reviewing a patch - 7. Translation (n = 12): Message translation - 10, Developing translation documentation - 8, Developing translation infrastructure - 3. Scoping work (n = 12): Project scoping - 9, Triaging bugs - 6, Developing a roadmap - 2", out.width = "100%"----
-knitr::include_graphics('figures/sprint_activities.png')
+## ----activities---------------------------------------------------------------
+#| fig.cap = "Activities of external contributors, based on 32 responses to the participant survey.",
+#| fig.alt = paste(
+#|   "Four bar charts of activities across four areas.",
+#|   "Code (n = 23): Bug analysis/issue discussion - 19, Creating a patch - 12,",
+#|   "Bug fixing - 10, Developing improved/new functionality - 10, Optimizing/refactoring code - 5,",
+#|   "Creating/running tests - 4, Reviewing a patch - 3.",
+#|   "Documentation (n = 13): Bug analysis/issue discussion - 7, Creating a patch - 7,",
+#|   "Reviewing a patch - 7. Translation (n = 12): Message translation - 10,",
+#|   "Developing translation documentation - 8, Developing translation infrastructure - 3.",
+#|   "Scoping work (n = 12): Project scoping - 9, Triaging bugs - 6, Developing a roadmap - 2"),
+#| out.width = "100%"
+knitr::include_graphics('figures/sprint_activities.svg', auto_pdf = TRUE)
 
 
-## ----firsts, fig.cap = "R core interactions and R contribution activities that external contributors engaged in for the first time, based on 32 responses to participant survey.", fig.alt = "Two bar charts of activities. R Core interactions (n = 22): Discussing bug/issue with R Core member (online/in person) - 21, Having patch reviewed by R Core member (online/in person) - 14, Making a comment on R’s Bugzilla - 10, Posting a patch on R’s Bugzilla - 7. R contribution activities (n = 25) Working on R code in base R - 14, Creating a patch from the R sources - 14, Building R from source on own laptop - 14, Building R from source in GitHub Codespace - 13, Working on C code in base R - 6, Working on Rd files in base R - 8, Adding/updating a translation on Weblate - 5.", out.width = "100%"----
-knitr::include_graphics('figures/first_activities.png')
+## ----firsts-------------------------------------------------------------------
+#| fig.cap = paste(
+#|   "R core interactions and R contribution activities that external contributors engaged in for the first time,",
+#|   "based on 32 responses to participant survey."),
+#| fig.alt = paste(
+#|   "Two bar charts of activities.",
+#|   "R Core interactions (n = 22): Discussing bug/issue with R Core member (online/in person) - 21,",
+#|   "Having patch reviewed by R Core member (online/in person) - 14,",
+#|   "Making a comment on R’s Bugzilla - 10, Posting a patch on R’s Bugzilla - 7.",
+#|   "R contribution activities (n = 25) Working on R code in base R - 14,",
+#|   "Creating a patch from the R sources - 14, Building R from source on own laptop - 14,",
+#|   "Building R from source in GitHub Codespace - 13, Working on C code in base R - 6,",
+#|   "Working on Rd files in base R - 8, Adding/updating a translation on Weblate - 5."),
+#| out.width = "100%"
+knitr::include_graphics('figures/first_activities.svg', auto_pdf = TRUE)
 

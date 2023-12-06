@@ -72,7 +72,7 @@ review |>
     labs(x = NULL, y = NULL) +
     coord_flip() +
     facet_grid(~ Timepoint) +
-    theme_minimal() +
+    theme_minimal(base_size = 12) +
     theme(axis.text.y = element_text(colour = mid_text, size = rel(1)),
           panel.grid.minor = element_blank(),
           panel.grid.major.y = element_blank())

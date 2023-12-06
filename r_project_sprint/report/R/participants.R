@@ -1,5 +1,4 @@
 library(dplyr)
-library(forcats)
 library(ggplot2)
 library(here)
 library(readr)
@@ -15,6 +14,7 @@ location <- read_csv(here(dir, "data", "location.csv"))
 dat <- location |>
   mutate(Country = case_when(
     `Country of residence` == "Russian Federation" ~ "Russia",
+    `Country of residence` == "United States of America" ~ "United States",
     .default = `Country of residence`
   )) |>
   count(Country)
@@ -27,7 +27,7 @@ my_world <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf") |>
 my_world |>
   full_join(dat, by = "Country") |>
   ggplot() +
-  geom_sf(aes(fill = n)) +
+  geom_sf(aes(fill = n), linewidth = 0.2) +
   coord_sf(crs = "+proj=eqearth +wktext") +
   scale_fill_viridis_c(
     option = "C",
@@ -35,17 +35,13 @@ my_world |>
     na.value = "grey85"
   ) +
   theme(
-    panel.background = element_rect(fill = "azure"),
+    panel.background = element_blank(),
     panel.grid = element_line(color = "#ebebeb"),
     legend.position = c(0.97, 0.84),
     legend.background = element_blank(),
-    panel.border = element_rect(fill = NA),
+    panel.border = element_blank(),
   )
 
-ggsave("participant_map.png",
-  path = here(dir, "figures"), device = "png",
-  dpi = 320, width = 10, height = 5
-)
 ggsave("participant_map.svg",
   path = here(dir, "figures"), device = svg,
   width = 10, height = 5
@@ -81,8 +77,6 @@ contributor_level |>
           panel.grid.minor = element_blank(),
           panel.grid.major.x = element_blank())
 
-ggsave("contributor_level.png", path = here(dir, "figures"), device = "png",
-       dpi = 320, width = 5, height = 3)
 ggsave("contributor_level.svg", path = here(dir, "figures"), device = svg,
        width = 5, height = 3)
 ggsave("contributor_level.pdf", path = here(dir, "figures"), device = cairo_pdf,
@@ -104,8 +98,6 @@ translator_level |>
           panel.grid.minor = element_blank(),
           panel.grid.major.x = element_blank())
 
-ggsave("translator_level.png", path = here(dir, "figures"), device = "png",
-       dpi = 320, width = 5, height = 3)
 ggsave("translator_level.pdf", path = here(dir, "figures"), device = cairo_pdf,
        width = 5, height = 3)
 ggsave("translator_level.svg", path = here(dir, "figures"), device = svg,

@@ -1,16 +1,12 @@
-library(anytime)
 library(dplyr)
-library(forcats)
 library(ggplot2)
-library(lubridate)
-library(RColorBrewer)
-library(tidyr)
 library(readr)
+library(viridis)
 
 here::i_am("r_project_sprint/report/R/translations.R")
 dir <- "r_project_sprint/report"
-unit_summary <- read_csv(here::here(dir, "data", "unit_summary.csv"))
 
+unit_summary <- read_csv(here::here(dir, "data", "unit_summary.csv"))
 
 # Pre-processing - only leaves changes from R project (not recommended packages)
 
@@ -29,13 +25,19 @@ unit_summary <- unit_summary |>
                             "translation uploaded")) |>
     mutate(progress = factor(progress, progress_lev))
 
-#Across languages
+# plot changes across languages
 
-col <- c(brewer.pal(4, "Greens")[-1], brewer.pal(4, "Oranges")[2:3], brewer.pal(4, "Blues"))
+pal <- viridis_pal(option = "C")(4)
+
+col <- c("#7f7f7f",
+         colorRampPalette(c(pal[1], "white"))(4)[-4],
+         colorRampPalette(c(pal[2], "white"))(3)[-3],
+         colorRampPalette(c(pal[3:4], "yellow"))(4)[-4])
+
 unit_summary |>
     ggplot(aes(fill = progress, x = fct_infreq(translation))) +
     geom_bar() +
-    scale_fill_manual(values = col) +
+    scale_fill_manual(values = rev(col)) +
     labs(x = NULL, y = NULL) +
     theme_minimal(base_size = 36) +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
@@ -43,6 +45,5 @@ unit_summary |>
           panel.grid.minor = element_blank(),
           panel.grid.major.x = element_blank())
 
-ggsave(here::here(dir, "figures", "translations.png"), width = 20, height = 11, units = "in", device = "png", dpi = 320)
 ggsave(here::here(dir, "figures", "translations.svg"), width = 20, height = 11, units = "in", device = svg)
 ggsave(here::here(dir, "figures", "translations.pdf"), width = 20, height = 11, units = "in", device = cairo_pdf)

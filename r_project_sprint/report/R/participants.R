@@ -42,8 +42,9 @@ my_world |>
     panel.border = element_blank(),
   )
 
-ggsave("participant_map.svg",
-  path = here(dir, "figures"), device = svg,
+# svg doesn't seem to work propoerly here
+ggsave("participant_map.png",
+  path = here(dir, "figures"), device = png,
   width = 10, height = 5
 )
 ggsave("participant_map.pdf",

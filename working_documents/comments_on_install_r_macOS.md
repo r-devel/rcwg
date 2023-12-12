@@ -61,6 +61,8 @@ I worked through Heather's notes during the RProject Sprint, on Sept 1st
     > with the idea that if you had multiple builds of R you could have
     > them nested under those directories. Will poll R Contributors to
     > help decide what is best.
+    >
+    > (gone with second option for now)
 
 3.  In Build R, point 3 for Apple Silicon only, in line before `EOF`,
     need to add CPPFLAGS to link to the headers for liblzma:
@@ -115,8 +117,7 @@ from `config.site` (it's not needed once gfortran is in the PATH).
     --without-recommended-packages
     ```
     
-    > HT: We should try to find a non-hacky way to build with recommended 
-    packages.
+    > HT: Fixed by updating LDFLAGS. Not sure if this applies to Intel too.
 
 6.  Need to install java or turn it off!
 
@@ -139,5 +140,4 @@ from `config.site` (it's not needed once gfortran is in the PATH).
 After `make check`, if still in `build` directory, need to run `bin/R`
 to start newly build
 
-> HT: Assume that people will switch with RSwitch/rig and then use RStudio/usual 
-IDE.
+> HT: Fixed by adding `make install` step.

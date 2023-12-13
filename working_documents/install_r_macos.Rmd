@@ -18,6 +18,10 @@ expand or collapse these sections.
 
 ### Set up R installation directory
 
+If you do not have an existing version of R installed on your computer, download 
+the installer for the latest release of R from the [CRAN macOS page](https://cran.r-project.org/bin/macosx/) and install this pre-built 
+(binary) version with the default settings.
+
 Open Terminal.app and follow these instructions:
 
 1.  Set `LOCAL` as a temporary environment variable to match your architecture
@@ -48,35 +52,53 @@ EOF
    <details><summary><i>Note if using RStudio terminal, or using Terminal.app on macOS < 10.15 (Catalina)...</i></summary> The code above assumes you are using a Zsh shell (the default on macOS &ge; 10.15). If you are using a bash shell, replace <code>.zprofile</code> with <code>.bash_profile</code>. The type of terminal in RStudio can be set in Terminal Options from the terminal or in Global Options.
 </details>
    </details>
-4.  If you have previously installed R on the computer, make your account own the existing R framework folder
+4.  Make your account own the R framework folder (created when installing R from 
+the binary)
     ```{sh}
 sudo chown -R $USER /Library/Frameworks/R.framework/
    ```
-   Otherwise, download the installer for the latest release of R from CRAN and install with the default settings first. 
 
 ### Install prerequisites
 
-1.  Install Xcode Command Line Tools from the terminal
+For the following instructions, run the code within R:
+
+1.  Use the helper R script to install commonly required prerequisites
+    ```{r}
+source("https://mac.R-project.org/bin/install.R")
+install.libs("r-base-dev")
+    ```
+2.  (Optional), install Pango for full Cairo support
+    ```{r}
+install.libs("pango")
+    ```
+3.  Check if you already have Subversion installed:
+
+    ```{r}
+system2("which", "svn")
+    ```
+    
+    This will print a path where Subversion is installed. If nothing is 
+    printed, install Subversion:
+
+    ```{r}
+install.libs("subversion", dep = FALSE)
+    ```
+    
+    <details><summary><i>Troubleshooting...</i></summary> If this does not work, try installing Subversion via your preferred package manager, e.g. with Homebrew: <code>brew install svn</code>.
+    </details>
+    
+For the remaining instructions, run the code within Terminal.app
+
+1.  Install GNU Fortran (gfortran) from the binary at 
+<https://mac.r-project.org/tools/>. This version is prepared for specifically 
+for R and will be used in preference to any other version on your system.
+2.  From the terminal, install Xcode Command Line Tools
     ```{sh}
     xcode-select --install
     ```
     (If already installed, shows "xcode-select: error: command line tools are
 already installed").
-2.  Install GNU Fortran (gfortran) from the binary at 
-<https://mac.r-project.org/tools/>.
-3.  Install XQuartz from the binary <https://www.xquartz.org/>. 
-**Restart your computer** for XQuartz (and components that depend on it) to 
-work!
-4.  Within R, use the helper R script to install commonly required prerequisites
-    ```{r}
-source("https://mac.R-project.org/bin/install.R")
-install.libs("r-base-dev")
-    ```
-5.  (Optional), within R, install Pango for full Cairo support
-    ```{r}
-install.libs("pango")
-    ```
-6.  Check if you have a current version of MacTeX installed:
+3.  Check if you have a current version of MacTeX installed:
     ```{sh}
 ls /usr/local/texlive
     ```
@@ -85,25 +107,15 @@ ls /usr/local/texlive
     2022            2023            texmf-local
     ```
     If this check doesn't show a subdirectory for the current year, install MacTex from the binary at <https://tug.org/mactex/mactex-download.html>.
-7.  In the terminal, check if you already have Subversion installed:
-
+4.  Check if you have XQuartz installed:
     ```{sh}
-    which svn
+mdls -name kMDItemVersion /Applications/Utilities/XQuartz.app
     ```
-    
-    This will show a path where Subversion is installed, or `svn not found`. 
-    If necessary, install Subversion from within R:
-
-    ```{r}
-    install.libs("subversion", dep = FALSE)
-    ```
-    
-    <details><summary><i>Troubleshooting...</i></summary> If this does not work, try installing via your preferred package manage, e.g. with Homebrew: <code>brew install svn</code>.
-    </details>
-    
-8. (Recommended)  If you are not already using a tool such as [rig](https://github.com/r-lib/rig) 
-to install and manage multiple R versions, install RSwitch from <https://rud.is/rswitch/>. These tools are not part of the R Project, but 
-make it easy to switch R versions.
+    This will show the version number or `could not find /Applications/Utilities/XQuartz.app`. If missing, install XQuartz from the binary at  <https://www.xquartz.org/>. **Restart your computer** for XQuartz (and components that depend on it) to work!  
+5. (Recommended)  If you are not already using a tool such as [rig](https://github.com/r-lib/rig) 
+to install and manage multiple R versions, install RSwitch from <https://rud.is/rswitch/>. These are third-party tools, not part of the R 
+Project, but are recommended here as they provide an easy way to switch R 
+versions.
     
 [//]: # (
 * Skip readline (use editline) 

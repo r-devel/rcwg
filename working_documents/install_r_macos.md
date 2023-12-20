@@ -1,6 +1,6 @@
 Installing R from Source on macOS
 ================
-2023-12-11
+2023-12-20
 
 ## Prerequisites
 
@@ -128,7 +128,7 @@ For the following instructions, run the code within R:
 For the remaining instructions, run the code within Terminal.app
 
 1.  Install GNU Fortran (gfortran) from the binary at
-    <https://mac.r-project.org/tools/>. This version is prepared for
+    <https://mac.r-project.org/tools/>. This version is prepared
     specifically for R and will be used in preference to any other
     version on your system.
 
@@ -165,13 +165,12 @@ For the remaining instructions, run the code within Terminal.app
     This will show the version number or
     `could not find /Applications/Utilities/XQuartz.app`. If missing,
     install XQuartz from the binary at <https://www.xquartz.org/>.
-    **Restart your computer** for XQuartz (and components that depend on
-    it) to work!  
+    **Restart your computer** for XQuartz to work!  
 
 5.  (Recommended) If you are not already using a tool such as
     [rig](https://github.com/r-lib/rig) to install and manage multiple R
-    versions, install RSwitch from <https://rud.is/rswitch/>. These are
-    third-party tools, not part of the R Project, but are recommended
+    versions, install RSwitch from <https://rud.is/rswitch/>. These
+    third-party tools are not part of the R Project, but are recommended
     here as they provide an easy way to switch R versions.
 
 ## Build R
@@ -182,7 +181,7 @@ Run the following commands within Terminal.app:
     `r-devel` source code:
 
     ``` sh
-    export TOP_SRCDIR="$HOME/svn/R-devel"
+    export TOP_SRCDIR="$HOME/R-devel/svn"
     svn checkout https://svn.r-project.org/R/trunk/ "$TOP_SRCDIR"
     ```
 
@@ -195,7 +194,7 @@ Run the following commands within Terminal.app:
 2.  Create the build directory in the `BUILDDIR`:
 
     ``` sh
-    export BUILDDIR="$HOME/build/R-devel"
+    export BUILDDIR="$HOME/R-devel/build"
     mkdir -p $BUILDDIR
     cd $BUILDDIR
     ```
@@ -245,9 +244,8 @@ Run the following commands within Terminal.app:
 
     </details>
 
-4.  Configure the R installation with `--enable-R-framework` to install
-    as an application framework so that we can switch between R versions
-    with RSwitch:
+4.  Configure the R installation with `--enable-R-framework` to prepare
+    for installation as an App:
 
     ``` sh
     "$TOP_SRCDIR/configure" --enable-R-framework
@@ -283,7 +281,10 @@ Run the following commands within Terminal.app:
     make check
     ```
 
-    `make` will exit with an error if there are any problems.
+    `make` will exit with an error if there are any problems. You can
+    start the built version of by running the command `bin/R` from the
+    build directory, but we recommending installing as an App, as
+    described next.
 
     <details>
     <summary>
@@ -296,13 +297,35 @@ Run the following commands within Terminal.app:
 
     </details>
 
-7.  Install the built version of R
+7.  Install the built version of R and reset permissions on the R
+    framework folder to include the new directories.
 
     ``` sh
     make install
+    sudo chown -R $USER /Library/Frameworks/R.framework/
     ```
 
-The built version of R will now be your default version of R, which you
-can start by typing `R` in the terminal, or restarting the R session in
-RStudio, etc. To switch versions, use RSwitch or rig, then restart your
-R session.
+    The built version of R will now be your default version of R, which
+    you can start by typing `R` in the terminal, or restarting the R
+    session in RStudio, etc. To switch versions, use RSwitch or rig,
+    then restart your R session.
+
+## Re-build R
+
+After making changes to the source files in `$TOP_SRCDIR` (via
+`svn update` or making your own modifications), you can re-build R
+incorporating the changed components by running the following commands
+in the terminal:
+
+``` sh
+export BUILDDIR="$HOME/build/R-devel"
+cd $BUILDDIR
+make
+```
+
+If you followed the recommended steps to install R as an App, you can
+install the re-built version as follows:
+
+``` sh
+make install
+```

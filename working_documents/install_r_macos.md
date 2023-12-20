@@ -181,9 +181,25 @@ Run the following commands within Terminal.app:
     `r-devel` source code:
 
     ``` sh
-    export TOP_SRCDIR="$HOME/R-devel/svn"
+    export TOP_SRCDIR="$HOME/svn/R-devel"
     svn checkout https://svn.r-project.org/R/trunk/ "$TOP_SRCDIR"
     ```
+
+    <details>
+    <summary>
+
+    <i>Alternatively create an RStudio SVN project…</i>
+
+    </summary>
+
+    You may prefer to create an RStudio project from the SVN repository.
+    Set `https://svn.r-project.org/R/trunk/` as the Repository URL; set
+    `R-devel` as the project directory name and create the project as a
+    subdirectory of `/Users/<username>/svn` (or adapt the definition of
+    `TOP_SRCDIR` to match where you create the project). This will
+    create an SVN pane in RStudio where you can track changes.
+
+    </details>
 
 1.  Download the latest recommended packages:
 
@@ -191,10 +207,10 @@ Run the following commands within Terminal.app:
     $TOP_SRCDIR/tools/rsync-recommended
     ```
 
-2.  Create the build directory in the `BUILDDIR`:
+2.  Create the build directory, `BUILDDIR`:
 
     ``` sh
-    export BUILDDIR="$HOME/R-devel/build"
+    export BUILDDIR="$HOME/build/R-devel"
     mkdir -p $BUILDDIR
     cd $BUILDDIR
     ```

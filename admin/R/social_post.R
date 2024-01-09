@@ -48,11 +48,5 @@ social_post <- function(...,
     post_template <- readChar(template_file, file.info(template_file)$size)
     post <- glue_data(args, post_template)
     cat(post, sep = "\n\n")
-    if (venue == "mastodon"){
-        if (ask && askYesNo("Post toots on Mastodon?")){
-            for (i in seq_along(post)){
-                post_toot(status = post[i])
-            }
-        }
-    }
+    post
 }

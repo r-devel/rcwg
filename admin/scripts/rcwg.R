@@ -2,8 +2,9 @@
 
 source("admin/R/update_readme_dates.R")
 
-update_readme_dates(1, "October", 3, "Tuesday", "19:30", 2023)
-update_readme_dates(2, "November", 3, "Friday", "15:00", 2023)
+#update_readme_dates(2, "October", 3, "Tuesday", "19:30", 2023)
+update_readme_dates(1, "November", 4, "Friday", "15:00", 2023)
+update_readme_dates(2, "January", 3, "Friday", "15:00", 2023)
 
 # Social media posts ------------------------------------------------------
 

@@ -1,5 +1,12 @@
 # Data for next office hours ----------------------------------------------
 
+# 11 Apr
+# 9 May
+# 13 Jun
+# 18 Jul: shifted one week later to avoid useR!
+# 8 Aug
+# 12 Sep
+
 day <- 11
 month <- "January"
 emea <- "https://www.meetup.com/r-contributors/events/298086101/"
@@ -54,9 +61,6 @@ buffer_createpost(browser = browser,
                   day = NULL,
                   month = NULL,
                   time = "10:00",
-                  endtime = "11:00",
-                  eventlink = emea,
-                  description = description,
                   postcontent = postcontent)
 
 # LinkedIn event ----------------------------------------------------------

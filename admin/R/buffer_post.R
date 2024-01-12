@@ -30,11 +30,13 @@ buffer_createpost <- function(
     if (is.null(month)) month <- format(Sys.Date(), "%m")
     if (is.null(time)) time <- format(Sys.time() + 60*60, "%H:00")
 
-    browser$navigate("https://publish.buffer.com/calendar/week")
+    #browser$navigate("https://publish.buffer.com/calendar/week")
+    #Sys.sleep(2) # pause for page to load
 
     elem <- browser$findElement(using = 'xpath',
                                 "//div[text()='Create Post']")
     elem$clickElement()
+    Sys.sleep(2) # pause for dialog to load
 
     # select outlets
     # all (mastodon, twitter and linked-in page) pre-selected by default
@@ -54,7 +56,7 @@ buffer_createpost <- function(
     elem <- browser$findElement(using = 'xpath',
                                 "//div[@role='textbox']")
 
-    sendChar(elem, post[2])
+    sendChar(elem, postcontent)
 
     elem <- browser$findElement(using = 'xpath',
                                 "//button[text()='Customize for each network']")

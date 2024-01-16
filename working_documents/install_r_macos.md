@@ -175,7 +175,24 @@ For the remaining instructions, run the code within Terminal.app
 
 ## Build R
 
-Run the following commands within Terminal.app:
+### Setting up a source code repository
+
+If you skipped the [Prerequisites](#Prerequisites) section because you
+believe you have the prerequisites already installed, you’ll need to
+define the `LOCAL` environment variable to match your architecture
+
+``` sh
+# Intel
+export LOCAL=/opt/R/x86_64 
+```
+
+``` sh
+# Apple Silicon (e.g. M1)
+export LOCAL=/opt/R/arm64  
+```
+
+Run the following commands within Terminal.app to set up a local copy of
+the Subversion source code repository:
 
 0.  Retrieve R source code into `TOP_SRCDIR`, note that we retrieve the
     `r-devel` source code:
@@ -200,6 +217,19 @@ Run the following commands within Terminal.app:
     create an SVN pane in RStudio where you can track changes.
 
     </details>
+    <details>
+    <summary>
+
+    <i>Alternatively checkout r-svn GitHub repo…</i>
+
+    </summary>
+
+    You may prefer to use the
+    <a href="https://github.com/r-devel/r-svn">r-svn GitHub repo</a>.
+    Set the <code>TOP_SRCDIR</code> environment variable to the
+    directory where you checkout the repository.
+
+    </details>
 
 1.  Download the latest recommended packages:
 
@@ -207,7 +237,8 @@ Run the following commands within Terminal.app:
     $TOP_SRCDIR/tools/rsync-recommended
     ```
 
-2.  Create the build directory, `BUILDDIR`:
+2.  Create the build directory, `BUILDDIR` (you may wish to customise
+    this path):
 
     ``` sh
     export BUILDDIR="$HOME/build/R-devel"
@@ -257,6 +288,22 @@ Run the following commands within Terminal.app:
     `LDFLAGS="-L$LOCAL/lib -L/opt/gfortran/lib"` added so that liblzma
     (in `$LOCAL/lib`) and gfortran libraries can be found. CPPFLAGS
     modified for Apple Silicon to link to the headers for liblzma.
+
+    </details>
+    <details>
+    <summary>
+
+    <i>Extra step if you are using the r-svn GitHub mirror…</i>
+
+    </summary>
+
+    You will need to update the Makefile template to infer the SVN
+    revision number from the git mirror. Run the following line of code
+    to replace an `svn` command in the template with a shell script that
+    will infer the SVN revision number: <code> sed -i.bak “s\|\$(GIT)
+    svn
+    info\|$TOP_SRCDIR/.github/scripts/svn-info.sh|" "$TOP_SRCDIR/Makefile.in”
+    \<code
 
     </details>
 

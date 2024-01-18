@@ -220,14 +220,14 @@ the Subversion source code repository:
     <details>
     <summary>
 
-    <i>Alternatively checkout r-svn GitHub repo…</i>
+    <i>Alternatively checkout a fork of the r-svn GitHub repo…</i>
 
     </summary>
 
-    You may prefer to use the
+    You may prefer to use a fork of the
     <a href="https://github.com/r-devel/r-svn">r-svn GitHub repo</a>.
     Set the <code>TOP_SRCDIR</code> environment variable to the
-    directory where you checkout the repository.
+    directory where you checkout your fork of the repository.
 
     </details>
 

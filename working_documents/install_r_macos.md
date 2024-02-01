@@ -1,37 +1,31 @@
 Installing R from Source on macOS
 ================
-2023-12-20
+2024-02-01
 
 ## Prerequisites
 
 Some details and notes are hidden by default - click the black arrowhead
 to expand or collapse these sections.
 
-### Set up R installation directory
+### Set up installation directories
 
 If you do not have an existing version of R installed on your computer,
 download the installer for the latest release of R from the [CRAN macOS
 page](https://cran.r-project.org/bin/macosx/) and install this pre-built
 (binary) version with the default settings.
 
-Open Terminal.app and follow these instructions:
+Open Terminal.app to run the shell commands in the instructions below:
 
-1.  Set `LOCAL` as a temporary environment variable to match your
-    architecture
-
-    ``` sh
-    # Intel
-    export LOCAL=/opt/R/x86_64 
-    ```
+1.  Make your account own the R framework folder (created when
+    installing R from the binary)
 
     ``` sh
-    # Apple Silicon (e.g. M1)
-    export LOCAL=/opt/R/arm64  
+    sudo chown -R $USER /Library/Frameworks/R.framework/
     ```
 
 2.  Make your account own `/opt/R` so that we can install prerequisites
-    for building from source with the helper R script described in the
-    next subsection.
+    for building from source with the `install.libs` R function
+    described in the next subsection.
 
     ``` sh
     sudo chown -R $USER /opt/R
@@ -50,14 +44,28 @@ Open Terminal.app and follow these instructions:
 
     </details>
 
-3.  Add `$LOCAL/bin` to your path
+3.  Open the profile for the Zsh shell
 
     ``` sh
-    cat << EOF >> /Users/$USER/.zprofile
-    # Add R bin directory to PATH
-    export PATH="$LOCAL/bin:\${PATH}"
-    EOF
+    open /Users/$USER/.zprofile
     ```
+
+    Add one of the following commands to the profile, selecting the one
+    that matches your architecture:
+
+    ``` sh
+    # Intel
+    export PATH="/opt/R/x86_64/bin:\${PATH}"
+    ```
+
+    ``` sh
+    # Apple Silicon (M1, M2, ...)
+    export PATH="/opt/R/arm64/bin:\${PATH}"
+    ```
+
+    This will add the `/opt/R/*/bin` directory to your `PATH` variable
+    when you restart Terminal.app, so that the prerequisites installed
+    with `install.libs` can be found.
 
     <details>
     <summary>
@@ -67,40 +75,28 @@ Open Terminal.app and follow these instructions:
 
     </summary>
 
-    The code above assumes you are using a Zsh shell (the default on
-    macOS ≥ 10.15). If you are using a bash shell, replace
-    <code>.zprofile</code> with <code>.bash_profile</code>. The type of
-    terminal in RStudio can be set in Terminal Options from the terminal
-    or in Global Options.
+    The code above assumes you are running shell commands in a Zsh shell
+    (the default for Terminal.app on macOS ≥ 10.15). If you are using a
+    bash shell, edit <code>.bash_profile</code> rather than
+    <code>.zprofile</code>. The type of terminal in RStudio can be set
+    in Terminal Options from the terminal or in Global Options.
 
     </details>
-    </details>
-
-4.  Make your account own the R framework folder (created when
-    installing R from the binary)
-
-    ``` sh
-    sudo chown -R $USER /Library/Frameworks/R.framework/
-    ```
 
 ### Install prerequisites
 
-For the following instructions, run the code within R:
+Start a new R session. For the following instructions, run the code
+within R:
 
-1.  Use the helper R script to install commonly required prerequisites
+1.  Use `install.libs` from <https://mac.R-project.org> to install
+    commonly required prerequisites
 
     ``` r
     source("https://mac.R-project.org/bin/install.R")
     install.libs("r-base-dev")
     ```
 
-2.  (Optional), install Pango for full Cairo support
-
-    ``` r
-    install.libs("pango")
-    ```
-
-3.  Check if you already have Subversion installed:
+2.  Check if you already have Subversion installed:
 
     ``` r
     system2("which", "svn")
@@ -125,7 +121,7 @@ For the following instructions, run the code within R:
 
     </details>
 
-For the remaining instructions, run the code within Terminal.app
+For the remaining instructions, code should be run within Terminal.app
 
 1.  Install GNU Fortran (gfortran) from the binary at
     <https://mac.r-project.org/tools/>. This version is prepared
@@ -173,34 +169,58 @@ For the remaining instructions, run the code within Terminal.app
     third-party tools are not part of the R Project, but are recommended
     here as they provide an easy way to switch R versions.
 
+<details>
+<summary>
+<i>Detail on selected prerequisites…</i>
+</summary>
+The following prerequisites have been installed by the above
+instructions:
+<ul>
+<li>
+jpeg, libpng, pkgconfig, tiff and zlib-system-stub from r-base-dev.
+</li>
+<li>
+Objective C compiler from xcode command line tools.
+</li>
+<li>
+Tcl/Tk and texinfo from standard installation of R binary.
+</li>
+</ul>
+The following optional prerequisites have been skipped as they are
+unlikely to be needed by R contributors
+<ul>
+<li>
+readline5. Apple’s editline is sufficient. Can install with
+`install.libs("readline5")`.
+</li>
+<li>
+Cairo/Pango. Can install both with `install.libs("pango")`.
+</li>
+<li>
+Java. See [Java subsection in R-admin macOS
+instructions](https://cran.r-project.org/doc/manuals/r-patched/R-admin.html#Java-_0028macOS_0029)
+to add Java support. You may have installed Java to use a Java-using R
+package.
+</li>
+</ul>
+</details>
+
 ## Build R
 
 ### Setting up a source code repository
 
-If you skipped the [Prerequisites](#Prerequisites) section because you
-believe you have the prerequisites already installed, you’ll need to
-define the `LOCAL` environment variable to match your architecture
+Run the following commands within Terminal.app:
 
-``` sh
-# Intel
-export LOCAL=/opt/R/x86_64 
-```
-
-``` sh
-# Apple Silicon (e.g. M1)
-export LOCAL=/opt/R/arm64  
-```
-
-Run the following commands within Terminal.app to set up a local copy of
-the Subversion source code repository:
-
-0.  Retrieve R source code into `TOP_SRCDIR`, note that we retrieve the
-    `r-devel` source code:
+0.  Check out a local copy of the R Subversion (SVN) repository into
+    `TOP_SRCDIR`:
 
     ``` sh
     export TOP_SRCDIR="$HOME/svn/R-devel"
     svn checkout https://svn.r-project.org/R/trunk/ "$TOP_SRCDIR"
     ```
+
+    This will retrieve the source code for the development version of R
+    (`r-devel`).
 
     <details>
     <summary>
@@ -231,7 +251,7 @@ the Subversion source code repository:
 
     </details>
 
-1.  Download the latest recommended packages:
+1.  Download the source code for the recommended packages:
 
     ``` sh
     $TOP_SRCDIR/tools/rsync-recommended
@@ -246,7 +266,19 @@ the Subversion source code repository:
     cd $BUILDDIR
     ```
 
-3.  Create `config.site` within the build directory to set some
+3.  Define the `LOCAL` environment variable to match your architecture
+
+    ``` sh
+    # Intel
+    export LOCAL=/opt/R/x86_64 
+    ```
+
+    ``` sh
+    # Apple Silicon (e.g. M1)
+    export LOCAL=/opt/R/arm64  
+    ```
+
+    Create `config.site` within the build directory to set some
     configuration flags as recommended by the [R-admin
     manual](https://cran.r-project.org/doc/manuals/r-devel/R-admin.html#Prerequisites).
 
@@ -301,35 +333,38 @@ the Subversion source code repository:
     revision number from the git mirror. Run the following line of code
     to replace an `svn` command in the template with a shell script that
     will infer the SVN revision number: <br> <code> sed -i.bak
-    "s\|\$(GIT) svn info\|\$TOP_SRCDIR/.github/scripts/svn-info.sh\|"
+    "s\|\\\$(GIT) svn info\|\$TOP_SRCDIR/.github/scripts/svn-info.sh\|"
     "\$TOP_SRCDIR/Makefile.in" </code>
 
     </details>
 
 4.  Configure the R installation with `--enable-R-framework` to prepare
-    for installation as an App:
+    for installation as an App and `--disable-java` to skip configuring
+    Java, which may not be installed. Use `FW_VERSION` to set the
+    version name as “R-devel”:
 
     ``` sh
-    "$TOP_SRCDIR/configure" --enable-R-framework
+    $TOP_SRCDIR/configure --enable-R-framework --disable-java FW_VERSION=R-devel
     ```
 
     <details>
     <summary>
 
-    <i>Working with multiple devel versions…</i>
+    <i>Multiple versions of R-devel…</i>
 
     </summary>
 
-    The code above assumes you only want to work with one development
-    version of R that will be identified by the Major.Minor version
-    number. To customize the version name use
-    `--enable-R-framework FW=VERSION` where e.g. `VERSION=4.4-dev`. The
-    configure options in [R-admin
-    manual](https://cran.r-project.org/doc/manuals/r-devel/R-admin.html#Prerequisites)
-    to define the location of X11 and tcltk libraries do not seem to be
-    necessary.
+    If you want to build multiple versions of R-devel, customize
+    `FW_VERSION` to give a unique name to each build. Be aware that if
+    you install R-devel from an Intel Mac binary, e.g., from
+    <url><https://mac.r-project.org/></url> or using rig, this will use
+    the default name “Major.Minor”, using the major and minor numbers
+    from the R version number (e.g. 4.4 for R 4.4.0 Under development
+    version).
 
     </details>
+
+<!-- -->
 
 5.  Build R :
 

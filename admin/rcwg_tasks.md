@@ -60,7 +60,7 @@ Note for next time should include etherpad link in Zoom invitation, meetup etc.
     - Set up to recur until clocks change (can always edit specific date)
     - Seems that it can cope with clocks changing if set local time in PST,
     but stick with doing it this way for now.
-2. Create event on Meetup [cannot automate this part without paying, e.g. https://integrately.com/integrations/meetup/zoom] or announce if not yet done.
+2. Create event on Meetup [cannot automate this part without paying, e.g. https://integrately.com/integrations/meetup/zoom] **or announce if not yet done**.
     - [Consider editing current recurring meeting to extend end date]
     - Copy past event
     - Don't require registration

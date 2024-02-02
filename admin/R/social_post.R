@@ -13,8 +13,8 @@ office_hour_post <- function(month, day, time, #UTC
                              meetup, zoom,
                              venue, templates, ask = TRUE){
     # convert AMER time from UTC to PDT/PST
-    date <- as.POSIXct(paste(ymd(glue("2000-{match(month, month.name)}-{day}")),
-                             time[2]), tz = "UTC")
+    txt <- "{year(Sys.Date())}-{match(month, month.name)}-{day}"
+    date <- as.POSIXct(paste(ymd(glue(txt)), time[2]), tz = "UTC")
     date <- with_tz(date, "US/Pacific")
     tz <- substr(capture.output(print(date)), 26, 28)
     time[2] <- format(date, "%H:%M")

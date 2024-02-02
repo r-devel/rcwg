@@ -7,10 +7,10 @@
 # 8 Aug
 # 12 Sep
 
-day <- 11
-month <- "January"
-emea <- "https://www.meetup.com/r-contributors/events/298086101/"
-amer <- "https://www.meetup.com/r-contributors/events/297947055/"
+day <- 8
+month <- "February"
+emea <- "https://www.meetup.com/r-contributors/events/298435153/"
+amer <- "https://www.meetup.com/r-contributors/events/298350211/"
 emea_zoom <- "https://us02web.zoom.us/j/82797972945?pwd=cnZmL0h1LzM1dXoxaDlmNk9BLzRldz09"
 amer_zoom <- "https://us02web.zoom.us/j/84394094425?pwd=SjJpZVBpcGgwcWxocmV3YzRtc3JKZz09"
 
@@ -20,19 +20,24 @@ source("admin/R/social_post.R")
 
 # auth_setup() # choose user token and login as RContributors on Mastodon
 
-# venues: email, twitter, mastodon, slack, R weekly
+# venues: email, slack, R weekly
 # copy and paste output to Twitter
 # - cut and re-paste meetup link to display card properly
 # use "office_hour" for main post,
 # "office_hour_reminder" for twitter/mastodon/slack reminders
 post <- office_hour_post(month, day, c("10:00", "17:30"), # UTC times
                          c(emea, amer), c(emea_zoom, amer_zoom),
-                         venue = "mastodon",
+                         venue = "rweekly",
                          templates = "admin/posts/office_hour")
 
 # Email r-contribution-wg@r-project.org -----------------------------------
 
-# Buffer posts ------------------------------------------------------------
+# Mastons and Twitter via Buffer posts ------------------------------------
+
+post <- office_hour_post(month, day, c("10:00", "17:30"), # UTC times
+                         c(emea, amer), c(emea_zoom, amer_zoom),
+                         venue = "mastodon",
+                         templates = "admin/posts/office_hour")
 
 source("admin/R/buffer_post.R")
 
@@ -61,7 +66,13 @@ buffer_createpost(browser = browser,
                   day = NULL,
                   month = NULL,
                   time = "10:00",
-                  postcontent = postcontent)
+                  postcontent = post[[1]])
+
+buffer_createpost(browser = browser,
+                  day = NULL,
+                  month = NULL,
+                  time = "17:30",
+                  postcontent = post[[2]])
 
 # LinkedIn event ----------------------------------------------------------
 

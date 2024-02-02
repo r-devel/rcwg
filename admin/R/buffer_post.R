@@ -17,6 +17,7 @@ buffer_signin <- function(browser, page, username, key = "Buffer password"){
     elem$clickElement()
 
     # team plan promotion
+    Sys.sleep(1) # pause for pop-up to load
     elem <- browser$findElement(using = 'css', "[aria-label='Close']")
     elem$clickElement()
 }

@@ -48,9 +48,9 @@ Working agenda is here: https://hackmd.io/@hturner/HyISuE97D/edit including
  - Preparation for R Project Sprint 2023
  - Updates on GSoC projects (R Development Container, Translations Dashboard)
 
-Issues: https://github.com/r-devel/rcontribution/issues
+Issues: https://github.com/r-devel/rcwg/issues
 
-Minutes of previous meetings: https://github.com/r-devel/rcontribution/tree/main/team_minutes
+Minutes of previous meetings: https://github.com/r-devel/rcwg/tree/main/team_minutes
     
 ## Setting up Office Hours
 

@@ -25,13 +25,13 @@ source("admin/R/buffer_post.R")
 # copy and paste output to Twitter
 # - cut and re-paste meetup link to display card properly
 
-month <- "January"
-day <- 19
-time <- "15:00"
+month <- "February"
+day <- 20
+time <- "19:30"
 weekday <- get_weekday(day, month, abbreviate = TRUE)
 agenda = c(
-"- Activities at useR! 2024
-- R Dev Days at useR!/posit::conf
+"- Preparation for R Dev Days
+- RCWG contributions to useR!
 - Ideas for Google Summer of Code/Season of Docs"
 )
 post <- social_post(weekday = weekday,
@@ -67,7 +67,7 @@ buffer_signin(browser = browser,
 buffer_createpost(browser = browser,
                   day = NULL,
                   month = NULL,
-                  time = "15:00",
+                  time = "19:30",
                   postcontent = post)
 
 browser$close()

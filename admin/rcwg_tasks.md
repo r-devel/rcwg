@@ -6,7 +6,7 @@
    - Based on usual pattern (n'th day of month at particular times)
    - Check dates and adjust if necessary
 2.  Prepare agenda (check minutes were saved from last meeting: https://github.com/r-devel/rcwg/tree/main/team_minutes)
- - https://hackmd.io/@hturner/HyISuE97D/edit.
+     - https://hackmd.io/@hturner/HyISuE97D/edit.
 3.  Create Google event +Zoom (use Method 2)
     - Method 1: Create event on Google calendar, make Zoom event. Makes a mess of Zoom instructions in description on Teamup, but just about usable.
     - Method 2: Create event on Zoom, add to Google calendar. Need to make sure on Forwards account

@@ -10,8 +10,9 @@ source("admin/R/update_readme_dates.R")
 # (20 Aug)
 # 20 Sep
 
-update_readme_dates(1, "January", 3, "Friday", "15:00", 2024)
-update_readme_dates(2, "February", 3, "Tuesday", "19:30", 2024)
+update_readme_dates(1, "February", 3, "Tuesday", "19:30", 2024)
+update_readme_dates(2, "March", 3, "Friday", "15:00", 2024)
+
 
 # Social media posts ------------------------------------------------------
 

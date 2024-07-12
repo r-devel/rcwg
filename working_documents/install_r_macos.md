@@ -55,12 +55,12 @@ Open Terminal.app to run the shell commands in the instructions below:
 
     ``` sh
     # Intel
-    export PATH="/opt/R/x86_64/bin:\${PATH}"
+    export PATH="/opt/R/x86_64/bin:${PATH}"
     ```
 
     ``` sh
     # Apple Silicon (M1, M2, ...)
-    export PATH="/opt/R/arm64/bin:\${PATH}"
+    export PATH="/opt/R/arm64/bin:${PATH}"
     ```
 
     This will add the `/opt/R/*/bin` directory to your `PATH` variable

@@ -2,16 +2,19 @@
 
 source("admin/R/update_readme_dates.R")
 
-# 15 Mar
-# 16 Apr: clashes with EPSRC Research Fellows Day, maybe move to Wed 17 Apr?
-# 17 May
-# 11 Jun
-# 19 Jul
-# (20 Aug)
+# 20 Aug
 # 20 Sep
+# 15 Oct
+# 15 Nov
+# 17 Dec
 
-update_readme_dates(1, "February", 3, "Tuesday", "19:30", 2024)
-update_readme_dates(2, "March", 3, "Friday", "15:00", 2024)
+# N.B. Set up meetings till Dec 2024 but Friday ones (now July onwards)
+# not yet "announced" by inviting mailing list to this series!!!
+
+# times here are UK times!
+# !! Think I have inconsistency here: Slack message and Twitter/Mastodon were wrong last time
+update_readme_dates(1, "July", 3, "Friday", "15:00", 2024)
+update_readme_dates(2, "August", 3, "Tuesday", "19:30", 2024)
 
 
 # Social media posts ------------------------------------------------------
@@ -21,18 +24,16 @@ source("admin/R/buffer_post.R")
 
 # auth_setup() # choose user token and login as RContributors on Mastodon
 
-# venues: mastodon, slack and twitter (currently all same content)
-# copy and paste output to Twitter
-# - cut and re-paste meetup link to display card properly
-
-month <- "February"
-day <- 20
-time <- "19:30"
+# slack announcement
+month <- "June"
+day <- 18
+time <- "18:30" # UTC !!
 weekday <- get_weekday(day, month, abbreviate = TRUE)
 agenda = c(
-"- Preparation for R Dev Days
+"- Update on R Dev Day @ Imperial
+- Preparation for future R Dev Days
 - RCWG contributions to useR!
-- Ideas for Google Summer of Code/Season of Docs"
+- Update on Google Summer of Code/other projects"
 )
 post <- social_post(weekday = weekday,
                     day = day,
@@ -67,7 +68,7 @@ buffer_signin(browser = browser,
 buffer_createpost(browser = browser,
                   day = NULL,
                   month = NULL,
-                  time = "19:30",
+                  time = "18:30", #UTC
                   postcontent = post)
 
 browser$close()
@@ -75,8 +76,3 @@ browser$close()
 # stop server
 pid <- system2("lsof", "-t -i :5556", stdout = TRUE)
 system(paste("kill -1", pid))
-
-
-# Gmail + Zoom ------------------------------------------------------
-
-page <- "https://calendar.google.com"

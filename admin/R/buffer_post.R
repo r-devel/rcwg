@@ -28,14 +28,14 @@ buffer_createpost <- function(
         postcontent){
 
     if (is.null(day)) day <- format(Sys.Date(), "%d")
-    if (is.null(month)) month <- format(Sys.Date(), "%m")
+    if (is.null(month)) month <- format(Sys.Date(), "%B")
     if (is.null(time)) time <- format(Sys.time() + 60*60, "%H:00")
 
     #browser$navigate("https://publish.buffer.com/calendar/week")
     #Sys.sleep(2) # pause for page to load
 
     elem <- browser$findElement(using = 'xpath',
-                                "//div[text()='Create Post']")
+                                "//button[text()=' New Post']")
     elem$clickElement()
     Sys.sleep(2) # pause for dialog to load
 
@@ -63,24 +63,22 @@ buffer_createpost <- function(
                                 "//button[text()='Customize for each network']")
     elem$clickElement()
 
-    # fragile - clicking on drop down arrow
+    # fragile (which number element to click?) - clicking on drop down arrow
     elem <- browser$findElements(using = 'xpath',
                                 "//div[@role='button']")
-    elem[[3]]$clickElement()
+    elem[[length(elem)]]$clickElement()
 
     elem <- browser$findElement(using = "id", "SCHEDULE_POST")
     elem$clickElement()
 
     # select dates and times
-    ## TODO: work on add month
-    #addmonth <- match(startmonth, month.name) -
-    #    match(format(Sys.Date(), "%B"), month.name)
-    addmonth <- 0
+    addmonth <- match(month, month.name) -
+        match(format(Sys.Date(), "%B"), month.name)
     selectDate(day, addmonth)
     selectTime(time)
 
     elem <- browser$findElement(using = 'xpath',
-                                "//div[text()='Schedule']")
+                                "//button[text()='Schedule']")
     elem$clickElement()
 }
 
@@ -97,7 +95,11 @@ sendChar <- function(elem, text){
 }
 
 selectDate <- function(daynum = 1, addmonth = 0){
-    # TODO: move to correct month
+    # get left and right arrow buttons
+    xpath <- "//div[@class='DayPicker-wrapper']//div//div//button[@type='button']"
+    elem <- browser$findElements(using = 'xpath', xpath)
+    # click right arrow button add month times
+    for (i in seq_len(addmonth)) elem[[2]]$clickElement()
 
     # pick day
     xpath <- paste0("//div[text()='", as.numeric(daynum), "']")

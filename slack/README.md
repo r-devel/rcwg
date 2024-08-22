@@ -3,7 +3,7 @@
 This repository contains an export of public messages from the R Contributors Slack 
 since it was set up in November 5, 2020.
 
-The export will be updated every 90 days (this is a manual process, so the 
+The export will be updated every 12 weeks (this is a manual process, so the 
 reality may differ from this intention!).
 
 Aside from this README, files are in JSON format, organized by Slack channel 

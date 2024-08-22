@@ -1,0 +1,451 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18745] format(&lt;data.frame&gt;) does not keep `_NA_character` column names*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18745>\n\n--- Comment #5 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nYou are right, Sebastian.  The first change did revert too many names to\noriginal;  I've added r86806, notably with more regression checks, and only\nmodifying original `NA`s  -- as indeed, I would not see a way to have the \n`do.call(data.frame, *)` do this, as `data.frame()` indeed does already only\nget the \"NA\" `names()` in its `...`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1719041899.765669",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "dYO",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18745] format(<data.frame>) does not keep ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "_NA_character",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " column names",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18745"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nYou are right, Sebastian.  The first change did revert too many names to\noriginal;  I've added r86806, notably with more regression checks, and only\nmodifying original "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "s  -- as indeed, I would not see a way to have the \n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "do.call(data.frame, *)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " do this, as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "data.frame()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " indeed does already only\nget the \"NA\" "
+                            },
+                            {
+                                "type": "text",
+                                "text": "names()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in its "
+                            },
+                            {
+                                "type": "text",
+                                "text": "...",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18702] print.data.frame does not respect na.print for missing column names*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18702>\n\n--- Comment #5 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nBy fixing bug 18745, indeed, we now fixed the original bug report here:\nMichael's initial example now do work as he suggested.\n\nElin (and other people outside of bugzilla) had opened a Part 2 of this PR: \n\nFor data.frames `na.print` does work differently for character (and factor) vs\nnumeric, logical, .., etc,  inspite of the fact that otherwise, `na.print` does\nwork the same for all atomic vectors.\n\n```\n(chNms &lt;- c(\"num\", \"ch\", \"NA\", NA)) \n## [1] \"num\" \"ch\"  \"NA\"  NA\n\nd1 &lt;- setNames(data.frame(c(1,NA), c(\"a\",NA), c(\"NA\", NA), c(NA, FALSE)),\n               chNms)\nd1 # does show the  NA  and &lt;NA&gt;  in *column* names differently (after fixing\nbug 18745 ! )\n##   num   ch   NA  &lt;NA&gt;          and also in \"char\" columns, but not the\nnumeric &amp; logical column\n## 1   1    a   NA    NA\n## 2  NA &lt;NA&gt; &lt;NA&gt; FALSE\n\nprint(d1, na.print = \"..\")\n##   num ch NA    ..\n## 1   1  a NA    NA\n## 2  NA .. .. FALSE\n```\n\nso  `na.print` really only changes those which by default are shown as `&lt;NA&gt;`.\n\nThe underlying reason of the current behavior is that  `format(x,  na.encode =\nFALSE)`  for an atomic `x`, \nonly keeps  `NA` for `character` but not for numeric, complex, or logical ...\nall well documented in  `?format.default`.\n\nNow we *could* address the issue by extending `format.default()` functionality\nadding a new optional argument say,\n` keepallNA = FALSE ` (i.e. default `FALSE`),  which when set to TRUE  would\nkeep all `NA`  in the sense as formatting them to `NA_character_`. ... or maybe\nnicer and slightly less confusing, newly allow  `na.encode` to be one of \n{`FALSE`, `TRUE`, `\"all\"`}\nwith the new `na.encode = \"all\"` being the same as the alternative  `keepallNA\n= TRUE`.\n\nSuch a change should be implemented primarily in the C code which implements\nthe `.Internal(format(....))` call from R.\nIt would be useful in some cases to have this,  even though I'm not sure if the\nnew behavior should become default or only optional for  `print.data.frame()`.\n\n\n.. and finally (to comment 4): yes, part '1.' of my comment 3 was misleading,\nbecause the example did *not* construct a data frame with `NA` (col)names..",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1719052390.242799",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "69M3",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18702] print.data.frame does not respect na.print for missing column names",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18702"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nBy fixing bug 18745, indeed, we now fixed the original bug report here:\nMichael's initial example now do work as he suggested.\n\nElin (and other people outside of bugzilla) had opened a Part 2 of this PR: \n\nFor data.frames "
+                            },
+                            {
+                                "type": "text",
+                                "text": "na.print",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does work differently for character (and factor) vs\nnumeric, logical, .., etc,  inspite of the fact that otherwise, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "na.print",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does\nwork the same for all atomic vectors.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "(chNms <- c(\"num\", \"ch\", \"NA\", NA)) \n## [1] \"num\" \"ch\"  \"NA\"  NA\n\nd1 <- setNames(data.frame(c(1,NA), c(\"a\",NA), c(\"NA\", NA), c(NA, FALSE)),\n               chNms)\nd1 # does show the  NA  and <NA>  in *column* names differently (after fixing\nbug 18745 ! )\n##   num   ch   NA  <NA>          and also in \"char\" columns, but not the\nnumeric & logical column\n## 1   1    a   NA    NA\n## 2  NA <NA> <NA> FALSE\n\nprint(d1, na.print = \"..\")\n##   num ch NA    ..\n## 1   1  a NA    NA\n## 2  NA .. .. FALSE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nso  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "na.print",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " really only changes those which by default are shown as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "<NA>",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nThe underlying reason of the current behavior is that  `format(x,  na.encode =\nFALSE)`  for an atomic "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", \nonly keeps  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "character",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " but not for numeric, complex, or logical ...\nall well documented in  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "?format.default",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nNow we "
+                            },
+                            {
+                                "type": "text",
+                                "text": "could",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " address the issue by extending "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format.default()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " functionality\nadding a new optional argument say,\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": " keepallNA = FALSE ",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (i.e. default "
+                            },
+                            {
+                                "type": "text",
+                                "text": "FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "),  which when set to TRUE  would\nkeep all "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  in the sense as formatting them to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA_character_",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". ... or maybe\nnicer and slightly less confusing, newly allow  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "na.encode",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to be one of \n{"
+                            },
+                            {
+                                "type": "text",
+                                "text": "FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"all\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "}\nwith the new "
+                            },
+                            {
+                                "type": "text",
+                                "text": "na.encode = \"all\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " being the same as the alternative  `keepallNA\n= TRUE`.\n\nSuch a change should be implemented primarily in the C code which implements\nthe "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".Internal(format(....))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " call from R.\nIt would be useful in some cases to have this,  even though I'm not sure if the\nnew behavior should become default or only optional for  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "print.data.frame()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n\n\n.. and finally (to comment 4): yes, part '1.' of my comment 3 was misleading,\nbecause the example did "
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " construct a data frame with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (col)names.."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

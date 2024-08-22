@@ -1,0 +1,743 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18700] Error passing improvements in 'parallel'*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18700>\n\nIvan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3328|0                           |1\n        is obsolete|                            |\n\n--- Comment #1 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nCreated attachment 3341\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3341&amp;action=edit>\nAdjusted patch\n\nApologies for not correctly \"draining\" the cluster in case when the number of\nremaining jobs was less than `min(n, p) - 1`. This has now been fixed.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1713876429.591509",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "c0ov6",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18700] Error passing improvements in 'parallel'",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18700"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIvan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3328|0                           |1\n        is obsolete|                            |\n\n--- Comment #1 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3341\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3341&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3341&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nAdjusted patch\n\nApologies for not correctly \"draining\" the cluster in case when the number of\nremaining jobs was less than "
+                            },
+                            {
+                                "type": "text",
+                                "text": "min(n, p) - 1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". This has now been fixed."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16806] nlme getVarCov() fails for corSpatial fits for individuals with a single observation only*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16806>\n\nSebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|ASSIGNED                    |CLOSED\n\n--- Comment #6 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\nRevisited now, 8 years later ... (with thanks to Elin for the reminder)\n\nAs described in the original report, the `getVarCov()` methods did not\nanticipate that `corMatrix.corSpatial()` excludes 1-obs groups (by default).\nThis comes from `getCovariate.corSpatial()` returning only (and since \"forever\"\n= version 3.1-1)\n```\ngrps[lengths(grps) &gt; 0]# no 1-obs groups\n```\ni.e., excluding groups with 0-length `dist()` (which I have now noted on the\nhelp page). Note that the bug would be fixed by commenting just that line of\ncode, because `corMatrix.corSpatial()` can actually deal with these 0-length\ndistances:\n```\ncorMatrix(corExp(1), covariate = numeric(0))\n##      [,1]\n## [1,]    1\n```\nHowever, this would change the stored \"modelStruct\" in fitted model objects so\nwould not be backwards-compatible. Also, for example, `Variogram.lme()` expects\nthat 1-obs groups are already dropped in the \"corSpatial\" case.\n\nSo the right way to fix this bug is to teach the `getVarCov()` methods how to\nhandle this special case: use `diag(1)` as the correlation matrix. I have\ncommitted the corresponding changes and tests to the nlme trunk (version\n3.1-165).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1713887183.555699",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "nT30d",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16806] nlme getVarCov() fails for corSpatial fits for individuals with a single observation only",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16806"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|ASSIGNED                    |CLOSED\n\n--- Comment #6 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nRevisited now, 8 years later ... (with thanks to Elin for the reminder)\n\nAs described in the original report, the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getVarCov()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " methods did not\nanticipate that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "corMatrix.corSpatial()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " excludes 1-obs groups (by default).\nThis comes from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getCovariate.corSpatial()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " returning only (and since \"forever\"\n= version 3.1-1)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "grps[lengths(grps) > 0]# no 1-obs groups\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "i.e., excluding groups with 0-length "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dist()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (which I have now noted on the\nhelp page). Note that the bug would be fixed by commenting just that line of\ncode, because "
+                            },
+                            {
+                                "type": "text",
+                                "text": "corMatrix.corSpatial()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " can actually deal with these 0-length\ndistances:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "corMatrix(corExp(1), covariate = numeric(0))\n##      [,1]\n## [1,]    1\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "However, this would change the stored \"modelStruct\" in fitted model objects so\nwould not be backwards-compatible. Also, for example, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Variogram.lme()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " expects\nthat 1-obs groups are already dropped in the \"corSpatial\" case.\n\nSo the right way to fix this bug is to teach the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getVarCov()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " methods how to\nhandle this special case: use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "diag(1)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as the correlation matrix. I have\ncommitted the corresponding changes and tests to the nlme trunk (version\n3.1-165)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18505] varIdent  depends on order of grouping variable in data*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18505>\n\nSebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |seb.meyer@fau.de\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #2 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\nI agree this behaviour is unfortunate. The bug is at least that the reference\nlevel is not clearly documented. `help(varIdent)` says:\n\n&gt; By default, if the elements in 'value' are unnamed,\n&gt; the first group level is taken as the reference level.\n\nI'd interpret this as referring to the first element of levels(), which is not\nwhat happens. Furthermore, that sentence might suggest the reference level\ncould be chosen by a named initial value; however, this has no effect:\n```\nInitialize(varIdent(c(\"&lt; 5\"  = 0.5), form = ~1|ApgarInd), Phenobarb)\nInitialize(varIdent(c(\"&gt;= 5\" = 0.5), form = ~1|ApgarInd), Phenobarb)\n```\nBoth give\n```\nVariance function structure of class varIdent representing\n&gt;= 5  &lt; 5 \n 1.0  0.5 \n```\nwith `Phenobarb$ApgarInd[1]` as the reference level, whereas\n`levels(Phenobarb$ApgarInd)[1]` is \"&lt;5\".\n\nIt does work though when there are more than two levels:\n```\nInitialize(varIdent(2, form = ~1|Apgar), Phenobarb)\n## Variance function structure of class varIdent representing\n##  7  9  6  5  8  1  3  2  4 10 \n##  1  2  2  2  2  2  2  2  2  2 \nInitialize(varIdent(setNames(rep(2, 9), 1:9), form = ~1|Apgar), Phenobarb)\n## Variance function structure of class varIdent representing\n## 10  1  2  3  4  5  6  7  8  9 \n##  1  2  2  2  2  2  2  2  2  2 \n```\n\n\n(In reply to Ben Bolker from comment #1)\n&gt; Created attachment 3169\n&gt; patch to fix varIdent ordering problem\n&gt; \n&gt; this seems to be easy to fix\n\nQuick comments: `getGroups()` with level=&lt;maxdepth&gt; seems to *always* return a\nfactor. `uStrat` needs to exclude `levels()` that don't occur in the data; here\nI'd probably use `uStrat &lt;- as.character(sort(unique(strat)))`.\n\n&gt; and probably (?) won't break anything ... ?\n\nUnfortunately, fixing the default reference level would affect\/reparameterize\nfits where the first group in the data is not also the first level of the\nfactor. If there is still enough motivation for a change (not sure, as there is\nnothing wrong with the current results), I think there needs to be a way to\nselect the previous reference level.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1713904428.332079",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "7JKM4",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18505] varIdent  depends on order of grouping variable in data",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18505"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |seb.meyer@fau.de\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #2 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI agree this behaviour is unfortunate. The bug is at least that the reference\nlevel is not clearly documented. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "help(varIdent)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " says:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "By default, if the elements in 'value' are unnamed,\nthe first group level is taken as the reference level."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI'd interpret this as referring to the first element of levels(), which is not\nwhat happens. Furthermore, that sentence might suggest the reference level\ncould be chosen by a named initial value; however, this has no effect:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Initialize(varIdent(c(\"< 5\"  = 0.5), form = ~1|ApgarInd), Phenobarb)\nInitialize(varIdent(c(\">= 5\" = 0.5), form = ~1|ApgarInd), Phenobarb)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Both give"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Variance function structure of class varIdent representing\n>= 5  < 5 \n 1.0  0.5 \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Phenobarb$ApgarInd[1]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as the reference level, whereas\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "levels(Phenobarb$ApgarInd)[1]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is \"<5\".\n\nIt does work though when there are more than two levels:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Initialize(varIdent(2, form = ~1|Apgar), Phenobarb)\n## Variance function structure of class varIdent representing\n##  7  9  6  5  8  1  3  2  4 10 \n##  1  2  2  2  2  2  2  2  2  2 \nInitialize(varIdent(setNames(rep(2, 9), 1:9), form = ~1|Apgar), Phenobarb)\n## Variance function structure of class varIdent representing\n## 10  1  2  3  4  5  6  7  8  9 \n##  1  2  2  2  2  2  2  2  2  2 \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n\n\n(In reply to Ben Bolker from comment #1)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Created attachment 3169\npatch to fix varIdent ordering problem\n\nthis seems to be easy to fix"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nQuick comments: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getGroups()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " with level=<maxdepth> seems to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "always",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " return a\nfactor. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "uStrat",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " needs to exclude "
+                            },
+                            {
+                                "type": "text",
+                                "text": "levels()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " that don't occur in the data; here\nI'd probably use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "uStrat <- as.character(sort(unique(strat)))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "and probably (?) won't break anything ... ?"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nUnfortunately, fixing the default reference level would affect\/reparameterize\nfits where the first group in the data is not also the first level of the\nfactor. If there is still enough motivation for a change (not sure, as there is\nnothing wrong with the current results), I think there needs to be a way to\nselect the previous reference level."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18708] New: Custom class partialMatchWarning for partial matching*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18708>\n\n            Bug ID: 18708\n           Summary: Custom class partialMatchWarning for partial matching\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>\n\nCreated attachment 3342\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3342&amp;action=edit>\nCustom warning signal handling for partialMatchWarning\n\nThis is towards the ongoing discussion on r-devel:\n\n<https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2024-April\/083344.html>\n\nIt will be very helpful in pursuing fixes for partial matching issues if we can\nselectively convert partial match issues into errors, while letting other\nwarnings signal as usual (i.e., `options(warn=2)` is not a good idea).\n\nTo that end, I had a go at signalling `partialMatchWarning` conditions for\nthese issues.\n\nThe attached patch has the call sites for `partialMatchAttr` and\n`partialMatchArgs` covered &amp; manually tested.\n\nThe call surface for `partialMatchDollar` is a bit more complicated, so I\nwanted to pause here for directional approval before continuing -- does this\ncode look roughly correct, and does R core agree this is the right way to go?\n\nAFAICT there's no existing work for signalling custom warning classes from C,\nI've bootstrapped off the custom error signalling code I found from Luke in\nsrc\/main\/errors.c -- feedback welcome.\n\nWith this patch, we can get the desired behavior:\n\n```\noptions(warnPartialMatchArgs=TRUE, warnPartialMatchAttr=TRUE)\nglobalCallingHandlers(partialMatchWarning = stop)\nprint(pi, d=1)\n# Error in print.default(pi, d = 1) : \n#   partial argument match of 'd' to 'digits'\nattr(structure(1, ab=1), 'a')\n# Error in attr(structure(1, ab = 1), \"a\") : partial match of 'a' to 'ab'\n\n# but plain warnings otherwise, of course\nwarning('not error')\n# Warning message:\n# not error \n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1713922812.051979",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "y5xu",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18708] New: Custom class partialMatchWarning for partial matching",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18708"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18708\n           Summary: Custom class partialMatchWarning for partial matching\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3342\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3342&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3342&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCustom warning signal handling for partialMatchWarning\n\nThis is towards the ongoing discussion on r-devel:\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2024-April\/083344.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIt will be very helpful in pursuing fixes for partial matching issues if we can\nselectively convert partial match issues into errors, while letting other\nwarnings signal as usual (i.e., "
+                            },
+                            {
+                                "type": "text",
+                                "text": "options(warn=2)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is not a good idea).\n\nTo that end, I had a go at signalling "
+                            },
+                            {
+                                "type": "text",
+                                "text": "partialMatchWarning",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " conditions for\nthese issues.\n\nThe attached patch has the call sites for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "partialMatchAttr",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "partialMatchArgs",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " covered & manually tested.\n\nThe call surface for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "partialMatchDollar",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is a bit more complicated, so I\nwanted to pause here for directional approval before continuing -- does this\ncode look roughly correct, and does R core agree this is the right way to go?\n\nAFAICT there's no existing work for signalling custom warning classes from C,\nI've bootstrapped off the custom error signalling code I found from Luke in\nsrc\/main\/errors.c -- feedback welcome.\n\nWith this patch, we can get the desired behavior:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "options(warnPartialMatchArgs=TRUE, warnPartialMatchAttr=TRUE)\nglobalCallingHandlers(partialMatchWarning = stop)\nprint(pi, d=1)\n# Error in print.default(pi, d = 1) : \n#   partial argument match of 'd' to 'digits'\nattr(structure(1, ab=1), 'a')\n# Error in attr(structure(1, ab = 1), \"a\") : partial match of 'a' to 'ab'\n\n# but plain warnings otherwise, of course\nwarning('not error')\n# Warning message:\n# not error \n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18708] Custom class partialMatchWarning for partial matching*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18708>\n\nMichael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3342|0                           |1\n        is obsolete|                            |\n\n--- Comment #1 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nCreated attachment 3343\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3343&amp;action=edit>\nCustom warning signal handling for partialMatchWarning\n\n(reverted some irrelevant diff in src\/include\/Defn.h, otherwise the patch is\nthe same as in OP)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1713922952.383939",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "o5L5",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18708] Custom class partialMatchWarning for partial matching",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18708"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMichael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3342|0                           |1\n        is obsolete|                            |\n\n--- Comment #1 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3343\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3343&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3343&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCustom warning signal handling for partialMatchWarning\n\n(reverted some irrelevant diff in src\/include\/Defn.h, otherwise the patch is\nthe same as in OP)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

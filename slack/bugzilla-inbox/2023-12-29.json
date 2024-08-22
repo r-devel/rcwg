@@ -1,0 +1,213 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18642] dgeom accuracy*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18642>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n             Status|UNCONFIRMED                 |ASSIGNED\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #2 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nThank you, Morten. \nIndeed, I've conviced myself only 2-3 years ago going via logarithmic scale\nnecessarily loses accuracy whenever the (de-log'ed) result is orders of\nmagnitudue larger or smaller than 1.  This fact gives room for improvement in\nthe order of about 3 digits (~ 10 bits) in all these cases (and more!) cases.\n\nBack to `dgeom()`:\nAgain, we don't need closed source software, as mathematically,\n`dgeom(x, prob)` = `dnbinom(x, size=1, prob)`\nand as the [Rmpfr](<https:\/\/cran.R-project.org\/package=Rmpfr>) package has an\n\"mpfr-ized\" `dnbinom()` version, and we can compute `dgeom()` values arbitrary\naccurately using R, specifically `Rmpfr::dnbinom()`\n(Note I do recommend to attach `Rmpfr` and not just load it: It has been\nwritten to call the \"base\" function whenever all the arguments are not\nmpfr-numbers and hence truly generalizes these base functions to the case of\narbitrary accuracy args.) \n\n\nIndeed my R code below shows that  \"the generalized `dgeom()`\", i.e.,\n`dnbinom()` suffers from a similar deficiency, actually even a bit worse\ntypically.\n\nAlso your `x=201` was not at all the worst case: For x=183 on my Linux\nplatforms,\nthe worst case for prob=31\/32  was  x=183:\n\n```\n## Consider\nprint(dgeom(201, 31\/32), digits=17) # which yields\n## R:           2.8253097825781102e-303\n## Mathematica: 2.8253097825781040281e-303\n## Rmpfr:...    2.8253097825781040281926539e-303\nRmpfr::roundMpfr(Rmpfr::dnbinom(201, size=1, mpfr(31,256)\/32), 80)\n\n##  ==&gt; more systematically:\n## MM:\nx &lt;- 0:215\npr &lt;- 31\/32\nstr(p1.32 &lt;- dgeom(x, pr))\nstr(p1nb.32 &lt;- dnbinom(x, size=1, pr))\nok &lt;- p1.32 &gt; 0 # &lt;==&gt; no underfloew  {rel.Err. of 0  wrt to \"true\" is\nnon-sense}\nx &lt;- x[ok]\np1.32   &lt;- p1.32  [ok]\np1nb.32 &lt;- p1nb.32[ok]\nstopifnot(identical(x, 0:214)\nplot(x, p1.32, type=\"l\", col=2, log=\"y\")# of course straight line on log-scale\n\nrequire(Rmpfr) # contains dnbinom()  which generalizes dgeom():\n## &gt;&gt; dgeom(x, prob=p) == dnbinom(x, size=1, prob=p)  &lt;&lt;&lt;&lt;\n##    -----               -------    ~~~~~~\nstr(p1.32M &lt;- dnbinom(x, size=1, prob=mpfr(31, 256)\/32)) # 256 bit is much more\nthan needed -- proof:\np1.32M128  &lt;- dnbinom(x, size=1, prob=mpfr(31, 128)\/32)\nrelE128 &lt;- asNumeric(p1.32M128\/p1.32M - 1)\nhead(sort(abs(relE128), decreasing = TRUE)) # 4.853654e-38 4.246947e-38 (4 x)\n3.943e-38 ==&gt; 37+ digits accuracy already\nstopifnot(abs(relE128) &lt; 5e-38) # NB: 2^-128 = 2.94e-39\nplot(x, relE128, type=\"o\", col=2)\n## relevent rel.Err of R's dgeom() &amp; R's \"equivalent\" dnbinom():\nsummary(relE   &lt;- asNumeric((p1.32  \/p1.32M) - 1))\nsummary(relEnb &lt;- asNumeric((p1nb.32\/p1.32M) - 1))\nplot(x, relE, type=\"o\", col=2); abline(h=0, lty=2, col=\"gray\")# last is huge\n==&gt; use 'subset=.'\n\nplot (relE   ~ x, subset=relE &lt; 1\/40, type=\"o\", col=2, ylim=c(-1,1)*1.25e-13);\nabline(h=0, lty=2, col=\"gray\")\nlines(relEnb ~ x, subset=relE &lt; 1\/40, type=\"o\", col=3) # ok, dnbinom()\nlegend(\"topleft\", c(\"rel.err. dgeom   (x, pr=31\/32)\",\n                    \"rel.err. dnbinom(x, pr=31\/32, size=1)\"), col=2:3, pch=1,\nlty=1)\nlegend(\"top\", paste(R.version.string,\"\\n\", paste(sessionInfo()$platform,\nosVersion, sep=\": \")), bty=\"n\")\n## very interesting pattern: arithmetic sub-sequences have straight-line\nsegments raising\n##                                               (or other falling straight\nline segment) errors !!!\n## last few are exactly zero !! (Linux F 38; R 4.3.2 ptch)\n\n## zoom in :\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1703889244.947989",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "=IE",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18642] dgeom accuracy",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18642"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n             Status|UNCONFIRMED                 |ASSIGNED\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #2 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you, Morten. \nIndeed, I've conviced myself only 2-3 years ago going via logarithmic scale\nnecessarily loses accuracy whenever the (de-log'ed) result is orders of\nmagnitudue larger or smaller than 1.  This fact gives room for improvement in\nthe order of about 3 digits (~ 10 bits) in all these cases (and more!) cases.\n\nBack to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dgeom()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\nAgain, we don't need closed source software, as mathematically,\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "dgeom(x, prob)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " = "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dnbinom(x, size=1, prob)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nand as the [Rmpfr]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/cran.R-project.org\/package=Rmpfr"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") package has an\n\"mpfr-ized\" "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dnbinom()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " version, and we can compute "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dgeom()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " values arbitrary\naccurately using R, specifically "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rmpfr::dnbinom()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n(Note I do recommend to attach "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rmpfr",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and not just load it: It has been\nwritten to call the \"base\" function whenever all the arguments are not\nmpfr-numbers and hence truly generalizes these base functions to the case of\narbitrary accuracy args.) \n\n\n\nIndeed my R code below shows that  \"the generalized "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dgeom()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\", i.e.,\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "dnbinom()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " suffers from a similar deficiency, actually even a bit worse\ntypically.\n\nAlso your "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x=201",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " was not at all the worst case: For x=183 on my Linux\nplatforms,\nthe worst case for prob=31\/32  was  x=183:\n\n```\n## Consider\nprint(dgeom(201, 31\/32), digits=17) # which yields\n## R:           2.8253097825781102e-303\n## Mathematica: 2.8253097825781040281e-303\n## Rmpfr:...    2.8253097825781040281926539e-303\nRmpfr::roundMpfr(Rmpfr::dnbinom(201, size=1, mpfr(31,256)\/32), 80)\n\n##  ==> more systematically:\n## MM:\nx <- 0:215\npr <- 31\/32\nstr(p1.32 <- dgeom(x, pr))\nstr(p1nb.32 <- dnbinom(x, size=1, pr))\nok <- p1.32 > 0 # <==> no underfloew  {rel.Err. of 0  wrt to \"true\" is\nnon-sense}\nx <- x[ok]\np1.32   <- p1.32  [ok]\np1nb.32 <- p1nb.32[ok]\nstopifnot(identical(x, 0:214)\nplot(x, p1.32, type=\"l\", col=2, log=\"y\")# of course straight line on log-scale\n\nrequire(Rmpfr) # contains dnbinom()  which generalizes dgeom():\n## >> dgeom(x, prob=p) == dnbinom(x, size=1, prob=p)  <<<<\n##    -----               -------    ~~~~~~\nstr(p1.32M <- dnbinom(x, size=1, prob=mpfr(31, 256)\/32)) # 256 bit is much more\nthan needed -- proof:\np1.32M128  <- dnbinom(x, size=1, prob=mpfr(31, 128)\/32)\nrelE128 <- asNumeric(p1.32M128\/p1.32M - 1)\nhead(sort(abs(relE128), decreasing = TRUE)) # 4.853654e-38 4.246947e-38 (4 x)\n3.943e-38 ==> 37+ digits accuracy already\nstopifnot(abs(relE128) < 5e-38) # NB: 2^-128 = 2.94e-39\nplot(x, relE128, type=\"o\", col=2)\n## relevent rel.Err of R's dgeom() & R's \"equivalent\" dnbinom():\nsummary(relE   <- asNumeric((p1.32  \/p1.32M) - 1))\nsummary(relEnb <- asNumeric((p1nb.32\/p1.32M) - 1))\nplot(x, relE, type=\"o\", col=2); abline(h=0, lty=2, col=\"gray\")# last is huge\n==> use 'subset=.'\n\nplot (relE   ~ x, subset=relE < 1\/40, type=\"o\", col=2, ylim=c(-1,1)*1.25e-13);\nabline(h=0, lty=2, col=\"gray\")\nlines(relEnb ~ x, subset=relE < 1\/40, type=\"o\", col=3) # ok, dnbinom()\nlegend(\"topleft\", c(\"rel.err. dgeom   (x, pr=31\/32)\",\n                    \"rel.err. dnbinom(x, pr=31\/32, size=1)\"), col=2:3, pch=1,\nlty=1)\nlegend(\"top\", paste(R.version.string,\"\\n\", paste(sessionInfo()$platform,\nosVersion, sep=\": \")), bty=\"n\")\n## very interesting pattern: arithmetic sub-sequences have straight-line\nsegments raising\n##                                               (or other falling straight\nline segment) errors !!!\n## last few are exactly zero !! (Linux F 38; R 4.3.2 ptch)\n\n## zoom in :"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "plot(relE ~ x, subset=relE &lt; 1\/40 &amp; x &gt;= 150, type=\"o\", col=2,);           \nabline(h=0, lty=2, col=\"gray\")\ntext(relE ~ x, subset=relE &lt; 1\/40 &amp; x &gt;= 150, labels = x, adj=-c(1,1)\/4,\ncex=3\/4, col=adjustcolor(1, 1\/3))\n\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1703889244.997119",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "vc=nQ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "plot(relE ~ x, subset=relE < 1\/40 & x >= 150, type=\"o\", col=2,);           \nabline(h=0, lty=2, col=\"gray\")\ntext(relE ~ x, subset=relE < 1\/40 & x >= 150, labels = x, adj=-c(1,1)\/4,\ncex=3\/4, col=adjustcolor(1, 1\/3))\n\n```"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

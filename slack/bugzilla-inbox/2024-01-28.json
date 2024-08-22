@@ -1,0 +1,236 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18661] New: DDVAL symbols do not throw \"argument is missing, with no default\" error*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18661>\n\n            Bug ID: 18661\n           Summary: DDVAL symbols do not throw \"argument is missing, with\n                    no default\" error\n           Product: R\n           Version: R 4.3.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Language\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:akwsimmo@gmail.com|akwsimmo@gmail.com>\n\nHello,\n\n\nI'd seen something weird recently while working with `..1` where no error is\nthrown that it is missing:\n\n```\nfun &lt;- function(...) ..1\nfun(,)\n```\n\nI would expect that this would throw an error `argument is missing, with no\ndefault` but it does not. This seems contradictory to `...elt(1)` which would\nthrow that error in a similar scenario:\n\n```\nfun &lt;- function(...) ...elt(1)\nfun(,)\n```\n\nThis issue seems to be arise from C function `eval` which claims, around line\n1165, that if ..d is missing, then ddfindVar will signal, so no need to do so\nin `eval`. From what I can tell, ddfindVar was never designed to throw an\nargument is missing error, and it should probably stay that way since `findVar`\nand `findVarInFrame` also do not throw an argument is missing error. Instead,\nperhaps `eval` could be changed from:\n\n```\n        \/* if ..d is missing then ddfindVar will signal *\/\n        else if (tmp == R_MissingArg &amp;&amp; !DDVAL(e) ) {\n            const char *n = CHAR(PRINTNAME(e));\n            if(*n) errorcall(getLexicalCall(rho),\n                             _(\"argument \\\"%s\\\" is missing, with no default\"),\n                             CHAR(PRINTNAME(e)));\n            else errorcall(getLexicalCall(rho),\n                           _(\"argument is missing, with no default\"));\n        }\n```\n\nto something more like this:\n\n```\n        else if (tmp == R_MissingArg) {\n            \/* for consistency with ...elt() *\/\n            if (DDVAL(e)) errorcall(getLexicalCall(rho),\n                                    _(\"argument is missing, with no default\"));\n            const char *n = CHAR(PRINTNAME(e));\n            if(*n) errorcall(getLexicalCall(rho),\n                             _(\"argument \\\"%s\\\" is missing, with no default\"),\n                             CHAR(PRINTNAME(e)));\n            else errorcall(getLexicalCall(rho),\n                           _(\"argument is missing, with no default\"));\n        }\n```\n\nThis would mean that `..1` and `...elt(1)` would both throw an error with the\nmessage, as expected.\n\n\nThank you!",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1706493277.609319",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Pg0z",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18661] New: DDVAL symbols do not throw \"argument is missing, with no default\" error",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18661"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18661\n           Summary: DDVAL symbols do not throw \"argument is missing, with\n                    no default\" error\n           Product: R\n           Version: R 4.3.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Language\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:akwsimmo@gmail.com",
+                                "text": "akwsimmo@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nHello,\n\n\n\nI'd seen something weird recently while working with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "..1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " where no error is\nthrown that it is missing:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "fun <- function(...) ..1\nfun(,)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI would expect that this would throw an error `argument is missing, with no\ndefault` but it does not. This seems contradictory to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "...elt(1)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " which would\nthrow that error in a similar scenario:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "fun <- function(...) ...elt(1)\nfun(,)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis issue seems to be arise from C function "
+                            },
+                            {
+                                "type": "text",
+                                "text": "eval",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " which claims, around line\n1165, that if ..d is missing, then ddfindVar will signal, so no need to do so\nin "
+                            },
+                            {
+                                "type": "text",
+                                "text": "eval",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". From what I can tell, ddfindVar was never designed to throw an\nargument is missing error, and it should probably stay that way since "
+                            },
+                            {
+                                "type": "text",
+                                "text": "findVar",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nand "
+                            },
+                            {
+                                "type": "text",
+                                "text": "findVarInFrame",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " also do not throw an argument is missing error. Instead,\nperhaps "
+                            },
+                            {
+                                "type": "text",
+                                "text": "eval",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " could be changed from:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "        \/* if ..d is missing then ddfindVar will signal *\/\n        else if (tmp == R_MissingArg && !DDVAL(e) ) {\n            const char *n = CHAR(PRINTNAME(e));\n            if(*n) errorcall(getLexicalCall(rho),\n                             _(\"argument \\\"%s\\\" is missing, with no default\"),\n                             CHAR(PRINTNAME(e)));\n            else errorcall(getLexicalCall(rho),\n                           _(\"argument is missing, with no default\"));\n        }\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nto something more like this:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "        else if (tmp == R_MissingArg) {\n            \/* for consistency with ...elt() *\/\n            if (DDVAL(e)) errorcall(getLexicalCall(rho),\n                                    _(\"argument is missing, with no default\"));\n            const char *n = CHAR(PRINTNAME(e));\n            if(*n) errorcall(getLexicalCall(rho),\n                             _(\"argument \\\"%s\\\" is missing, with no default\"),\n                             CHAR(PRINTNAME(e)));\n            else errorcall(getLexicalCall(rho),\n                           _(\"argument is missing, with no default\"));\n        }\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis would mean that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "..1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "...elt(1)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " would both throw an error with the\nmessage, as expected.\n\n\n\nThank you!"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

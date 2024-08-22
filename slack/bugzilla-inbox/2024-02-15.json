@@ -1,0 +1,633 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 1161] x-axis label in persp()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=1161>\n\nHeather Turner (<mailto:ht@heatherturner.net|ht@heatherturner.net>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ht@heatherturner.net\n\n--- Comment #6 from Heather Turner (<mailto:ht@heatherturner.net|ht@heatherturner.net>) ---\nCreated attachment 3312\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3312&amp;action=edit>\nalternative patch with more consistent labelling when x argument is a list\n\nThanks Munawar for this proposal and the test cases. \n\nYour solution follows the direction we came up with in the R Contributor Office\nHour when analysing this bug. However, considering this further, I think we\nshould aim for greater consistency with other plotting functions.\n\nFor example, you can pass a list to `plot()` (goes to `plot.default()`):\n\n```\n# Case 1\n# labels are \"list(x = x1, y = y1)$x\", \"list(x = x1, y = y1)$y\"\nplot(list(x = x1, y = y1))\n# Case 2\n# labels are \"xylist$x\", \"xylist$y\"\nxylist &lt;- list(x = x1, y = y1)\nplot(xylist)\n```\n\nor `image()`\n\n```\n# Case 3\n# labels are \"list(x = x1, y = y1)$x\", \"list(x = x1, y = y1)$y\"\nimage(list(x = x1, y = y1), z = z1)\n# Case 4 \n# no axis labels!\nimage(list(x = x1, y = y1, z = z1))\n```\n\nUnlike `image()`, `persp()` of course has 3 axes, so I propose our desired\nbehaviour should be \n\n```\n# labels \"list(x = x1, y = y1)$x\", \"list(x = x1, y = y1)$y\", \"z1\"\npersp(list(x = x1, y = y1), z = z1)\n# labels \"list(x = x1, y = y1, z = z1)$x\", \"list(x = x1, y = y1, z = z1)$y\"\n# \"list(x = x1, y = y1, z = z1)$z\"\npersp(list(x = x1, y = y1, z = z1))\n```\n\nYou are right that partial matches could unintentionally be plotted. However,\nthe style of label I am proposing now at least matches how the data is selected\nin the code, so I don't think we should try to do anything special to handle\npartial matches in the labelling.\n\nI attach a patch that implements this alternative proposal.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1708018824.595039",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "M\/N8",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 1161] x-axis label in persp()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=1161"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nHeather Turner ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ht@heatherturner.net",
+                                "text": "ht@heatherturner.net"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ht@heatherturner.net\n\n--- Comment #6 from Heather Turner ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ht@heatherturner.net",
+                                "text": "ht@heatherturner.net"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3312\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3312&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3312&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nalternative patch with more consistent labelling when x argument is a list\n\nThanks Munawar for this proposal and the test cases. \n\nYour solution follows the direction we came up with in the R Contributor Office\nHour when analysing this bug. However, considering this further, I think we\nshould aim for greater consistency with other plotting functions.\n\nFor example, you can pass a list to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "plot()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (goes to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "plot.default()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# Case 1\n# labels are \"list(x = x1, y = y1)$x\", \"list(x = x1, y = y1)$y\"\nplot(list(x = x1, y = y1))\n# Case 2\n# labels are \"xylist$x\", \"xylist$y\"\nxylist <- list(x = x1, y = y1)\nplot(xylist)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nor "
+                            },
+                            {
+                                "type": "text",
+                                "text": "image()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# Case 3\n# labels are \"list(x = x1, y = y1)$x\", \"list(x = x1, y = y1)$y\"\nimage(list(x = x1, y = y1), z = z1)\n# Case 4 \n# no axis labels!\nimage(list(x = x1, y = y1, z = z1))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nUnlike "
+                            },
+                            {
+                                "type": "text",
+                                "text": "image()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "persp()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " of course has 3 axes, so I propose our desired\nbehaviour should be \n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# labels \"list(x = x1, y = y1)$x\", \"list(x = x1, y = y1)$y\", \"z1\"\npersp(list(x = x1, y = y1), z = z1)\n# labels \"list(x = x1, y = y1, z = z1)$x\", \"list(x = x1, y = y1, z = z1)$y\"\n# \"list(x = x1, y = y1, z = z1)$z\"\npersp(list(x = x1, y = y1, z = z1))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nYou are right that partial matches could unintentionally be plotted. However,\nthe style of label I am proposing now at least matches how the data is selected\nin the code, so I don't think we should try to do anything special to handle\npartial matches in the labelling.\n\nI attach a patch that implements this alternative proposal."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 1161] x-axis label in persp()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=1161>\n\n--- Comment #7 from Munawar Cheema (<mailto:munawar.a.cheema@gmail.com|munawar.a.cheema@gmail.com>) ---\nHeather,\nThis definitely is better as having the list name in the plot would be more\ninformative as well as being more consistent as you pointed out.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1708022562.534419",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "QTZ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 1161] x-axis label in persp()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=1161"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #7 from Munawar Cheema ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:munawar.a.cheema@gmail.com",
+                                "text": "munawar.a.cheema@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nHeather,\nThis definitely is better as having the list name in the plot would be more\ninformative as well as being more consistent as you pointed out."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18673] New: suspendInterrupts() doesn't suspend interrupts during Sys.sleep() invocation*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18673>\n\n            Bug ID: 18673\n           Summary: suspendInterrupts() doesn't suspend interrupts during\n                    Sys.sleep() invocation\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nTo reproduce:\n\n    suspendInterrupts({\n      Sys.sleep(3)\n    })\n\nThen, try interrupt the R session, e.g. via Ctrl + C. The R session is\ninterrupted, despite `suspendInterrupts()` being active.\n\nAlso reproduced on an R 4.3.2 installation on Ubuntu 22.04.\n---\n\n```\n&gt; sessionInfo()\nR version 4.3.2 (2023-10-31)\nPlatform: aarch64-apple-darwin20 (64-bit)\nRunning under: macOS Sonoma 14.3.1\n\nMatrix products: default\nBLAS:  \n\/Library\/Frameworks\/R.framework\/Versions\/4.3-arm64\/Resources\/lib\/libRblas.0.dylib\nLAPACK:\n\/Library\/Frameworks\/R.framework\/Versions\/4.3-arm64\/Resources\/lib\/libRlapack.dylib;\n LAPACK version 3.11.0\n\nlocale:\n[1] en_US.UTF-8\/en_US.UTF-8\/en_US.UTF-8\/C\/en_US.UTF-8\/en_US.UTF-8\n\ntime zone: America\/Los_Angeles\ntzcode source: internal\n\nattached base packages:\n[1] stats     graphics  grDevices utils     datasets  methods   base\n\nloaded via a namespace (and not attached):\n[1] compiler_4.3.2\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1708038260.938579",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "x0Qmn",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18673] New: suspendInterrupts() doesn't suspend interrupts during Sys.sleep() invocation",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18673"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18673\n           Summary: suspendInterrupts() doesn't suspend interrupts during\n                    Sys.sleep() invocation\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTo reproduce:\n\n    suspendInterrupts({\n      Sys.sleep(3)\n    })\n\nThen, try interrupt the R session, e.g. via Ctrl + C. The R session is\ninterrupted, despite "
+                            },
+                            {
+                                "type": "text",
+                                "text": "suspendInterrupts()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " being active.\n\nAlso reproduced on an R 4.3.2 installation on Ubuntu 22.04.\n---\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> sessionInfo()\nR version 4.3.2 (2023-10-31)\nPlatform: aarch64-apple-darwin20 (64-bit)\nRunning under: macOS Sonoma 14.3.1\n\nMatrix products: default\nBLAS:  \n\/Library\/Frameworks\/R.framework\/Versions\/4.3-arm64\/Resources\/lib\/libRblas.0.dylib\nLAPACK:\n\/Library\/Frameworks\/R.framework\/Versions\/4.3-arm64\/Resources\/lib\/libRlapack.dylib;\n LAPACK version 3.11.0\n\nlocale:\n[1] en_US.UTF-8\/en_US.UTF-8\/en_US.UTF-8\/C\/en_US.UTF-8\/en_US.UTF-8\n\ntime zone: America\/Los_Angeles\ntzcode source: internal\n\nattached base packages:\n[1] stats     graphics  grDevices utils     datasets  methods   base\n\nloaded via a namespace (and not attached):\n[1] compiler_4.3.2\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18673] suspendInterrupts() doesn't suspend interrupts during Sys.sleep() invocation*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18673>\n\nLuke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |luke@stat.uiowa.edu\n\n--- Comment #1 from Luke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) ---\nThis is as intended. `Sys.sleep()` conceptually does the sleep inside an\n`allowInterrupts()` call. If you really want to disallow interrupts you can use\n\n```\nwithCallingHandlers(Sys.sleep(10),\n                    interrupt = function(e) invokeRestart(\"resume\"))\n```\nor\n```\nsuspendInterrupts(\n    withCallingHandlers(Sys.sleep(10),\n                        interrupt = function(e) invokeRestart(\"resume\")))\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1708042499.677569",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "gmA",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18673] suspendInterrupts() doesn't suspend interrupts during Sys.sleep() invocation",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18673"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nLuke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |luke@stat.uiowa.edu\n\n--- Comment #1 from Luke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThis is as intended. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Sys.sleep()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " conceptually does the sleep inside an\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "allowInterrupts()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " call. If you really want to disallow interrupts you can use\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "withCallingHandlers(Sys.sleep(10),\n                    interrupt = function(e) invokeRestart(\"resume\"))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "or"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "suspendInterrupts(\n    withCallingHandlers(Sys.sleep(10),\n                        interrupt = function(e) invokeRestart(\"resume\")))\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18673] suspendInterrupts() doesn't suspend interrupts during Sys.sleep() invocation*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18673>\n\nLuke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |INVALID\n             Status|UNCONFIRMED                 |CLOSED",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1708042518.793969",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "bMW\/i",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18673] suspendInterrupts() doesn't suspend interrupts during Sys.sleep() invocation",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18673"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nLuke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |INVALID\n             Status|UNCONFIRMED                 |CLOSED"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18674] New: tools::toTitleCase() incorrectly capitalizes conjunctions (e.g. 'and') when using suspensive hyphenation*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18674>\n\n            Bug ID: 18674\n           Summary: tools::toTitleCase() incorrectly capitalizes\n                    conjunctions (e.g. 'and') when using suspensive\n                    hyphenation\n           Product: R\n           Version: R 4.3.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Misc\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:henrikb@braju.com|henrikb@braju.com>\n\nIt looks like `tools::toTitleCase()` gets confused when using suspensive\nhyphenation, i.e. when a conjunction is followed by a word ending with a\nhyphen. For example,\n\n```\n&gt; tools::toTitleCase(\"small- and large-scale analysis\")\n[1] \"Small- And Large-Scale Analysis\"\n```\n\nNotice the capitalized conjunction \"And\". This does not happen if we use full\nrepetition, e.g.\n\n```\n&gt; tools::toTitleCase(\"small-scale and large-scale analysis\")\n[1] \"Small-Scale and Large-Scale Analysis\"\n```\n\nor if we (incorrectly) drop the preceding hyphen, e.g.\n\n```\n&gt; tools::toTitleCase(\"small and large-scale analysis\")\n[1] \"Small and Large-Scale Analysis\"\n```\n\n\nThis impacts `R CMD check --as-cran`, which incorrectly produce a NOTE and\nincorrectly suggests that \"and\" should be capitalized, e.g.\n\n```\n* checking CRAN incoming feasibility\n  ...\n   The Title field should be in title case. Current version is:\n   'Small- and Large-Scale Analysis'\n   In title case that is:\n   'Small- And Large-Scale Analysis'\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1708060919.028809",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "CoHzx",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18674] New: tools::toTitleCase() incorrectly capitalizes conjunctions (e.g. 'and') when using suspensive hyphenation",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18674"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18674\n           Summary: tools::toTitleCase() incorrectly capitalizes\n                    conjunctions (e.g. 'and') when using suspensive\n                    hyphenation\n           Product: R\n           Version: R 4.3.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Misc\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:henrikb@braju.com",
+                                "text": "henrikb@braju.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIt looks like "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tools::toTitleCase()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " gets confused when using suspensive\nhyphenation, i.e. when a conjunction is followed by a word ending with a\nhyphen. For example,\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> tools::toTitleCase(\"small- and large-scale analysis\")\n[1] \"Small- And Large-Scale Analysis\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nNotice the capitalized conjunction \"And\". This does not happen if we use full\nrepetition, e.g.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> tools::toTitleCase(\"small-scale and large-scale analysis\")\n[1] \"Small-Scale and Large-Scale Analysis\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nor if we (incorrectly) drop the preceding hyphen, e.g.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> tools::toTitleCase(\"small and large-scale analysis\")\n[1] \"Small and Large-Scale Analysis\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n\n\nThis impacts "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R CMD check --as-cran",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which incorrectly produce a NOTE and\nincorrectly suggests that \"and\" should be capitalized, e.g.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "* checking CRAN incoming feasibility\n  ...\n   The Title field should be in title case. Current version is:\n   'Small- and Large-Scale Analysis'\n   In title case that is:\n   'Small- And Large-Scale Analysis'\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,825 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18710] Partial matching issues in the R sources*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18710>\n\nSebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |seb.meyer@fau.de\n           Severity|normal                      |enhancement\n\n--- Comment #2 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\nThanks for looking into these partial matching issues, especially in package\ncode, for the convenience of users running R under warnPartialMatch*=TRUE (like\nme).\n\nI cherry-picked changes from your patch and committed these as c86849 to the\ntrunk. This covers R code in data\/, R\/ and Rd \\examples.\n\nThings I did *not* touch:\n\n- **tests**: strong reasons are needed to change test code. There is nothing\nwrong with test code relying on partial matching. It implicitly or explicitly\ntests a feature of the language. Especially regression tests often come from\nreal use cases and we'd want to notice when these break while working on the\nimplementation. One notable example from the patch is from\n`tests\/reg-tests-1b.R`, where the patch would probably change the code path\nthat was tested originally:\n\n```\n ## test of internal argument matching\n-stopifnot(all.equal(round(d=2, x=pi), 3.14))\n+stopifnot(all.equal(round(digits=2, x=pi), 3.14))\n ## used positional matching in 2.6.x\n```\n\n- **demo scripts**: I was tempted to apply the change from `axis(lab=)` to\n`axis(labels=)` as the former could be confused with the `par()` of the same\nname, but then I saw exactly this documented in `?axis`:\n\n&gt; Note that 'lab' will partial match to argument 'labels' unless the latter is also supplied.\n\nSo again, this is effectively testing documented behaviour.\nGenerally, code like `ls(all=TRUE)` is a matter of taste and I didn't see\nstrong reasons to disregard that of the original author. I'm sure many analysis\nscripts use shortcuts like `pnorm(lower=FALSE, log=TRUE)`, `complex(re=, im=)`,\n`predict(se=TRUE)`, etc, and, of course, `seq(length=)` or `seq(len=)`.\n\n- **R-intro**: changing `length` to `length.out` in the code examples would be\ninconsistent if not also revising the text. This says:\n\n&gt; The next two arguments to `seq()` may be named `by=VALUE` and `length=VALUE`\n&gt; [...]\n&gt; The fifth argument may be named `along=VECTOR`\n\nwhich is certainly true due to the partial matching. In principle, it would be\nnice to have formal arguments `length` and `along` in the base `seq()` methods,\nnot least because autocompletion of `seq(len[TAB]` stops at `length` (as\ndiscussed in `?rc.settings`), but that would be another enhancement request\n(and I haven't thought about the associated costs).\n\nIn my opinion this PR can now be closed.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1719577896.335469",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "8tYRf",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18710] Partial matching issues in the R sources",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18710"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |seb.meyer@fau.de\n           Severity|normal                      |enhancement\n\n--- Comment #2 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for looking into these partial matching issues, especially in package\ncode, for the convenience of users running R under warnPartialMatch*=TRUE (like\nme).\n\nI cherry-picked changes from your patch and committed these as c86849 to the\ntrunk. This covers R code in data\/, R\/ and Rd \\examples.\n\nThings I did "
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " touch:\n\n- **tests**: strong reasons are needed to change test code. There is nothing\nwrong with test code relying on partial matching. It implicitly or explicitly\ntests a feature of the language. Especially regression tests often come from\nreal use cases and we'd want to notice when these break while working on the\nimplementation. One notable example from the patch is from\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "tests\/reg-tests-1b.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", where the patch would probably change the code path\nthat was tested originally:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " ## test of internal argument matching\n-stopifnot(all.equal(round(d=2, x=pi), 3.14))\n+stopifnot(all.equal(round(digits=2, x=pi), 3.14))\n ## used positional matching in 2.6.x\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n- **demo scripts**: I was tempted to apply the change from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "axis(lab=)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "axis(labels=)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as the former could be confused with the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "par()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " of the same\nname, but then I saw exactly this documented in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "?axis",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Note that 'lab' will partial match to argument 'labels' unless the latter is also supplied."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSo again, this is effectively testing documented behaviour.\nGenerally, code like "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ls(all=TRUE)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is a matter of taste and I didn't see\nstrong reasons to disregard that of the original author. I'm sure many analysis\nscripts use shortcuts like "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pnorm(lower=FALSE, log=TRUE)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "complex(re=, im=)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "predict(se=TRUE)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", etc, and, of course, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq(length=)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq(len=)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n- **R-intro**: changing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length.out",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in the code examples would be\ninconsistent if not also revising the text. This says:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "The next two arguments to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " may be named "
+                            },
+                            {
+                                "type": "text",
+                                "text": "by=VALUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length=VALUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n[...]\nThe fifth argument may be named "
+                            },
+                            {
+                                "type": "text",
+                                "text": "along=VECTOR",
+                                "style": {
+                                    "code": true
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nwhich is certainly true due to the partial matching. In principle, it would be\nnice to have formal arguments "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "along",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in the base "
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " methods,\nnot least because autocompletion of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq(len[TAB]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " stops at "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (as\ndiscussed in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "?rc.settings",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), but that would be another enhancement request\n(and I haven't thought about the associated costs).\n\nIn my opinion this PR can now be closed."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18748] New: array(dim = rep(2^25, 3)) technically overflows R_xlen_t cast from double*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18748>\n\n            Bug ID: 18748\n           Summary: array(dim = rep(2^25, 3)) technically overflows\n                    R_xlen_t cast from double\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: trivial\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:ikrylov@disroot.org|ikrylov@disroot.org>\n\nLow priority because there is __no__ data corruption or crash on `amd64`,\n`armv7l`, `aarch64` Linux. Casting a too-large `double` to a signed integer\ngives a very negative integer, which is caught by `allocVector`:\n\n```\n$ bin\/R -q -s -e 'array(0, rep(2^25, 3))'\n..\/..\/..\/src\/main\/array.c:2107:5: runtime error: 3.77789e+22 is outside the\nrange of representable values of type 'long int'\nError in array(0, rep(2^25, 3)) :\n  negative length vectors are not allowed\nExecution halted\n```\n\nThe diagnostic is only visible when building with\n[`-fsanitize=float-cast-overflow`][1] (not included in `-fsanitize=undefined`),\nbut the C standard is clear that this is UB, for example, C99 6.3.1.4.1:\n\n&gt; When a finite value of real floating type is converted to an integer type &lt;...&gt; If the value of the integral part cannot be represented by the integer type, the behavior is undefined.\n\nThe functions `alloc3DArray` and `allocArray` are less lucky and will result in\na short allocation if the caller doesn't check for overflow. Should `do_matrix`\ncheck the vector size against `R_XLEN_T_MAX` when calculating it? Should the C\nAPI be doing the same? (Maybe not.) `R_XLEN_T_MAX` has the useful property of\nbeing exactly representable in a `double`, which [simplifies the overflow\ncheck](<https:\/\/stackoverflow.com\/a\/526092>).\n\nWill be happy to provide a patch if needed.\n\n[1]:\n<https:\/\/gcc.gnu.org\/onlinedocs\/gcc\/Instrumentation-Options.html#index-fsanitize_003dfloat-cast-overflow>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1719587800.799509",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "n5JGi",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18748] New: array(dim = rep(2^25, 3)) technically overflows R_xlen_t cast from double",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18748"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18748\n           Summary: array(dim = rep(2^25, 3)) technically overflows\n                    R_xlen_t cast from double\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: trivial\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nLow priority because there is __no__ data corruption or crash on "
+                            },
+                            {
+                                "type": "text",
+                                "text": "amd64",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "armv7l",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "aarch64",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " Linux. Casting a too-large "
+                            },
+                            {
+                                "type": "text",
+                                "text": "double",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to a signed integer\ngives a very negative integer, which is caught by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "allocVector",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$ bin\/R -q -s -e 'array(0, rep(2^25, 3))'\n..\/..\/..\/src\/main\/array.c:2107:5: runtime error: 3.77789e+22 is outside the\nrange of representable values of type 'long int'\nError in array(0, rep(2^25, 3)) :\n  negative length vectors are not allowed\nExecution halted\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe diagnostic is only visible when building with\n["
+                            },
+                            {
+                                "type": "text",
+                                "text": "-fsanitize=float-cast-overflow",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "][1] (not included in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "-fsanitize=undefined",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "),\nbut the C standard is clear that this is UB, for example, C99 6.3.1.4.1:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "When a finite value of real floating type is converted to an integer type <...> If the value of the integral part cannot be represented by the integer type, the behavior is undefined."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe functions "
+                            },
+                            {
+                                "type": "text",
+                                "text": "alloc3DArray",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "allocArray",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " are less lucky and will result in\na short allocation if the caller doesn't check for overflow. Should "
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_matrix",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ncheck the vector size against "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_XLEN_T_MAX",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " when calculating it? Should the C\nAPI be doing the same? (Maybe not.) "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_XLEN_T_MAX",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has the useful property of\nbeing exactly representable in a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "double",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which [simplifies the overflow\ncheck]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stackoverflow.com\/a\/526092"
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\n\nWill be happy to provide a patch if needed.\n\n[1]:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/gcc.gnu.org\/onlinedocs\/gcc\/Instrumentation-Options.html#index-fsanitize_003dfloat-cast-overflow"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18749] New: sort_by() all columns*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18749>\n\n            Bug ID: 18749\n           Summary: sort_by() all columns\n           Product: R\n           Version: R 4.4.x\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Wishlist\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:marberts@protonmail.com|marberts@protonmail.com>\n\nCreated attachment 3365\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3365&amp;action=edit>\nPatch to allow ~ . in sort_by().\n\n`sort_by(mtcars, ~ mpg + cyl)` is a nice alternative to `mtcars[do.call(order,\nmtcars[c(\"mpg\", \"cyl\")]), ]`. I was expecting sort_by(mtcars, ~ .) to be the\nsame as `mtcars[do.call(order, mtcars), ]`, but `.formula2varlist()` gives an\nerror in this case. It's a minor suggestion but it would be nice to be able to\nuse `~ .` as a simple way to sort a data frame on all columns instead of having\nto use `do.call()` for this one case.\n\nThe simple way to make `sort_by(mtcars, ~ .)` work is to add the `data`\nargument for `terms()` in `.formula2varlist()` (see attached). This does mean\nthat a dot is accepted on the RHS for `split()` and `tapply()`. This isn't\nuseful, but I don't think it would hurt anything.\n\nAs always, thanks for all your work on R.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1719632189.246139",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "WrLH",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18749] New: sort_by() all columns",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18749"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18749\n           Summary: sort_by() all columns\n           Product: R\n           Version: R 4.4.x\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Wishlist\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:marberts@protonmail.com",
+                                "text": "marberts@protonmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3365\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3365&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3365&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch to allow ~ . in sort_by().\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "sort_by(mtcars, ~ mpg + cyl)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is a nice alternative to `mtcars[do.call(order,\nmtcars[c(\"mpg\", \"cyl\")]), ]`. I was expecting sort_by(mtcars, ~ .) to be the\nsame as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mtcars[do.call(order, mtcars), ]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", but "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".formula2varlist()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " gives an\nerror in this case. It's a minor suggestion but it would be nice to be able to\nuse "
+                            },
+                            {
+                                "type": "text",
+                                "text": "~ .",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as a simple way to sort a data frame on all columns instead of having\nto use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "do.call()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for this one case.\n\nThe simple way to make "
+                            },
+                            {
+                                "type": "text",
+                                "text": "sort_by(mtcars, ~ .)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " work is to add the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "data",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nargument for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "terms()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".formula2varlist()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (see attached). This does mean\nthat a dot is accepted on the RHS for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "split()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tapply()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". This isn't\nuseful, but I don't think it would hurt anything.\n\nAs always, thanks for all your work on R."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

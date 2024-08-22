@@ -1,0 +1,572 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18558] row names and column names of a matrix themselves preserve the names attribute*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18558>\n\n--- Comment #3 from Steve Martin (<mailto:marberts@protonmail.com|marberts@protonmail.com>) ---\nI didn't realize how inconsistent names assignment is. For example,\n```\nx = 1:3\nnames(x) = factor(1:3)\nnames(x)\n```\nworks fine, but\n```\nstructure(1:3, names = factor(1:3)) |&gt; names()\n```\ngives an error about malformed factors. The case with dimnames also works fine,\nunlike when the names have names.\n\nI took a stab at fixing this so that attributes are stripped from names before\nsetting them as an attribute: <https:\/\/github.com\/r-devel\/r-svn\/pull\/150>. This\nis my first time working at the C level, so it may not be any good and deserves\nsome scrutiny. I've also done minimal testing, but I'm happy to do more and\nmake unit tests if there interest in a patch. \n\nMartin, regarding backwards compatibility, it doesn't feel like names keeping\ntheir attributes is particularly useful. For example, a no op like `names(x) =\nnames(x)` would drop them, as would , say, `x[1]`. But a better test would be\nto run the check on a subset of cran packages. I'm happy to give this a shot;\nany advice on how to do it and stay sane would be appreciated as I don't have a\naccess to a lot of compute.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1704115586.711949",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Ju\/2",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18558] row names and column names of a matrix themselves preserve the names attribute",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18558"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Steve Martin ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:marberts@protonmail.com",
+                                "text": "marberts@protonmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI didn't realize how inconsistent names assignment is. For example,"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "x = 1:3\nnames(x) = factor(1:3)\nnames(x)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "works fine, but"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "structure(1:3, names = factor(1:3)) |> names()\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "gives an error about malformed factors. The case with dimnames also works fine,\nunlike when the names have names.\n\nI took a stab at fixing this so that attributes are stripped from names before\nsetting them as an attribute: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/pull\/150"
+                            },
+                            {
+                                "type": "text",
+                                "text": ". This\nis my first time working at the C level, so it may not be any good and deserves\nsome scrutiny. I've also done minimal testing, but I'm happy to do more and\nmake unit tests if there interest in a patch. \n\nMartin, regarding backwards compatibility, it doesn't feel like names keeping\ntheir attributes is particularly useful. For example, a no op like `names(x) =\nnames(x)` would drop them, as would , say, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x[1]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". But a better test would be\nto run the check on a subset of cran packages. I'm happy to give this a shot;\nany advice on how to do it and stay sane would be appreciated as I don't have a\naccess to a lot of compute."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18558] row names and column names of a matrix themselves preserve the names attribute*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18558>\n\n--- Comment #4 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nSome remarks:\n\n- Note that  `dimnames` and `names`  are indeed implemented \"analogously\", but\nwith different code,\n- in some sense `names` are considerably more \"intrinsic to R\"  than\n`dimnames`,\n- Contrary to `names`, `dimnames` are always a list *and* the list entries can\nbe named, \n  e.g., most of the time in results of `table()`. However, *additionally* ---\nthe topic here --- each of the list elements, when character vectors, can have\n`names(.)`, \n  the latter being what we are considering to abolish in this PR.\n- I have checked on how to fix this PR (without some of the extra musings; \nhere we only talk about `dimnames`), nicely and sensibly,\n  quite a few months ago.   We found that the change would break at least one\nquite mature and widely used CRAN package,\n  of which I am myself a co-author: In `glmmTMB` we use\n`names(dimnames(.)[[2]])` quite on purpose, in order to distinguish the\ndifferent parts of the parameter vector &lt;=&gt; different sub matrices of the\nvar-cov matrix of the model parameters (fixed eff; random eff: \"var\" vs \"corr\",\n...).\n\n- if I had seen a nice and still efficient way to achieve storing these\n\"name-properties\" with the 'varCov'-objects in package {glmmTMB}, \n  we'd see a good reason to consider dropping this undocumented feature from\ndimnames.\n  Till now, I have not taken enough time to \"see\"\/devise such an alternative\nwhich would not need much more code than currently;\n  if it would, it means we'd be talking about removing an R-language feature\nwhich *is* nice and efficient at times.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1704119580.443839",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "TDFj4",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18558] row names and column names of a matrix themselves preserve the names attribute",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18558"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nSome remarks:\n\n- Note that  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dimnames",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "names",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  are indeed implemented \"analogously\", but\nwith different code,\n- in some sense "
+                            },
+                            {
+                                "type": "text",
+                                "text": "names",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " are considerably more \"intrinsic to R\"  than\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "dimnames",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\n- Contrary to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "names",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dimnames",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " are always a list "
+                            },
+                            {
+                                "type": "text",
+                                "text": "and",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " the list entries can\nbe named, \n  e.g., most of the time in results of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "table()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". However, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "additionally",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ---\nthe topic here --- each of the list elements, when character vectors, can have\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "names(.)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", \n  the latter being what we are considering to abolish in this PR.\n- I have checked on how to fix this PR (without some of the extra musings; \nhere we only talk about "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dimnames",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), nicely and sensibly,\n  quite a few months ago.   We found that the change would break at least one\nquite mature and widely used CRAN package,\n  of which I am myself a co-author: In "
+                            },
+                            {
+                                "type": "text",
+                                "text": "glmmTMB",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " we use\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "names(dimnames(.)[[2]])",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " quite on purpose, in order to distinguish the\ndifferent parts of the parameter vector <=> different sub matrices of the\nvar-cov matrix of the model parameters (fixed eff; random eff: \"var\" vs \"corr\",\n...).\n\n- if I had seen a nice and still efficient way to achieve storing these\n\"name-properties\" with the 'varCov'-objects in package {glmmTMB}, \n  we'd see a good reason to consider dropping this undocumented feature from\ndimnames.\n  Till now, I have not taken enough time to \"see\"\/devise such an alternative\nwhich would not need much more code than currently;\n  if it would, it means we'd be talking about removing an R-language feature\nwhich "
+                            },
+                            {
+                                "type": "text",
+                                "text": "is",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " nice and efficient at times."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16256] bug in predict with type=\"terms\" in the presence of missing*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16256>\n\n--- Comment #5 from Elin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) ---\nYes I can confirm that it happens at\n\n<https:\/\/github.com\/r-devel\/r-svn\/blob\/1a8f9830987dfc8b48f451e97184988f6e5716a5\/src\/library\/stats\/R\/nafns.R#L157>\n\nIt seems like it would be possible to grab the constant before the `[` and then\nreassign it.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1704144094.563959",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "KtcAy",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16256] bug in predict with type=\"terms\" in the presence of missing",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16256"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Elin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nYes I can confirm that it happens at\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/1a8f9830987dfc8b48f451e97184988f6e5716a5\/src\/library\/stats\/R\/nafns.R#L157"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIt seems like it would be possible to grab the constant before the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "[",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and then\nreassign it."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18616] TukeyHSD not functioning properly with nested designs*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18616>\n\nElin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |elin.waring@gmail.com\n\n--- Comment #1 from Elin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) ---\nThis definitely happens but it seems like a brute force way of dealing with it,\nif it is really wrong.\n\n```\nmodel.tables(a1)$tables\n```\n```\n$`x1:x2`\n   x2\nx1  1    2    3    4   \n  1 -1.5 -0.5          \n  2            0.5  1.5\n```\n```\nmodel.tables(a2)$tables\n```\n```\n$x1\nx1\n 1  2 \n-1  1 \n\n$`x1:x2`\n   x2\nx1  1    2   \n  1 -0.5  0.5\n  2 -0.5  0.5\n```\n\nSo the results are going to be different. I don't think that the function was\ndesigned with your use case in mind.  You would probably want to compare within\neach of the top level branches.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1704166268.084329",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "+vI",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18616] TukeyHSD not functioning properly with nested designs",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18616"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nElin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |elin.waring@gmail.com\n\n--- Comment #1 from Elin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThis definitely happens but it seems like a brute force way of dealing with it,\nif it is really wrong.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "model.tables(a1)$tables\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$`x1:x2`\n   x2\nx1  1    2    3    4   \n  1 -1.5 -0.5          \n  2            0.5  1.5\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "model.tables(a2)$tables\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$x1\nx1\n 1  2 \n-1  1 \n\n$`x1:x2`\n   x2\nx1  1    2   \n  1 -0.5  0.5\n  2 -0.5  0.5\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSo the results are going to be different. I don't think that the function was\ndesigned with your use case in mind.  You would probably want to compare within\neach of the top level branches."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17227] nlme::gnls  seg.fault (reported in 2008)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17227>\n\n--- Comment #8 from Elin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) ---\nI wanted to mention that at bug 16806  I submitted a patch that may turn out to\nbe related.  What I discovered is that the *names* of the list elements were\n_string versions of integers_ e.g. \"28\".  However when the contents of list\nelements were retrieved the retrieval is using the integer it self e.g. 28,\nwhich returns the 28th element rather than element \"28\".  Unfortunately these\nare not the same.\n\nIn terms of why the multiplication happens, that is the nature of spatial\nstructures. \n\nI don't think that the patch on bug 16806 solves everything in this issue, but\nI think it does change some aspects of this issue.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1704167236.669379",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "6+dc",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17227] nlme::gnls  seg.fault (reported in 2008)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17227"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #8 from Elin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI wanted to mention that at bug 16806  I submitted a patch that may turn out to\nbe related.  What I discovered is that the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "names",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " of the list elements were\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "string versions of integers",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " e.g. \"28\".  However when the contents of list\nelements were retrieved the retrieval is using the integer it self e.g. 28,\nwhich returns the 28th element rather than element \"28\".  Unfortunately these\nare not the same.\n\nIn terms of why the multiplication happens, that is the nature of spatial\nstructures. \n\nI don't think that the patch on bug 16806 solves everything in this issue, but\nI think it does change some aspects of this issue."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

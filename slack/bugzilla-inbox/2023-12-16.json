@@ -1,0 +1,482 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 15853] chol problem with positive semi definite matrix and pivoting*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=15853>\n\nMikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jaganmn@mcmaster.ca\n\n--- Comment #3 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nThe \"mistake\" here seems to be the assumption that `A &lt;- crossprod(X)` _must_\nbe positive semidefinite and\/or that the error `norm(A[p, p] -\ncrossprod(R))\/norm(A)` _must_ be small if `A` is positive semidefinite, where\n`R &lt;- chol(A, pivot = TRUE)` and `p &lt;- attr(R, \"pivot\")`.  But neither `A` nor\n`R` is computed in exact arithmetic.\n\nOn my machine, the computed rank of `A`, namely `r &lt;- attr(R, \"rank\")`, is\nfour.  The fifth and last pivot, which is `R[r+1, r+1]`, is not only less than\n`tol` but _negative_, indicating a violation of the assumption of positive\nsemidefiniteness.\n\nR makes no promises in this case.  Indeed, `help(\"chol\")` states:\n\n&gt; If `pivot = TRUE` and `x` is not non-negative definite then there will be a warning message but a meaningless result will occur.  So only use `pivot = TRUE` when `x` is non-negative definite by construction.\n\nHere the \"construction\" was `crossprod`, but that was insufficient.\n\nFWIW, the implementation of the underlying LAPACK routine `dpstrf` is well\nexplained by [LAPACK Working Note\n161](<https:\/\/www.netlib.org\/lapack\/lawnspdf\/lawn161.pdf>).  Notably LAPACK _does\nnot_ attempt to zero the trailing submatrix `R[(r+1):n, (r+1):n]` when `r &lt; n`\neven though doing so would be theoretically justified if `A` were \"known\" to be\npositive semidefinite.  LAPACK sets `R[r+1, r+1]` equal to the last computed\npivot and leaves the rest of the submatrix \"as is\", i.e., containing\nunfactorized elements of `A` (to devastating effect in this case).\n\nR could better document the above.  E.g., `help(\"chol\")` could suggest the\npossibility of zeroing `R[(r+1):n, (r+1):n]` when `r &lt; n` _and_ the user is\nconfident that their `A` is \"near to\" a positive semidefinite matrix.  It could\nalso add LAWN 161 as a reference.\n\nOutside of that, I think that this \"bug\" can be closed ...",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702790452.867739",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "e45y",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 15853] chol problem with positive semi definite matrix and pivoting",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=15853"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jaganmn@mcmaster.ca\n\n--- Comment #3 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe \"mistake\" here seems to be the assumption that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "A <- crossprod(X)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " "
+                            },
+                            {
+                                "type": "text",
+                                "text": "must",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nbe positive semidefinite and\/or that the error `norm(A[p, p] -\ncrossprod(R))\/norm(A)` "
+                            },
+                            {
+                                "type": "text",
+                                "text": "must",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " be small if "
+                            },
+                            {
+                                "type": "text",
+                                "text": "A",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is positive semidefinite, where\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "R <- chol(A, pivot = TRUE)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "p <- attr(R, \"pivot\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  But neither "
+                            },
+                            {
+                                "type": "text",
+                                "text": "A",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " nor\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is computed in exact arithmetic.\n\nOn my machine, the computed rank of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "A",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", namely "
+                            },
+                            {
+                                "type": "text",
+                                "text": "r <- attr(R, \"rank\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", is\nfour.  The fifth and last pivot, which is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R[r+1, r+1]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", is not only less than\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "tol",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " but "
+                            },
+                            {
+                                "type": "text",
+                                "text": "negative",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", indicating a violation of the assumption of positive\nsemidefiniteness.\n\nR makes no promises in this case.  Indeed, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "help(\"chol\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " states:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "If "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pivot = TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is not non-negative definite then there will be a warning message but a meaningless result will occur.  So only use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pivot = TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " when "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is non-negative definite by construction."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nHere the \"construction\" was "
+                            },
+                            {
+                                "type": "text",
+                                "text": "crossprod",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", but that was insufficient.\n\nFWIW, the implementation of the underlying LAPACK routine "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dpstrf",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is well\nexplained by [LAPACK Working Note\n161]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/www.netlib.org\/lapack\/lawnspdf\/lawn161.pdf"
+                            },
+                            {
+                                "type": "text",
+                                "text": ").  Notably LAPACK _does\nnot_ attempt to zero the trailing submatrix "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R[(r+1):n, (r+1):n]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " when "
+                            },
+                            {
+                                "type": "text",
+                                "text": "r < n",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\neven though doing so would be theoretically justified if "
+                            },
+                            {
+                                "type": "text",
+                                "text": "A",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " were \"known\" to be\npositive semidefinite.  LAPACK sets "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R[r+1, r+1]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " equal to the last computed\npivot and leaves the rest of the submatrix \"as is\", i.e., containing\nunfactorized elements of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "A",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (to devastating effect in this case).\n\nR could better document the above.  E.g., "
+                            },
+                            {
+                                "type": "text",
+                                "text": "help(\"chol\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " could suggest the\npossibility of zeroing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R[(r+1):n, (r+1):n]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " when "
+                            },
+                            {
+                                "type": "text",
+                                "text": "r < n",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " "
+                            },
+                            {
+                                "type": "text",
+                                "text": "and",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " the user is\nconfident that their "
+                            },
+                            {
+                                "type": "text",
+                                "text": "A",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is \"near to\" a positive semidefinite matrix.  It could\nalso add LAWN 161 as a reference.\n\nOutside of that, I think that this \"bug\" can be closed ..."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 15853] chol problem with positive semi definite matrix and pivoting*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=15853>\n\n--- Comment #4 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nOutput to accompany comment 3 ...\n\n```\n&gt; set.seed(0)\n&gt; m &lt;- 20L\n&gt; n &lt;- 6L\n&gt; X &lt;- matrix(runif(m * n), m, n)\n&gt; X[, 5L] &lt;- X[, 4L]\n&gt; X[, 1L] &lt;- X[, 3L] + X[, 4L]\n&gt; (A &lt;- crossprod(X))\n         [,1]      [,2]      [,3]      [,4]      [,5]      [,6]\n[1,] 24.38501 10.924049 11.847004 12.538007 12.538007 10.747373\n[2,] 10.92405  6.370394  5.225453  5.698596  5.698596  5.101149\n[3,] 11.84700  5.225453  6.372565  5.474439  5.474439  5.547384\n[4,] 12.53801  5.698596  5.474439  7.063567  7.063567  5.199989\n[5,] 12.53801  5.698596  5.474439  7.063567  7.063567  5.199989\n[6,] 10.74737  5.101149  5.547384  5.199989  5.199989  6.428194\n&gt; \n&gt; min(eigen(A, only.values = TRUE)[[\"values\"]])\n[1] -6.363584e-15\n&gt; \n&gt; (R &lt;- chol(A, pivot = TRUE))\n         [,1]     [,2]      [,3]       [,4]          [,5]       [,6]\n[1,] 4.938118 2.176411 2.2121886  2.3990929  2.539025e+00  2.5390253\n[2,] 0.000000 1.300550 0.2203056  0.2506419 -2.506419e-01 -0.2506419\n[3,] 0.000000 0.000000 1.1950233 -0.1146514  1.146514e-01  0.1146514\n[4,] 0.000000 0.000000 0.0000000  0.7354943 -7.354943e-01 -0.7354943\n[5,] 0.000000 0.000000 0.0000000  0.0000000 -1.687539e-14  7.0635675\n[6,] 0.000000 0.000000 0.0000000  0.0000000  0.000000e+00  7.0635675\nattr(,\"pivot\")\n[1] 1 6 2 3 5 4\nattr(,\"rank\")\n[1] 4\nWarning message:\nIn chol.default(A, pivot = TRUE) :\n  the matrix is either rank-deficient or not positive definite\n&gt; p &lt;- attr(R, \"pivot\")\n&gt; r &lt;- attr(R, \"rank\")\n&gt; \n&gt; R[r + 1L, r + 1L]\n[1] -1.687539e-14\n&gt; A[p, p][r + 1L, r + 1L] - sum(crossprod(R[1L:r, r + 1L]))\n[1] -1.687539e-14\n&gt; \n&gt; R0 &lt;- R\n&gt; R0[(r + 1L):n, (r + 1L):n] &lt;- 0\n&gt; \n&gt; norm(A[p, p] - crossprod(R )) \/ norm(A)\n[1] 1.202562\n&gt; norm(A[p, p] - crossprod(R0)) \/ norm(A)\n[1] 4.281438e-16\n&gt;\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702791732.374889",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "aW=",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 15853] chol problem with positive semi definite matrix and pivoting",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=15853"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nOutput to accompany comment 3 ...\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> set.seed(0)\n> m <- 20L\n> n <- 6L\n> X <- matrix(runif(m * n), m, n)\n> X[, 5L] <- X[, 4L]\n> X[, 1L] <- X[, 3L] + X[, 4L]\n> (A <- crossprod(X))\n         [,1]      [,2]      [,3]      [,4]      [,5]      [,6]\n[1,] 24.38501 10.924049 11.847004 12.538007 12.538007 10.747373\n[2,] 10.92405  6.370394  5.225453  5.698596  5.698596  5.101149\n[3,] 11.84700  5.225453  6.372565  5.474439  5.474439  5.547384\n[4,] 12.53801  5.698596  5.474439  7.063567  7.063567  5.199989\n[5,] 12.53801  5.698596  5.474439  7.063567  7.063567  5.199989\n[6,] 10.74737  5.101149  5.547384  5.199989  5.199989  6.428194\n> \n> min(eigen(A, only.values = TRUE)[[\"values\"]])\n[1] -6.363584e-15\n> \n> (R <- chol(A, pivot = TRUE))\n         [,1]     [,2]      [,3]       [,4]          [,5]       [,6]\n[1,] 4.938118 2.176411 2.2121886  2.3990929  2.539025e+00  2.5390253\n[2,] 0.000000 1.300550 0.2203056  0.2506419 -2.506419e-01 -0.2506419\n[3,] 0.000000 0.000000 1.1950233 -0.1146514  1.146514e-01  0.1146514\n[4,] 0.000000 0.000000 0.0000000  0.7354943 -7.354943e-01 -0.7354943\n[5,] 0.000000 0.000000 0.0000000  0.0000000 -1.687539e-14  7.0635675\n[6,] 0.000000 0.000000 0.0000000  0.0000000  0.000000e+00  7.0635675\nattr(,\"pivot\")\n[1] 1 6 2 3 5 4\nattr(,\"rank\")\n[1] 4\nWarning message:\nIn chol.default(A, pivot = TRUE) :\n  the matrix is either rank-deficient or not positive definite\n> p <- attr(R, \"pivot\")\n> r <- attr(R, \"rank\")\n> \n> R[r + 1L, r + 1L]\n[1] -1.687539e-14\n> A[p, p][r + 1L, r + 1L] - sum(crossprod(R[1L:r, r + 1L]))\n[1] -1.687539e-14\n> \n> R0 <- R\n> R0[(r + 1L):n, (r + 1L):n] <- 0\n> \n> norm(A[p, p] - crossprod(R )) \/ norm(A)\n[1] 1.202562\n> norm(A[p, p] - crossprod(R0)) \/ norm(A)\n[1] 4.281438e-16\n>\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

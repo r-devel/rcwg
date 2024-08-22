@@ -1,0 +1,917 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18634] R leaks sockets on error in download.file when options(warn = 2) is set*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18634>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tomas.kalibera@gmail.com\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #3 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nThanks for the report. For now I've added\/fixed checks to assure that select()\nand FD_* are called with valid file descriptors.\n\nI agree that on POSIX systems, the maximum allowed descriptor number is\nFD_SETSIZE-1. I think it is clear from the POSIX wording as well as Linux and\nmacOS man pages.\n\nI don't know why the error handling in the socket code has been designed the\nway it has been, but I've fixed it consistently with the existing design. Also,\nintroducing R exceptions where they haven't been before often comes with\nintroducing new leaks.\n\nAlso these checks have to be done differently on Windows. On Windows, the\nsocket (file) descriptors can be and are arbitrarily large numbers and they are\nsupported such in select() and FD_*(). The limit, however, (still) applies to\nthe maximum number of descriptors in the set.\n\nIf you could test the new behavior on a system where you observed the crash,\nthat would be nice. The fixes are in R-devel 85689 (the calls to select\/FD_\nshould be fixed, but the leaks are still present).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702649561.153909",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "qNh",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18634] R leaks sockets on error in download.file when options(warn = 2) is set",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18634"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tomas.kalibera@gmail.com\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #3 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for the report. For now I've added\/fixed checks to assure that select()\nand FD_* are called with valid file descriptors.\n\nI agree that on POSIX systems, the maximum allowed descriptor number is\nFD_SETSIZE-1. I think it is clear from the POSIX wording as well as Linux and\nmacOS man pages.\n\nI don't know why the error handling in the socket code has been designed the\nway it has been, but I've fixed it consistently with the existing design. Also,\nintroducing R exceptions where they haven't been before often comes with\nintroducing new leaks.\n\nAlso these checks have to be done differently on Windows. On Windows, the\nsocket (file) descriptors can be and are arbitrarily large numbers and they are\nsupported such in select() and FD_*(). The limit, however, (still) applies to\nthe maximum number of descriptors in the set.\n\nIf you could test the new behavior on a system where you observed the crash,\nthat would be nice. The fixes are in R-devel 85689 (the calls to select\/FD_\nshould be fixed, but the leaks are still present)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18637] New: Tar has not had a 100 byte limit for 35 years. The check is confusing.*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18637>\n\n            Bug ID: 18637\n           Summary: Tar has not had a 100 byte limit for 35 years. The\n                    check is confusing.\n           Product: R\n           Version: R 4.3.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Misc\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:mcgrath.justin@gmail.com|mcgrath.justin@gmail.com>\n\nThis is not a bug per se, but a member of the core team on the mailing list\nsuggesting that I post this here.\n\nThe \"check_file_names\" function in \"library\/tools\/R\/check.R\" performs checks\nfor compatibility with the tar v7 and ustar formats. v7 has a 100 byte\nrestriction on the total path, and if a path is longer than that, a note is\noutputted. Tar has not had this limitation for more than 35 years, longer than\nR has existed. Thus, there are likely no people installing current versions of\nR that do not have support for at least 256 byte paths, and checking for v7\ncompatibility is not helpful. It is roughly similar to telling users that their\npaths are not 8.3 compatible.\n\nAlthough it is rare that sensibly named files have paths longer than 100 bytes,\nit does happen. In particular, publicly available libraries can have sensible\npath names around 85 bytes long, which when added in a subdirectory of an R\npackage exceed 100 bytes. Thus developers see the note and need to rename files\nso that R CMD check --as-cran reports no messages in order to send a clean\nbuild to CRAN. Since this requires manually renaming files and editing #include\ndirectives each time an update is pulled from a public source, this task is\nfrustratingly pointless given that tar has no such limitation.\n\nI think the check for v7 compatibility, that is, paths exceeding 100 bytes, is\nunnecessary and causes unnecessary work and could be removed. The ustar check,\nup to 256 byte paths with some restrictions on splitting the path, poses no\nproblem.\n\nThe v7 check has served double duty, also helping ensure that packages can be\nextracted on Windows, which has a 260 character path limit. A path limit check\nwould likely need to be added if the v7 check is removed. However, a path limit\nof 100 characters is not necessary to ensure usability, and it is unbalanced.\nBoth packing and unpacking require people to use reasonable names. One can't\nexpect that people will put unreasonable paths in their packages, and one can't\nexpect people to try to unpack packages into unreasonably long directories.\nThus there should be a balance between the two.\n\nI suggest 130 characters. Why? Well, if the total path limit were 1000\ncharacters, one would just pick 500, right in the middle, and not think more\nabout it. Realistically, neither packing nor unpacking will ever be restricted\nby that limit. Although 260 characters is small enough that no matter what\nsplit is chosen, there's going to be someone packing or unpacking that has a\nproblem, it's also big enough that by selecting the value right in the middle,\nvery few people will ever have problems in either case. There's probably an\noptimal value that's not 130 characters, but until people complain about it\neither way, it's all guessing, and 130 is a good first guess.\n\nOverall, this makes things clearer and easier for developers. They would not be\ngiven a message about an overly restrictive limitation they know doesn't exist,\nand instead they'd be given a meaningful message about a real, but reasonable,\nlimitation.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702652926.208949",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "f=PB=",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18637] New: Tar has not had a 100 byte limit for 35 years. The check is confusing.",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18637"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18637\n           Summary: Tar has not had a 100 byte limit for 35 years. The\n                    check is confusing.\n           Product: R\n           Version: R 4.3.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Misc\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:mcgrath.justin@gmail.com",
+                                "text": "mcgrath.justin@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThis is not a bug per se, but a member of the core team on the mailing list\nsuggesting that I post this here.\n\nThe \"check_file_names\" function in \"library\/tools\/R\/check.R\" performs checks\nfor compatibility with the tar v7 and ustar formats. v7 has a 100 byte\nrestriction on the total path, and if a path is longer than that, a note is\noutputted. Tar has not had this limitation for more than 35 years, longer than\nR has existed. Thus, there are likely no people installing current versions of\nR that do not have support for at least 256 byte paths, and checking for v7\ncompatibility is not helpful. It is roughly similar to telling users that their\npaths are not 8.3 compatible.\n\nAlthough it is rare that sensibly named files have paths longer than 100 bytes,\nit does happen. In particular, publicly available libraries can have sensible\npath names around 85 bytes long, which when added in a subdirectory of an R\npackage exceed 100 bytes. Thus developers see the note and need to rename files\nso that R CMD check --as-cran reports no messages in order to send a clean\nbuild to CRAN. Since this requires manually renaming files and editing #include\ndirectives each time an update is pulled from a public source, this task is\nfrustratingly pointless given that tar has no such limitation.\n\nI think the check for v7 compatibility, that is, paths exceeding 100 bytes, is\nunnecessary and causes unnecessary work and could be removed. The ustar check,\nup to 256 byte paths with some restrictions on splitting the path, poses no\nproblem.\n\nThe v7 check has served double duty, also helping ensure that packages can be\nextracted on Windows, which has a 260 character path limit. A path limit check\nwould likely need to be added if the v7 check is removed. However, a path limit\nof 100 characters is not necessary to ensure usability, and it is unbalanced.\nBoth packing and unpacking require people to use reasonable names. One can't\nexpect that people will put unreasonable paths in their packages, and one can't\nexpect people to try to unpack packages into unreasonably long directories.\nThus there should be a balance between the two.\n\nI suggest 130 characters. Why? Well, if the total path limit were 1000\ncharacters, one would just pick 500, right in the middle, and not think more\nabout it. Realistically, neither packing nor unpacking will ever be restricted\nby that limit. Although 260 characters is small enough that no matter what\nsplit is chosen, there's going to be someone packing or unpacking that has a\nproblem, it's also big enough that by selecting the value right in the middle,\nvery few people will ever have problems in either case. There's probably an\noptimal value that's not 130 characters, but until people complain about it\neither way, it's all guessing, and 130 is a good first guess.\n\nOverall, this makes things clearer and easier for developers. They would not be\ngiven a message about an overly restrictive limitation they know doesn't exist,\nand instead they'd be given a meaningful message about a real, but reasonable,\nlimitation."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18637] Tar has not had a 100 byte limit for 35 years. The check is confusing.*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18637>\n\nDirk Eddelbuettel (<mailto:edd@debian.org|edd@debian.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |edd@debian.org\n\n--- Comment #1 from Dirk Eddelbuettel (<mailto:edd@debian.org|edd@debian.org>) ---\nI like this.  The 'clashes' I had with outdated limit of 100 chars where\ngenerally caused by path length still under 105 or 110 chars.  Going to 150,\nwhile still abitrary, will make life easier for many developers.  That is a\nworthy goal.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702654478.123869",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "sFEq",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18637] Tar has not had a 100 byte limit for 35 years. The check is confusing.",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18637"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nDirk Eddelbuettel ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:edd@debian.org",
+                                "text": "edd@debian.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |edd@debian.org\n\n--- Comment #1 from Dirk Eddelbuettel ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:edd@debian.org",
+                                "text": "edd@debian.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI like this.  The 'clashes' I had with outdated limit of 100 chars where\ngenerally caused by path length still under 105 or 110 chars.  Going to 150,\nwhile still abitrary, will make life easier for many developers.  That is a\nworthy goal."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18634] R leaks sockets on error in download.file when options(warn = 2) is set*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18634>\n\n--- Comment #4 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\n\n(In reply to Ivan Krylov from comment #1)\n\nI see \"fclose(out[i]);\" at line 735 followed by unlink at line 746. Does the\ncurrent code attempt to delete an opened file? If so, could you please help me\nsee where? Thanks.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702657503.281369",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "cSRbP",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18634] R leaks sockets on error in download.file when options(warn = 2) is set",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18634"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n\n(In reply to Ivan Krylov from comment #1)\n\nI see \"fclose(out[i]);\" at line 735 followed by unlink at line 746. Does the\ncurrent code attempt to delete an opened file? If so, could you please help me\nsee where? Thanks."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18634] R leaks sockets on error in download.file when options(warn = 2) is set*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18634>\n\n--- Comment #5 from Ivan Krylov (<mailto:krylov.r00t@gmail.com|krylov.r00t@gmail.com>) ---\n(In reply to Tomas Kalibera from comment #4)\n&gt; I see \"fclose(out[i]);\" at line 735 followed by unlink at line 746. Does the\n&gt; current code attempt to delete an opened file?\n\nSorry, no, the current code is fine. I only mentioned this to explain why I had\nto move both `fclose()` and `unlink()` from `in_curlDownload` into the\ndestructor: `fclose()` only wouldn't be enough.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702657817.682749",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "MwILQ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18634] R leaks sockets on error in download.file when options(warn = 2) is set",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18634"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:krylov.r00t@gmail.com",
+                                "text": "krylov.r00t@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Tomas Kalibera from comment #4)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I see \"fclose(out[i]);\" at line 735 followed by unlink at line 746. Does the\ncurrent code attempt to delete an opened file?"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSorry, no, the current code is fine. I only mentioned this to explain why I had\nto move both "
+                            },
+                            {
+                                "type": "text",
+                                "text": "fclose()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "unlink()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "in_curlDownload",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " into the\ndestructor: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "fclose()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " only wouldn't be enough."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18423] cov2cor(&lt;0-by-0&gt;) should not be an error*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18423>\n\n--- Comment #1 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nThe reported behaviour still exists in R-devel (r85690) - it seems like\nlow-hanging fruit for R 4.4, hence a gentle bump ...",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702666645.182599",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "QwLgj",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18423] cov2cor(<0-by-0>) should not be an error",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18423"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe reported behaviour still exists in R-devel (r85690) - it seems like\nlow-hanging fruit for R 4.4, hence a gentle bump ..."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18424] cov2cor() warning is inaccurate*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18424>\n\n--- Comment #6 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nParallel to bug 18423, this warning message is still issued in R-devel\n(r85690).  However, note that attachment 3077 _does not_ represent my original\nproposal concerning the possibility of finite _negative_ elements of `diag(V)`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702667268.041799",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "=kR",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18424] cov2cor() warning is inaccurate",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18424"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #6 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nParallel to bug 18423, this warning message is still issued in R-devel\n(r85690).  However, note that attachment 3077 "
+                            },
+                            {
+                                "type": "text",
+                                "text": "does not",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " represent my original\nproposal concerning the possibility of finite "
+                            },
+                            {
+                                "type": "text",
+                                "text": "negative",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " elements of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "diag(V)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 8112] Bug in copying of S4 objects*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=8112>\n\nMikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jaganmn@mcmaster.ca\n\n--- Comment #6 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nI am not able to reproduce Duncan's or Luke's output running the latest R-devel\n(r85690):\n\n```\n&gt; setClass(\"foo\", list(a = \"numeric\"))\n&gt; x &lt;- new(\"foo\", a = 1)\n&gt; y &lt;- x\n&gt; assign(\"x\", `@&lt;-`(x, \"a\", 2))\n&gt; x@a\n[1] 2\n&gt; y@a\n[1] 1\n&gt; f &lt;- function() x@a &lt;&lt;- 2\n&gt; x &lt;- new(\"foo\", a = 1)\n&gt; y &lt;- x\n&gt; f()\n&gt; x@a\n[1] 2\n&gt; y@a\n[1] 1\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702677442.964299",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "AWF+",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 8112] Bug in copying of S4 objects",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=8112"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jaganmn@mcmaster.ca\n\n--- Comment #6 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI am not able to reproduce Duncan's or Luke's output running the latest R-devel\n(r85690):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> setClass(\"foo\", list(a = \"numeric\"))\n> x <- new(\"foo\", a = 1)\n> y <- x\n> assign(\"x\", `@<-`(x, \"a\", 2))\n> x@a\n[1] 2\n> y@a\n[1] 1\n> f <- function() x@a <<- 2\n> x <- new(\"foo\", a = 1)\n> y <- x\n> f()\n> x@a\n[1] 2\n> y@a\n[1] 1\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 7923] Bug in help(package=)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=7923>\n\nMikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jaganmn@mcmaster.ca\n\n--- Comment #4 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nSince r56790, `help(\"help\")` has documented a \"hack\" to disable deparsing in\nthe absence of a `character.only` argument.  Would R-core consider adding (or\naccepting a patch that adds) support for `help(character.only=)`?  If not, then\ncan this bug finally be closed?\n\n```\nIndex: src\/library\/utils\/man\/help.Rd\n===================================================================\n--- src\/library\/utils\/man\/help.Rd       (revision 56789)\n+++ src\/library\/utils\/man\/help.Rd       (revision 56790)\n@@ -28,9 +28,9 @@\n    See \\sQuote{Details} for what happens if this is omitted.\n  }\n  \\item{package}{a name or character vector giving the packages to look\n-   into for documentation, or \\code{NULL}. By default, all packages in\n-   the search path are used. To avoid a name being deparsed use e.g.\n-   \\code{(pkg_ref)}.}\n+   into for documentation, or \\code{NULL}.  By default, all packages in\n+   the search path are used.  To avoid a name being deparsed use e.g.\n+   \\code{(pkg_ref)} (see the examples).}\n  \\item{lib.loc}{a character vector of directory names of \\R libraries,\n    or \\code{NULL}.  The default value of \\code{NULL} corresponds to all\n    libraries currently known.  If the default is used, the loaded\n@@ -176,5 +176,9 @@\n try(help(\"bs\", try.all.packages=FALSE)) # reports not found (an error)\n help(\"bs\", try.all.packages=TRUE)       # reports can be found\n                                         # in package 'splines'\n-}\n+\n+\\donttest{## For programmatic use:\n+topic &lt;- \"family\"; pkg_ref &lt;- \"stats\"\n+help((topic), (pkg_ref))\n+}}\n \\keyword{documentation}\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702679619.402459",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "3dO",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 7923] Bug in help(package=)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=7923"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jaganmn@mcmaster.ca\n\n--- Comment #4 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nSince r56790, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "help(\"help\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has documented a \"hack\" to disable deparsing in\nthe absence of a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "character.only",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " argument.  Would R-core consider adding (or\naccepting a patch that adds) support for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "help(character.only=)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "?  If not, then\ncan this bug finally be closed?\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/utils\/man\/help.Rd\n===================================================================\n--- src\/library\/utils\/man\/help.Rd       (revision 56789)\n+++ src\/library\/utils\/man\/help.Rd       (revision 56790)\n@@ -28,9 +28,9 @@\n    See \\sQuote{Details} for what happens if this is omitted.\n  }\n  \\item{package}{a name or character vector giving the packages to look\n-   into for documentation, or \\code{NULL}. By default, all packages in\n-   the search path are used. To avoid a name being deparsed use e.g.\n-   \\code{(pkg_ref)}.}\n+   into for documentation, or \\code{NULL}.  By default, all packages in\n+   the search path are used.  To avoid a name being deparsed use e.g.\n+   \\code{(pkg_ref)} (see the examples).}\n  \\item{lib.loc}{a character vector of directory names of \\R libraries,\n    or \\code{NULL}.  The default value of \\code{NULL} corresponds to all\n    libraries currently known.  If the default is used, the loaded\n@@ -176,5 +176,9 @@\n try(help(\"bs\", try.all.packages=FALSE)) # reports not found (an error)\n help(\"bs\", try.all.packages=TRUE)       # reports can be found\n                                         # in package 'splines'\n-}\n+\n+\\donttest{## For programmatic use:\n+topic <- \"family\"; pkg_ref <- \"stats\"\n+help((topic), (pkg_ref))\n+}}\n \\keyword{documentation}\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 8112] Bug in copying of S4 objects*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=8112>\n\nLuke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |luke@stat.uiowa.edu\n\n--- Comment #7 from Luke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) ---\nA lot has changed in the internals since this was reported, so closing now.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702684964.323369",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "93f",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 8112] Bug in copying of S4 objects",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=8112"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nLuke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |luke@stat.uiowa.edu\n\n--- Comment #7 from Luke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nA lot has changed in the internals since this was reported, so closing now."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 8112] Bug in copying of S4 objects*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=8112>\n\nLuke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|NEW                         |CLOSED",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702684969.801279",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "=WN",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 8112] Bug in copying of S4 objects",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=8112"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nLuke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|NEW                         |CLOSED"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18424] cov2cor() warning is inaccurate*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18424>\n\n--- Comment #7 from Elin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) ---\nCan you please make a patch with what you think the change should be?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702703338.789649",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "tu56n",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18424] cov2cor() warning is inaccurate",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18424"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #7 from Elin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCan you please make a patch with what you think the change should be?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18423] cov2cor(&lt;0-by-0&gt;) should not be an error*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18423>\n\nElin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |elin.waring@gmail.com\n\n--- Comment #2 from Elin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) ---\nCreated attachment 3276\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3276&amp;action=edit>\npatch based on comments\n\nI tested the proposed change here:\n\n<https:\/\/github.com\/r-devel\/r-svn\/pull\/148>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702712923.426799",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "AbqH",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18423] cov2cor(<0-by-0>) should not be an error",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18423"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nElin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |elin.waring@gmail.com\n\n--- Comment #2 from Elin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3276\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3276&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3276&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\npatch based on comments\n\nI tested the proposed change here:\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/pull\/148"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

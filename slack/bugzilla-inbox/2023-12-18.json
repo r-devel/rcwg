@@ -1,0 +1,738 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18638] New: removeSource fails to remove source references from formals and from pairlist*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18638>\n\n            Bug ID: 18638\n           Summary: removeSource fails to remove source references from\n                    formals and from pairlist\n           Product: R\n           Version: R 4.3.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Language\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:akwsimmo@gmail.com|akwsimmo@gmail.com>\n\n`removeSource()` fails to remove source references from the formal arguments of\na function, and from the pairlist of formal arguments in sub-functions:\n\n```\nf &lt;- removeSource(function(x = {}) {\n    function(y = {}) {\n        NULL\n    }\n})\nlapply(formals(f), attributes)\nlapply(formals(f()), attributes)\n```\n\nThis gives the following output:\n\n```\n&gt; f &lt;- removeSource(function(x = {}) {\n+     function(y = {}) {\n+         NULL\n+     }\n+ })\n&gt; lapply(formals(f), attributes)\n$x\n$x$srcref\n$x$srcref[[1]]\n{\n\n\n$x$srcfile\n\n\n$x$wholeSrcref\nf &lt;- removeSource(function(x = {}\n\n\n&gt; lapply(formals(f()), attributes)\n$y\n$y$srcref\n$y$srcref[[1]]\n{\n\n\n$y$srcfile\n\n\n$y$wholeSrcref\nf &lt;- removeSource(function(x = {}) {\n    function(y = {}\n\n\n&gt; \n```\n\nAs such, I think `removeSource` should be replaced with something like this:\n\n```\nremoveSource &lt;- function(fn) {\n\n    recurse &lt;- function(part) {\n        if (is.name(part)) return(part)  # handles missing arg, PR#15957\n        attr(part, \"srcref\") &lt;- NULL\n        attr(part, \"wholeSrcref\") &lt;- NULL\n        attr(part, \"srcfile\") &lt;- NULL\n        ## remove source references from formal arguments of sub-functions\n        if (is.pairlist(part)) {\n            for (i in seq_along(part))\n                part[i] &lt;- list(recurse(part[[i]]))\n            ## as.pairlist() keeps attributes\n            return(as.pairlist(part))\n        }\n        if (is.language(part) &amp;&amp; is.recursive(part)) {\n            for (i in seq_along(part))\n                part[i] &lt;- list(recurse(part[[i]])) # recurse(*) may be NULL\n        }\n        part\n    }\n\n    if(is.function(fn)) {\n        if(!is.primitive(fn)) {\n            attr(fn, \"srcref\") &lt;- NULL\n            ## `body&lt;-`(f, *) drops all attributes of f\n            at &lt;- attributes(fn)\n            formals(fn) &lt;- recurse(formals(fn))\n            attr(body(fn), \"wholeSrcref\") &lt;- NULL\n            attr(body(fn), \"srcfile\") &lt;- NULL\n            body(fn) &lt;- recurse(body(fn))\n            if(!is.null(at)) attributes(fn) &lt;- at\n        }\n        fn\n    }\n    else if(is.language(fn)) { # expression, call, or symbol=name\n        recurse(fn)\n    }\n    else\n        stop(\"argument is not a function or language object:\", typeof(fn))\n}\n```\n\nthe two new additions being the `if (is.pairlist(part)) {` block in `recurse()`\nand `formals(fn) &lt;- recurse(formals(fn))` in the `if(is.function(fn)) {` block.\n\nIf I re-run the example with this new `removeSource()`, I get this output:\n\n```\n&gt; lapply(formals(f), attributes)\n$x\nNULL\n\n&gt; lapply(formals(f()), attributes)\n$y\nNULL\n\n&gt; \n```\n\nMuch better. Thank you!",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702892185.621579",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "jG0N",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18638] New: removeSource fails to remove source references from formals and from pairlist",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18638"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18638\n           Summary: removeSource fails to remove source references from\n                    formals and from pairlist\n           Product: R\n           Version: R 4.3.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Language\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:akwsimmo@gmail.com",
+                                "text": "akwsimmo@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "removeSource()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " fails to remove source references from the formal arguments of\na function, and from the pairlist of formal arguments in sub-functions:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "f <- removeSource(function(x = {}) {\n    function(y = {}) {\n        NULL\n    }\n})\nlapply(formals(f), attributes)\nlapply(formals(f()), attributes)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis gives the following output:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> f <- removeSource(function(x = {}) {\n+     function(y = {}) {\n+         NULL\n+     }\n+ })\n> lapply(formals(f), attributes)\n$x\n$x$srcref\n$x$srcref[[1]]\n{\n\n\n$x$srcfile\n\n\n$x$wholeSrcref\nf <- removeSource(function(x = {}\n\n\n> lapply(formals(f()), attributes)\n$y\n$y$srcref\n$y$srcref[[1]]\n{\n\n\n$y$srcfile\n\n\n$y$wholeSrcref\nf <- removeSource(function(x = {}) {\n    function(y = {}\n\n\n> \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nAs such, I think "
+                            },
+                            {
+                                "type": "text",
+                                "text": "removeSource",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " should be replaced with something like this:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "removeSource <- function(fn) {\n\n    recurse <- function(part) {\n        if (is.name(part)) return(part)  # handles missing arg, PR#15957\n        attr(part, \"srcref\") <- NULL\n        attr(part, \"wholeSrcref\") <- NULL\n        attr(part, \"srcfile\") <- NULL\n        ## remove source references from formal arguments of sub-functions\n        if (is.pairlist(part)) {\n            for (i in seq_along(part))\n                part[i] <- list(recurse(part[[i]]))\n            ## as.pairlist() keeps attributes\n            return(as.pairlist(part))\n        }\n        if (is.language(part) && is.recursive(part)) {\n            for (i in seq_along(part))\n                part[i] <- list(recurse(part[[i]])) # recurse(*) may be NULL\n        }\n        part\n    }\n\n    if(is.function(fn)) {\n        if(!is.primitive(fn)) {\n            attr(fn, \"srcref\") <- NULL\n            ## `body<-`(f, *) drops all attributes of f\n            at <- attributes(fn)\n            formals(fn) <- recurse(formals(fn))\n            attr(body(fn), \"wholeSrcref\") <- NULL\n            attr(body(fn), \"srcfile\") <- NULL\n            body(fn) <- recurse(body(fn))\n            if(!is.null(at)) attributes(fn) <- at\n        }\n        fn\n    }\n    else if(is.language(fn)) { # expression, call, or symbol=name\n        recurse(fn)\n    }\n    else\n        stop(\"argument is not a function or language object:\", typeof(fn))\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nthe two new additions being the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "if (is.pairlist(part)) {",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " block in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "recurse()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nand "
+                            },
+                            {
+                                "type": "text",
+                                "text": "formals(fn) <- recurse(formals(fn))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "if(is.function(fn)) {",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " block.\n\nIf I re-run the example with this new "
+                            },
+                            {
+                                "type": "text",
+                                "text": "removeSource()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", I get this output:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> lapply(formals(f), attributes)\n$x\nNULL\n\n> lapply(formals(f()), attributes)\n$y\nNULL\n\n> \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nMuch better. Thank you!"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18638] removeSource fails to remove source references from formals and from pairlist*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18638>\n\nIvan Krylov (<mailto:krylov.r00t@gmail.com|krylov.r00t@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |krylov.r00t@gmail.com\n\n--- Comment #1 from Ivan Krylov (<mailto:krylov.r00t@gmail.com|krylov.r00t@gmail.com>) ---\nYet another source of source references is [unevaluated function\nliterals](<https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2023-March\/082504.html>):\n\n```\nstr(quote(function()NULL)[[4]])\n#  'srcref' int [1:8] 1 11 1 24 11 24 1 1\n#  - attr(*, \"srcfile\")=Classes 'srcfilecopy', 'srcfile' &lt;environment:\n0x5592ba8df8c0&gt; \n```\n\nThis is not an attribute, this is the fourth element in the call to ``\n`function` ``. Perhaps `recurse(x)` could also test for `inherits(x, 'srcref')`\nand return `NULL` if that is the case.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702893314.069429",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "=ygZ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18638] removeSource fails to remove source references from formals and from pairlist",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18638"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIvan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:krylov.r00t@gmail.com",
+                                "text": "krylov.r00t@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |krylov.r00t@gmail.com\n\n--- Comment #1 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:krylov.r00t@gmail.com",
+                                "text": "krylov.r00t@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nYet another source of source references is [unevaluated function\nliterals]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2023-March\/082504.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "str(quote(function()NULL)[[4]])\n#  'srcref' int [1:8] 1 11 1 24 11 24 1 1\n#  - attr(*, \"srcfile\")=Classes 'srcfilecopy', 'srcfile' <environment:\n0x5592ba8df8c0> \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis is not an attribute, this is the fourth element in the call to ``\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "function",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ``. Perhaps "
+                            },
+                            {
+                                "type": "text",
+                                "text": "recurse(x)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " could also test for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "inherits(x, 'srcref')",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nand return "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " if that is the case."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18635] dummy.coef could not deal with character variable*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18635>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #4 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nThank you, both.  I have fixed  `dummy.coef.lm()` now, not touching `lm()` nor\n`model.frame()`, for now.\nIndeed, the factor-level ordering *is* recorded in the lm-object already,\nnotably via  `&lt;obj&gt;$xlevel` as Erin noted indirectly.\n\nCommitted to R-devel in svn rev 85694.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702912442.967629",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "PvrN",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18635] dummy.coef could not deal with character variable",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18635"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #4 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you, both.  I have fixed  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dummy.coef.lm()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " now, not touching "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lm()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " nor\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "model.frame()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", for now.\nIndeed, the factor-level ordering "
+                            },
+                            {
+                                "type": "text",
+                                "text": "is",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " recorded in the lm-object already,\nnotably via  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "<obj>$xlevel",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as Erin noted indirectly.\n\nCommitted to R-devel in svn rev 85694."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18423] cov2cor(&lt;0-by-0&gt;) should not be an error*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18423>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n         Resolution|---                         |FIXED\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #3 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nThank you, Elin and Mikael.\nIndeed low hanging fruit, finally \"harvested\", svn rev 85697.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702912565.765539",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "jGzEQ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18423] cov2cor(<0-by-0>) should not be an error",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18423"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n         Resolution|---                         |FIXED\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #3 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you, Elin and Mikael.\nIndeed low hanging fruit, finally \"harvested\", svn rev 85697."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18424] cov2cor() warning is inaccurate*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18424>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |ASSIGNED\n\n--- Comment #8 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nI think I know +\/- what Michael meant.\n\nAdditionally, I'm also looking into trying to only get one instead of two\nwarnings in such a case.\nNo need to add patches in such cases where only very few lines are affected\n(and they are in such a small function).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702916574.884259",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "iHXj",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18424] cov2cor() warning is inaccurate",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18424"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |ASSIGNED\n\n--- Comment #8 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI think I know +\/- what Michael meant.\n\nAdditionally, I'm also looking into trying to only get one instead of two\nwarnings in such a case.\nNo need to add patches in such cases where only very few lines are affected\n(and they are in such a small function)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18634] R leaks sockets on error in download.file when options(warn = 2) is set*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18634>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|CONFIRMED                   |CLOSED\n\n--- Comment #6 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nI've fixed the resource leaks in the download code, a superset of what has been\ncovered in Ivan's patch. I've initialized the pointers by assigning NULL in a\nloop rather than memset() - it should be more portable, in the (unlikely) case\nthat NULL had a bit representation other than all zeros. I've also fixed some\nleaks in curl connections code. Please let me know if you spot any problems.\n\nI've validated using strace, as suggested by Kevin, that the socket leaks are\nfixed by this.\n\nIn principle, options(warn = 2) should work, so bugs like this one should be\nfixed - thanks for the report. But it is difficult to test for a number of\nreasons. It happens on error\/warning paths (not during normal use). Normally\nleaks do not cause test failure nor crash. Leak detectors would detect also a\nnumber of leaks that are benign\/intended, identifying those that are bad would\nprobably have to be done manually. It seems more cases could be identified\nsimply by code review. I would say that leaks of open files are worse than say\n(limited) heap memory leaks. I've added a note to the documentation mentioning\nthat options(warn=2) could trigger bugs not triggered otherwise.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702927128.349919",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "z6K",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18634] R leaks sockets on error in download.file when options(warn = 2) is set",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18634"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|CONFIRMED                   |CLOSED\n\n--- Comment #6 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI've fixed the resource leaks in the download code, a superset of what has been\ncovered in Ivan's patch. I've initialized the pointers by assigning NULL in a\nloop rather than memset() - it should be more portable, in the (unlikely) case\nthat NULL had a bit representation other than all zeros. I've also fixed some\nleaks in curl connections code. Please let me know if you spot any problems.\n\nI've validated using strace, as suggested by Kevin, that the socket leaks are\nfixed by this.\n\nIn principle, options(warn = 2) should work, so bugs like this one should be\nfixed - thanks for the report. But it is difficult to test for a number of\nreasons. It happens on error\/warning paths (not during normal use). Normally\nleaks do not cause test failure nor crash. Leak detectors would detect also a\nnumber of leaks that are benign\/intended, identifying those that are bad would\nprobably have to be done manually. It seems more cases could be identified\nsimply by code review. I would say that leaks of open files are worse than say\n(limited) heap memory leaks. I've added a note to the documentation mentioning\nthat options(warn=2) could trigger bugs not triggered otherwise."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18639] New: Export tools:::.split_dependencies*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18639>\n\n            Bug ID: 18639\n           Summary: Export tools:::.split_dependencies\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Wishlist\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>\n\nPlease export `tools:::.split_dependencies()`. It's important for any author\ntrying to parse DESCRIPTION files correctly, which has any number of use cases\nfor writing tooling. I've hand-written similar logic dozens of times in subtly\nincorrect ways, as have other authors. I very quickly find 100 examples in CRAN\npackages:\n\n<https:\/\/github.com\/search?q=org%3Acran+%2Fread%5B.%5Ddcf%5B%28%5D%2F+%2F%5B%27%22%5DDESCRIPTION%2F+%2Fstrsplit%5B%28%5D%2F&amp;type=code>\n\nThe function is very stable (I don't see any substantive change in 15 years).\nIs there any reason to keep it private? It seems like having a canonical\nmapping from plaintext-in-DESCRIPTION to a corresponding parsed data structure\nis a good tool to share.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702948690.474929",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "zbo90",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18639] New: Export tools:::.split_dependencies",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18639"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18639\n           Summary: Export tools:::.split_dependencies\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Wishlist\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nPlease export "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tools:::.split_dependencies()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". It's important for any author\ntrying to parse DESCRIPTION files correctly, which has any number of use cases\nfor writing tooling. I've hand-written similar logic dozens of times in subtly\nincorrect ways, as have other authors. I very quickly find 100 examples in CRAN\npackages:\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/search?q=org%3Acran+%2Fread%5B.%5Ddcf%5B%28%5D%2F+%2F%5B%27%22%5DDESCRIPTION%2F+%2Fstrsplit%5B%28%5D%2F&amp;type=code",
+                                "text": "https:\/\/github.com\/search?q=org%3Acran+%2Fread%5B.%5Ddcf%5B%28%5D%2F+%2F%5B%27%22%5DDESCRIPTION%2F+%2Fstrsplit%5B%28%5D%2F&type=code"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThe function is very stable (I don't see any substantive change in 15 years).\nIs there any reason to keep it private? It seems like having a canonical\nmapping from plaintext-in-DESCRIPTION to a corresponding parsed data structure\nis a good tool to share."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

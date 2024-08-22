@@ -1,0 +1,786 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16158] Error in predict.lm for rank-deficient cases*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16158>\n\nRuss Lenth (<mailto:russell-lenth@uiowa.edu|russell-lenth@uiowa.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|FIXED                       |---\n             Status|CLOSED                      |REOPENED\n\n--- Comment #20 from Russ Lenth (<mailto:russell-lenth@uiowa.edu|russell-lenth@uiowa.edu>) ---\nI hadn't thought about this for a while, but now I am seeing cases where we are\ngetting false positives ewgarding non-estimability. Here's some sample code and\nresults:\n```\nset.seed(24.0217)\n\nx1 = rnorm(10, mean = 12, sd = 4)\nx2 = rnorm(10, mean = 14, sd = 3)\nx3 = .7*x1 + .3*x2\nx4 = .4*x1 + .6*x2\ny = 3.5 + .45*x1 + .14*x2 -.51*x3 + rnorm(10, sd = 0.25)\n\nmod = lm(y ~ x1 + x2 + x3 + x4)\n\npredict(mod)\n##        1        2        3        4        5        6        7        8 \n## 4.207751 4.453079 4.445103 4.199925 4.536646 4.401216 4.444607 4.182162 \n##        9       10 \n## 4.099641 4.318122\n\npredict(mod, newdata = data.frame(x1,x2,x3,x4))\n## Warning in predict.lm(mod, newdata = data.frame(x1, x2, x3, x4)): prediction\n## from rank-deficient fit; attr(*, \"non-estim\") has doubtful cases\n##        1        2        3        4        5        6        7        8 \n## 4.207751 4.453079 4.445103 4.199925 4.536646 4.401216 4.444607 4.182162 \n##        9       10 \n## 4.099641 4.318122 \n## attr(,\"non-estim\")\n##  1  2  3  4  5  6  7  8  9 10 \n##  1  2  3  4  5  6  7  8  9 10\n\npredict(mod, newdata = data.frame(x1,x2,x3,x4), tol = 1e-2)\n## Warning in predict.lm(mod, newdata = data.frame(x1, x2, x3, x4), tol =\n0.01):\n## prediction from rank-deficient fit; attr(*, \"non-estim\") has doubtful cases\n##        1        2        3        4        5        6        7        8 \n## 4.207751 4.453079 4.445103 4.199925 4.536646 4.401216 4.444607 4.182162 \n##        9       10 \n## 4.099641 4.318122 \n## attr(,\"non-estim\")\n## 4 9 \n## 4 9\n\nmod10 = lm(y ~ I(10*x1) + I(10*x2) + I(10*x3) + I(10*x4))\npredict(mod10, newdata = data.frame(x1,x2,x3,x4), tol = 1e-2)\n##        1        2        3        4        5        6        7        8 \n## 4.207751 4.453079 4.445103 4.199925 4.536646 4.401216 4.444607 4.182162 \n##        9       10 \n## 4.099641 4.318122\n\npredict(mod10, newdata = data.frame(x1,x2,x3,x4), tol = 1e-3)\n## Warning in predict.lm(mod10, newdata = data.frame(x1, x2, x3, x4), tol =\n## 0.001): prediction from rank-deficient fit; attr(*, \"non-estim\") has\ndoubtful\n## cases\n##        1        2        3        4        5        6        7        8 \n## 4.207751 4.453079 4.445103 4.199925 4.536646 4.401216 4.444607 4.182162 \n##        9       10 \n## 4.099641 4.318122 \n## attr(,\"non-estim\")\n## 4 9 \n## 4 9\n\nR.Version()\n## $platform\n## [1] \"x86_64-w64-mingw32\"\n## \n## $arch\n## [1] \"x86_64\"\n## \n## $os\n## [1] \"mingw32\"\n## \n## $crt\n## [1] \"ucrt\"\n## \n## $system\n## [1] \"x86_64, mingw32\"\n## \n## $status\n## [1] \"\"\n## \n## $major\n## [1] \"4\"\n## \n## $minor\n## [1] \"3.2\"\n## \n## $year\n## [1] \"2023\"\n## \n## $month\n## [1] \"10\"\n## \n## $day\n## [1] \"31\"\n## \n## $`svn rev`\n## [1] \"85441\"\n## \n## $language\n## [1] \"R\"\n## \n## $version.string\n## [1] \"R version 4.3.2 (2023-10-31 ucrt)\"\n## \n## $nickname\n## [1] \"Eye Holes\"\n```\n\n\nIn summary, I fitted a rank-deficient model `mod` and obtained its predictions.\nThen if I use `mod` to predict the same data specified in `newdata`, then under\ndefault settings we are warned that all 10 predictions are non-estimable, even\nthough obviously these 10 rows of newdata comprise the row space of X.\n\nIf I back-off the `tol` parameter to `1e-2`, then only two are flagged as\nnon-estimable. This puts us near the edge of the estimability criteria. I\nsuspected that the issue might have to do with how the estimability criteria\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1708284575.990549",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "F62\/U",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16158] Error in predict.lm for rank-deficient cases",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16158"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nRuss Lenth ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:russell-lenth@uiowa.edu",
+                                "text": "russell-lenth@uiowa.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|FIXED                       |---\n             Status|CLOSED                      |REOPENED\n\n--- Comment #20 from Russ Lenth ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:russell-lenth@uiowa.edu",
+                                "text": "russell-lenth@uiowa.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI hadn't thought about this for a while, but now I am seeing cases where we are\ngetting false positives ewgarding non-estimability. Here's some sample code and\nresults:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "set.seed(24.0217)\n\nx1 = rnorm(10, mean = 12, sd = 4)\nx2 = rnorm(10, mean = 14, sd = 3)\nx3 = .7*x1 + .3*x2\nx4 = .4*x1 + .6*x2\ny = 3.5 + .45*x1 + .14*x2 -.51*x3 + rnorm(10, sd = 0.25)\n\nmod = lm(y ~ x1 + x2 + x3 + x4)\n\npredict(mod)\n##        1        2        3        4        5        6        7        8 \n## 4.207751 4.453079 4.445103 4.199925 4.536646 4.401216 4.444607 4.182162 \n##        9       10 \n## 4.099641 4.318122\n\npredict(mod, newdata = data.frame(x1,x2,x3,x4))\n## Warning in predict.lm(mod, newdata = data.frame(x1, x2, x3, x4)): prediction\n## from rank-deficient fit; attr(*, \"non-estim\") has doubtful cases\n##        1        2        3        4        5        6        7        8 \n## 4.207751 4.453079 4.445103 4.199925 4.536646 4.401216 4.444607 4.182162 \n##        9       10 \n## 4.099641 4.318122 \n## attr(,\"non-estim\")\n##  1  2  3  4  5  6  7  8  9 10 \n##  1  2  3  4  5  6  7  8  9 10\n\npredict(mod, newdata = data.frame(x1,x2,x3,x4), tol = 1e-2)\n## Warning in predict.lm(mod, newdata = data.frame(x1, x2, x3, x4), tol =\n0.01):\n## prediction from rank-deficient fit; attr(*, \"non-estim\") has doubtful cases\n##        1        2        3        4        5        6        7        8 \n## 4.207751 4.453079 4.445103 4.199925 4.536646 4.401216 4.444607 4.182162 \n##        9       10 \n## 4.099641 4.318122 \n## attr(,\"non-estim\")\n## 4 9 \n## 4 9\n\nmod10 = lm(y ~ I(10*x1) + I(10*x2) + I(10*x3) + I(10*x4))\npredict(mod10, newdata = data.frame(x1,x2,x3,x4), tol = 1e-2)\n##        1        2        3        4        5        6        7        8 \n## 4.207751 4.453079 4.445103 4.199925 4.536646 4.401216 4.444607 4.182162 \n##        9       10 \n## 4.099641 4.318122\n\npredict(mod10, newdata = data.frame(x1,x2,x3,x4), tol = 1e-3)\n## Warning in predict.lm(mod10, newdata = data.frame(x1, x2, x3, x4), tol =\n## 0.001): prediction from rank-deficient fit; attr(*, \"non-estim\") has\ndoubtful\n## cases\n##        1        2        3        4        5        6        7        8 \n## 4.207751 4.453079 4.445103 4.199925 4.536646 4.401216 4.444607 4.182162 \n##        9       10 \n## 4.099641 4.318122 \n## attr(,\"non-estim\")\n## 4 9 \n## 4 9\n\nR.Version()\n## $platform\n## [1] \"x86_64-w64-mingw32\"\n## \n## $arch\n## [1] \"x86_64\"\n## \n## $os\n## [1] \"mingw32\"\n## \n## $crt\n## [1] \"ucrt\"\n## \n## $system\n## [1] \"x86_64, mingw32\"\n## \n## $status\n## [1] \"\"\n## \n## $major\n## [1] \"4\"\n## \n## $minor\n## [1] \"3.2\"\n## \n## $year\n## [1] \"2023\"\n## \n## $month\n## [1] \"10\"\n## \n## $day\n## [1] \"31\"\n## \n## $`svn rev`\n## [1] \"85441\"\n## \n## $language\n## [1] \"R\"\n## \n## $version.string\n## [1] \"R version 4.3.2 (2023-10-31 ucrt)\"\n## \n## $nickname\n## [1] \"Eye Holes\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n\n\nIn summary, I fitted a rank-deficient model "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mod",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and obtained its predictions.\nThen if I use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mod",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to predict the same data specified in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "newdata",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", then under\ndefault settings we are warned that all 10 predictions are non-estimable, even\nthough obviously these 10 rows of newdata comprise the row space of X.\n\nIf I back-off the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tol",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " parameter to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "1e-2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", then only two are flagged as\nnon-estimable. This puts us near the edge of the estimability criteria. I\nsuspected that the issue might have to do with how the estimability criteria"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "are scaled; so I tried another model, `mod10`, which is the same except all the\npredictors are multiplied by 10. Now, predicting with `tol` set to `1e-2`\nresults in their all testing to be estimable. But if I change `tol` to `1e-3`,\nwe get to the borderline situation where the same two of the 10 are flagged as\nnon-estimable.\n\nMy recommendation is to look at how the nonestimable basis is scaled, and also\nat how we scale the estimable function being tested for estimability. The\nestimability assessment should not depend on the scaling of the predictors or\nthe new data.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1708284576.014839",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "N9j",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "are scaled; so I tried another model, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mod10",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which is the same except all the\npredictors are multiplied by 10. Now, predicting with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tol",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " set to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "1e-2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nresults in their all testing to be estimable. But if I change "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tol",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "1e-3",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\nwe get to the borderline situation where the same two of the 10 are flagged as\nnon-estimable.\n\nMy recommendation is to look at how the nonestimable basis is scaled, and also\nat how we scale the estimable function being tested for estimability. The\nestimability assessment should not depend on the scaling of the predictors or\nthe new data."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16158] Error in predict.lm for rank-deficient cases*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16158>\n\n--- Comment #21 from Russ Lenth (<mailto:russell-lenth@uiowa.edu|russell-lenth@uiowa.edu>) ---\nDarn it, bugzilla plugged-in the wrong markdown stuff and instead, recycled\nsome stuff from comment 18. I'm trying again. \n\n```\nset.seed(24.0217)\n\nx1 = rnorm(10, mean = 12, sd = 4)\nx2 = rnorm(10, mean = 14, sd = 3)\nx3 = .7*x1 + .3*x2\nx4 = .4*x1 + .6*x2\ny = 3.5 + .45*x1 + .14*x2 -.51*x3 + rnorm(10, sd = 0.25)\n\nmod = lm(y ~ x1 + x2 + x3 + x4)\n\npredict(mod)\n##        1        2        3        4        5        6        7        8 \n## 4.207751 4.453079 4.445103 4.199925 4.536646 4.401216 4.444607 4.182162 \n##        9       10 \n## 4.099641 4.318122\n\npredict(mod, newdata = data.frame(x1,x2,x3,x4))\n## Warning in predict.lm(mod, newdata = data.frame(x1, x2, x3, x4)): prediction\n## from rank-deficient fit; attr(*, \"non-estim\") has doubtful cases\n##        1        2        3        4        5        6        7        8 \n## 4.207751 4.453079 4.445103 4.199925 4.536646 4.401216 4.444607 4.182162 \n##        9       10 \n## 4.099641 4.318122 \n## attr(,\"non-estim\")\n##  1  2  3  4  5  6  7  8  9 10 \n##  1  2  3  4  5  6  7  8  9 10\n\npredict(mod, newdata = data.frame(x1,x2,x3,x4), tol = 1e-2)\n## Warning in predict.lm(mod, newdata = data.frame(x1, x2, x3, x4), tol =\n0.01):\n## prediction from rank-deficient fit; attr(*, \"non-estim\") has doubtful cases\n##        1        2        3        4        5        6        7        8 \n## 4.207751 4.453079 4.445103 4.199925 4.536646 4.401216 4.444607 4.182162 \n##        9       10 \n## 4.099641 4.318122 \n## attr(,\"non-estim\")\n## 4 9 \n## 4 9\n\nmod10 = lm(y ~ I(10*x1) + I(10*x2) + I(10*x3) + I(10*x4))\npredict(mod10, newdata = data.frame(x1,x2,x3,x4), tol = 1e-2)\n##        1        2        3        4        5        6        7        8 \n## 4.207751 4.453079 4.445103 4.199925 4.536646 4.401216 4.444607 4.182162 \n##        9       10 \n## 4.099641 4.318122\n\npredict(mod10, newdata = data.frame(x1,x2,x3,x4), tol = 1e-3)\n## Warning in predict.lm(mod10, newdata = data.frame(x1, x2, x3, x4), tol =\n## 0.001): prediction from rank-deficient fit; attr(*, \"non-estim\") has\ndoubtful\n## cases\n##        1        2        3        4        5        6        7        8 \n## 4.207751 4.453079 4.445103 4.199925 4.536646 4.401216 4.444607 4.182162 \n##        9       10 \n## 4.099641 4.318122 \n## attr(,\"non-estim\")\n## 4 9 \n## 4 9\n\nR.Version()\n## $platform\n## [1] \"x86_64-w64-mingw32\"\n## \n## $arch\n## [1] \"x86_64\"\n## \n## $os\n## [1] \"mingw32\"\n## \n## $crt\n## [1] \"ucrt\"\n## \n## $system\n## [1] \"x86_64, mingw32\"\n## \n## $status\n## [1] \"\"\n## \n## $major\n## [1] \"4\"\n## \n## $minor\n## [1] \"3.2\"\n## \n## $year\n## [1] \"2023\"\n## \n## $month\n## [1] \"10\"\n## \n## $day\n## [1] \"31\"\n## \n## $`svn rev`\n## [1] \"85441\"\n## \n## $language\n## [1] \"R\"\n## \n## $version.string\n## [1] \"R version 4.3.2 (2023-10-31 ucrt)\"\n## \n## $nickname\n## [1] \"Eye Holes\"\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1708284853.713219",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "0hZ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16158] Error in predict.lm for rank-deficient cases",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16158"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #21 from Russ Lenth ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:russell-lenth@uiowa.edu",
+                                "text": "russell-lenth@uiowa.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nDarn it, bugzilla plugged-in the wrong markdown stuff and instead, recycled\nsome stuff from comment 18. I'm trying again. \n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "set.seed(24.0217)\n\nx1 = rnorm(10, mean = 12, sd = 4)\nx2 = rnorm(10, mean = 14, sd = 3)\nx3 = .7*x1 + .3*x2\nx4 = .4*x1 + .6*x2\ny = 3.5 + .45*x1 + .14*x2 -.51*x3 + rnorm(10, sd = 0.25)\n\nmod = lm(y ~ x1 + x2 + x3 + x4)\n\npredict(mod)\n##        1        2        3        4        5        6        7        8 \n## 4.207751 4.453079 4.445103 4.199925 4.536646 4.401216 4.444607 4.182162 \n##        9       10 \n## 4.099641 4.318122\n\npredict(mod, newdata = data.frame(x1,x2,x3,x4))\n## Warning in predict.lm(mod, newdata = data.frame(x1, x2, x3, x4)): prediction\n## from rank-deficient fit; attr(*, \"non-estim\") has doubtful cases\n##        1        2        3        4        5        6        7        8 \n## 4.207751 4.453079 4.445103 4.199925 4.536646 4.401216 4.444607 4.182162 \n##        9       10 \n## 4.099641 4.318122 \n## attr(,\"non-estim\")\n##  1  2  3  4  5  6  7  8  9 10 \n##  1  2  3  4  5  6  7  8  9 10\n\npredict(mod, newdata = data.frame(x1,x2,x3,x4), tol = 1e-2)\n## Warning in predict.lm(mod, newdata = data.frame(x1, x2, x3, x4), tol =\n0.01):\n## prediction from rank-deficient fit; attr(*, \"non-estim\") has doubtful cases\n##        1        2        3        4        5        6        7        8 \n## 4.207751 4.453079 4.445103 4.199925 4.536646 4.401216 4.444607 4.182162 \n##        9       10 \n## 4.099641 4.318122 \n## attr(,\"non-estim\")\n## 4 9 \n## 4 9\n\nmod10 = lm(y ~ I(10*x1) + I(10*x2) + I(10*x3) + I(10*x4))\npredict(mod10, newdata = data.frame(x1,x2,x3,x4), tol = 1e-2)\n##        1        2        3        4        5        6        7        8 \n## 4.207751 4.453079 4.445103 4.199925 4.536646 4.401216 4.444607 4.182162 \n##        9       10 \n## 4.099641 4.318122\n\npredict(mod10, newdata = data.frame(x1,x2,x3,x4), tol = 1e-3)\n## Warning in predict.lm(mod10, newdata = data.frame(x1, x2, x3, x4), tol =\n## 0.001): prediction from rank-deficient fit; attr(*, \"non-estim\") has\ndoubtful\n## cases\n##        1        2        3        4        5        6        7        8 \n## 4.207751 4.453079 4.445103 4.199925 4.536646 4.401216 4.444607 4.182162 \n##        9       10 \n## 4.099641 4.318122 \n## attr(,\"non-estim\")\n## 4 9 \n## 4 9\n\nR.Version()\n## $platform\n## [1] \"x86_64-w64-mingw32\"\n## \n## $arch\n## [1] \"x86_64\"\n## \n## $os\n## [1] \"mingw32\"\n## \n## $crt\n## [1] \"ucrt\"\n## \n## $system\n## [1] \"x86_64, mingw32\"\n## \n## $status\n## [1] \"\"\n## \n## $major\n## [1] \"4\"\n## \n## $minor\n## [1] \"3.2\"\n## \n## $year\n## [1] \"2023\"\n## \n## $month\n## [1] \"10\"\n## \n## $day\n## [1] \"31\"\n## \n## $`svn rev`\n## [1] \"85441\"\n## \n## $language\n## [1] \"R\"\n## \n## $version.string\n## [1] \"R version 4.3.2 (2023-10-31 ucrt)\"\n## \n## $nickname\n## [1] \"Eye Holes\"\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16158] Error in predict.lm for rank-deficient cases*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16158>\n\n--- Comment #22 from Russ Lenth (<mailto:russell-lenth@uiowa.edu|russell-lenth@uiowa.edu>) ---\nOK, this time ikt took. Please read the narrative in Comment 20, but substitute\nthe code\/output in Comment 21. Thanks.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1708285039.084099",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "F2dTp",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16158] Error in predict.lm for rank-deficient cases",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16158"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #22 from Russ Lenth ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:russell-lenth@uiowa.edu",
+                                "text": "russell-lenth@uiowa.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nOK, this time ikt took. Please read the narrative in Comment 20, but substitute\nthe code\/output in Comment 21. Thanks."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18675] New: plot() applies argument 'font' to tick mark labels, not just to plotted points*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18675>\n\n            Bug ID: 18675\n           Summary: plot() applies argument 'font' to tick mark labels,\n                    not just to plotted points\n           Product: R\n           Version: R 4.3.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Graphics\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:jrmhosking@gmail.com|jrmhosking@gmail.com>\n\nExample:\n\n```\nplot(1:10, pch=\"a\", font=2)              # Tick mark labels are bold too!\nplot(1:10, pch=\"a\", font=2, font.axis=3) # 'font' overrides 'font.axis'\n```\n\nThe problem seems to originate in axis(), which shows the same behaviour:\n\n```\nplot(1:10,xaxt=\"n\",yaxt=\"n\")\naxis(1)\naxis(2, font=2)              # Tick mark labels are bold\naxis(3, font=2, font.axis=3) # 'font' overrides 'font.axis'\naxis(4, font.axis=3)         # 'font.axis' by itself gives expected result\n```\n\nTested on R 4.3.2 and R-devel (2024-02-13 r85898 ucrt), with windows() and\npdf() graphics devices.\n\nThis behaviour is long established - it was present in R 1.2.2 but not in R\n1.0.0 (checked using Windows binaries from\n<https:\/\/cran.wustl.edu\/bin\/windows\/base\/old\/>). But surely it is a bug: other\ngraphics parameters (cex, col) with '.axis' variants don't behave like this.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1708290924.451429",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "H7p",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18675] New: plot() applies argument 'font' to tick mark labels, not just to plotted points",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18675"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18675\n           Summary: plot() applies argument 'font' to tick mark labels,\n                    not just to plotted points\n           Product: R\n           Version: R 4.3.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Graphics\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jrmhosking@gmail.com",
+                                "text": "jrmhosking@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nExample:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "plot(1:10, pch=\"a\", font=2)              # Tick mark labels are bold too!\nplot(1:10, pch=\"a\", font=2, font.axis=3) # 'font' overrides 'font.axis'\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe problem seems to originate in axis(), which shows the same behaviour:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "plot(1:10,xaxt=\"n\",yaxt=\"n\")\naxis(1)\naxis(2, font=2)              # Tick mark labels are bold\naxis(3, font=2, font.axis=3) # 'font' overrides 'font.axis'\naxis(4, font.axis=3)         # 'font.axis' by itself gives expected result\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nTested on R 4.3.2 and R-devel (2024-02-13 r85898 ucrt), with windows() and\npdf() graphics devices.\n\nThis behaviour is long established - it was present in R 1.2.2 but not in R\n1.0.0 (checked using Windows binaries from\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/cran.wustl.edu\/bin\/windows\/base\/old\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "). But surely it is a bug: other\ngraphics parameters (cex, col) with '.axis' variants don't behave like this."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16158] Error in predict.lm for rank-deficient cases*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16158>\n\n--- Comment #23 from Russ Lenth (<mailto:russell-lenth@uiowa.edu|russell-lenth@uiowa.edu>) ---\nLooking at this further, it is *not* a scaling issue, but rather that there is\nan error somewhere in computing `nbasis`. For the same example, I ran `predict`\nin debug mode, and when I got past thwe computation of `nbasis`, I saved that\nresult in my global workspace. After exiting debug, I computed:\n```\n&gt; X = cbind(int = 1, x1, x2, x3, x4)\n&gt; X %*% nbasis\n              [,1]         [,2]\n [1,]  0.008465559 -0.183292381\n [2,] -0.008102229  0.175425732\n [3,] -0.006312054  0.136665678\n [4,]  0.009043291 -0.195801163\n [5,] -0.012860352  0.278446413\n [6,] -0.003961096  0.085763831\n [7,] -0.006694114  0.144937868\n [8,]  0.007250515 -0.156984799\n [9,]  0.013095338 -0.283534218\n[10,]  0.000075143 -0.001626962\n```\nCompare this with:\n```\n&gt; X %*% estimability::nonest.basis(mod)\n               [,1]          [,2]\n [1,] -3.552714e-15  3.552714e-15\n [2,]  0.000000e+00 -1.776357e-15\n [3,] -1.776357e-15  1.776357e-15\n [4,] -3.996803e-15  3.552714e-15\n [5,] -8.881784e-16  0.000000e+00\n [6,] -1.332268e-15  0.000000e+00\n [7,]  0.000000e+00  1.776357e-15\n [8,]  8.881784e-16  1.776357e-15\n [9,] -1.776357e-15  1.776357e-15\n[10,] -4.440892e-16  0.000000e+00\n```\nThese are much, much smaller values. But I think the code in predict.lm should\nresult in the same thing as `estimability::nonest.basis(mod)`.\n\nI haven't followed this further yet, but do think we need to focus on getting\n`nbasis` right, rather than messing with scaling issues.\n\nFurther, rather than fixing-up the existing code that uses the QR\ndecomposition, it might be simpler to just use the SVD, which is now the\ndefault method for `estimability::nonest.basis()`, since it yields the null\nbasis directly. All we have to do is pick out the relevant columns in the V\npart of UDV'.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1708291677.568089",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Spyp8",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16158] Error in predict.lm for rank-deficient cases",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16158"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #23 from Russ Lenth ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:russell-lenth@uiowa.edu",
+                                "text": "russell-lenth@uiowa.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nLooking at this further, it is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " a scaling issue, but rather that there is\nan error somewhere in computing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nbasis",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". For the same example, I ran "
+                            },
+                            {
+                                "type": "text",
+                                "text": "predict",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nin debug mode, and when I got past thwe computation of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nbasis",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", I saved that\nresult in my global workspace. After exiting debug, I computed:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> X = cbind(int = 1, x1, x2, x3, x4)\n> X %*% nbasis\n              [,1]         [,2]\n [1,]  0.008465559 -0.183292381\n [2,] -0.008102229  0.175425732\n [3,] -0.006312054  0.136665678\n [4,]  0.009043291 -0.195801163\n [5,] -0.012860352  0.278446413\n [6,] -0.003961096  0.085763831\n [7,] -0.006694114  0.144937868\n [8,]  0.007250515 -0.156984799\n [9,]  0.013095338 -0.283534218\n[10,]  0.000075143 -0.001626962\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Compare this with:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> X %*% estimability::nonest.basis(mod)\n               [,1]          [,2]\n [1,] -3.552714e-15  3.552714e-15\n [2,]  0.000000e+00 -1.776357e-15\n [3,] -1.776357e-15  1.776357e-15\n [4,] -3.996803e-15  3.552714e-15\n [5,] -8.881784e-16  0.000000e+00\n [6,] -1.332268e-15  0.000000e+00\n [7,]  0.000000e+00  1.776357e-15\n [8,]  8.881784e-16  1.776357e-15\n [9,] -1.776357e-15  1.776357e-15\n[10,] -4.440892e-16  0.000000e+00\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "These are much, much smaller values. But I think the code in predict.lm should\nresult in the same thing as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "estimability::nonest.basis(mod)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nI haven't followed this further yet, but do think we need to focus on getting\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "nbasis",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " right, rather than messing with scaling issues.\n\nFurther, rather than fixing-up the existing code that uses the QR\ndecomposition, it might be simpler to just use the SVD, which is now the\ndefault method for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "estimability::nonest.basis()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", since it yields the null\nbasis directly. All we have to do is pick out the relevant columns in the V\npart of UDV'."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16158] Error in predict.lm for rank-deficient cases*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16158>\n\n--- Comment #24 from Russ Lenth (<mailto:russell-lenth@uiowa.edu|russell-lenth@uiowa.edu>) ---\nMan, I am getting tired of this markdown bug. I previewed it several times to\nconfirm and it was right when I sent it. The last code block you see in comment\n23 is the result of `X %*% nbasis`, using the `nbasis` saved from debug.\nCompare this with\n```\n&gt; X %*% nonest.basis(mod)\n               [,1]          [,2]\n [1,] -3.552714e-15  3.552714e-15\n [2,]  0.000000e+00 -1.776357e-15\n [3,] -1.776357e-15  1.776357e-15\n [4,] -3.996803e-15  3.552714e-15\n [5,] -8.881784e-16  0.000000e+00\n [6,] -1.332268e-15  0.000000e+00\n [7,]  0.000000e+00  1.776357e-15\n [8,]  8.881784e-16  1.776357e-15\n [9,] -1.776357e-15  1.776357e-15\n[10,] -4.440892e-16  0.000000e+00\n```\nwhich is the one with much smaller values. Then read the remaining narrative in\ncomment 23.\n\nIt is unconscionable that there is this bug in Bugzilla and that it has\npersisted for at least a year, that I know of.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1708292142.712549",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "A8H",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16158] Error in predict.lm for rank-deficient cases",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16158"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #24 from Russ Lenth ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:russell-lenth@uiowa.edu",
+                                "text": "russell-lenth@uiowa.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nMan, I am getting tired of this markdown bug. I previewed it several times to\nconfirm and it was right when I sent it. The last code block you see in comment\n23 is the result of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "X %*% nbasis",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", using the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nbasis",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " saved from debug.\nCompare this with"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> X %*% nonest.basis(mod)\n               [,1]          [,2]\n [1,] -3.552714e-15  3.552714e-15\n [2,]  0.000000e+00 -1.776357e-15\n [3,] -1.776357e-15  1.776357e-15\n [4,] -3.996803e-15  3.552714e-15\n [5,] -8.881784e-16  0.000000e+00\n [6,] -1.332268e-15  0.000000e+00\n [7,]  0.000000e+00  1.776357e-15\n [8,]  8.881784e-16  1.776357e-15\n [9,] -1.776357e-15  1.776357e-15\n[10,] -4.440892e-16  0.000000e+00\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "which is the one with much smaller values. Then read the remaining narrative in\ncomment 23.\n\nIt is unconscionable that there is this bug in Bugzilla and that it has\npersisted for at least a year, that I know of."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16158] Error in predict.lm for rank-deficient cases*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16158>\n\n--- Comment #25 from Russ Lenth (<mailto:russell-lenth@uiowa.edu|russell-lenth@uiowa.edu>) ---\nI have a new version of predict.lm which can be found [**at this\nlink**](<https:\/\/www.dropbox.com\/scl\/fi\/hlgjmkx46kdtkpi6c2luk\/new-predict-lm.R?rlkey=oisuwbh2ahihhbkndq21vwv3g&amp;dl=0>)\nwhich replaces the code for `nbasis` with just 2 lines of code. See lines 60-61\nof the linked file.\n\nI won't try to show those 2 lines because I have already been burned too many\ntimes. But the gist is that `qr.R(qrX)` has the same row space as the model\nmatrix. So we obtain the SVD of it, inparticular its V part which is a basis\nfor the row space of R, and extract the last few columns according to the rank\nof the model matrix. My understanding is that this R may be pivoted, just as\nwas true before. It tests out on my example.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1708301613.155999",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "aHQ7Y",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16158] Error in predict.lm for rank-deficient cases",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16158"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #25 from Russ Lenth ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:russell-lenth@uiowa.edu",
+                                "text": "russell-lenth@uiowa.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI have a new version of predict.lm which can be found [**at this\nlink**]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/www.dropbox.com\/scl\/fi\/hlgjmkx46kdtkpi6c2luk\/new-predict-lm.R?rlkey=oisuwbh2ahihhbkndq21vwv3g&amp;dl=0",
+                                "text": "https:\/\/www.dropbox.com\/scl\/fi\/hlgjmkx46kdtkpi6c2luk\/new-predict-lm.R?rlkey=oisuwbh2ahihhbkndq21vwv3g&dl=0"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\nwhich replaces the code for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nbasis",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " with just 2 lines of code. See lines 60-61\nof the linked file.\n\nI won't try to show those 2 lines because I have already been burned too many\ntimes. But the gist is that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "qr.R(qrX)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has the same row space as the model\nmatrix. So we obtain the SVD of it, inparticular its V part which is a basis\nfor the row space of R, and extract the last few columns according to the rank\nof the model matrix. My understanding is that this R may be pivoted, just as\nwas true before. It tests out on my example."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

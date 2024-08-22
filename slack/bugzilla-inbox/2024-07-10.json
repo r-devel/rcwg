@@ -1,0 +1,370 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17377] inconsistent result of getSrcLocation for an S4 method that uses the ... argument*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17377>\n\nGabriel Becker (<mailto:gmbecker@ucdavis.edu|gmbecker@ucdavis.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |gmbecker@ucdavis.edu\n\n--- Comment #5 from Gabriel Becker (<mailto:gmbecker@ucdavis.edu|gmbecker@ucdavis.edu>) ---\n(In reply to Markus Müller from comment #0)\nI don't agree, the concept of a signature means *that argument taking that\nclass*. Now missing is not a class in the normal sense, but its still something\nthat the argument is supposed to reflect. Your method definition doesn't accept\nthe format argument at all, so that argument can't be missing in the sense the\nsignature means. Missing means the value is missing\/not set, not that the\nfunction does not accept the parameter at all.\n\nIn point of fact, the documentation for setMethod states that definition must\nbe a function which accepts the same formal arguments as the generic, with the\ncaveat that in the presence of ... additional arguments can be added.\n\nIn light of that, it seems that that method never should have worked at all and\nshould have been an error at declaration (call to setMethod) time.\n\nWhat you call a workaround the method definition accepting the format argument)\nis, I would argue, the only way this method was intended to have worked at all.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1720612899.232939",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "9MA",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17377] inconsistent result of getSrcLocation for an S4 method that uses the ... argument",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17377"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nGabriel Becker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:gmbecker@ucdavis.edu",
+                                "text": "gmbecker@ucdavis.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |gmbecker@ucdavis.edu\n\n--- Comment #5 from Gabriel Becker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:gmbecker@ucdavis.edu",
+                                "text": "gmbecker@ucdavis.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Markus Müller from comment #0)\nI don't agree, the concept of a signature means *that argument taking that\nclass*. Now missing is not a class in the normal sense, but its still something\nthat the argument is supposed to reflect. Your method definition doesn't accept\nthe format argument at all, so that argument can't be missing in the sense the\nsignature means. Missing means the value is missing\/not set, not that the\nfunction does not accept the parameter at all.\n\nIn point of fact, the documentation for setMethod states that definition must\nbe a function which accepts the same formal arguments as the generic, with the\ncaveat that in the presence of ... additional arguments can be added.\n\nIn light of that, it seems that that method never should have worked at all and\nshould have been an error at declaration (call to setMethod) time.\n\nWhat you call a workaround the method definition accepting the format argument)\nis, I would argue, the only way this method was intended to have worked at all."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18591] strwidth returns wrong value on first call from terminal*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18591>\n\nGabriel Becker (<mailto:gmbecker@ucdavis.edu|gmbecker@ucdavis.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |gmbecker@ucdavis.edu\n\n--- Comment #1 from Gabriel Becker (<mailto:gmbecker@ucdavis.edu|gmbecker@ucdavis.edu>) ---\n(In reply to Kai Aragaki from comment #0)\n&gt; This bug is only present on macOS, as best I can tell, likely due to the\n&gt; involvement of XQuartz.\n&gt; \n&gt; To reproduce:\n&gt; 1. Open an R session in the terminal*\n&gt; 2. Run `strwidth(\"string\", units = \"inches\")`. Expected result: 0.8333....\n&gt; An XQuartz window will appear. Do not close it.\n&gt; 3. Run `strwidth(\"string\", units = \"inches\")` again. Expected result:\n&gt; 0.4067...\n&gt; 4. This issue can be repeated ad-infinitum by closing the XQuartz window and\n&gt; repeating from step 2. \n&gt; \n&gt; *Note - this may not be reproducible in RStudio since a viewer device may\n&gt; already be pre-initialized, getting ahead of this issue.\n&gt; \n&gt; Additional notes: The first call to `strwidth(\"string\", units = \"inches\")`\n&gt; is not dependent on font family, while the second call is.\n\nI can confirm this behavior as of 4.3.3 which is what I have handy.\n\n```\n&gt; library(graphics)\n&gt; strwidth(\"string\", units = \"inches\")\n[1] 0.8333333\n&gt; strwidth(\"string\", units = \"inches\")\n[1] 0.4075521\n&gt; sessionInfo()\nR version 4.3.3 (2024-02-29)\nPlatform: aarch64-apple-darwin20 (64-bit)\nRunning under: macOS Sonoma 14.1\n\nMatrix products: default\nBLAS:  \n\/Library\/Frameworks\/R.framework\/Versions\/4.3-arm64\/Resources\/lib\/libRblas.0.dylib \nLAPACK:\n\/Library\/Frameworks\/R.framework\/Versions\/4.3-arm64\/Resources\/lib\/libRlapack.dylib;\n LAPACK version 3.11.0\n\nlocale:\n[1] en_US.UTF-8\/en_US.UTF-8\/en_US.UTF-8\/C\/en_US.UTF-8\/en_US.UTF-8\n\ntime zone: Europe\/Vienna\ntzcode source: internal\n\nattached base packages:\n[1] stats     graphics  grDevices utils     datasets  methods   base     \n\nloaded via a namespace (and not attached):\n[1] compiler_4.3.3\n&gt; \n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1720614343.406629",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "VzfYX",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18591] strwidth returns wrong value on first call from terminal",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18591"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nGabriel Becker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:gmbecker@ucdavis.edu",
+                                "text": "gmbecker@ucdavis.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |gmbecker@ucdavis.edu\n\n--- Comment #1 from Gabriel Becker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:gmbecker@ucdavis.edu",
+                                "text": "gmbecker@ucdavis.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Kai Aragaki from comment #0)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "This bug is only present on macOS, as best I can tell, likely due to the\ninvolvement of XQuartz.\n\nTo reproduce:\n1. Open an R session in the terminal*\n2. Run "
+                            },
+                            {
+                                "type": "text",
+                                "text": "strwidth(\"string\", units = \"inches\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". Expected result: 0.8333....\nAn XQuartz window will appear. Do not close it.\n3. Run "
+                            },
+                            {
+                                "type": "text",
+                                "text": "strwidth(\"string\", units = \"inches\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " again. Expected result:\n0.4067...\n4. This issue can be repeated ad-infinitum by closing the XQuartz window and\nrepeating from step 2. \n\n*Note - this may not be reproducible in RStudio since a viewer device may\nalready be pre-initialized, getting ahead of this issue.\n\nAdditional notes: The first call to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "strwidth(\"string\", units = \"inches\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nis not dependent on font family, while the second call is."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI can confirm this behavior as of 4.3.3 which is what I have handy.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> library(graphics)\n> strwidth(\"string\", units = \"inches\")\n[1] 0.8333333\n> strwidth(\"string\", units = \"inches\")\n[1] 0.4075521\n> sessionInfo()\nR version 4.3.3 (2024-02-29)\nPlatform: aarch64-apple-darwin20 (64-bit)\nRunning under: macOS Sonoma 14.1\n\nMatrix products: default\nBLAS:  \n\/Library\/Frameworks\/R.framework\/Versions\/4.3-arm64\/Resources\/lib\/libRblas.0.dylib \nLAPACK:\n\/Library\/Frameworks\/R.framework\/Versions\/4.3-arm64\/Resources\/lib\/libRlapack.dylib;\n LAPACK version 3.11.0\n\nlocale:\n[1] en_US.UTF-8\/en_US.UTF-8\/en_US.UTF-8\/C\/en_US.UTF-8\/en_US.UTF-8\n\ntime zone: Europe\/Vienna\ntzcode source: internal\n\nattached base packages:\n[1] stats     graphics  grDevices utils     datasets  methods   base     \n\nloaded via a namespace (and not attached):\n[1] compiler_4.3.3\n> \n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18209] `tools::check_packages_in_dir` does not respect `_R_CHECK_FORCE_SUGGESTS_` and installs unnecessary packages*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18209>\n\nGabriel Becker (<mailto:gmbecker@ucdavis.edu|gmbecker@ucdavis.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |gmbecker@ucdavis.edu\n\n--- Comment #4 from Gabriel Becker (<mailto:gmbecker@ucdavis.edu|gmbecker@ucdavis.edu>) ---\n(In reply to Kurt Hornik from comment #3)\nFrom Kurt's comment it seems like this can be closed(?)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1720621674.988209",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "sE4",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18209] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "tools::check_packages_in_dir",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does not respect ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "_R_CHECK_FORCE_SUGGESTS_",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and installs unnecessary packages",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18209"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nGabriel Becker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:gmbecker@ucdavis.edu",
+                                "text": "gmbecker@ucdavis.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |gmbecker@ucdavis.edu\n\n--- Comment #4 from Gabriel Becker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:gmbecker@ucdavis.edu",
+                                "text": "gmbecker@ucdavis.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Kurt Hornik from comment #3)\nFrom Kurt's comment it seems like this can be closed(?)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18209] `tools::check_packages_in_dir` does not respect `_R_CHECK_FORCE_SUGGESTS_` and installs unnecessary packages*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18209>\n\nRob Carnell (<mailto:bertcarnell@gmail.com|bertcarnell@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n         Resolution|---                         |WONTFIX\n\n--- Comment #5 from Rob Carnell (<mailto:bertcarnell@gmail.com|bertcarnell@gmail.com>) ---\nAgree that it can be closed based on Kurt's comments.  I appreciate the\nconsideration of my suggestion.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1720666773.753039",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "p\/hhO",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18209] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "tools::check_packages_in_dir",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does not respect ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "_R_CHECK_FORCE_SUGGESTS_",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and installs unnecessary packages",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18209"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nRob Carnell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:bertcarnell@gmail.com",
+                                "text": "bertcarnell@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n         Resolution|---                         |WONTFIX\n\n--- Comment #5 from Rob Carnell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:bertcarnell@gmail.com",
+                                "text": "bertcarnell@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nAgree that it can be closed based on Kurt's comments.  I appreciate the\nconsideration of my suggestion."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

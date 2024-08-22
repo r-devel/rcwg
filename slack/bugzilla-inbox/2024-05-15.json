@@ -1,0 +1,302 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18728] New: Improving strcapture performance*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18728>\n\n            Bug ID: 18728\n           Summary: Improving strcapture performance\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Wishlist\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:tim.taylor@hiddenelephants.co.uk|tim.taylor@hiddenelephants.co.uk>\n\nCreated attachment 3357\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3357&amp;action=edit>\npatch\n\nLogging here after previously raising on the mailing list\n(<https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2024-January\/083150.html>).\n\nPlease find attached a patch which greatly improves the performance of\nstrcapture in cases where the argument perl = TRUE. The patch works by\ncalling regexpr instead of regexec (conditionally when perl = TRUE) and\nutilising the output of this directly (following a very nice substring\napproach that I've seen implemented by Toby Hocking in the nc package;\nnc::capture_first_vec).\n\nI'm unsure if the performance benefits outweigh the additional complication\nto the codebase but wanted to raise here for R-core to weigh up.\n\nThe following code expanded the named capture example from the grep\ndocumentation: \n\n# -----------------------------------------------------------\n\nnotables &lt;- c(\n    \"  Ben Franklin and Jefferson Davis\",\n    \"\\tMillard Fillmore\",\n    \"Bob\",\n    NA_character_\n)\n\nregex &lt;- \"(?&lt;first&gt;[[:upper:]][[:lower:]]+) (?&lt;last&gt;[[:upper:]][[:lower:]]+)\"\nproto &lt;- data.frame(\"\",\"\")\n\n# compare timings over a range of vector lengths:\nlengths &lt;- sort(outer(c(1, 2, 5), 10^(1:4)))\nreps &lt;- 20\n\ntime_strcapture &lt;- function(text, length, regex, proto, reps) {\n    text &lt;- rep_len(text, length)\n    str &lt;- system.time(for (i in seq_len(reps)) strcapture(regex, text, proto,\nperl = TRUE))\n    str[[\"user.self\"]]\n}\n\ntimings &lt;- sapply(\n    lengths,\n    time_strcapture,\n    text = notables, regex = regex, reps = reps, proto = proto\n)\n\n# -----------------------------------------------------------\n\nComparing the patched build with the current development version\n(rev 86552) we have the following timings (see also the attached\nloglog plot):\n\n# -----------------------------------------------------------\n\n     lengths rev-86552 patched     ratio\n [1,]      10     0.004   0.003  1.333333\n [2,]      20     0.005   0.002  2.500000\n [3,]      50     0.008   0.003  2.666667\n [4,]     100     0.015   0.003  5.000000\n [5,]     200     0.023   0.003  7.666667\n [6,]     500     0.051   0.003 17.000000\n [7,]    1000     0.100   0.005 20.000000\n [8,]    2000     0.194   0.007 27.714286\n [9,]    5000     0.675   0.012 56.250000\n[10,]   10000     1.501   0.023 65.260870\n[11,]   20000     2.902   0.047 61.744681\n[12,]   50000     7.797   0.113 69.000000\n\n#-----------------------------------------------------------\n\nToby Hocking also followed up on the initial mailing list post and linked\nto some analysis that confirmed the performance improvements\n(see <https:\/\/github.com\/tdhock\/atime\/issues\/29#issuecomment-1943037753>).\n\n\nHope all this make sense. Cheers\n\nTim",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1715762911.991129",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "0P\/M",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18728] New: Improving strcapture performance",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18728"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18728\n           Summary: Improving strcapture performance\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Wishlist\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tim.taylor@hiddenelephants.co.uk",
+                                "text": "tim.taylor@hiddenelephants.co.uk",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3357\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3357&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3357&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\npatch\n\nLogging here after previously raising on the mailing list\n("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2024-January\/083150.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\n\nPlease find attached a patch which greatly improves the performance of\nstrcapture in cases where the argument perl = TRUE. The patch works by\ncalling regexpr instead of regexec (conditionally when perl = TRUE) and\nutilising the output of this directly (following a very nice substring\napproach that I've seen implemented by Toby Hocking in the nc package;\nnc::capture_first_vec).\n\nI'm unsure if the performance benefits outweigh the additional complication\nto the codebase but wanted to raise here for R-core to weigh up.\n\nThe following code expanded the named capture example from the grep\ndocumentation: \n\n# -----------------------------------------------------------\n\nnotables <- c(\n    \"  Ben Franklin and Jefferson Davis\",\n    \"\\tMillard Fillmore\",\n    \"Bob\",\n    NA_character_\n)\n\nregex <- \"(?<first>[["
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "upper"
+                            },
+                            {
+                                "type": "text",
+                                "text": "]][["
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "lower"
+                            },
+                            {
+                                "type": "text",
+                                "text": "]]+) (?<last>[["
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "upper"
+                            },
+                            {
+                                "type": "text",
+                                "text": "]][["
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "lower"
+                            },
+                            {
+                                "type": "text",
+                                "text": "]]+)\"\nproto <- data.frame(\"\",\"\")\n\n# compare timings over a range of vector lengths:\nlengths <- sort(outer(c(1, 2, 5), 10^(1:4)))\nreps <- 20\n\ntime_strcapture <- function(text, length, regex, proto, reps) {\n    text <- rep_len(text, length)\n    str <- system.time(for (i in seq_len(reps)) strcapture(regex, text, proto,\nperl = TRUE))\n    str[[\"user.self\"]]\n}\n\ntimings <- sapply(\n    lengths,\n    time_strcapture,\n    text = notables, regex = regex, reps = reps, proto = proto\n)\n\n# -----------------------------------------------------------\n\nComparing the patched build with the current development version\n(rev 86552) we have the following timings (see also the attached\nloglog plot):\n\n# -----------------------------------------------------------\n\n     lengths rev-86552 patched     ratio\n [1,]      10     0.004   0.003  1.333333\n [2,]      20     0.005   0.002  2.500000\n [3,]      50     0.008   0.003  2.666667\n [4,]     100     0.015   0.003  5.000000\n [5,]     200     0.023   0.003  7.666667\n [6,]     500     0.051   0.003 17.000000\n [7,]    1000     0.100   0.005 20.000000\n [8,]    2000     0.194   0.007 27.714286\n [9,]    5000     0.675   0.012 56.250000\n[10,]   10000     1.501   0.023 65.260870\n[11,]   20000     2.902   0.047 61.744681\n[12,]   50000     7.797   0.113 69.000000\n\n#-----------------------------------------------------------\n\nToby Hocking also followed up on the initial mailing list post and linked\nto some analysis that confirmed the performance improvements\n(see "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/tdhock\/atime\/issues\/29#issuecomment-1943037753"
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\n\n\n\nHope all this make sense. Cheers\n\nTim"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18728] Improving strcapture performance*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18728>\n\n--- Comment #1 from Tim Taylor (<mailto:tim.taylor@hiddenelephants.co.uk|tim.taylor@hiddenelephants.co.uk>) ---\nCreated attachment 3358\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3358&amp;action=edit>\nlog log plot of timings",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1715762961.369449",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "=NWBi",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18728] Improving strcapture performance",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18728"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Tim Taylor ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tim.taylor@hiddenelephants.co.uk",
+                                "text": "tim.taylor@hiddenelephants.co.uk",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3358\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3358&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3358&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nlog log plot of timings"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17978] unstated dependencies in tests - incomplete message when no internet connection*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17978>\n\nSebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n                 CC|                            |seb.meyer@fau.de\n         Resolution|---                         |FIXED\n\n--- Comment #1 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\nUndeclared test dependencies were indeed swallowed when checking offline. I\nhave committed a trivial fix for this inconvenience in c86556. The warnings on\nfailed connections to the standard PACKAGES indices will still appear when\nundeclared packages are found (the results might then contain false alarms,\ne.g., for test-internal packages).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1715800279.469979",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "iqS",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17978] unstated dependencies in tests - incomplete message when no internet connection",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17978"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n                 CC|                            |seb.meyer@fau.de\n         Resolution|---                         |FIXED\n\n--- Comment #1 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nUndeclared test dependencies were indeed swallowed when checking offline. I\nhave committed a trivial fix for this inconvenience in c86556. The warnings on\nfailed connections to the standard PACKAGES indices will still appear when\nundeclared packages are found (the results might then contain false alarms,\ne.g., for test-internal packages)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17978] unstated dependencies in tests - incomplete message when no internet connection*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17978>\n\n--- Comment #2 from Angela Lucaci (<mailto:angela.lucaci.timoce@gmail.com|angela.lucaci.timoce@gmail.com>) ---\nHello Sebastian,\nI'm impressed that you followed this bug after so much time.\n\nThank you very much,\nAngela",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1715803690.201789",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Tml",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17978] unstated dependencies in tests - incomplete message when no internet connection",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17978"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Angela Lucaci ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:angela.lucaci.timoce@gmail.com",
+                                "text": "angela.lucaci.timoce@gmail.com",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nHello Sebastian,\nI'm impressed that you followed this bug after so much time.\n\nThank you very much,\nAngela"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

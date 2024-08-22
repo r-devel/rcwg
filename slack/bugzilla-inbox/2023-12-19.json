@@ -1,0 +1,313 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18555] dummy_fgetc will keep returning EOF if the connection has an encoding specified*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18555>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|REOPENED                    |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #12 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nI've simplified the test and removed the race conditions discussed. I've also\nmade  it robust against the case that a particular port number is in use, e.g.\nin case someone was running such tests concurrently.\n\nI've also amended the fix in connections code. It is an intended behavior\ndocumented to be the common case (in ?connections) that when invalid input is\nfound during encoding conversion in the connections code, the input ends, no\nmore data (possibly following the invalid bytes) is returned. The EOF_signalled\nvariable needs to be persistent across calls to dummy_fgetc to achieve that.\nThis behavior has already been partially broken by a previous fix (but only in\ncase the buffer happened to start with invalid bytes, the suggested fix for\n18555 broke it in the remaining cases), so I've fixed that now as well.\n\nThe current behavior of connection functions is that they return EOF on error\nor end-of-file, but there is no way to distinguish between the two. Normally an\nend-of-file indicator is persistent, but an error is not. When a non-blocking\nconnection doesn't have enough data available, it is an error, not end-of-file.\nTherefore, I've fixed 18555 by not setting EOF_signalled when the underlying\nconnections code returns EOF.\n\nWith stdio fgetc(), distinction between end-of-file and an error is possible.\nWhen there is no data available, it returns EOF, sets an error indicator (one\ncan query with ferror() it is the case, and then check errno for EAGAIN). When\nthere is a real end-of-file, it returns EOF, but sets an end-of-file indicator\n(one can query with feof()). One can clear both indicators using clearerr().",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1703001368.588759",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "WqpXX",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18555] dummy_fgetc will keep returning EOF if the connection has an encoding specified",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18555"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|REOPENED                    |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #12 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI've simplified the test and removed the race conditions discussed. I've also\nmade  it robust against the case that a particular port number is in use, e.g.\nin case someone was running such tests concurrently.\n\nI've also amended the fix in connections code. It is an intended behavior\ndocumented to be the common case (in ?connections) that when invalid input is\nfound during encoding conversion in the connections code, the input ends, no\nmore data (possibly following the invalid bytes) is returned. The EOF_signalled\nvariable needs to be persistent across calls to dummy_fgetc to achieve that.\nThis behavior has already been partially broken by a previous fix (but only in\ncase the buffer happened to start with invalid bytes, the suggested fix for\n18555 broke it in the remaining cases), so I've fixed that now as well.\n\nThe current behavior of connection functions is that they return EOF on error\nor end-of-file, but there is no way to distinguish between the two. Normally an\nend-of-file indicator is persistent, but an error is not. When a non-blocking\nconnection doesn't have enough data available, it is an error, not end-of-file.\nTherefore, I've fixed 18555 by not setting EOF_signalled when the underlying\nconnections code returns EOF.\n\nWith stdio fgetc(), distinction between end-of-file and an error is possible.\nWhen there is no data available, it returns EOF, sets an error indicator (one\ncan query with ferror() it is the case, and then check errno for EAGAIN). When\nthere is a real end-of-file, it returns EOF, but sets an end-of-file indicator\n(one can query with feof()). One can clear both indicators using clearerr()."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18634] R leaks sockets on error in download.file when options(warn = 2) is set*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18634>\n\n--- Comment #7 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nThanks Ivan and Tomas! I can confirm the issue is resolved on my side as well;\ntested with r85709.\n\nI also tested a similar variant of the above example, e.g.\n\n```\ntryCatch(\n  download.file(\"<https:\/\/cloud.r-project.org\/no\/such\/file>\", tempfile()),\n  warning = identity\n)\n```\n\nand can confirm sockets are closed in this scenario as well.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1703010868.587479",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "iuH",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18634] R leaks sockets on error in download.file when options(warn = 2) is set",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18634"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #7 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks Ivan and Tomas! I can confirm the issue is resolved on my side as well;\ntested with r85709.\n\nI also tested a similar variant of the above example, e.g.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "tryCatch(\n  download.file(\""
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/cloud.r-project.org\/no\/such\/file"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\", tempfile()),\n  warning = identity\n)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nand can confirm sockets are closed in this scenario as well."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18640] New: stirlerr concerns*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18640>\n\n            Bug ID: 18640\n           Summary: stirlerr concerns\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Accuracy\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:mwelinder@gmail.com|mwelinder@gmail.com>\n\nI have been looking at the code in src\/nmath\/stirlerr.c for non-R reasons and I\nam getting the impression that the code is a bit optimistic with respect to the\nnumber of terms needed for accurate results.  No specific accuracy goals are\ngiven so it's a bit hard to be sure.\n\nstirlerr isn't directly available in R as a function and I have no idea whether\nthis has any visible consequences for functions that are available.\n\nIn Mathematica:\n\n```\nstirlerr[x_]:=Log[x!]-Log[Sqrt[2*Pi*x]]-x*Log[x]+x\n\nstirlerr2[x_,n_]:=Sum[BernoulliB[2k]\/(2k(2k-1)x^(2k-1)),{k,1,n}]\n\ncompare[x_,n_]:={N[stirlerr[x],16],N[stirlerr2[x,n],16],N[Log2[Abs[(stirlerr[x]-stirlerr2[x,n])\/stirlerr[x]]],4]}\n\n(* type stirlerr2[x,9] to see the series *)\n```\n\ncompare[15,5] shows that the result is only accurate to about 44.5 bits.  (Note\nthat 15 is special-cased, so interpret that as 15+eps.)\n\ncompare[35,4] shows 47.7 bits.\n\nBy my calculations, the break points should be as follows to gain 53 bits:\n\n```\nTerms    Min x\n-----------------\n1        1.733e7\n2        3043\n3        200.2\n4        55.57\n5        27.01\n6        17.23\n7        12.77\n8        10.38\n9        8.946\n```\n\nCoefficients are 1\/12, 1\/360, 1\/1260, 1\/1680, 1\/1188, 691\/360360, 1\/156,\n3617\/122400, 43867\/244188.  These have alternating signs which stirlerr.c\naccounts for by minuses in the return statements.\n\nNote: terms 8 and 9 here are only relevant if one wanted to extend the range\nusing the asymptotic expansion down to 10 from 15.  10 is the lower limit for\nlgammacor (ignoring the offset of 1 between factorial and gamma).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1703011694.318809",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "maXOx",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18640] New: stirlerr concerns",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18640"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18640\n           Summary: stirlerr concerns\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Accuracy\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:mwelinder@gmail.com",
+                                "text": "mwelinder@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nI have been looking at the code in src\/nmath\/stirlerr.c for non-R reasons and I\nam getting the impression that the code is a bit optimistic with respect to the\nnumber of terms needed for accurate results.  No specific accuracy goals are\ngiven so it's a bit hard to be sure.\n\nstirlerr isn't directly available in R as a function and I have no idea whether\nthis has any visible consequences for functions that are available.\n\nIn Mathematica:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "stirlerr[x_]:=Log[x!]-Log[Sqrt[2*Pi*x]]-x*Log[x]+x\n\nstirlerr2[x_,n_]:=Sum[BernoulliB[2k]\/(2k(2k-1)x^(2k-1)),{k,1,n}]\n\ncompare[x_,n_]:={N[stirlerr[x],16],N[stirlerr2[x,n],16],N[Log2[Abs[(stirlerr[x]-stirlerr2[x,n])\/stirlerr[x]]],4]}\n\n(* type stirlerr2[x,9] to see the series *)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\ncompare[15,5] shows that the result is only accurate to about 44.5 bits.  (Note\nthat 15 is special-cased, so interpret that as 15+eps.)\n\ncompare[35,4] shows 47.7 bits.\n\nBy my calculations, the break points should be as follows to gain 53 bits:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Terms    Min x\n-----------------\n1        1.733e7\n2        3043\n3        200.2\n4        55.57\n5        27.01\n6        17.23\n7        12.77\n8        10.38\n9        8.946\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nCoefficients are 1\/12, 1\/360, 1\/1260, 1\/1680, 1\/1188, 691\/360360, 1\/156,\n3617\/122400, 43867\/244188.  These have alternating signs which stirlerr.c\naccounts for by minuses in the return statements.\n\nNote: terms 8 and 9 here are only relevant if one wanted to extend the range\nusing the asymptotic expansion down to 10 from 15.  10 is the lower limit for\nlgammacor (ignoring the offset of 1 between factorial and gamma)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18638] removeSource fails to remove source references from formals and from pairlist*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18638>\n\n--- Comment #2 from Andrew Simmons (<mailto:akwsimmo@gmail.com|akwsimmo@gmail.com>) ---\nI agree with Ivan. I think the current implementation is acceptable since it\nremoves the source file attribute of the source reference in the function\nliteral, but it could be improved, something like this:\n\n```\nremoveSource &lt;- function(fn) {\n\n    recurse &lt;- function(part) {\n        if (is.name(part)) return(part)  # handles missing arg, PR#15957\n        if (inherits(part, \"srcref\")) return(NULL)\n        attr(part, \"srcref\") &lt;- NULL\n        attr(part, \"wholeSrcref\") &lt;- NULL\n        attr(part, \"srcfile\") &lt;- NULL\n        ## remove source references from formal arguments of sub-functions\n        if (is.pairlist(part)) {\n            for (i in seq_along(part))\n                part[i] &lt;- list(recurse(part[[i]]))\n            return(as.pairlist(part))\n        }\n        if (is.language(part) &amp;&amp; is.recursive(part)) {\n            for (i in seq_along(part))\n                part[i] &lt;- list(recurse(part[[i]])) # recurse(*) may be NULL\n        }\n        part\n    }\n\n    if(is.function(fn)) {\n        if(!is.primitive(fn)) {\n            attr(fn, \"srcref\") &lt;- NULL\n            ## `body&lt;-`(f, *) drops all attributes of f\n            at &lt;- attributes(fn)\n            formals(fn) &lt;- recurse(formals(fn))\n            attr(body(fn), \"wholeSrcref\") &lt;- NULL\n            attr(body(fn), \"srcfile\") &lt;- NULL\n            body(fn) &lt;- recurse(body(fn))\n            if(!is.null(at)) attributes(fn) &lt;- at\n        }\n        fn\n    }\n    else if(is.language(fn)) { # expression, call, or symbol=name\n        recurse(fn)\n    }\n    else\n        stop(\"argument is not a function or language object:\", typeof(fn))\n}\n```\n\nThank you again!",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1703044879.268889",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "sQw",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18638] removeSource fails to remove source references from formals and from pairlist",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18638"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Andrew Simmons ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:akwsimmo@gmail.com",
+                                "text": "akwsimmo@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI agree with Ivan. I think the current implementation is acceptable since it\nremoves the source file attribute of the source reference in the function\nliteral, but it could be improved, something like this:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "removeSource <- function(fn) {\n\n    recurse <- function(part) {\n        if (is.name(part)) return(part)  # handles missing arg, PR#15957\n        if (inherits(part, \"srcref\")) return(NULL)\n        attr(part, \"srcref\") <- NULL\n        attr(part, \"wholeSrcref\") <- NULL\n        attr(part, \"srcfile\") <- NULL\n        ## remove source references from formal arguments of sub-functions\n        if (is.pairlist(part)) {\n            for (i in seq_along(part))\n                part[i] <- list(recurse(part[[i]]))\n            return(as.pairlist(part))\n        }\n        if (is.language(part) && is.recursive(part)) {\n            for (i in seq_along(part))\n                part[i] <- list(recurse(part[[i]])) # recurse(*) may be NULL\n        }\n        part\n    }\n\n    if(is.function(fn)) {\n        if(!is.primitive(fn)) {\n            attr(fn, \"srcref\") <- NULL\n            ## `body<-`(f, *) drops all attributes of f\n            at <- attributes(fn)\n            formals(fn) <- recurse(formals(fn))\n            attr(body(fn), \"wholeSrcref\") <- NULL\n            attr(body(fn), \"srcfile\") <- NULL\n            body(fn) <- recurse(body(fn))\n            if(!is.null(at)) attributes(fn) <- at\n        }\n        fn\n    }\n    else if(is.language(fn)) { # expression, call, or symbol=name\n        recurse(fn)\n    }\n    else\n        stop(\"argument is not a function or language object:\", typeof(fn))\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThank you again!"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

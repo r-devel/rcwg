@@ -1,0 +1,650 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17289] Inconsistent NA handling in scan()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17289>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n                 CC|                            |tomas.kalibera@gmail.com\n             Status|UNCONFIRMED                 |CONFIRMED\n\n--- Comment #3 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nThanks for the report and analysis\/patch.\n\nIt is always easier to work with a minimal reproducible example. In both\nreported cases, the issue is about how \"NA\" is treated (no matter whether it\ncomes to scan() directly or via a text connection, also there is no problem\nwith \"1\").\n\nThis is a simplified example:\n\nscan(text = \"NA\", what = integer(), na.strings = character())  # error\nscan(text = \"NA\", what = double(), na.strings = character())   # NA\n\nThe documentation says that strings part of na.strings are treated as NA, and\nthat is probably the main use of this argument: to inform about alternative\nways to describe missing values. The documentation doesn't say that other\nstrings aren't treated as NA. So technically the behavior isn't against the\nwording of the documentation.\n\nNote that there are already some other differences in treatment of different\ntypes and I think achieving exactly consistent behavior is not possible. With\ncharacter vectors, \"NA\" is accepted as a string with these two letters when\nna.strings is empty, because, it is a valid value of a string even in R, a\ndistinct one from a representation of a missing string. With integers,\n\"-2147483648\" isn't accepted (no matter what na.strings is set to), because it\nis also an internal representation of NA integer, so turning that into NA would\nnot be desirable, it could provide completely confusing results. With double,\nNA has an internal representation (NaN with a specific payload) that would not\ncause confusion, as computation with NaN is part of the standard floating point\ncomputations where they are treated as special values already. The raw type is\nthen yet slightly different: there is no NA representation in R, strings from\nna.strings are treated as zero by scan() and then all other processing in R.\nThe complex type is similar to double and affected by the bug report.\n\nMy impression is still that it would have been better to not accept \"NA\" as a\ndouble\/complex value when not in na.strings. I've checked the code and its\nhistory in addition to the documentation and didn't find a clear hint whether\nthe current behavior was intentional or not. So I will have a closer look and\ntest a variant of Michael's patch (which also handles complex and relies on\nendptr check for error handling) on packages to see whether it breaks anything.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1714050987.148479",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "UcN",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17289] Inconsistent NA handling in scan()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17289"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n                 CC|                            |tomas.kalibera@gmail.com\n             Status|UNCONFIRMED                 |CONFIRMED\n\n--- Comment #3 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for the report and analysis\/patch.\n\nIt is always easier to work with a minimal reproducible example. In both\nreported cases, the issue is about how \"NA\" is treated (no matter whether it\ncomes to scan() directly or via a text connection, also there is no problem\nwith \"1\").\n\nThis is a simplified example:\n\nscan(text = \"NA\", what = integer(), na.strings = character())  # error\nscan(text = \"NA\", what = double(), na.strings = character())   # NA\n\nThe documentation says that strings part of na.strings are treated as NA, and\nthat is probably the main use of this argument: to inform about alternative\nways to describe missing values. The documentation doesn't say that other\nstrings aren't treated as NA. So technically the behavior isn't against the\nwording of the documentation.\n\nNote that there are already some other differences in treatment of different\ntypes and I think achieving exactly consistent behavior is not possible. With\ncharacter vectors, \"NA\" is accepted as a string with these two letters when\nna.strings is empty, because, it is a valid value of a string even in R, a\ndistinct one from a representation of a missing string. With integers,\n\"-2147483648\" isn't accepted (no matter what na.strings is set to), because it\nis also an internal representation of NA integer, so turning that into NA would\nnot be desirable, it could provide completely confusing results. With double,\nNA has an internal representation (NaN with a specific payload) that would not\ncause confusion, as computation with NaN is part of the standard floating point\ncomputations where they are treated as special values already. The raw type is\nthen yet slightly different: there is no NA representation in R, strings from\nna.strings are treated as zero by scan() and then all other processing in R.\nThe complex type is similar to double and affected by the bug report.\n\nMy impression is still that it would have been better to not accept \"NA\" as a\ndouble\/complex value when not in na.strings. I've checked the code and its\nhistory in addition to the documentation and didn't find a clear hint whether\nthe current behavior was intentional or not. So I will have a closer look and\ntest a variant of Michael's patch (which also handles complex and relies on\nendptr check for error handling) on packages to see whether it breaks anything."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17409] [[.POSIXlt non-backwards compatible change?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17409>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #5 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nThe subject talks about a \"friendly warning\";  the patch now has `stop()` \nwhich is a bit contradicting.\n\nIf there's no good reason against, I would agree on the patch, replacing `stop`\nby `warning`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1714054041.500879",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "0MV2W",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17409] [[.POSIXlt non-backwards compatible change?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17409"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #5 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe subject talks about a \"friendly warning\";  the patch now has "
+                            },
+                            {
+                                "type": "text",
+                                "text": "stop()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " \nwhich is a bit contradicting.\n\nIf there's no good reason against, I would agree on the patch, replacing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "stop",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nby "
+                            },
+                            {
+                                "type": "text",
+                                "text": "warning",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16531] ppc64el is not supported*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16531>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n         Resolution|---                         |NOT REPRODUCIBLE\n                 CC|                            |tomas.kalibera@gmail.com\n\n--- Comment #2 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nThe report isn't detailed enough for me to be comfortable changing the\nconfigure file, without actually being able to analyze and test the problem. An\nanalysis of this should be based on a vanilla build of R from source and a\nminimalistic example package. It is not clear to me whether the problem was\nactually specific to Power or to some local\/OS setup.\n\nPower is not an architecture actively supported by R, so the priority is low,\nalso this could break again, soon, as we don't test on the architecture. But in\nprinciple, one could use an emulator for this, e.g. QEMU. I did that in the\npast with some report here [1] - if anyone had the energy, feel free to explore\nand possibly re-open.\n\n[1]\n<https:\/\/blog.r-project.org\/2020\/05\/29\/testing-r-on-emulated-platforms\/index.html>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1714054602.623179",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "klOJI",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16531] ppc64el is not supported",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16531"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n         Resolution|---                         |NOT REPRODUCIBLE\n                 CC|                            |tomas.kalibera@gmail.com\n\n--- Comment #2 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe report isn't detailed enough for me to be comfortable changing the\nconfigure file, without actually being able to analyze and test the problem. An\nanalysis of this should be based on a vanilla build of R from source and a\nminimalistic example package. It is not clear to me whether the problem was\nactually specific to Power or to some local\/OS setup.\n\nPower is not an architecture actively supported by R, so the priority is low,\nalso this could break again, soon, as we don't test on the architecture. But in\nprinciple, one could use an emulator for this, e.g. QEMU. I did that in the\npast with some report here [1] - if anyone had the energy, feel free to explore\nand possibly re-open.\n\n[1]\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/blog.r-project.org\/2020\/05\/29\/testing-r-on-emulated-platforms\/index.html"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17409] [[.POSIXlt non-backwards compatible change?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17409>\n\nMichael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3339|0                           |1\n        is obsolete|                            |\n\n--- Comment #6 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nCreated attachment 3344\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3344&amp;action=edit>\nThrow a warning when trying to extract POSIXlt class members\n\nOK, switched to a warning and added tests.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1714060803.064939",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "wWk",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17409] [[.POSIXlt non-backwards compatible change?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17409"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMichael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3339|0                           |1\n        is obsolete|                            |\n\n--- Comment #6 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3344\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3344&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3344&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nThrow a warning when trying to extract POSIXlt class members\n\nOK, switched to a warning and added tests."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17217] make strptime(\"1\",\"%m\") work*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17217>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tomas.kalibera@gmail.com\n         Resolution|---                         |WONTFIX\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #2 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nThe idea of providing a default day of month has already been discussed and\nrejected in Bug 17212. The current behavior of not providing one is documented\nand is reasonable (other might also be) and there is no strong reason to change\nthis documented behavior at the moment.\n\nI wouldn't dare to expect that no code depends on this documented behavior. I\nappreciate the argument that changing say from NA to 1 would probably break\nless code than say the other way around: this is an additional reason to keep\nthe current behavior, it gives more space for change in the future if that\nbecomes necessary, making the maintenance easier.\n\nIn principle, there are multiple options and different implementations do treat\nunder-specified dates differently. One can have a fixed default, one can have a\nconfigurable default\/template as suggested, one can throw an error on partial\ndates or otherwise restrict that, one can return the current value and one can\nprovide an alternative API for parsing partial dates. And one can come up with\na justification for and against each.\n\nThe current implementation in R is based on glibc and for maintenance reasons,\nit is unlikely we would want to extend the strptime() interface beyond that,\ne.g. allowing to configure how partial dates are treated such as via that\ntemplate as suggested or some other way. That could probably happen in package\nspace. Also for maintenance reasons, it is unlikely we would want to consider\nchanging the behavior unless when updating from upstream, and even then it\nwould not be an easy decision (and very hard for documented behavior).\n\nRe the default year fixed to 1900 in Python as noted by Michael, this has the\nproblem that it doesn't work with February 29 (see e.g.\n<https:\/\/github.com\/python\/cpython\/issues\/70647> - that and linked discussions\ngive interesting views on the different possible implementation options).\n\nIt is probably a good defensive strategy not to depend on the behavior with\nunder-specified dates in strptime (in R, Python or any other system), but\nbetter specify more of the date when possible (i.e. all of year, month, day).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1714079077.781679",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "QYode",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17217] make strptime(\"1\",\"%m\") work",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17217"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tomas.kalibera@gmail.com\n         Resolution|---                         |WONTFIX\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #2 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe idea of providing a default day of month has already been discussed and\nrejected in Bug 17212. The current behavior of not providing one is documented\nand is reasonable (other might also be) and there is no strong reason to change\nthis documented behavior at the moment.\n\nI wouldn't dare to expect that no code depends on this documented behavior. I\nappreciate the argument that changing say from NA to 1 would probably break\nless code than say the other way around: this is an additional reason to keep\nthe current behavior, it gives more space for change in the future if that\nbecomes necessary, making the maintenance easier.\n\nIn principle, there are multiple options and different implementations do treat\nunder-specified dates differently. One can have a fixed default, one can have a\nconfigurable default\/template as suggested, one can throw an error on partial\ndates or otherwise restrict that, one can return the current value and one can\nprovide an alternative API for parsing partial dates. And one can come up with\na justification for and against each.\n\nThe current implementation in R is based on glibc and for maintenance reasons,\nit is unlikely we would want to extend the strptime() interface beyond that,\ne.g. allowing to configure how partial dates are treated such as via that\ntemplate as suggested or some other way. That could probably happen in package\nspace. Also for maintenance reasons, it is unlikely we would want to consider\nchanging the behavior unless when updating from upstream, and even then it\nwould not be an easy decision (and very hard for documented behavior).\n\nRe the default year fixed to 1900 in Python as noted by Michael, this has the\nproblem that it doesn't work with February 29 (see e.g.\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/python\/cpython\/issues\/70647"
+                            },
+                            {
+                                "type": "text",
+                                "text": " - that and linked discussions\ngive interesting views on the different possible implementation options).\n\nIt is probably a good defensive strategy not to depend on the behavior with\nunder-specified dates in strptime (in R, Python or any other system), but\nbetter specify more of the date when possible (i.e. all of year, month, day)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18709] New: Are functions like INTEGER_GET_REGION part of the API?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18709>\n\n            Bug ID: 18709\n           Summary: Are functions like INTEGER_GET_REGION part of the API?\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Documentation\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nThe functions:\n\n```\nR_xlen_t INTEGER_GET_REGION(SEXP sx, R_xlen_t i, R_xlen_t n, int *buf);\nR_xlen_t REAL_GET_REGION(SEXP sx, R_xlen_t i, R_xlen_t n, double *buf);\nR_xlen_t LOGICAL_GET_REGION(SEXP sx, R_xlen_t i, R_xlen_t n, int *buf);\nR_xlen_t COMPLEX_GET_REGION(SEXP sx, R_xlen_t i, R_xlen_t n, Rcomplex *buf);\nR_xlen_t RAW_GET_REGION(SEXP sx, R_xlen_t i, R_xlen_t n, Rbyte *buf);\n```\n\nare included in Rinternals.h, but do not appear to be documented in R-exts.\n\nAre these functions considered part of the R API? Or, are they part of the\nexperimental ALTREP API? Do they require documentation in R-exts?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1714080390.903069",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "qqgL",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18709] New: Are functions like INTEGER_GET_REGION part of the API?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18709"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18709\n           Summary: Are functions like INTEGER_GET_REGION part of the API?\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Documentation\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThe functions:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "R_xlen_t INTEGER_GET_REGION(SEXP sx, R_xlen_t i, R_xlen_t n, int *buf);\nR_xlen_t REAL_GET_REGION(SEXP sx, R_xlen_t i, R_xlen_t n, double *buf);\nR_xlen_t LOGICAL_GET_REGION(SEXP sx, R_xlen_t i, R_xlen_t n, int *buf);\nR_xlen_t COMPLEX_GET_REGION(SEXP sx, R_xlen_t i, R_xlen_t n, Rcomplex *buf);\nR_xlen_t RAW_GET_REGION(SEXP sx, R_xlen_t i, R_xlen_t n, Rbyte *buf);\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nare included in Rinternals.h, but do not appear to be documented in R-exts.\n\nAre these functions considered part of the R API? Or, are they part of the\nexperimental ALTREP API? Do they require documentation in R-exts?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18709] Are functions like INTEGER_GET_REGION part of the API?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18709>\n\nLuke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n         Resolution|---                         |WONTFIX\n                 CC|                            |luke@stat.uiowa.edu\n\n--- Comment #1 from Luke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) ---\nPart of ALTREP, so experimental. So won't make any changes for now.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1714081309.107229",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "KPz",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18709] Are functions like INTEGER_GET_REGION part of the API?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18709"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nLuke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n         Resolution|---                         |WONTFIX\n                 CC|                            |luke@stat.uiowa.edu\n\n--- Comment #1 from Luke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nPart of ALTREP, so experimental. So won't make any changes for now."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18710] New: Partial matching issues in the R sources*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18710>\n\n            Bug ID: 18710\n           Summary: Partial matching issues in the R sources\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Misc\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>\n\nCreated attachment 3345\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3345&amp;action=edit>\nFix all code relying on partial matching to be on by default\n\nAnother follow-on to the recent r-devel thread:\n\n<https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2024-April\/083344.html>\n\nAs an initial step to encouraging packages to be more strict about partial\nmatching, I endeavored to uncover such usage in the R sources and found\nextensive usage of partial matching, especially in test scripts, but also in\ndemos\/, data\/, the R-intro manual, man\/ examples, and the grid\/R sources.\n\nI am not sure the effort is totally comprehensive, but the large patch attached\ndoes a lot to eliminate reliance on partial matching in the R sources. My\nworkflow for the patch was:\n\n 1. Initialize `warnPartialMatch*` to `TRUE` in src\/include\/Defn.h\n 2. Run `make check-all` (via GitHub r-svn mirror in this PR:\n<https:\/\/github.com\/r-devel\/r-svn\/pull\/165>)\n 3. Fix some number of observed issues\n 4. Iterate 2-3\n\nThis also exposed some partial matching issues in recommended-priority packages\n(esp. 'survival') which I am working to fix separately, e.g.\n<https:\/\/github.com\/therneau\/survival\/pull\/254> and\n<https:\/\/github.com\/bethatkinson\/rpart\/pull\/66>.\n\nI am happy to split up this admittedly large patch into smaller logical pieces\nif seen fit (e.g. one patch for each directory affected by this patch, or one\npatch for tests, one for demos, etc.)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1714111575.662989",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "DWtEw",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18710] New: Partial matching issues in the R sources",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18710"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18710\n           Summary: Partial matching issues in the R sources\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Misc\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3345\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3345&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3345&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nFix all code relying on partial matching to be on by default\n\nAnother follow-on to the recent r-devel thread:\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2024-April\/083344.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nAs an initial step to encouraging packages to be more strict about partial\nmatching, I endeavored to uncover such usage in the R sources and found\nextensive usage of partial matching, especially in test scripts, but also in\ndemos\/, data\/, the R-intro manual, man\/ examples, and the grid\/R sources.\n\nI am not sure the effort is totally comprehensive, but the large patch attached\ndoes a lot to eliminate reliance on partial matching in the R sources. My\nworkflow for the patch was:\n\n 1. Initialize "
+                            },
+                            {
+                                "type": "text",
+                                "text": "warnPartialMatch*",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in src\/include\/Defn.h\n 2. Run "
+                            },
+                            {
+                                "type": "text",
+                                "text": "make check-all",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (via GitHub r-svn mirror in this PR:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/pull\/165"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n 3. Fix some number of observed issues\n 4. Iterate 2-3\n\nThis also exposed some partial matching issues in recommended-priority packages\n(esp. 'survival') which I am working to fix separately, e.g.\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/therneau\/survival\/pull\/254"
+                            },
+                            {
+                                "type": "text",
+                                "text": " and\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/bethatkinson\/rpart\/pull\/66"
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nI am happy to split up this admittedly large patch into smaller logical pieces\nif seen fit (e.g. one patch for each directory affected by this patch, or one\npatch for tests, one for demos, etc.)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

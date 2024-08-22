@@ -1,0 +1,850 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18770] padj does the opposite of what it says for mtext when `side=c(1,3)`*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18770>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n         Resolution|---                         |FIXED\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #6 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nThank you both.  Adding an example is definitely improving the documentation.\nI've slightly tweaked it (and left Aidan's reformulation above), the initial\nline now being\n\n   plot(0, axes=FALSE, ann=FALSE, frame.plot=TRUE)\n\nCommitted to R-devel's svn rev 86943",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1722415546.272479",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Ab8",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18770] padj does the opposite of what it says for mtext when ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "side=c(1,3)",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18770"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n         Resolution|---                         |FIXED\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #6 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you both.  Adding an example is definitely improving the documentation.\nI've slightly tweaked it (and left Aidan's reformulation above), the initial\nline now being\n\n   plot(0, axes=FALSE, ann=FALSE, frame.plot=TRUE)\n\nCommitted to R-devel's svn rev 86943"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18771] New: MASS::boxcox fails if data name matches a built-in object*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18771>\n\n            Bug ID: 18771\n           Summary: MASS::boxcox fails if data name matches a built-in\n                    object\n           Product: R\n           Version: R 4.4.x\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Models\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:bbolker@gmail.com|bbolker@gmail.com>\n\nThis is arguably an 'infelicity'\/fault of the user for allowing a name\ncollision between their objects and built-in objects, but: if a fitted `lm()`\nmodel uses `data = df` (as is very common), `MASS::boxcox()` will fail because\nit finds `stats::df` instead of the user's data (in the global environment).\n\n```\ndf &lt;- iris\nm &lt;- lm(Sepal.Length ~ Species, data = df)\nMASS::boxcox(m)\n```\n\n&gt; Error in model.frame.default(formula = Sepal.Length ~ Species, data = df,  : \n  'data' must be a data.frame, environment, or list\n\n```\nm2 &lt;- update(m, data = iris)\nMASS::boxcox(m2) ## works\n```\n\n[This SO answer](https:\/\/stackoverflow.com\/a\/78818252\/190277) gives a little\nmore detail, but the problem is clearly that `update()` -&gt; `model.frame()` is\nfragile.\n\nI don't have a fix yet. (This would make a good case study in digging through\nparent frames and enclosing environments ...)\n\nTraceback:\n\n```\n12: stop(\"'data' must be a data.frame, environment, or list\")\n11: model.frame.default(formula = Sepal.Length ~ Species, data = df, \n        drop.unused.levels = TRUE)\n10: stats::model.frame(formula = Sepal.Length ~ Species, data = df, \n        drop.unused.levels = TRUE)\n9: eval(mf, parent.frame())\n8: eval(mf, parent.frame())\n7: lm(formula = Sepal.Length ~ Species, data = df, y = TRUE, qr = TRUE)\n6: eval(call, parent.frame())\n5: eval(call, parent.frame())\n4: update.default(object, y = TRUE, qr = TRUE, ...)\n3: update(object, y = TRUE, qr = TRUE, ...)\n2: boxcox.lm(m)\n1: MASS::boxcox(m)\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1722462726.841649",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "w=D+",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18771] New: MASS::boxcox fails if data name matches a built-in object",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18771"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18771\n           Summary: MASS::boxcox fails if data name matches a built-in\n                    object\n           Product: R\n           Version: R 4.4.x\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Models\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:bbolker@gmail.com",
+                                "text": "bbolker@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThis is arguably an 'infelicity'\/fault of the user for allowing a name\ncollision between their objects and built-in objects, but: if a fitted "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lm()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nmodel uses "
+                            },
+                            {
+                                "type": "text",
+                                "text": "data = df",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (as is very common), "
+                            },
+                            {
+                                "type": "text",
+                                "text": "MASS::boxcox()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " will fail because\nit finds "
+                            },
+                            {
+                                "type": "text",
+                                "text": "stats::df",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " instead of the user's data (in the global environment).\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "df <- iris\nm <- lm(Sepal.Length ~ Species, data = df)\nMASS::boxcox(m)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Error in model.frame.default(formula = Sepal.Length ~ Species, data = df,  : "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "  'data' must be a data.frame, environment, or list\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "m2 <- update(m, data = iris)\nMASS::boxcox(m2) ## works\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n[This SO answer](https:\/\/stackoverflow.com\/a\/78818252\/190277) gives a little\nmore detail, but the problem is clearly that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "update()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " -> "
+                            },
+                            {
+                                "type": "text",
+                                "text": "model.frame()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is\nfragile.\n\nI don't have a fix yet. (This would make a good case study in digging through\nparent frames and enclosing environments ...)\n\nTraceback:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "12: stop(\"'data' must be a data.frame, environment, or list\")\n11: model.frame.default(formula = Sepal.Length ~ Species, data = df, \n        drop.unused.levels = TRUE)\n10: stats::model.frame(formula = Sepal.Length ~ Species, data = df, \n        drop.unused.levels = TRUE)\n9: eval(mf, parent.frame())\n8: eval(mf, parent.frame())\n7: lm(formula = Sepal.Length ~ Species, data = df, y = TRUE, qr = TRUE)\n6: eval(call, parent.frame())\n5: eval(call, parent.frame())\n4: update.default(object, y = TRUE, qr = TRUE, ...)\n3: update(object, y = TRUE, qr = TRUE, ...)\n2: boxcox.lm(m)\n1: MASS::boxcox(m)\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18771] MASS::boxcox fails if data name matches a built-in object*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18771>\n\nMikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jaganmn@mcmaster.ca\n\n--- Comment #1 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nIf this is a bug report for **MASS** (priority=\"recommended\", not \"base\"), then\nit should go to `bug.report(package=\"MASS\")`, which is not here.  If there\nmight be a bug in R, then we should try to find an example not depending on any\ncontributed packages.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1722466675.173239",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "MaoT",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18771] MASS::boxcox fails if data name matches a built-in object",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18771"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jaganmn@mcmaster.ca\n\n--- Comment #1 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nIf this is a bug report for **MASS** (priority=\"recommended\", not \"base\"), then\nit should go to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "bug.report(package=\"MASS\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which is not here.  If there\nmight be a bug in R, then we should try to find an example not depending on any\ncontributed packages."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18771] MASS::boxcox fails if data name matches a built-in object*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18771>\n\n--- Comment #2 from Ben Bolker (<mailto:bbolker@gmail.com|bbolker@gmail.com>) ---\nYou're right. I had incorrectly generalized from having posted `nlme` bugs here\nin the past that R-bugzilla was the right venue for \"recommended\" packages.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1722467454.535149",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "1JS",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18771] MASS::boxcox fails if data name matches a built-in object",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18771"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Ben Bolker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:bbolker@gmail.com",
+                                "text": "bbolker@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nYou're right. I had incorrectly generalized from having posted "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nlme",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " bugs here\nin the past that R-bugzilla was the right venue for \"recommended\" packages."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18771] MASS::boxcox fails if data name matches a built-in object*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18771>\n\n--- Comment #3 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nFWIW, here is an example not involving **MASS**:\n\n```\nError in model.frame.default(formula = Sepal.Length ~ Species, data = df,  : \n  'data' must be a data.frame, environment, or list\n```\n\nwhich is pretty much what I would expect ...\n\nThe problem is the environment in which the `update` call is evaluated, which\nis the choice of the caller, which is `MASS:::boxcox.lm`.  Perhaps\n`MASS:::boxcox.lm` should evaluate the call to `update` in its parent frame or\nin `environment(formula(object))`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1722470849.091059",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Km2",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18771] MASS::boxcox fails if data name matches a built-in object",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18771"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nFWIW, here is an example not involving **MASS**:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Error in model.frame.default(formula = Sepal.Length ~ Species, data = df,  : \n  'data' must be a data.frame, environment, or list\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nwhich is pretty much what I would expect ...\n\nThe problem is the environment in which the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "update",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " call is evaluated, which\nis the choice of the caller, which is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "MASS:::boxcox.lm",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  Perhaps\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "MASS:::boxcox.lm",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " should evaluate the call to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "update",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in its parent frame or\nin "
+                            },
+                            {
+                                "type": "text",
+                                "text": "environment(formula(object))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18771] MASS::boxcox fails if data name matches a built-in object*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18771>\n\n--- Comment #4 from Ben Bolker (<mailto:bbolker@gmail.com|bbolker@gmail.com>) ---\nI did try\n\n```\neval(update(object, y = TRUE, qr = TRUE, ...), \n     envir = environment(object$terms))\n```\n\nbut this doesn't work, probably because `stats::update.default()` goes out of\nits ways to evaluate in *its* parent frame, i.e. `eval(call, parent.frame())`.\nYou can do something horrible like\n\n```r\nassign(deparse(object$call$data), eval.parent(object$call$data))\n```\n\nafter which `df` now exists in the parent frame of `update()` ... but (a)\nthat's probably **not** the best way to do it and (b) to me, all of this just\nexposes the fundamental fragility of the way the `update()` mechanism is built\n(maybe `update` should allow an `envir=` argument ???)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1722471611.907839",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "oQb",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18771] MASS::boxcox fails if data name matches a built-in object",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18771"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Ben Bolker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:bbolker@gmail.com",
+                                "text": "bbolker@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI did try\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "eval(update(object, y = TRUE, qr = TRUE, ...), \n     envir = environment(object$terms))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nbut this doesn't work, probably because "
+                            },
+                            {
+                                "type": "text",
+                                "text": "stats::update.default()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " goes out of\nits ways to evaluate in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "its",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " parent frame, i.e. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "eval(call, parent.frame())",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\nYou can do something horrible like\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "r\nassign(deparse(object$call$data), eval.parent(object$call$data))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nafter which "
+                            },
+                            {
+                                "type": "text",
+                                "text": "df",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " now exists in the parent frame of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "update()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ... but (a)\nthat's probably **not** the best way to do it and (b) to me, all of this just\nexposes the fundamental fragility of the way the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "update()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " mechanism is built\n(maybe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "update",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " should allow an "
+                            },
+                            {
+                                "type": "text",
+                                "text": "envir=",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " argument ???)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18771] MASS::boxcox fails if data name matches a built-in object*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18771>\n\n--- Comment #5 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\n`update.default` provides an `evaluate` argument maybe for this reason, i.e.,\n`MASS:::boxcox.lm` could do:\n\n```\neval(update(object, y = TRUE, qr = TRUE, evaluate = FALSE), \n     environment(formula(object)))\n```\n\nBut a more robust alternative might be:\n\n```\nupdate(object, y = TRUE, qr = TRUE, data = model.frame(object))\n```\n\nsince the model frame promises to contain \"the variables needed to use\n`formula` and any `...` arguments\".  That may not be true of the parent frame\nor formula environment.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1722473665.395939",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "1JiQy",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18771] MASS::boxcox fails if data name matches a built-in object",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18771"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "update.default",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " provides an "
+                            },
+                            {
+                                "type": "text",
+                                "text": "evaluate",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " argument maybe for this reason, i.e.,\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "MASS:::boxcox.lm",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " could do:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "eval(update(object, y = TRUE, qr = TRUE, evaluate = FALSE), \n     environment(formula(object)))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nBut a more robust alternative might be:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "update(object, y = TRUE, qr = TRUE, data = model.frame(object))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nsince the model frame promises to contain \"the variables needed to use\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "formula",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and any "
+                            },
+                            {
+                                "type": "text",
+                                "text": "...",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " arguments\".  That may not be true of the parent frame\nor formula environment."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

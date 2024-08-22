@@ -1,0 +1,488 @@
+[
+    {
+        "user": "U060RULT44D",
+        "type": "message",
+        "ts": "1718962638.077909",
+        "client_msg_id": "a0039fdd-f6cd-43ad-8e73-db8627df6ccf",
+        "text": "Thank you <@U035M81N341>! In the meantime I’ve found the approach of the R source embedded as a comment in C source file a little inconvenient. I don’t really understand what problem it solves, so I’ve changed `csource` function to have `rfname` parameter, to attach seperate R file with R function calling C-function. It’s backwards compatible, so you can always use it with single C file as well. <https:\/\/github.com\/Nerwosolek\/cpackagedemo\/blob\/csource_rfname\/inst\/examples\/csource.R>",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "f7ccd27ca9d6",
+            "image_72": "https:\/\/avatars.slack-edge.com\/2023-10-12\/6028895371202_f7ccd27ca9d6b022e19d_72.jpg",
+            "first_name": "Tomek",
+            "real_name": "Tomek Gieorgijewski",
+            "display_name": "Tomek Gieorgijewski",
+            "team": "T01DW9DLB2A",
+            "name": "cybergeorge2020",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "attachments": [
+            {
+                "id": 1,
+                "footer_icon": "https:\/\/slack.github.com\/static\/img\/favicon-neutral.png",
+                "color": "24292f",
+                "bot_id": "B01V53YD4FJ",
+                "app_unfurl_url": "https:\/\/github.com\/Nerwosolek\/cpackagedemo\/blob\/csource_rfname\/inst\/examples\/csource.R",
+                "is_app_unfurl": true,
+                "app_id": "A01BP7R4KNY",
+                "fallback": "<https:\/\/github.com\/Nerwosolek\/cpackagedemo\/blob\/csource_rfname\/inst\/examples\/csource.R | csource.R>",
+                "text": "```\n# compiles a C or C++ source file using R CMD SHLIB,\n# loads the resulting DLL, and executes the embedded R code\n\ncsource <- function(\n    fname,\n    libname=NULL,  # defaults to the base name of `fname` without extension\n    rfname=NULL, # R file with function calling package's funcs. defaults to extracting from fname file\n    shlibargs=character(),\n    headers=paste0(\n        \"#include <R.h>\\n\",\n        \"#include <Rinternals.h>\\n\",\n        \"#include <Rmath.h>\\n\"\n    ),\n    R=file.path(R.home(), \"bin\/R\")\n)\n{\n    stopifnot(file.exists(fname))\n    stopifnot(is.character(shlibargs))\n    stopifnot(is.character(headers))\n    stopifnot(is.character(R), length(R) == 1)\n    stopifnot(is.null(rfname) || file.exists(rfname))\n\n    if (is.null(libname))\n        libname <- regmatches(basename(fname),\n            regexpr(\"[^.]*(?=\\\\..*)\", basename(fname), perl=TRUE))\n\n    stopifnot(is.character(libname), length(libname) == 1)\n\n    # read the source file:\n    f <- paste(readLines(fname), collapse=\"\\n\")\n\n    # set up output file names:\n    tmpdir <- normalizePath(tempdir(), winslash=\"\/\")  # tempdir on Win uses \\\n    dynlib_ext <- .Platform[[\"dynlib.ext\"]]\n    libpath <- file.path(tmpdir, sprintf(\"%s%s\", libname, dynlib_ext))\n    cfname <- file.path(tmpdir, basename(fname))\n    if (is.null(rfname)) {\n      rfname <- sub(\"\\\\..*?$\", \".R\", cfname, perl=TRUE)  # .R extension.\n    \n      # separate the \/* R ... <R code> ... R *\/ chunk from the source file:\n      rpart <- regexec(\"(?smi)^\/\\\\* R\\\\s?(.*)R \\\\*\/$\", f, perl=TRUE)[[1]]\n      rpart_start <- rpart\n      rpart_len <- attr(rpart, \"match.length\")\n      if (rpart_start[1] < 0 || rpart_len[1] < 0)\n          stop(\"enclose R code between \/* R ... and ... R *\/\")\n\n      rcode <- substr(f, rpart_start[2], rpart_start[2]+rpart_len[2]-1)\n\n      cat(rcode, file=rfname, append=FALSE)\n    } \n\n    # write the C\/C++ file:\n    ccode <- paste(\n        headers,\n        f,\n        collapse=\"\\n\"\n    )\n    cat(ccode, file=cfname, append=FALSE)\n\n    # prepare the \"R CMD SHLIB ...\" command:\n    shlibargs <- c(\n        \"CMD\", \"SHLIB\",\n        sprintf(\"-o %s\", libpath),\n        cfname,\n        shlibargs\n    )\n\n    # compile and load the DLL, run the extracted R script:\n    retval <- FALSE\n    oldwd <- setwd(tmpdir)\n    tryCatch({\n        if (libpath %in% sapply(getLoadedDLLs(), `[[`, \"path\"))\n            dyn.unload(libpath)\n        stopifnot(system2(R, shlibargs) == 0)  # 0 == success\n        dyn.load(libpath)\n        source(rfname)\n        retval <- TRUE\n    }, error=function(e) {\n        cat(as.character(e), file=stderr())\n    })\n    setwd(oldwd)\n\n    if (!retval) stop(\"error compiling file or executing R code therein\")\n    invisible(TRUE)\n}\n\n```",
+                "title": "<https:\/\/github.com\/Nerwosolek\/cpackagedemo\/blob\/csource_rfname\/inst\/examples\/csource.R | csource.R>",
+                "footer": "<https:\/\/github.com\/Nerwosolek\/cpackagedemo|Nerwosolek\/cpackagedemo>",
+                "mrkdwn_in": [
+                    "text"
+                ]
+            }
+        ],
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "VSoHj",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Thank you "
+                            },
+                            {
+                                "type": "user",
+                                "user_id": "U035M81N341"
+                            },
+                            {
+                                "type": "text",
+                                "text": "! In the meantime I’ve found the approach of the R source embedded as a comment in C source file a little inconvenient. I don’t really understand what problem it solves, so I’ve changed "
+                            },
+                            {
+                                "type": "text",
+                                "text": "csource",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " function to have "
+                            },
+                            {
+                                "type": "text",
+                                "text": "rfname",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " parameter, to attach seperate R file with R function calling C-function. It’s backwards compatible, so you can always use it with single C file as well. "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/Nerwosolek\/cpackagedemo\/blob\/csource_rfname\/inst\/examples\/csource.R"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "user": "U01DZUA88S1",
+        "type": "message",
+        "ts": "1718977564.198169",
+        "client_msg_id": "86e037b8-6d56-4f29-b174-ae56e0d63284",
+        "text": "<@U0655E66NSY>, <@U060RULT44D>, <@U04RM6HJ5GT>, I'm afraid I haven't been able to keep up with the schedule and won't be able to contribute much to the study group next week. Thankfully <@U035M81N341> is on top of it, so can facilitate a session, but it only makes sense to have one meeting. Ella can push it a bit later, to 14:30 London \/ 15: 30 Paris, but that is 06:30 San Francisco, rather early! Will it help to move it, or shall we stick with one session at 12:00 London \/ 13:00 Paris that we record and share?",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "g580131f5a7a",
+            "image_72": "https:\/\/secure.gravatar.com\/avatar\/580131f5a7a4fa33c811dc6d20ab3ef8.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0004-72.png",
+            "first_name": "Heather",
+            "real_name": "Heather Turner (she\/her)",
+            "display_name": "Heather Turner",
+            "team": "T01DW9DLB2A",
+            "name": "ht",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1718977564.198169",
+        "reply_count": 7,
+        "reply_users_count": 5,
+        "latest_reply": "1719136254.056219",
+        "reply_users": [
+            "U0655E66NSY",
+            "U04RM6HJ5GT",
+            "U01DZUA88S1",
+            "U035M81N341",
+            "U060RULT44D"
+        ],
+        "replies": [
+            {
+                "user": "U0655E66NSY",
+                "ts": "1718985495.074329"
+            },
+            {
+                "user": "U04RM6HJ5GT",
+                "ts": "1718988034.322009"
+            },
+            {
+                "user": "U01DZUA88S1",
+                "ts": "1718989660.083929"
+            },
+            {
+                "user": "U035M81N341",
+                "ts": "1718993405.887009"
+            },
+            {
+                "user": "U060RULT44D",
+                "ts": "1719074059.354879"
+            },
+            {
+                "user": "U035M81N341",
+                "ts": "1719080247.623959"
+            },
+            {
+                "user": "U060RULT44D",
+                "ts": "1719136254.056219"
+            }
+        ],
+        "is_locked": false,
+        "subscribed": true,
+        "last_read": "1719136254.056219",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "KlB\/b",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "user",
+                                "user_id": "U0655E66NSY"
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "user",
+                                "user_id": "U060RULT44D"
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "user",
+                                "user_id": "U04RM6HJ5GT"
+                            },
+                            {
+                                "type": "text",
+                                "text": ", I'm afraid I haven't been able to keep up with the schedule and won't be able to contribute much to the study group next week. Thankfully "
+                            },
+                            {
+                                "type": "user",
+                                "user_id": "U035M81N341"
+                            },
+                            {
+                                "type": "text",
+                                "text": " is on top of it, so can facilitate a session, but it only makes sense to have one meeting. Ella can push it a bit later, to 14:30 London \/ 15: 30 Paris, but that is 06:30 San Francisco, rather early! Will it help to move it, or shall we stick with one session at 12:00 London \/ 13:00 Paris that we record and share?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "user": "U0655E66NSY",
+        "type": "message",
+        "ts": "1718985495.074329",
+        "client_msg_id": "59e1547e-e2a9-4c13-b71e-4aa3fa4471de",
+        "text": "I would be okay with record and share. I have been off my game recently and haven't made time to look at it :disappointed:",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "ec1b8640e40e",
+            "image_72": "https:\/\/avatars.slack-edge.com\/2023-11-09\/6196019440496_ec1b8640e40e9d88342a_72.jpg",
+            "first_name": "Zhian",
+            "real_name": "Zhian N. Kamvar",
+            "display_name": "Zhian N. Kamvar",
+            "team": "T01DW9DLB2A",
+            "name": "zkamvar",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1718977564.198169",
+        "parent_user_id": "U01DZUA88S1",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "kYEiy",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I would be okay with record and share. I have been off my game recently and haven't made time to look at it "
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "disappointed",
+                                "unicode": "1f61e"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "user": "U04RM6HJ5GT",
+        "type": "message",
+        "ts": "1718988034.322009",
+        "edited": {
+            "user": "U04RM6HJ5GT",
+            "ts": "1718989607.000000"
+        },
+        "client_msg_id": "aeab8d9e-45d2-4b36-9ade-a730b0edc638",
+        "text": "I probably won't be able to join next week either as I'll be travelling. Would it make sense to push it to a later date if that's only the 5 of us?\nAbsolutely no problem if you want to move forward for those who are ready though, I'll catch after mid-July on my own time",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "404083940b4a",
+            "image_72": "https:\/\/avatars.slack-edge.com\/2023-02-28\/4864855297894_404083940b4acb373c0f_72.jpg",
+            "first_name": "Hugo",
+            "real_name": "Hugo Gruson",
+            "display_name": "Hugo Gruson",
+            "team": "T01DW9DLB2A",
+            "name": "hugo",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1718977564.198169",
+        "parent_user_id": "U01DZUA88S1",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "gAdZk",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I probably won't be able to join next week either as I'll be travelling. Would it make sense to push it to a later date if that's only the 5 of us?\nAbsolutely no problem if you want to move forward for those who are ready though, I'll catch after mid-July on my own time"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "user": "U01DZUA88S1",
+        "type": "message",
+        "ts": "1718989660.083929",
+        "client_msg_id": "01d2fbc0-9f9b-402c-b0f9-d43644f9276e",
+        "text": "I guess it depends if <@U035M81N341> and <@U060RULT44D> would find it helpful to discuss, perhaps to help them prepare for the Dev Day after useR! I'm away the following week, then it is useR! week, so there isn't time to postpone to another date before useR!. But I would also like to catch up later, so I will postpone the second one for 30 July and leave the first one as is.",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "g580131f5a7a",
+            "image_72": "https:\/\/secure.gravatar.com\/avatar\/580131f5a7a4fa33c811dc6d20ab3ef8.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0004-72.png",
+            "first_name": "Heather",
+            "real_name": "Heather Turner (she\/her)",
+            "display_name": "Heather Turner",
+            "team": "T01DW9DLB2A",
+            "name": "ht",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1718977564.198169",
+        "parent_user_id": "U01DZUA88S1",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "mFM7o",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I guess it depends if "
+                            },
+                            {
+                                "type": "user",
+                                "user_id": "U035M81N341"
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "user",
+                                "user_id": "U060RULT44D"
+                            },
+                            {
+                                "type": "text",
+                                "text": " would find it helpful to discuss, perhaps to help them prepare for the Dev Day after useR! I'm away the following week, then it is useR! week, so there isn't time to postpone to another date before useR!. But I would also like to catch up later, so I will postpone the second one for 30 July and leave the first one as is."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "reactions": [
+            {
+                "name": "+1",
+                "users": [
+                    "U0655E66NSY",
+                    "U04RM6HJ5GT"
+                ],
+                "count": 2
+            }
+        ]
+    },
+    {
+        "text": "The Cohort 2 C study group meeting has been postponed until Tue 30 July (same time).\nIt doesn't look like Meetup will send an updated calendar invite, so you may want to update manually, see <https:\/\/www.meetup.com\/r-contributors\/events\/298350310\/> or use the attached .ics file. Don't forget to delete the old event that was original planned for Tue 25 June!",
+        "files": [
+            {
+                "id": "F0791GCA0KG",
+                "created": 1718991458,
+                "timestamp": 1718991458,
+                "name": "C+Study+Group+-+Cohort+2(1).ics",
+                "title": "C+Study+Group+-+Cohort+2(1).ics",
+                "mimetype": "text\/calendar",
+                "filetype": "ics",
+                "pretty_type": "Binary",
+                "user": "U01DZUA88S1",
+                "user_team": "T01DW9DLB2A",
+                "editable": false,
+                "size": 1258,
+                "mode": "hosted",
+                "is_external": false,
+                "external_type": "",
+                "is_public": true,
+                "public_url_shared": false,
+                "display_as_bot": false,
+                "username": "",
+                "url_private": "https:\/\/files.slack.com\/files-pri\/T01DW9DLB2A-F0791GCA0KG\/c_study_group_-_cohort_2_1_.ics?t=xoxe-1472319691078-7614527758499-7608005367206-d46a5537bd404ef339c7688f3498b5a5",
+                "url_private_download": "https:\/\/files.slack.com\/files-pri\/T01DW9DLB2A-F0791GCA0KG\/download\/c_study_group_-_cohort_2_1_.ics?t=xoxe-1472319691078-7614527758499-7608005367206-d46a5537bd404ef339c7688f3498b5a5",
+                "media_display_type": "unknown",
+                "permalink": "https:\/\/r-contributors.slack.com\/files\/U01DZUA88S1\/F0791GCA0KG\/c_study_group_-_cohort_2_1_.ics",
+                "permalink_public": "https:\/\/slack-files.com\/T01DW9DLB2A-F0791GCA0KG-b09f1207a8",
+                "is_starred": false,
+                "has_rich_preview": false,
+                "file_access": "visible"
+            }
+        ],
+        "upload": false,
+        "user": "U01DZUA88S1",
+        "display_as_bot": false,
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "McwvA",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "The Cohort 2 C study group meeting has been postponed until Tue 30 July (same time).\nIt doesn't look like Meetup will send an updated calendar invite, so you may want to update manually, see "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/www.meetup.com\/r-contributors\/events\/298350310\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": " or use the attached .ics file. Don't forget to delete the old event that was original planned for Tue 25 June!"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "type": "message",
+        "ts": "1718991501.151279",
+        "client_msg_id": "e4801eb0-ef3d-4824-96ea-8ff875df7e3b",
+        "reactions": [
+            {
+                "name": "heavy_check_mark",
+                "users": [
+                    "U04RM6HJ5GT"
+                ],
+                "count": 1
+            }
+        ]
+    },
+    {
+        "user": "U035M81N341",
+        "type": "message",
+        "ts": "1718993405.887009",
+        "client_msg_id": "e9b46c20-545e-4d58-be84-f02e0b647da8",
+        "text": "I’m happy to go ahead with Cohort 1 as is. I’m ready and, as Heather says, keen to do this before useR, to help me prepare for my C for R users talk, as well as the Dev Day. Perhaps at least <@U060RULT44D> and I can meet? I wouldn’t be opposed to another session after useR, perhaps usual time on July 30th, to wrap up. I’ll hopefully have a better understanding after the conference and Dev Day.",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "c4cd2d45eb7b",
+            "image_72": "https:\/\/avatars.slack-edge.com\/2024-02-05\/6583494822997_c4cd2d45eb7bfbf5886a_72.jpg",
+            "first_name": "Ella",
+            "real_name": "Ella Kaye",
+            "display_name": "Ella Kaye",
+            "team": "T01DW9DLB2A",
+            "name": "ella.kaye",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1718977564.198169",
+        "parent_user_id": "U01DZUA88S1",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "EpnmP",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I’m happy to go ahead with Cohort 1 as is. I’m ready and, as Heather says, keen to do this before useR, to help me prepare for my C for R users talk, as well as the Dev Day. Perhaps at least "
+                            },
+                            {
+                                "type": "user",
+                                "user_id": "U060RULT44D"
+                            },
+                            {
+                                "type": "text",
+                                "text": " and I can meet? I wouldn’t be opposed to another session after useR, perhaps usual time on July 30th, to wrap up. I’ll hopefully have a better understanding after the conference and Dev Day."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "reactions": [
+            {
+                "name": "+1::skin-tone-2",
+                "users": [
+                    "U01DZUA88S1"
+                ],
+                "count": 1
+            }
+        ]
+    }
+]

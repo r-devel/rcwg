@@ -1,0 +1,159 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18780] New: boot.array uses wrong random seed for random data expression*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18780>\n\n            Bug ID: 18780\n           Summary: boot.array uses wrong random seed for random data\n                    expression\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Add-ons\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:Andre.Gillibert@chu-rouen.fr|Andre.Gillibert@chu-rouen.fr>\n\n# Platform\nTested on the lastest nightly R-devel build on Windows 10 \/ x86_64. However,\nthe bug seems to be platform-independent.\n# Summary\n\nDue to lazy evaluation, the boot.array function of the 'boot' recommended\npackage fails to use the correct random seed status when an expression which\nuses randomness when it is evaluated, is used as input in the boot function\ncall.\n\n# Example code\n```\nset.seed(202408)\nrequire(boot)\n\n\nweighed.mean.save=function(data, w) {\n        lidx&lt;&lt;-c(lidx, list(w*length(x)))\n        mean(data*prop.table(w))\n}\nlidx = NULL\nx=rexp(10)\nbt1=boot(data=x,weighed.mean.save,R=100, stype=\"w\")\n\n# returns TRUE, which is expected\nall(t(simplify2array(lidx[-1])) == boot.array(bt1)) \n\nset.seed(202408)\nlidx=NULL\nbt2=boot(data=rexp(10),weighed.mean.save,R=100, stype=\"w\")\n\n# returns FALSE, which is NOT expected\nall(t(simplify2array(lidx[-1])) == boot.array(bt2))\n```\n# Expected output\nThe first call to all(...) returns TRUE as expected\nThe second call to all(...) returns FALSE while it is expected to return TRUE\n\n# Consequences of the bug\nThis bug occurs when performing Monte Carlo simulations assessing the\nperformances of BCa confidence intervals. Indeed, by default BCa confidence\nintervals use empinf(type=\"reg\") which calls boot.array. Due to the bug,\nboot.array() returns random data, yielding an estimate of the acceleration\nconstant close to zero. Incorrect BCa confidence intervals are silently\nproduced without any clue for the naive user.\n\n# Workaround\nOnce known, the bug workaround is trivial: just execute the random-generating\ncommand before calling boot() rather than passing it as an unevaluated\nargument.\n\n# Root cause\nThe bug cause can easily be explained by R's lazy evaluation.\nThe random seed is saved early in boot::boot(), before the first reference to\nthe data argument.\n\n# Simple bug fix\nThe bug can be fixed by forcing all arguments to be evaluated before saving the\nrandom seed.\nSimply inserting the following statements at the start of boot::boot() solves\nthe problem.\n\nforce(data)\nn &lt;- NROW(data) # needed for force(strata) by default\nforce(statistic)\nforce(R)\nforce(sim)\nforce(stype)\nforce(strata)\nforce(L)\nforce(m)\nforce(weights)\nforce(ran.gen)\nforce(mle)\nforce(simple)\nforce(list(...))\nforce(parallel)\nforce(cl)\n\n# Comment about the bug fix\n\nForcing the order of evaluation of arguments might introduce bugs to existing\ncode that would rely on a specific order.\n\nA safer bugfix would be probably obtained by saving the random seed later, just\nbefore generating random numbers.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1723653883.643419",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ag8",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18780] New: boot.array uses wrong random seed for random data expression",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18780"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18780\n           Summary: boot.array uses wrong random seed for random data\n                    expression\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Add-ons\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Andre.Gillibert@chu-rouen.fr",
+                                "text": "Andre.Gillibert@chu-rouen.fr",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n# Platform\nTested on the lastest nightly R-devel build on Windows 10 \/ x86_64. However,\nthe bug seems to be platform-independent.\n# Summary\n\nDue to lazy evaluation, the boot.array function of the 'boot' recommended\npackage fails to use the correct random seed status when an expression which\nuses randomness when it is evaluated, is used as input in the boot function\ncall.\n\n# Example code"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "set.seed(202408)\nrequire(boot)\n\n\nweighed.mean.save=function(data, w) {\n        lidx<<-c(lidx, list(w*length(x)))\n        mean(data*prop.table(w))\n}\nlidx = NULL\nx=rexp(10)\nbt1=boot(data=x,weighed.mean.save,R=100, stype=\"w\")\n\n# returns TRUE, which is expected\nall(t(simplify2array(lidx[-1])) == boot.array(bt1)) \n\nset.seed(202408)\nlidx=NULL\nbt2=boot(data=rexp(10),weighed.mean.save,R=100, stype=\"w\")\n\n# returns FALSE, which is NOT expected\nall(t(simplify2array(lidx[-1])) == boot.array(bt2))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# Expected output\nThe first call to all(...) returns TRUE as expected\nThe second call to all(...) returns FALSE while it is expected to return TRUE\n\n# Consequences of the bug\nThis bug occurs when performing Monte Carlo simulations assessing the\nperformances of BCa confidence intervals. Indeed, by default BCa confidence\nintervals use empinf(type=\"reg\") which calls boot.array. Due to the bug,\nboot.array() returns random data, yielding an estimate of the acceleration\nconstant close to zero. Incorrect BCa confidence intervals are silently\nproduced without any clue for the naive user.\n\n# Workaround\nOnce known, the bug workaround is trivial: just execute the random-generating\ncommand before calling boot() rather than passing it as an unevaluated\nargument.\n\n# Root cause\nThe bug cause can easily be explained by R's lazy evaluation.\nThe random seed is saved early in boot::boot(), before the first reference to\nthe data argument.\n\n# Simple bug fix\nThe bug can be fixed by forcing all arguments to be evaluated before saving the\nrandom seed.\nSimply inserting the following statements at the start of boot::boot() solves\nthe problem.\n\nforce(data)\nn <- NROW(data) # needed for force(strata) by default\nforce(statistic)\nforce(R)\nforce(sim)\nforce(stype)\nforce(strata)\nforce(L)\nforce(m)\nforce(weights)\nforce(ran.gen)\nforce(mle)\nforce(simple)\nforce(list(...))\nforce(parallel)\nforce(cl)\n\n# Comment about the bug fix\n\nForcing the order of evaluation of arguments might introduce bugs to existing\ncode that would rely on a specific order.\n\nA safer bugfix would be probably obtained by saving the random seed later, just\nbefore generating random numbers."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18780] boot.array uses wrong random seed for random data expression*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18780>\n\nBrian Ripley (<mailto:ripley@stats.ox.ac.uk|ripley@stats.ox.ac.uk>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |CONTRIBUTED PACKAGE\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #1 from Brian Ripley (<mailto:ripley@stats.ox.ac.uk|ripley@stats.ox.ac.uk>) ---\nWrong address: boot is a contributed recommneded package with a separate\nmaintainer.\n\n\nUse bug.report(package=\"boot\" (*in current R*) to report.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1723656576.552369",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "zI8Q",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18780] boot.array uses wrong random seed for random data expression",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18780"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nBrian Ripley ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ripley@stats.ox.ac.uk",
+                                "text": "ripley@stats.ox.ac.uk",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |CONTRIBUTED PACKAGE\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #1 from Brian Ripley ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ripley@stats.ox.ac.uk",
+                                "text": "ripley@stats.ox.ac.uk",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nWrong address: boot is a contributed recommneded package with a separate\nmaintainer.\n\n\n\nUse bug.report(package=\"boot\" ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "in current R",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") to report."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

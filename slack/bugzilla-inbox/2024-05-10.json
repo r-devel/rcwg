@@ -1,0 +1,545 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18133] R on Windows does not remove one of its own test files in TMPDIR*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18133>\n\n--- Comment #10 from Henrik Bengtsson (<mailto:henrikb@braju.com|henrikb@braju.com>) ---\nThank you for this. However, I think introduces significant changes the public\nAPI, which has to be considered.\n\nSpecifically, the generic `closeNode()`, which was previously called via\n`parallel:::stopCluster.default()`:\n\n```\n&gt; parallel:::stopCluster.default\nfunction (cl) \nfor (n in cl) stopNode(n)\n```\n\nand\n\n```\n&gt; parallel:::stopNode\nfunction (n) \n{\n    postNode(n, \"DONE\")\n    closeNode(n)\n}\n```\n\nwill no longer be called.  This is turn, means any such custom S3 method for\nclasses inheriting from `SOCKnode` or `SOCKnode` will no longer be called and\nbe compleetly ignored, e.g. `stopNode.myCustomSOCKNode`.  In other words, you\ncan no longer have a `SOCKcluster` cluster with `myCustomSOCKNode` nodes - it\nis now assumed they are `SOCKnode` or `SOCKnode` nodes.\n\nOne can argue that we have to implement a `MyCustomSOCKcluster` with it's own\n`stopCluster.MyCustomSOCKcluster()` implementation.  This is what I mean that\nthe API is changing.  But there's another, bigger, change in the API as well;\nyou can no longer have a `PSOCKcluster` that comprise a mix of different types\nof SOCKnode, e.g. a combination of regular `PSOCKnode` and `MyCustomPSOCKnode`\nnodes.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1715353626.307769",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "T7iUr",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18133] R on Windows does not remove one of its own test files in TMPDIR",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18133"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #10 from Henrik Bengtsson ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:henrikb@braju.com",
+                                "text": "henrikb@braju.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you for this. However, I think introduces significant changes the public\nAPI, which has to be considered.\n\nSpecifically, the generic "
+                            },
+                            {
+                                "type": "text",
+                                "text": "closeNode()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which was previously called via\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "parallel:::stopCluster.default()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> parallel:::stopCluster.default\nfunction (cl) \nfor (n in cl) stopNode(n)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nand\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> parallel:::stopNode\nfunction (n) \n{\n    postNode(n, \"DONE\")\n    closeNode(n)\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nwill no longer be called.  This is turn, means any such custom S3 method for\nclasses inheriting from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "SOCKnode",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "SOCKnode",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " will no longer be called and\nbe compleetly ignored, e.g. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "stopNode.myCustomSOCKNode",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  In other words, you\ncan no longer have a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "SOCKcluster",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " cluster with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "myCustomSOCKNode",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " nodes - it\nis now assumed they are "
+                            },
+                            {
+                                "type": "text",
+                                "text": "SOCKnode",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "SOCKnode",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " nodes.\n\nOne can argue that we have to implement a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "MyCustomSOCKcluster",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " with it's own\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "stopCluster.MyCustomSOCKcluster()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " implementation.  This is what I mean that\nthe API is changing.  But there's another, bigger, change in the API as well;\nyou can no longer have a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "PSOCKcluster",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " that comprise a mix of different types\nof SOCKnode, e.g. a combination of regular "
+                            },
+                            {
+                                "type": "text",
+                                "text": "PSOCKnode",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "MyCustomPSOCKnode",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nnodes."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18727] New: help(\"drop\") is wrong about names for vectors of length 1*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18727>\n\n            Bug ID: 18727\n           Summary: help(\"drop\") is wrong about names for vectors of\n                    length 1\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Documentation\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>\n\nCreated attachment 3356\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3356&amp;action=edit>\namending one sentence in drop.Rd\n\n`help(\"drop\")` says:\n\n&gt; If the result is a length-one vector, the names are taken from the first dimension with a dimname.\n\nThe patch amends that to say:\n\n&gt; However, if the result is a vector of length one, then it does not get `names` _unless_ exactly one component of the `dimnames` is non-`NULL`, in which case that component is used.\n\nThis reflects the actual logic used by `drop`, which is documented in the\n`NEWS` for R version 2.7.0\n\n&gt; Where an array is dropped to a length-one vector by `drop()` or `[, drop = TRUE]`, the result now has names if exactly one of the dimensions was named. (This is compatible with S.)  Previously there were no names.\n\nand quite transparently implemented in the function `DropDims` (defined in\n`array.c`, used by `do_drop` there and by `MatrixSubset` and `ArraySubset` in\n`subset.c`).\n\nA trivial example:\n\n```\n&gt; (x &lt;- x1 &lt;- x2 &lt;- array(0, c(1L, 1L), list(\"a\", \"b\")))\n  b\na 0\n&gt; colnames(x1) &lt;- rownames(x2) &lt;- NULL\n&gt; names(drop(x ))\nNULL\n&gt; names(drop(x1))\n[1] \"a\"\n&gt; names(drop(x2))\n[1] \"b\"\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1715403488.881269",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "EPI",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18727] New: help(\"drop\") is wrong about names for vectors of length 1",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18727"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18727\n           Summary: help(\"drop\") is wrong about names for vectors of\n                    length 1\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Documentation\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3356\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3356&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3356&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\namending one sentence in drop.Rd\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "help(\"drop\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " says:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "If the result is a length-one vector, the names are taken from the first dimension with a dimname."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe patch amends that to say:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "However, if the result is a vector of length one, then it does not get "
+                            },
+                            {
+                                "type": "text",
+                                "text": "names",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " "
+                            },
+                            {
+                                "type": "text",
+                                "text": "unless",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " exactly one component of the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dimnames",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is non-"
+                            },
+                            {
+                                "type": "text",
+                                "text": "NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", in which case that component is used."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis reflects the actual logic used by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "drop",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which is documented in the\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "NEWS",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for R version 2.7.0\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Where an array is dropped to a length-one vector by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "drop()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "[, drop = TRUE]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", the result now has names if exactly one of the dimensions was named. (This is compatible with S.)  Previously there were no names."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nand quite transparently implemented in the function "
+                            },
+                            {
+                                "type": "text",
+                                "text": "DropDims",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (defined in\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "array.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", used by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_drop",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " there and by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "MatrixSubset",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ArraySubset",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "subset.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\n\nA trivial example:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> (x <- x1 <- x2 <- array(0, c(1L, 1L), list(\"a\", \"b\")))\n  b\na 0\n> colnames(x1) <- rownames(x2) <- NULL\n> names(drop(x ))\nNULL\n> names(drop(x1))\n[1] \"a\"\n> names(drop(x2))\n[1] \"b\"\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

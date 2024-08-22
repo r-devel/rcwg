@@ -1,0 +1,509 @@
+[
+    {
+        "user": "U01KXU8UNRX",
+        "type": "message",
+        "ts": "1618309121.000600",
+        "edited": {
+            "user": "U01KXU8UNRX",
+            "ts": "1618309209.000000"
+        },
+        "client_msg_id": "59008f5f-2b3a-41af-a2ca-90fee3204a26",
+        "text": "Not sure on this one, but it is present on both R 3.6.3 and R 4.0.1.  Could someone confirm this one?\n```v &lt;- vector(\"list\", 28)\nfor (i in seq_along(v)) {\n  v[[i]] &lt;- 2:5\n}\nexpand.grid(v)\n#&gt; Error in <http:\/\/rep.int|rep.int>(<http:\/\/rep.int|rep.int>(seq_len(nx), <http:\/\/rep.int|rep.int>(rep.fac, nx)), orep): invalid 'times' value\nexpand.grid(v[1:26])\n#&gt; Error: cannot allocate vector of size 16777216.0 Gb\nexpand.grid(v[1:27])\n#&gt; Error in <http:\/\/rep.int|rep.int>(<http:\/\/rep.int|rep.int>(seq_len(nx), <http:\/\/rep.int|rep.int>(rep.fac, nx)), orep): invalid 'times' value```",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "ad5dd68cbc81",
+            "image_72": "https:\/\/avatars.slack-edge.com\/2021-01-22\/1671554425412_ad5dd68cbc8196426bd1_72.png",
+            "first_name": "Lluís",
+            "real_name": "Lluís Revilla Sancho",
+            "display_name": "Lluís Revilla Sancho",
+            "team": "T01DW9DLB2A",
+            "name": "lluis.revilla_slack",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "cBwf",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Not sure on this one, but it is present on both R 3.6.3 and R 4.0.1.  Could someone confirm this one?\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "v <- vector(\"list\", 28)\nfor (i in seq_along(v)) {\n  v[[i]] <- 2:5\n}\nexpand.grid(v)\n#> Error in rep.int(rep.int(seq_len(nx), rep.int(rep.fac, nx)), orep): invalid 'times' value\nexpand.grid(v[1:26])\n#> Error: cannot allocate vector of size 16777216.0 Gb\nexpand.grid(v[1:27])\n#> Error in rep.int(rep.int(seq_len(nx), rep.int(rep.fac, nx)), orep): invalid 'times' value"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "user": "U01DZUA88S1",
+        "type": "message",
+        "ts": "1618329505.017300",
+        "client_msg_id": "0a227934-8ae0-49b9-95fe-d15aa092cf74",
+        "text": "This is not a bug. If we set `options(error = recover)` and run `expand.grid(v[1:27])` we can step into the `expand.grid()` call when it hits the error.\n\n```expand.grid(v[1:27])\nError in <http:\/\/rep.int|rep.int>(<http:\/\/rep.int|rep.int>(seq_len(nx), <http:\/\/rep.int|rep.int>(rep.fac, nx)), orep) : \n  invalid 'times' value\n\nEnter a frame number, or 0 to exit   \n\n1: expand.grid(v[1:27])\n\nSelection: 1\nCalled from: top level \nBrowse[1]&gt;```\nThe error complains about the `times` value which from `?<http:\/\/rep.int|rep.int>` we see is the second argument to `<http:\/\/rep.int|rep.int>`, i.e. `orep` in the outermost `<http:\/\/rep.int|rep.int>` call shown in the error message. So at the `Browse[1]&gt;` prompt we can try printing the value of `orep`\n\n```Browse[1]&gt; orep\n[1] 4.5036e+15\nBrowse[1]&gt; print(orep, digits = 15)\n[1] 4503599627370496```\nWe can try some experiments: is it the value of `times` itself that matters, or the length of the final output:\n\n```Browse[1]&gt; tmp &lt;- rep.int(1, orep)\nError during wrapup: cannot allocate vector of size 33554432.0 Gb\nError: no more error handlers available (recursive errors?); invoking 'abort' restart\nBrowse[1]&gt; tmp &lt;- rep.int(1:2, orep)\nError during wrapup: invalid 'times' value\nError: no more error handlers available (recursive errors?); invoking 'abort' restart\nBrowse[1]&gt; tmp &lt;- <http:\/\/rep.int|rep.int>(1, orep*2)\nError during wrapup: invalid 'times' value\nError: no more error handlers available (recursive errors?); invoking 'abort' restart```\nSo `times = 4503599627370496` is okay if we're only repeating 1 value (then we just run out of memory), but not if we're repeating 2 values or if we're repeating 1 value 2*orep times. This suggests we're hitting a maximum for the total length. By browsing the r-svn GitHub mirror, we can find the C code underlying the `<http:\/\/rep.int|rep.int>` function and within that the code that will trigger the \"invalid 'times' value\" error: <https:\/\/github.com\/r-devel\/r-svn\/blob\/0d65935f30dcaccfeee1dd61991bf4b1444873bc\/src\/main\/seq.c#L262-L263>.\n\n```    if (sna &gt; R_XLEN_T_MAX)\n\terror(_(\"invalid '%s' value\"), \"times\");```\nSearching the r-svn mirror for `R_XLEN_T_MAX` we find <https:\/\/github.com\/r-devel\/r-svn\/blob\/0d65935f30dcaccfeee1dd61991bf4b1444873bc\/src\/include\/Rinternals.h#L73>\n\n```# define R_XLEN_T_MAX 4503599627370496```\nSo indeed we have a hard-coded limit here. Where does this come from? It's the length of a long vector: 2^52, see `?`Long vectors` or <https:\/\/simplystatistics.tumblr.com\/post\/27980822670\/really-big-objects-coming-to-r> for more. This just happens to be the same as 4^27\/4 which is the value of `orep` when expanding a 4^27 grid. Possibly a more helpful error could be given in this case,  but since an integer vector of length 2^52 would require at least (2^52 *4)\/1e12 &gt; 18,000 terabytes (4 bytes per integer) to store, there may not be a lot of urgency to change it.",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "g580131f5a7a",
+            "image_72": "https:\/\/secure.gravatar.com\/avatar\/580131f5a7a4fa33c811dc6d20ab3ef8.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0004-72.png",
+            "first_name": "Heather",
+            "real_name": "Heather Turner (she\/her)",
+            "display_name": "Heather Turner",
+            "team": "T01DW9DLB2A",
+            "name": "ht",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "attachments": [
+            {
+                "fallback": "[r-devel\/r-svn] src\/main\/seq.c:262-263",
+                "title": "src\/main\/seq.c:262-263",
+                "footer": "<https:\/\/github.com\/r-devel\/r-svn|r-devel\/r-svn>",
+                "id": 1,
+                "title_link": "https:\/\/github.com\/r-devel\/r-svn\/blob\/0d65935f30dcaccfeee1dd61991bf4b1444873bc\/src\/main\/seq.c#L262-L263",
+                "footer_icon": "https:\/\/github.githubassets.com\/favicon.ico",
+                "color": "24292f",
+                "mrkdwn_in": [
+                    "text"
+                ],
+                "bot_id": "B01ER5BE7NX",
+                "app_unfurl_url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/0d65935f30dcaccfeee1dd61991bf4b1444873bc\/src\/main\/seq.c#L262-L263",
+                "is_app_unfurl": true
+            },
+            {
+                "fallback": "[r-devel\/r-svn] src\/include\/Rinternals.h:73",
+                "title": "src\/include\/Rinternals.h:73",
+                "footer": "<https:\/\/github.com\/r-devel\/r-svn|r-devel\/r-svn>",
+                "id": 2,
+                "title_link": "https:\/\/github.com\/r-devel\/r-svn\/blob\/0d65935f30dcaccfeee1dd61991bf4b1444873bc\/src\/include\/Rinternals.h#L73",
+                "footer_icon": "https:\/\/github.githubassets.com\/favicon.ico",
+                "color": "24292f",
+                "mrkdwn_in": [
+                    "text"
+                ],
+                "bot_id": "B01ER5BE7NX",
+                "app_unfurl_url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/0d65935f30dcaccfeee1dd61991bf4b1444873bc\/src\/include\/Rinternals.h#L73",
+                "is_app_unfurl": true
+            },
+            {
+                "service_name": "Simply Statistics",
+                "title": "Really Big Objects Coming to R",
+                "title_link": "https:\/\/simplystatistics.tumblr.com\/post\/27980822670\/really-big-objects-coming-to-r",
+                "text": "I noticed in the development version of R the following note in the NEWS file: There is a subtle change in behaviour for numeric index values 2^31 and larger.  These used never to be legitimate and so...",
+                "fallback": "Simply Statistics: Really Big Objects Coming to R",
+                "from_url": "https:\/\/simplystatistics.tumblr.com\/post\/27980822670\/really-big-objects-coming-to-r",
+                "service_icon": "https:\/\/64.media.tumblr.com\/avatar_390b44692ddc_128.pnj",
+                "id": 1,
+                "original_url": "https:\/\/simplystatistics.tumblr.com\/post\/27980822670\/really-big-objects-coming-to-r"
+            }
+        ],
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "dt9",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "This is not a bug. If we set "
+                            },
+                            {
+                                "type": "text",
+                                "text": "options(error = recover)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and run "
+                            },
+                            {
+                                "type": "text",
+                                "text": "expand.grid(v[1:27])",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " we can step into the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "expand.grid()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " call when it hits the error.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "expand.grid(v[1:27])\nError in rep.int(rep.int(seq_len(nx), rep.int(rep.fac, nx)), orep) : \n  invalid 'times' value\n\nEnter a frame number, or 0 to exit   \n\n1: expand.grid(v[1:27])\n\nSelection: 1\nCalled from: top level \nBrowse[1]>"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nThe error complains about the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "times",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " value which from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "?",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/rep.int",
+                                "text": "rep.int",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " we see is the second argument to "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/rep.int",
+                                "text": "rep.int",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", i.e. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "orep",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in the outermost "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/rep.int",
+                                "text": "rep.int",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " call shown in the error message. So at the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Browse[1]>",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " prompt we can try printing the value of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "orep",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Browse[1]> orep\n[1] 4.5036e+15\nBrowse[1]> print(orep, digits = 15)\n[1] 4503599627370496"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nWe can try some experiments: is it the value of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "times",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " itself that matters, or the length of the final output:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Browse[1]> tmp <- rep.int(1, orep)\nError during wrapup: cannot allocate vector of size 33554432.0 Gb\nError: no more error handlers available (recursive errors?); invoking 'abort' restart\nBrowse[1]> tmp <- rep.int(1:2, orep)\nError during wrapup: invalid 'times' value\nError: no more error handlers available (recursive errors?); invoking 'abort' restart\nBrowse[1]> tmp <- rep.int(1, orep*2)\nError during wrapup: invalid 'times' value\nError: no more error handlers available (recursive errors?); invoking 'abort' restart"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nSo "
+                            },
+                            {
+                                "type": "text",
+                                "text": "times = 4503599627370496",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is okay if we're only repeating 1 value (then we just run out of memory), but not if we're repeating 2 values or if we're repeating 1 value 2*orep times. This suggests we're hitting a maximum for the total length. By browsing the r-svn GitHub mirror, we can find the C code underlying the "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/rep.int",
+                                "text": "rep.int",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " function and within that the code that will trigger the \"invalid 'times' value\" error: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/0d65935f30dcaccfeee1dd61991bf4b1444873bc\/src\/main\/seq.c#L262-L263"
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "    if (sna > R_XLEN_T_MAX)\n\terror(_(\"invalid '%s' value\"), \"times\");"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nSearching the r-svn mirror for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_XLEN_T_MAX",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " we find "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/0d65935f30dcaccfeee1dd61991bf4b1444873bc\/src\/include\/Rinternals.h#L73"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# define R_XLEN_T_MAX 4503599627370496"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nSo indeed we have a hard-coded limit here. Where does this come from? It's the length of a long vector: 2^52, see `?`Long vectors` or "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/simplystatistics.tumblr.com\/post\/27980822670\/really-big-objects-coming-to-r"
+                            },
+                            {
+                                "type": "text",
+                                "text": " for more. This just happens to be the same as 4^27\/4 which is the value of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "orep",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " when expanding a 4^27 grid. Possibly a more helpful error could be given in this case,  but since an integer vector of length 2^52 would require at least (2^52 *4)\/1e12 > 18,000 terabytes (4 bytes per integer) to store, there may not be a lot of urgency to change it."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "reactions": [
+            {
+                "name": "100",
+                "users": [
+                    "U01KXU8UNRX"
+                ],
+                "count": 1
+            }
+        ]
+    },
+    {
+        "user": "U01KXU8UNRX",
+        "type": "message",
+        "ts": "1618330842.018500",
+        "client_msg_id": "5662e283-bfa9-4195-99d4-e8597bd2c7e5",
+        "text": "oh, nice detective work",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "ad5dd68cbc81",
+            "image_72": "https:\/\/avatars.slack-edge.com\/2021-01-22\/1671554425412_ad5dd68cbc8196426bd1_72.png",
+            "first_name": "Lluís",
+            "real_name": "Lluís Revilla Sancho",
+            "display_name": "Lluís Revilla Sancho",
+            "team": "T01DW9DLB2A",
+            "name": "lluis.revilla_slack",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "=\/B1",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "oh, nice detective work"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "user": "U01KXU8UNRX",
+        "type": "message",
+        "ts": "1618330847.018700",
+        "client_msg_id": "9d1fe0ab-09bc-40f6-bea0-1b9b0cf24694",
+        "text": "Thanks for checking it. I thought that this could be some problem with ALTREP",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "ad5dd68cbc81",
+            "image_72": "https:\/\/avatars.slack-edge.com\/2021-01-22\/1671554425412_ad5dd68cbc8196426bd1_72.png",
+            "first_name": "Lluís",
+            "real_name": "Lluís Revilla Sancho",
+            "display_name": "Lluís Revilla Sancho",
+            "team": "T01DW9DLB2A",
+            "name": "lluis.revilla_slack",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "fSI0",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Thanks for checking it. I thought that this could be some problem with ALTREP"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,301 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17866] nlme gls() results for unbalanced data with corStruct correlation class change if Initialize() is called first*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17866>\n\n--- Comment #3 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\nAs a lesson from Bug 17227 and Bug 18192, this bug is also capable of crashing\nR by pre-initializing the \"corStruct\" on a larger dataset:\n\n```\nlibrary(\"nlme\")\ncS &lt;- Initialize(corCompSymm(form = ~ 1 | Subject), Orthodont)\ngls(distance ~ age, Orthodont, correlation = cS, subset = Sex == \"Female\")\n```\n\n```\n==20279== Invalid read of size 8\n==20279==    at 0xD662518: mult_mat (matrix.c:92)\n==20279==    by 0xD66164D: compSymm_recalc (corStruct.c:736)\n```\n\nThis is because `Dim(cS)$start` exceeds the fitted subset.\n\nSilently getting wrong results as in the OP's examples is somehow worse, and\nunexpected as the same data *seem* to be used for initialization and model\nfitting. I think the bug happens for data that is not sorted by the levels of\nthe grouping factor *and* has a subject-specific correlation \"covariate\" (e.g.,\ndifferent number of observations per subject). So if the unbalanced example\n(\"Ounbal\") from Comment 0 had used `Ounbal &lt;- sort_by(Ounbal, ~Subject)`,\n`mod3` and `mod4` would have agreed.\n\nTo fix this, the various model fitting functions would either have to\n\"un-initialize\" the given correlation structure (which is messy), or simply\nwarn\/stop when encountering an already initialized \"corStruct\" (trivial, saying\nthis is unsupported) or only when that is incompatible (harder to get right). I\nam currently running reverse dependency checks with the simple \"always stop\"\nrule to see if foreign code uses pre-initialized correlation structures (which\nis never done in NLME's own book\/examples\/tests) ...",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1724083605.998149",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "bxkU",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17866] nlme gls() results for unbalanced data with corStruct correlation class change if Initialize() is called first",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17866"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nAs a lesson from Bug 17227 and Bug 18192, this bug is also capable of crashing\nR by pre-initializing the \"corStruct\" on a larger dataset:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "library(\"nlme\")\ncS <- Initialize(corCompSymm(form = ~ 1 | Subject), Orthodont)\ngls(distance ~ age, Orthodont, correlation = cS, subset = Sex == \"Female\")\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "==20279== Invalid read of size 8\n==20279==    at 0xD662518: mult_mat (matrix.c:92)\n==20279==    by 0xD66164D: compSymm_recalc (corStruct.c:736)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis is because "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Dim(cS)$start",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " exceeds the fitted subset.\n\nSilently getting wrong results as in the OP's examples is somehow worse, and\nunexpected as the same data "
+                            },
+                            {
+                                "type": "text",
+                                "text": "seem",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to be used for initialization and model\nfitting. I think the bug happens for data that is not sorted by the levels of\nthe grouping factor "
+                            },
+                            {
+                                "type": "text",
+                                "text": "and",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has a subject-specific correlation \"covariate\" (e.g.,\ndifferent number of observations per subject). So if the unbalanced example\n(\"Ounbal\") from Comment 0 had used "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Ounbal <- sort_by(Ounbal, ~Subject)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "mod3",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mod4",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " would have agreed.\n\nTo fix this, the various model fitting functions would either have to\n\"un-initialize\" the given correlation structure (which is messy), or simply\nwarn\/stop when encountering an already initialized \"corStruct\" (trivial, saying\nthis is unsupported) or only when that is incompatible (harder to get right). I\nam currently running reverse dependency checks with the simple \"always stop\"\nrule to see if foreign code uses pre-initialized correlation structures (which\nis never done in NLME's own book\/examples\/tests) ..."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18783] New: Remove the recommendation to guard against !defined(R_VERSION)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18783>\n\n            Bug ID: 18783\n           Summary: Remove the recommendation to guard against\n                    !defined(R_VERSION)\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Documentation\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>\n\nCreated attachment 3390\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3390&amp;action=edit>\nPatch to R-exts unguarding R_VERSION\n\nR-exts has:\n\n&gt; For protection against very old versions of R... use a construction such as `#if defined(R_VERSION)`...\n\nWhat does \"very old\" mean, exactly?\n\nAs near as I can tell, it means \"More than 25 years old\"!\n\n<https:\/\/github.com\/r-devel\/r-svn\/commit\/85588f282a804557c713aafa7c4e4e1b950f53c0>\n\nI highly doubt this advice is still useful \/ worth maintaining.\n\nThere are already ~100 files on CRAN using the un-guarded construction with no\napparent issue:\n\n<https:\/\/github.com\/search?q=org%3Acran%20%2F%23%5Cs*if%5Cs*R_VERSION%5Cs*%5B%3C%3E%5D%3D%3F%5Cs*R_version%5B(%5D%2F&amp;type=code>\n\nR-exts itself already does away with this guard elsewhere:\n\n<https:\/\/cran.r-project.org\/doc\/manuals\/r-release\/R-exts.html#Distribution-functions>\n\n```\n#if R_VERSION &lt; R_Version(4, 2, 0)\n```\n\nR-devel has another unguarded usage in the new section on replacing non-API\nusage.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1724110957.558819",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "3wwVf",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18783] New: Remove the recommendation to guard against !defined(R_VERSION)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18783"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18783\n           Summary: Remove the recommendation to guard against\n                    !defined(R_VERSION)\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Documentation\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3390\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3390&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3390&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch to R-exts unguarding R_VERSION\n\nR-exts has:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "For protection against very old versions of R... use a construction such as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "#if defined(R_VERSION)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "..."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWhat does \"very old\" mean, exactly?\n\nAs near as I can tell, it means \"More than 25 years old\"!\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/commit\/85588f282a804557c713aafa7c4e4e1b950f53c0"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nI highly doubt this advice is still useful \/ worth maintaining.\n\nThere are already ~100 files on CRAN using the un-guarded construction with no\napparent issue:\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/search?q=org%3Acran%20%2F%23%5Cs*if%5Cs*R_VERSION%5Cs*%5B%3C%3E%5D%3D%3F%5Cs*R_version%5B(%5D%2F&amp;type=code",
+                                "text": "https:\/\/github.com\/search?q=org%3Acran%20%2F%23%5Cs*if%5Cs*R_VERSION%5Cs*%5B%3C%3E%5D%3D%3F%5Cs*R_version%5B(%5D%2F&type=code"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nR-exts itself already does away with this guard elsewhere:\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/cran.r-project.org\/doc\/manuals\/r-release\/R-exts.html#Distribution-functions"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "#if R_VERSION < R_Version(4, 2, 0)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nR-devel has another unguarded usage in the new section on replacing non-API\nusage."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

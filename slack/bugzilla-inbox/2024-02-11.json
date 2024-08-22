@@ -1,0 +1,724 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 1161] x-axis label in persp()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=1161>\n\nMunawar Cheema (<mailto:munawar.a.cheema@gmail.com|munawar.a.cheema@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |munawar.a.cheema@gmail.com\n\n--- Comment #4 from Munawar Cheema (<mailto:munawar.a.cheema@gmail.com|munawar.a.cheema@gmail.com>) ---\nCreated attachment 3309\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3309&amp;action=edit>\nPatch to fix Labelling in persp() for a list argument for x",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1707640200.676839",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "JbMno",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 1161] x-axis label in persp()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=1161"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMunawar Cheema ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:munawar.a.cheema@gmail.com",
+                                "text": "munawar.a.cheema@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |munawar.a.cheema@gmail.com\n\n--- Comment #4 from Munawar Cheema ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:munawar.a.cheema@gmail.com",
+                                "text": "munawar.a.cheema@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3309\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3309&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3309&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch to fix Labelling in persp() for a list argument for x"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 1161] x-axis label in persp()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=1161>\n\n--- Comment #5 from Munawar Cheema (<mailto:munawar.a.cheema@gmail.com|munawar.a.cheema@gmail.com>) ---\nComment on attachment 3309\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3309>\nPatch to fix Labelling in persp() for a list argument for x\n\n#  [Bug 1161](<https:\/\/bugs.r-project.org\/show_bug.cgi?id=1161>)\nUsing Version: R 4.\nI think the problem as outlined in the OP can be stated as: the labelling of\naxes is incorrect when\na list is supplied to the x argument. The OP and subsequent discussion confuses\nthe possibility to\nprovide x, y and optionally z as members of a list, and the separate need for z\nto be a matrix so as to\nbe able to properly ascribe the datapoints to points on the x, y plane. Such a\nlist is a valid\ninput to the function per the help page of the function. The original proposed\nsolution I believe\ndoes not fully solve the labelling problem and I propose the following patch as\na preferable\nsolution and try to provide a rationale for my design choices. The patch\npasses: make check-devel.\nAny comments and suggestions would be appreciated to both the content and\nmanner of this report\n(it's my first bug report).\n\n## Recreating the problem\nSee the first example of a call to persp in the code in the following section\nto see example of the problem.\n\n## Proposed Solution\nI handle the labels appropriately when lists are provided while\nmaintaining the other pre-patch program behaviour in the examples\nbelow. ie throws errors in same situations and uses the list elements\nor the explicitly provided data as the current release version with\nlabels that conform.\n\nI have taken care not to trigger evaluation or setting of anything other than\nx, xlab, ylab, and\nzlab earlier than the orginal code and even for those specific variables only\nfor cases where the arguments\ndictate using the changes to the code. Nothing else is touched prematurely so\nas to reduce the\npossibility of breaking someone's code.\n\nThe original function will accept a list in which there are partial matches for\n\"x\" and \"y\" with\nits names. My reading of the help page is that this may be unintentional.\nNevertheless, I use lower\ncase x, y, and z for exact matches and the uppercase letters for the partial\nmatches so both cases\nare handled by the patch ablbeit providing a slight clue to the user of the\ndistinction.\n\nThe only case I am unhappy about is: persp(x = list(x=d1, y=d2, z=d3)) where I\nwould\nlike the labels to be, d1, d2, and d3, to correspond to the behaviour of\npersp(d1,d2,d3) but for\nreasons described in the end notes, this is not easy to achieve because the\nlist gets evaluated and the\nnames d1, d2, d3 are lost.\n\n```\n  ### lines to be added at the top of the persp function in persp.R\n  if (is.list(x)){\n    if (\"x\" %in% names(x)) xlab &lt;- \"x\" else \"X\" # else triggered when instead\nof x a pmatch for x is found\n    if (\"y\" %in% names(x)) ylab &lt;- \"y\" else \"Y\" # else triggered when instead\nof y a pmatch for y is found\n    if (missing(z)) { # only use z from list if it is missing\n      if (\"z\" %in% names(x)) zlab &lt;- \"z\" else if (!<http:\/\/is.na|is.na>(pmatch(\"z\",\nnames(x)))) \"Z\"\n    }\n  }\n  ### Tests I ran on the current release of R and on the build with the patch\n  x &lt;- seq(-10, 10, length.out = 30)\n  y &lt;- x\n  f &lt;- function(x, y) { r &lt;- sqrt(x^2+y^2); 10 * sin(r)\/r }\n  z &lt;- outer(x, y, f)\n  x1 &lt;- x; y1 &lt;- y; z1 &lt;- z\n  data.list &lt;- list(x=x,y=y,z=z)\n  data.list.with.names &lt;- list(x=x1, y=y1, z=z1) \n  malformed.list &lt;- list(mx=x,my=y,mz=z)\n  ### Tests I ran to determine what behaviour is in release and which I want to\nmatch in all but the case of labels when list is used\n  persp(data.list.with.names, theta = 30, phi = 30, expand = 0.5, col =\n\"lightblue\") # x label is list and Y and Z are the other labels\n  persp(x, y, z, theta = 30, phi = 30, expand = 0.5, col = \"lightblue\") # lower\ncase x, y, z labels in release\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1707640259.721749",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Xdz",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 1161] x-axis label in persp()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=1161"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Munawar Cheema ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:munawar.a.cheema@gmail.com",
+                                "text": "munawar.a.cheema@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nComment on attachment 3309\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3309"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch to fix Labelling in persp() for a list argument for x\n\n#  [Bug 1161]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=1161"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\nUsing Version: R 4.\nI think the problem as outlined in the OP can be stated as: the labelling of\naxes is incorrect when\na list is supplied to the x argument. The OP and subsequent discussion confuses\nthe possibility to\nprovide x, y and optionally z as members of a list, and the separate need for z\nto be a matrix so as to\nbe able to properly ascribe the datapoints to points on the x, y plane. Such a\nlist is a valid\ninput to the function per the help page of the function. The original proposed\nsolution I believe\ndoes not fully solve the labelling problem and I propose the following patch as\na preferable\nsolution and try to provide a rationale for my design choices. The patch\npasses: make check-devel.\nAny comments and suggestions would be appreciated to both the content and\nmanner of this report\n(it's my first bug report).\n\n## Recreating the problem\nSee the first example of a call to persp in the code in the following section\nto see example of the problem.\n\n## Proposed Solution\nI handle the labels appropriately when lists are provided while\nmaintaining the other pre-patch program behaviour in the examples\nbelow. ie throws errors in same situations and uses the list elements\nor the explicitly provided data as the current release version with\nlabels that conform.\n\nI have taken care not to trigger evaluation or setting of anything other than\nx, xlab, ylab, and\nzlab earlier than the orginal code and even for those specific variables only\nfor cases where the arguments\ndictate using the changes to the code. Nothing else is touched prematurely so\nas to reduce the\npossibility of breaking someone's code.\n\nThe original function will accept a list in which there are partial matches for\n\"x\" and \"y\" with\nits names. My reading of the help page is that this may be unintentional.\nNevertheless, I use lower\ncase x, y, and z for exact matches and the uppercase letters for the partial\nmatches so both cases\nare handled by the patch ablbeit providing a slight clue to the user of the\ndistinction.\n\nThe only case I am unhappy about is: persp(x = list(x=d1, y=d2, z=d3)) where I\nwould\nlike the labels to be, d1, d2, and d3, to correspond to the behaviour of\npersp(d1,d2,d3) but for\nreasons described in the end notes, this is not easy to achieve because the\nlist gets evaluated and the\nnames d1, d2, d3 are lost.\n\n```\n  ### lines to be added at the top of the persp function in persp.R\n  if (is.list(x)){\n    if (\"x\" %in% names(x)) xlab <- \"x\" else \"X\" # else triggered when instead\nof x a pmatch for x is found\n    if (\"y\" %in% names(x)) ylab <- \"y\" else \"Y\" # else triggered when instead\nof y a pmatch for y is found\n    if (missing(z)) { # only use z from list if it is missing\n      if (\"z\" %in% names(x)) zlab <- \"z\" else if (!"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(pmatch(\"z\",\nnames(x)))) \"Z\"\n    }\n  }\n  ### Tests I ran on the current release of R and on the build with the patch\n  x <- seq(-10, 10, length.out = 30)\n  y <- x\n  f <- function(x, y) { r <- sqrt(x^2+y^2); 10 * sin(r)\/r }\n  z <- outer(x, y, f)\n  x1 <- x; y1 <- y; z1 <- z\n  data.list <- list(x=x,y=y,z=z)\n  data.list.with.names <- list(x=x1, y=y1, z=z1) \n  malformed.list <- list(mx=x,my=y,mz=z)\n  ### Tests I ran to determine what behaviour is in release and which I want to\nmatch in all but the case of labels when list is used\n  persp(data.list.with.names, theta = 30, phi = 30, expand = 0.5, col =\n\"lightblue\") # x label is list and Y and Z are the other labels\n  persp(x, y, z, theta = 30, phi = 30, expand = 0.5, col = \"lightblue\") # lower\ncase x, y, z labels in release"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "  persp(x1,y1,z1, theta = 30, phi = 30, expand = 0.5, col = \"lightblue\") # x1,\ny1, z1 are labels\n  persp(list(x=x,y=y,z=z), theta = 30, phi = 30, expand = 0.5, col =\n\"lightblue\") # x label is  a list in release\n  persp(list(x=x,y=y,z=z), z, theta = 30, phi = 30, expand = 0.5, col =\n\"lightblue\") # x label is  a list and y label is y and z label is z\n  persp(list(x=x),y, z=z, theta = 30, phi = 30, expand = 0.5, col =\n\"lightblue\")  # throws error in release\n  persp(list(x=x, y=y), z=z, theta = 30, phi = 30, expand = 0.5, col =\n\"lightblue\") # x label is a list in release\n  persp(data.list, theta = 30, phi = 30, expand = 0.5, col = \"lightblue\") # x\nlabel is data.list in release\n  persp(list(x=x), y, z, theta = 30, phi = 30, expand = 0.5, col = \"lightblue\")\n# throws error in release \n  persp(list(x=x), z=z, theta = 30, phi = 30, expand = 0.5, col = \"lightblue\") \n# throws error in release\n  persp(malformed.list, theta = 30, phi = 30, expand = 0.5, col = \"lightblue\")\n# throws an error in release\n```\n\n### Relevant Notes on persp function\n+ If z is missing and x is not a list then x is assumed to be z and x is\nassigned its default\n+ If z is missing and x is a list then z is taken from the list but if z is\nprovided it overrides\n  the list\n+ Providing none of x, y, z throws an error\n+ if the list does not contain any variable beginning with x, y, or z an error\nwill be thrown. eg\n  any name with the regex x.* will be acceptable for x and similarly y.* and\nz.* correspond to y\n  and z.\n+ If x is found in the list then y must come from the list too otherwise an\nerror is thrown\n\n### Notes on Solution\n+ if an argument to a function is a list I cannot easily get at the names\nwithin the list via the\n  deparse1(substitute(arg)) idiom. I would like the following to work in an\nanalogous way to the\n  x=x1 providing an x axis label of x1. This doesn't work for a list because it\nhas to be\n  evaluated before substitution leading to a label comprised of all the values\nas follows:\n```\n        if (is.list(x)){\n        if (\"x\" %in% names(x)) xlab &lt;- deparse1(substitute(x), x) # this will\nnot work as x is evaluated losing the names of assigned to x elements\n        if (\"y\" %in% names(x)) ylab &lt;- deparse1(substitute(y), x)\n        # ...\n    }\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1707640259.768989",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "enB=",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "persp(x1,y1,z1, theta = 30, phi = 30, expand = 0.5, col = \"lightblue\") # x1,\ny1, z1 are labels\n  persp(list(x=x,y=y,z=z), theta = 30, phi = 30, expand = 0.5, col =\n\"lightblue\") # x label is  a list in release\n  persp(list(x=x,y=y,z=z), z, theta = 30, phi = 30, expand = 0.5, col =\n\"lightblue\") # x label is  a list and y label is y and z label is z\n  persp(list(x=x),y, z=z, theta = 30, phi = 30, expand = 0.5, col =\n\"lightblue\")  # throws error in release\n  persp(list(x=x, y=y), z=z, theta = 30, phi = 30, expand = 0.5, col =\n\"lightblue\") # x label is a list in release\n  persp(data.list, theta = 30, phi = 30, expand = 0.5, col = \"lightblue\") # x\nlabel is data.list in release\n  persp(list(x=x), y, z, theta = 30, phi = 30, expand = 0.5, col = \"lightblue\")\n# throws error in release \n  persp(list(x=x), z=z, theta = 30, phi = 30, expand = 0.5, col = \"lightblue\") \n# throws error in release\n  persp(malformed.list, theta = 30, phi = 30, expand = 0.5, col = \"lightblue\")\n# throws an error in release"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n### Relevant Notes on persp function\n+ If z is missing and x is not a list then x is assumed to be z and x is\nassigned its default\n+ If z is missing and x is a list then z is taken from the list but if z is\nprovided it overrides\n  the list\n+ Providing none of x, y, z throws an error\n+ if the list does not contain any variable beginning with x, y, or z an error\nwill be thrown. eg\n  any name with the regex x.* will be acceptable for x and similarly y.* and\nz.* correspond to y\n  and z.\n+ If x is found in the list then y must come from the list too otherwise an\nerror is thrown\n\n### Notes on Solution\n+ if an argument to a function is a list I cannot easily get at the names\nwithin the list via the\n  deparse1(substitute(arg)) idiom. I would like the following to work in an\nanalogous way to the\n  x=x1 providing an x axis label of x1. This doesn't work for a list because it\nhas to be\n  evaluated before substitution leading to a label comprised of all the values\nas follows:\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "        if (is.list(x)){\n        if (\"x\" %in% names(x)) xlab <- deparse1(substitute(x), x) # this will\nnot work as x is evaluated losing the names of assigned to x elements\n        if (\"y\" %in% names(x)) ylab <- deparse1(substitute(y), x)\n        # ...\n    }\n```"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18668] New: ImageMagick missing heic driver (libheif)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18668>\n\n            Bug ID: 18668\n           Summary: ImageMagick missing heic driver (libheif)\n           Product: Rtools\n           Version: 4.3\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Toolchain and libraries\n          Assignee: <mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>\n          Reporter: <mailto:jeroen@berkeley.edu|jeroen@berkeley.edu>\n\nBuilding the magick package against ImageMagick from rtools43 we see:\n\n\n```\n&gt; library(magick)\nLinking to ImageMagick 7.1.1.25\nEnabled features: cairo, freetype, ghostscript, lcms, raw, rsvg, webp\nDisabled features: fontconfig, fftw, heic, pango, x11\n```\n\nHEIC is a format that is important to several users of magick, see for example: \n\n - <https:\/\/github.com\/ropensci\/magick\/issues\/292>\n - <https:\/\/github.com\/ropensci\/magick\/issues\/377>\n\nIt is also enabled in ImageMagick on recent Linux distributions, as well as\nhomebrew, msys2 etc.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1707660699.004349",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "M5MMB",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18668] New: ImageMagick missing heic driver (libheif)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18668"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18668\n           Summary: ImageMagick missing heic driver (libheif)\n           Product: Rtools\n           Version: 4.3\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Toolchain and libraries\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jeroen@berkeley.edu",
+                                "text": "jeroen@berkeley.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nBuilding the magick package against ImageMagick from rtools43 we see:\n\n\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> library(magick)\nLinking to ImageMagick 7.1.1.25\nEnabled features: cairo, freetype, ghostscript, lcms, raw, rsvg, webp\nDisabled features: fontconfig, fftw, heic, pango, x11\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nHEIC is a format that is important to several users of magick, see for example: \n\n - "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/ropensci\/magick\/issues\/292"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n - "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/ropensci\/magick\/issues\/377"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIt is also enabled in ImageMagick on recent Linux distributions, as well as\nhomebrew, msys2 etc."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18669] New: librsvg version is very old*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18669>\n\n            Bug ID: 18669\n           Summary: librsvg version is very old\n           Product: Rtools\n           Version: 4.3\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Toolchain and libraries\n          Assignee: <mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>\n          Reporter: <mailto:jeroen@berkeley.edu|jeroen@berkeley.edu>\n\nThe version of librsvg that is currently included with rtools is 2.40.21. This\nis a patched-up version of the 2.40 branch which was released over 10 years\nago. The number of changes and fixes since then has been enormous:\n<https:\/\/gitlab.gnome.org\/GNOME\/librsvg\/-\/blob\/main\/NEWS>\n\nIt would be great if the library could be updated to a version that is a bit\nmore current. Debian is currently on 2.54 and Fedora\/Homebrew\/MSYS2 on 2.57.\nThe 'rsvg' and 'magick' Windows R packages are currently using a librsvg 2.57\nbuild from msys2, which performs very well. It would be a big regression to go\nback to the 2.40 version from rtools43.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1707661721.247449",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "koH",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18669] New: librsvg version is very old",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18669"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18669\n           Summary: librsvg version is very old\n           Product: Rtools\n           Version: 4.3\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Toolchain and libraries\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jeroen@berkeley.edu",
+                                "text": "jeroen@berkeley.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThe version of librsvg that is currently included with rtools is 2.40.21. This\nis a patched-up version of the 2.40 branch which was released over 10 years\nago. The number of changes and fixes since then has been enormous:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/gitlab.gnome.org\/GNOME\/librsvg\/-\/blob\/main\/NEWS"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIt would be great if the library could be updated to a version that is a bit\nmore current. Debian is currently on 2.54 and Fedora\/Homebrew\/MSYS2 on 2.57.\nThe 'rsvg' and 'magick' Windows R packages are currently using a librsvg 2.57\nbuild from msys2, which performs very well. It would be a big regression to go\nback to the 2.40 version from rtools43."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18666] Ctrl-D or DEL requests R to quit in Rterm*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18666>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tomas.kalibera@gmail.com\n\n--- Comment #1 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nThanks for the report. Looking at the code, (getline.c, lines 721-726), it\nseems it was intentional. At least, it was intentional that getline would\nfinish with editing a line if DEL or Ctrl-D is pressed when there are no more\ncharacters. Already R 4.0 would exit in that case, so it has been happening for\nsome time at least.\n\nIt seems easy to change - simply by deleting the condition, one gets instead a\nbeep in that case, a bit like when pressing backspace too many times.\n\nDo you think we should do that?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1707685801.743599",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "mall",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18666] Ctrl-D or DEL requests R to quit in Rterm",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18666"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tomas.kalibera@gmail.com\n\n--- Comment #1 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for the report. Looking at the code, (getline.c, lines 721-726), it\nseems it was intentional. At least, it was intentional that getline would\nfinish with editing a line if DEL or Ctrl-D is pressed when there are no more\ncharacters. Already R 4.0 would exit in that case, so it has been happening for\nsome time at least.\n\nIt seems easy to change - simply by deleting the condition, one gets instead a\nbeep in that case, a bit like when pressing backspace too many times.\n\nDo you think we should do that?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18666] Ctrl-D or DEL requests R to quit in Rterm*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18666>\n\n--- Comment #2 from Duncan Murdoch (<mailto:murdoch.duncan@gmail.com|murdoch.duncan@gmail.com>) ---\nI think that would be a good fix.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1707686475.651549",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "WUin",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18666] Ctrl-D or DEL requests R to quit in Rterm",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18666"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Duncan Murdoch ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:murdoch.duncan@gmail.com",
+                                "text": "murdoch.duncan@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI think that would be a good fix."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18670] New: help(\"qr\") wrong about length(qraux) when LAPACK = TRUE*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18670>\n\n            Bug ID: 18670\n           Summary: help(\"qr\") wrong about length(qraux) when LAPACK =\n                    TRUE\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Documentation\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>\n\n`qr(x, tol, LAPACK = TRUE)` is a named list with element `qraux` of length\n`min(dim(x))`, _not_ always of length `ncol(x)` as stated in `help(\"qr\")`.  The\ncorrect length is clearly documented [by\nLAPACK](<https:\/\/github.com\/Reference-LAPACK\/lapack\/blob\/c6bc40164ace127bc308da37b135791a9ecb4667\/SRC\/dgeqp3.f#L85-L86>)\nand we even see the following in `Lapack.c`:\n\n    SEXP tau = PROTECT(allocVector(REALSXP, m &lt; n ? m : n)); \/\/ qraux\n\n(If I may point out another typo in `qr.Rd`: `s\/qr.aty\/qr.qty\/` in the body of\n`\\source{}` ...)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1707717047.408029",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "\/Aegy",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18670] New: help(\"qr\") wrong about length(qraux) when LAPACK = TRUE",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18670"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18670\n           Summary: help(\"qr\") wrong about length(qraux) when LAPACK =\n                    TRUE\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Documentation\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "qr(x, tol, LAPACK = TRUE)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is a named list with element "
+                            },
+                            {
+                                "type": "text",
+                                "text": "qraux",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " of length\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "min(dim(x))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " always of length "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ncol(x)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as stated in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "help(\"qr\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  The\ncorrect length is clearly documented [by\nLAPACK]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/Reference-LAPACK\/lapack\/blob\/c6bc40164ace127bc308da37b135791a9ecb4667\/SRC\/dgeqp3.f#L85-L86"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\nand we even see the following in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Lapack.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n    SEXP tau = PROTECT(allocVector(REALSXP, m < n ? m : n)); \/\/ qraux\n\n(If I may point out another typo in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "qr.Rd",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ": "
+                            },
+                            {
+                                "type": "text",
+                                "text": "s\/qr.aty\/qr.qty\/",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in the body of\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\\source{}",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ...)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18665] Upstream LLVM change creates reveal's R transition dependency on &lt;locale&gt; from &lt;vector&gt;*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18665>\n\nSimon Urbanek (<mailto:simon.urbanek@r-project.org|simon.urbanek@r-project.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |simon.urbanek@r-project.org\n\n--- Comment #3 from Simon Urbanek (<mailto:simon.urbanek@r-project.org|simon.urbanek@r-project.org>) ---\nSorry, but this bug report make no sense whatsoever to me. R does not use C++\ncode at all, so this is likely a bug on some other code that has nothing to do\nwith R. It looks like some C++ code with a wrong order of includes as it seems\nto use R macros in C++ headers - a really bad idea.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1707722071.466549",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "QJwD",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18665] Upstream LLVM change creates reveal's R transition dependency on <locale> from <vector>",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18665"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSimon Urbanek ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:simon.urbanek@r-project.org",
+                                "text": "simon.urbanek@r-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |simon.urbanek@r-project.org\n\n--- Comment #3 from Simon Urbanek ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:simon.urbanek@r-project.org",
+                                "text": "simon.urbanek@r-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nSorry, but this bug report make no sense whatsoever to me. R does not use C++\ncode at all, so this is likely a bug on some other code that has nothing to do\nwith R. It looks like some C++ code with a wrong order of includes as it seems\nto use R macros in C++ headers - a really bad idea."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

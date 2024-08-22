@@ -1,0 +1,521 @@
+[
+    {
+        "subtype": "thread_broadcast",
+        "user": "U041CL6454N",
+        "thread_ts": "1675673716.107509",
+        "root": {
+            "user": "U01DZUA88S1",
+            "type": "message",
+            "ts": "1675673716.107509",
+            "edited": {
+                "user": "U01DZUA88S1",
+                "ts": "1675673766.000000"
+            },
+            "client_msg_id": "b05d74e3-3bea-4823-a740-1284b682a849",
+            "text": "Here's another \"good first issue\" for someone to have a go at: \"*bug in predict with type=\"terms\" in the presence of missing\"*. I'll use the example given by the original poster (OP) in the report to help you get started.\n\nThe predict method for lm returns a \"constant\" attribute:\n\n```set.seed(1)\ny &lt;- rnorm(10)\nx &lt;- 1:10\nx[3] &lt;- NA\n\nm &lt;- lm(y~x)\npred &lt;- predict(m,type=\"terms\")\npred\n#&gt;               x\n#&gt; 1  -0.115529273\n#&gt; 2  -0.091348728\n#&gt; 4  -0.042987637\n#&gt; 5  -0.018807091\n#&gt; 6   0.005373455\n#&gt; 7   0.029554000\n#&gt; 8   0.053734546\n#&gt; 9   0.077915091\n#&gt; 10  0.102095637\n#&gt; attr(,\"constant\")\n#&gt; [1] 0.2397396```\nThis is constant should be added to the term-wise predictions to obtain the final predicted value:\n\n```as.vector(pred + attr(pred, \"constant\"))\n#&gt; [1] 0.1242103 0.1483909 0.1967520 0.2209325 0.2451131 0.2692936 0.2934741\n#&gt; [8] 0.3176547 0.3418352\npredict(m)\n#&gt;         1         2         4         5         6         7         8         9\n#&gt; 0.1242103 0.1483909 0.1967520 0.2209325 0.2451131 0.2692936 0.2934741 0.3176547\n#&gt;        10\n#&gt; 0.3418352```\nSo,  questions to consider:\n1. What happens in the case when the model is fitted with `na.action=\"na.exclude\"`? (Note we expect to get the same predicted values for observations 1:2, 4:10, but the vectors should get padded with an `NA` for observation 3).\n2. Assuming the issue is as reported (that the `\"constant\"`  is dropped in this case), can you debug `predict.lm` to find the root cause? Can you see how to fix it?\nPost your findings in reply to this post. If we can identify a fix, the next step with be to create a patch to the relevant function(s).",
+            "team": "T01DW9DLB2A",
+            "thread_ts": "1675673716.107509",
+            "reply_count": 5,
+            "reply_users_count": 2,
+            "latest_reply": "1683801724.038479",
+            "reply_users": [
+                "U041CL6454N",
+                "U01DZUA88S1"
+            ],
+            "replies": [
+                {
+                    "user": "U041CL6454N",
+                    "ts": "1677429157.755489"
+                },
+                {
+                    "user": "U01DZUA88S1",
+                    "ts": "1678275071.748579"
+                },
+                {
+                    "user": "U041CL6454N",
+                    "ts": "1678301217.122189"
+                },
+                {
+                    "user": "U041CL6454N",
+                    "ts": "1681993225.393239"
+                },
+                {
+                    "user": "U01DZUA88S1",
+                    "ts": "1683801724.038479"
+                }
+            ],
+            "is_locked": false,
+            "subscribed": true,
+            "last_read": "1683801724.038479",
+            "blocks": [
+                {
+                    "type": "rich_text",
+                    "block_id": "hky",
+                    "elements": [
+                        {
+                            "type": "rich_text_section",
+                            "elements": [
+                                {
+                                    "type": "text",
+                                    "text": "Here's another \"good first issue\" for someone to have a go at: \""
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "bug in predict with type=\"terms\" in the presence of missing\"",
+                                    "style": {
+                                        "bold": true
+                                    }
+                                },
+                                {
+                                    "type": "text",
+                                    "text": ". I'll use the example given by the original poster (OP) in the report to help you get started.\n\nThe predict method for lm returns a \"constant\" attribute:\n\n"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "rich_text_preformatted",
+                            "elements": [
+                                {
+                                    "type": "text",
+                                    "text": "set.seed(1)\ny <- rnorm(10)\nx <- 1:10\nx[3] <- NA\n\nm <- lm(y~x)\npred <- predict(m,type=\"terms\")\npred\n#>               x\n#> 1  -0.115529273\n#> 2  -0.091348728\n#> 4  -0.042987637\n#> 5  -0.018807091\n#> 6   0.005373455\n#> 7   0.029554000\n#> 8   0.053734546\n#> 9   0.077915091\n#> 10  0.102095637\n#> attr(,\"constant\")\n#> [1] 0.2397396"
+                                }
+                            ],
+                            "border": 0
+                        },
+                        {
+                            "type": "rich_text_section",
+                            "elements": [
+                                {
+                                    "type": "text",
+                                    "text": "\nThis is constant should be added to the term-wise predictions to obtain the final predicted value:\n\n"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "rich_text_preformatted",
+                            "elements": [
+                                {
+                                    "type": "text",
+                                    "text": "as.vector(pred + attr(pred, \"constant\"))\n#> [1] 0.1242103 0.1483909 0.1967520 0.2209325 0.2451131 0.2692936 0.2934741\n#> [8] 0.3176547 0.3418352\npredict(m)\n#>         1         2         4         5         6         7         8         9\n#> 0.1242103 0.1483909 0.1967520 0.2209325 0.2451131 0.2692936 0.2934741 0.3176547\n#>        10\n#> 0.3418352"
+                                }
+                            ],
+                            "border": 0
+                        },
+                        {
+                            "type": "rich_text_section",
+                            "elements": [
+                                {
+                                    "type": "text",
+                                    "text": "\nSo,  questions to consider:\n"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "rich_text_list",
+                            "elements": [
+                                {
+                                    "type": "rich_text_section",
+                                    "elements": [
+                                        {
+                                            "type": "text",
+                                            "text": "What happens in the case when the model is fitted with "
+                                        },
+                                        {
+                                            "type": "text",
+                                            "text": "na.action=\"na.exclude\"",
+                                            "style": {
+                                                "code": true
+                                            }
+                                        },
+                                        {
+                                            "type": "text",
+                                            "text": "? (Note we expect to get the same predicted values for observations 1:2, 4:10, but the vectors should get padded with an "
+                                        },
+                                        {
+                                            "type": "text",
+                                            "text": "NA",
+                                            "style": {
+                                                "code": true
+                                            }
+                                        },
+                                        {
+                                            "type": "text",
+                                            "text": " for observation 3)."
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "rich_text_section",
+                                    "elements": [
+                                        {
+                                            "type": "text",
+                                            "text": "Assuming the issue is as reported (that the "
+                                        },
+                                        {
+                                            "type": "text",
+                                            "text": "\"constant\"",
+                                            "style": {
+                                                "code": true
+                                            }
+                                        },
+                                        {
+                                            "type": "text",
+                                            "text": "  is dropped in this case), can you debug "
+                                        },
+                                        {
+                                            "type": "text",
+                                            "text": "predict.lm",
+                                            "style": {
+                                                "code": true
+                                            }
+                                        },
+                                        {
+                                            "type": "text",
+                                            "text": " to find the root cause? Can you see how to fix it?"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "style": "ordered",
+                            "indent": 0,
+                            "border": 0
+                        },
+                        {
+                            "type": "rich_text_section",
+                            "elements": [
+                                {
+                                    "type": "text",
+                                    "text": "\nPost your findings in reply to this post. If we can identify a fix, the next step with be to create a patch to the relevant function(s)."
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "type": "message",
+        "ts": "1677429157.755489",
+        "client_msg_id": "1c47fff8-641b-4ff8-b639-c9dc83a8b71d",
+        "text": "The concerned bug is:\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16256>\n\nMy observations are as follows:\n1. When the model is fitted with `na.action=\"na.exclude\"`  we get the desired output as expected. However, the OP's point is valid as the attribute `constant`  gets erased.\n2. The most probable cause of this issue is because of `NA`  being used in the later case as opposed to the previous case. I am only pasting the relevant parts of the codes of the function `predict.lm`  to explain the issue. \n```        if (hasintercept) {\n            asgn$\"(Intercept)\" &lt;- NULL\n            avx &lt;- colMeans(mm)\n            termsconst &lt;- sum(avx[piv] * beta[piv])\n        }```\nNote how `avx`  is defined as only `colMeans(mm)`  (where `mm`  is the data matrix as defined at the beginning of `predict.lm` ). When we use `na.exclude` , the result of `colMeans`  is `NA`  which in turn makes `avx`  as `NA`  and subsequently, `termconst`  becomes `NA` . In a later part of the code, I found out that:\n```attr(predictor, \"constant\") &lt;- if (hasintercept) \n            termsconst```\nIf previously our `termsconst`  becomes `NA` , our attribute `constant`  is becoming `NA`  at this point, and hence, it does not output. This is my diagnosis of the issue.\n\nAs for some suggested fixes, I'd like to suggest `colMeans(mm)`  be changed to `colMeans(mm,na.rm=T)` . I believe, this will hopefully fix this problem.",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "+Co",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "The concerned bug is:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16256"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMy observations are as follows:\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_list",
+                        "elements": [
+                            {
+                                "type": "rich_text_section",
+                                "elements": [
+                                    {
+                                        "type": "text",
+                                        "text": "When the model is fitted with "
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": "na.action=\"na.exclude\"",
+                                        "style": {
+                                            "code": true
+                                        }
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": "  we get the desired output as expected. However, the OP's point is valid as the attribute "
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": "constant",
+                                        "style": {
+                                            "code": true
+                                        }
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": "  gets erased."
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "rich_text_section",
+                                "elements": [
+                                    {
+                                        "type": "text",
+                                        "text": "The most probable cause of this issue is because of "
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": "NA",
+                                        "style": {
+                                            "code": true
+                                        }
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": "  being used in the later case as opposed to the previous case. I am only pasting the relevant parts of the codes of the function "
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": "predict.lm",
+                                        "style": {
+                                            "code": true
+                                        }
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": "  to explain the issue. "
+                                    }
+                                ]
+                            }
+                        ],
+                        "style": "ordered",
+                        "indent": 0,
+                        "border": 0
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "        if (hasintercept) {\n            asgn$\"(Intercept)\" <- NULL\n            avx <- colMeans(mm)\n            termsconst <- sum(avx[piv] * beta[piv])\n        }"
+                            }
+                        ],
+                        "border": 0
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Note how "
+                            },
+                            {
+                                "type": "text",
+                                "text": "avx",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  is defined as only "
+                            },
+                            {
+                                "type": "text",
+                                "text": "colMeans(mm)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  (where "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mm",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  is the data matrix as defined at the beginning of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "predict.lm",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ). When we use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "na.exclude",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " , the result of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "colMeans",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  which in turn makes "
+                            },
+                            {
+                                "type": "text",
+                                "text": "avx",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  and subsequently, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "termconst",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  becomes "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " . In a later part of the code, I found out that:\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "attr(predictor, \"constant\") <- if (hasintercept) \n            termsconst"
+                            }
+                        ],
+                        "border": 0
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "If previously our "
+                            },
+                            {
+                                "type": "text",
+                                "text": "termsconst",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  becomes "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " , our attribute "
+                            },
+                            {
+                                "type": "text",
+                                "text": "constant",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  is becoming "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  at this point, and hence, it does not output. This is my diagnosis of the issue.\n\nAs for some suggested fixes, I'd like to suggest "
+                            },
+                            {
+                                "type": "text",
+                                "text": "colMeans(mm)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  be changed to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "colMeans(mm,na.rm=T)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " . I believe, this will hopefully fix this problem."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,293 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18737] table() on dataframe causes memory leak or unhelpful error*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18737>\n\nLluís (<mailto:lluis.revilla@gmail.com|lluis.revilla@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |lluis.revilla@gmail.com\n\n--- Comment #2 from Lluís (<mailto:lluis.revilla@gmail.com|lluis.revilla@gmail.com>) ---\nI can't reproduce this:\n\n```\n$ R-4.4.0\n\nR version 4.4.0 (2024-04-24) -- \"Puppy Cup\"\nCopyright (C) 2024 The R Foundation for Statistical Computing\nPlatform: x86_64-pc-linux-gnu\n\nR is free software and comes with ABSOLUTELY NO WARRANTY.\nYou are welcome to redistribute it under certain conditions.\nType 'license()' or 'licence()' for distribution details.\n\nR is a collaborative project with many contributors.\nType 'contributors()' for more information and\n'citation()' on how to cite R or R packages in publications.\n\nType 'demo()' for some demos, 'help()' for on-line help, or\n'help.start()' for an HTML browser interface to help.\nType 'q()' to quit R.\n\n&gt; table(airquality)\n [ reached getOption(\"max.print\") -- omitted 192200 matrix slice(s) ]\n```\n\nIn my computer it works, if it helps this is a Ubuntu 22.04 with &gt; 120GB of\nRAM.\nIt will probably help if you provide the \"nasty memory leak error\", it probably\ntells you R don't have enough RAM to handle the process. \n\nI think the \"unhelpful error\" in case of `table(mtcars)` is helpful, it is\ntelling the user that there are too many elements. What would you improve from\nit? What would be helpful?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1716541097.953929",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "M13",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18737] table() on dataframe causes memory leak or unhelpful error",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18737"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nLluís ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:lluis.revilla@gmail.com",
+                                "text": "lluis.revilla@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |lluis.revilla@gmail.com\n\n--- Comment #2 from Lluís ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:lluis.revilla@gmail.com",
+                                "text": "lluis.revilla@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI can't reproduce this:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$ R-4.4.0\n\nR version 4.4.0 (2024-04-24) -- \"Puppy Cup\"\nCopyright (C) 2024 The R Foundation for Statistical Computing\nPlatform: x86_64-pc-linux-gnu\n\nR is free software and comes with ABSOLUTELY NO WARRANTY.\nYou are welcome to redistribute it under certain conditions.\nType 'license()' or 'licence()' for distribution details.\n\nR is a collaborative project with many contributors.\nType 'contributors()' for more information and\n'citation()' on how to cite R or R packages in publications.\n\nType 'demo()' for some demos, 'help()' for on-line help, or\n'help.start()' for an HTML browser interface to help.\nType 'q()' to quit R.\n\n> table(airquality)\n [ reached getOption(\"max.print\") -- omitted 192200 matrix slice(s) ]\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIn my computer it works, if it helps this is a Ubuntu 22.04 with > 120GB of\nRAM.\nIt will probably help if you provide the \"nasty memory leak error\", it probably\ntells you R don't have enough RAM to handle the process. \n\nI think the \"unhelpful error\" in case of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "table(mtcars)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is helpful, it is\ntelling the user that there are too many elements. What would you improve from\nit? What would be helpful?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18737] table() on dataframe causes memory leak or unhelpful error*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18737>\n\nKurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |Kurt.Hornik@wu.ac.at\n\n--- Comment #3 from Kurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) ---\nWe have\n\nR&gt; vapply(mtcars, function(e) length(unique(e)), 0)\n mpg  cyl disp   hp drat   wt qsec   vs   am gear carb \n  25    3   27   22   22   29   30    2    2    3    6 \nR&gt; prod(vapply(mtcars, function(e) length(unique(e)), 0))\n[1] 61393464000\n\nlikely too big to fit into memory (hence the error), and\n\nR&gt; vapply(airquality, function(e) length(unique(e)), 0)\n  Ozone Solar.R    Wind    Temp   Month     Day \n     68     118      31      40       5      31 \nR&gt; prod(vapply(airquality, function(e) length(unique(e)), 0))\n[1] 1542212800\n\nOn my system I can allocate a vector for the results:\n\nR&gt; system.time(x &lt;- integer(1542212800))\n   user  system elapsed \n   0.46    1.68    7.91 \n\nbut running the table() command for the 153 elements in the data set takes\n\"forever\".  \n\nCan you perhaps provide info on your available memory and timings for\ntable(airquality)?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1716541461.904709",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "4QK",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18737] table() on dataframe causes memory leak or unhelpful error",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18737"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nKurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |Kurt.Hornik@wu.ac.at\n\n--- Comment #3 from Kurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nWe have\n\nR> vapply(mtcars, function(e) length(unique(e)), 0)\n mpg  cyl disp   hp drat   wt qsec   vs   am gear carb \n  25    3   27   22   22   29   30    2    2    3    6 \nR> prod(vapply(mtcars, function(e) length(unique(e)), 0))\n[1] 61393464000\n\nlikely too big to fit into memory (hence the error), and\n\nR> vapply(airquality, function(e) length(unique(e)), 0)\n  Ozone Solar.R    Wind    Temp   Month     Day \n     68     118      31      40       5      31 \nR> prod(vapply(airquality, function(e) length(unique(e)), 0))\n[1] 1542212800\n\nOn my system I can allocate a vector for the results:\n\nR> system.time(x <- integer(1542212800))\n   user  system elapsed \n   0.46    1.68    7.91 \n\nbut running the table() command for the 153 elements in the data set takes\n\"forever\".  \n\nCan you perhaps provide info on your available memory and timings for\ntable(airquality)?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18737] table() on dataframe causes memory leak or unhelpful error*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18737>\n\n--- Comment #4 from jxu (<mailto:jasonx98@gmail.com|jasonx98@gmail.com>) ---\n&gt; It will probably help if you provide the \"nasty memory leak error\", it probably tells you R don't have enough RAM to handle the process.\n\nThere is no error. In RStudio it will say R is not responding, and in console\nit'll use up memory until it freezes and earlyoom terminates it (oom-killer is\nuseless).\n\n&gt; I think the \"unhelpful error\" in case of table(mtcars) is helpful, it is telling the user that there are too many elements. What would you improve from it? What would be helpful?\n\nI see I misunderstood `table`. I thought it was just freq counts of the\nnon-zero factor combinations, but it's actually a full multi-dim contingency\ntable. Still, it seems like table uses a lot more memory than necessary given I\ncan allocate the 1542212800 length vector in 6.2 GB. Feel free to change the\ntitle.\n\n&gt; Can you perhaps provide info on your available memory and timings for table(airquality)?\n\nOn the Windows laptop it's 8 GB and on the Ubuntu laptop it's 24 GB. There are\nno timings for table(airquality) because it freezes. On Windows:\n\n&gt; system.time(x &lt;- integer(1542212800))\n   user  system elapsed \n   0.44    8.66    9.36",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1716559000.268999",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "4VXEl",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18737] table() on dataframe causes memory leak or unhelpful error",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18737"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from jxu ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jasonx98@gmail.com",
+                                "text": "jasonx98@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "It will probably help if you provide the \"nasty memory leak error\", it probably tells you R don't have enough RAM to handle the process."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThere is no error. In RStudio it will say R is not responding, and in console\nit'll use up memory until it freezes and earlyoom terminates it (oom-killer is\nuseless).\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I think the \"unhelpful error\" in case of table(mtcars) is helpful, it is telling the user that there are too many elements. What would you improve from it? What would be helpful?"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI see I misunderstood "
+                            },
+                            {
+                                "type": "text",
+                                "text": "table",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". I thought it was just freq counts of the\nnon-zero factor combinations, but it's actually a full multi-dim contingency\ntable. Still, it seems like table uses a lot more memory than necessary given I\ncan allocate the 1542212800 length vector in 6.2 GB. Feel free to change the\ntitle.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Can you perhaps provide info on your available memory and timings for table(airquality)?"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nOn the Windows laptop it's 8 GB and on the Ubuntu laptop it's 24 GB. There are\nno timings for table(airquality) because it freezes. On Windows:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "system.time(x <- integer(1542212800))"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "   user  system elapsed \n   0.44    8.66    9.36"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

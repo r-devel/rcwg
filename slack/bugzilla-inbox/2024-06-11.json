@@ -1,0 +1,557 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18738] javareconf incorrectly managing Java out-of-memory situations on SGE*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18738>\n\n--- Comment #4 from Alexander Tyakht (<mailto:alexander.tyakht@tuebingen.mpg.de|alexander.tyakht@tuebingen.mpg.de>) ---\nUpdate: subsequently a smaller reproducible example based on R only was\nsuggested by Andre Noll: in a shell, run\n\nulimit -v 10000000\nR --no-restore --no-echo --no-site-file --no-init-file --args conftest.c\n\nThe bug occurs under R 4.3.1 and 4.3.3, but not the latest 4.4.0. Apparently,\nthe issue has been resolved by the fix described in the respective changelog:\n\"Low-level socket read\/write operations have been fixed to correctly signal\ncommunication errors.\"",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718091166.818989",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "o5n",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18738] javareconf incorrectly managing Java out-of-memory situations on SGE",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18738"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Alexander Tyakht ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:alexander.tyakht@tuebingen.mpg.de",
+                                "text": "alexander.tyakht@tuebingen.mpg.de",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nUpdate: subsequently a smaller reproducible example based on R only was\nsuggested by Andre Noll: in a shell, run\n\nulimit -v 10000000\nR --no-restore --no-echo --no-site-file --no-init-file --args conftest.c\n\nThe bug occurs under R 4.3.1 and 4.3.3, but not the latest 4.4.0. Apparently,\nthe issue has been resolved by the fix described in the respective changelog:\n\"Low-level socket read\/write operations have been fixed to correctly signal\ncommunication errors.\""
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18739] New: On using Cdqrls() &amp; influence() in a R package (CRAN compliant)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18739>\n\n            Bug ID: 18739\n           Summary: On using Cdqrls() &amp; influence() in a R package (CRAN\n                    compliant)\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Wishlist\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:geoffroy.berthelot@insep.fr|geoffroy.berthelot@insep.fr>\n\nCreated attachment 3362\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3362&amp;action=edit>\nAn example of benchmark.\n\nDear R-core Team,\n\n[Please see the *** Previous Interactions section *** at the end of this\nmessage for previous interactions with the « Ordinary  members » in the R\nfoundation Membership and the CRAN].\n\nWe would like to submit a R package to the CRAN.\nHowever, after intensive benchmark, we ran in a severe computational issue that\ncan only be solved using the two following functions :\nSEXP influence(SEXP mqr, SEXP e, SEXP stol)\nSEXP Cdqrls(SEXP x, SEXP y, SEXP tol, SEXP chk)\nWhich are part of the R software.\n\nIn summary, our work aims at estimating abnormal values on longitudinal\nsequences of iid observations, but requires -litteraly- ten of thousands and\neven millions of linear regressions at each statistical test, depending on the\nprecision. The process essentially consists in computing the studentized\nresiduals of all these linear regressions and perform a statistical test.\nThe package needs to be practical for the R user, ie. the package should\nprovide an estimate of the test in a reasonable time (including\nparallelization).\nHowever, using :\n&gt; reg &lt;- lm(x ~ y)\n&gt; reg_stud &lt;- rstudent(reg)\ndefinitely makes thing impractical, in terms of running time.\n\nOn the opposite, using :\n&gt; mqr &lt;- .Call(stats:::C_Cdqrls, cbind(TRUE, y), x, tol, FALSE)\n&gt; res &lt;- .Call(stats:::C_influence, mqr,  mqr$residuals, 1e-12)\n&gt; mqr$residuals \/ (res$sigma * sqrt(1 - cbind(res$hat)))\nAllows for estimating the test in a very reasonable time (say, the order of the\nruntime is about one minute on an average desktop computer). However, a direct\ncall to these two functions may not be compliant with the CRAN. When we asked\nthem about this issue they stated : « Not sure how much CRAN can help here: in\nprinciple, you would need to ask R Core whether these two functions could get\nexposed at C level or get thin R wrappers.  Alternatively, you could perhaps\ntry to copy the C codes (not ideal, of course) ... » (see *** Previous\nInteractions *** section).\n\nWe have developed our own C++ version of Cdqrls + influence, and used other C++\nproposed versions in the hope we could achieve a similar runtime.\nHowever, all the atemps are still several orders of magnitude greater (in terms\nof runtime) compared to C_Cdqrls + influence.\nA complete Stack topic (without the runtime of C_Cdqrls + influence), including\nthe benchmark, is available here :\n<https:\/\/stackoverflow.com\/questions\/64787026\/fast-and-accurate-computation-of-studentized-external-residuals-in-r>\n\nWe also have more detailed runtimes regarding the size of the sequence (ie. the\nnumber of observations in the sequence), where Cdqrls + influence performs even\nbetter. \nFor instance, using a vector of 10,000 random values and 100 repetitions\n(microbenchmark library), we got the following results:\n86944.90 : OneCast() (see\n<https:\/\/stackoverflow.com\/questions\/64787026\/fast-and-accurate-computation-of-studentized-external-residuals-in-r>)\n33766.85 : OneCast() (optimized version, only keeping the usefull variables)\n243.85 : Cdqrls + influence\n(see attachement as an example)\n\nWe end up with the three following choices:\n\n(choice A) – publish an impractical version of the package that will use the\nlm() \/ rstudent() functions on the CRAN, but compliant to the CRAN --- AND ---\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718094655.529939",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "iJU",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18739] New: On using Cdqrls() & influence() in a R package (CRAN compliant)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18739"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18739\n           Summary: On using Cdqrls() & influence() in a R package (CRAN\n                    compliant)\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Wishlist\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:geoffroy.berthelot@insep.fr",
+                                "text": "geoffroy.berthelot@insep.fr"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3362\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3362&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3362&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nAn example of benchmark.\n\nDear R-core Team,\n\n[Please see the *** Previous Interactions section *** at the end of this\nmessage for previous interactions with the « Ordinary  members » in the R\nfoundation Membership and the CRAN].\n\nWe would like to submit a R package to the CRAN.\nHowever, after intensive benchmark, we ran in a severe computational issue that\ncan only be solved using the two following functions :\nSEXP influence(SEXP mqr, SEXP e, SEXP stol)\nSEXP Cdqrls(SEXP x, SEXP y, SEXP tol, SEXP chk)\nWhich are part of the R software.\n\nIn summary, our work aims at estimating abnormal values on longitudinal\nsequences of iid observations, but requires -litteraly- ten of thousands and\neven millions of linear regressions at each statistical test, depending on the\nprecision. The process essentially consists in computing the studentized\nresiduals of all these linear regressions and perform a statistical test.\nThe package needs to be practical for the R user, ie. the package should\nprovide an estimate of the test in a reasonable time (including\nparallelization).\nHowever, using :"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "reg <- lm(x ~ y)\nreg_stud <- rstudent(reg)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "definitely makes thing impractical, in terms of running time.\n\nOn the opposite, using :"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "mqr <- .Call(stats:::C_Cdqrls, cbind(TRUE, y), x, tol, FALSE)\nres <- .Call(stats:::C_influence, mqr,  mqr$residuals, 1e-12)\nmqr$residuals \/ (res$sigma * sqrt(1 - cbind(res$hat)))"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Allows for estimating the test in a very reasonable time (say, the order of the\nruntime is about one minute on an average desktop computer). However, a direct\ncall to these two functions may not be compliant with the CRAN. When we asked\nthem about this issue they stated : « Not sure how much CRAN can help here: in\nprinciple, you would need to ask R Core whether these two functions could get\nexposed at C level or get thin R wrappers.  Alternatively, you could perhaps\ntry to copy the C codes (not ideal, of course) ... » (see *** Previous\nInteractions *** section).\n\nWe have developed our own C++ version of Cdqrls + influence, and used other C++\nproposed versions in the hope we could achieve a similar runtime.\nHowever, all the atemps are still several orders of magnitude greater (in terms\nof runtime) compared to C_Cdqrls + influence.\nA complete Stack topic (without the runtime of C_Cdqrls + influence), including\nthe benchmark, is available here :\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stackoverflow.com\/questions\/64787026\/fast-and-accurate-computation-of-studentized-external-residuals-in-r"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nWe also have more detailed runtimes regarding the size of the sequence (ie. the\nnumber of observations in the sequence), where Cdqrls + influence performs even\nbetter. \nFor instance, using a vector of 10,000 random values and 100 repetitions\n(microbenchmark library), we got the following results:\n86944.90 : OneCast() (see\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stackoverflow.com\/questions\/64787026\/fast-and-accurate-computation-of-studentized-external-residuals-in-r"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n33766.85 : OneCast() (optimized version, only keeping the usefull variables)\n243.85 : Cdqrls + influence\n(see attachement as an example)\n\nWe end up with the three following choices:\n\n(choice A) – publish an impractical version of the package that will use the\nlm() \/ rstudent() functions on the CRAN, but compliant to the CRAN --- AND ---"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "publish another version of the package, that will use C_Cdqrls + influence on a\nGitHub repository (not compliant with the CRAN). However, we think that this\nsolution is really not satisfactory, for both the R user and us (please see the\nCRAN answer in the section *** Previous Interactions *** below).\n\n(choice B) – As suggested by the CRAN, if these two functions can possibly «\nget exposed at C level or get thin R wrappers » then it would be the ideal\nsolution for the user.\n\n(choice C) – As suggested by the CRAN, copy the C-code of the current version\ndirectly into the R package. Which is impractical given the very large number\nof dependencies of these two C files.\n\nWe have exhausted all possible other solutions (custom C++ functions, wrappers,\n…), which ultimately underline the very efficient coding\/approach of the\ninternal functions of R (bravo !). \nIt is also frustrating as some researchers started to use our package and we\ncannot propose an official version of it.\n\nThus, we hereby make a wishlist item for including either allow for a direct\ncall to Cdqrls + influence or a thin wrapper to these two functions.\n\nThan you very much.\n\n*** Previous Interactions section  ***\n\n&gt;&gt;&gt; CRAN : « <mailto:CRAN@R-project.org|CRAN@R-project.org> »\nWe got in touch with them, especially with Uwe Ligges, Kurt Hornik, Tomas\nKalibera, Brian D. Ripley and Simon Urbanek from the QA of the CRAN. They\nsuggested that we directly contact the R-core team regarding our very specific\nquestion. They stated : \n(*) « Not sure how much CRAN can help here: in principle, you would need to ask\nR Core whether these two functions could get exposed at C level or get thin R\nwrappers.  Alternatively, you could perhaps try to copy the C codes (not ideal,\nof course) ... » (see *** Previous Interactions *** section).\n\n&gt;&gt;&gt; « Ordinary  members » in the R foundation Membership page :\nWe contacted Pr. Julie Josse, Pr. Torsten Hothorn, Pr. Uwe Ligges (again). Pr.\nLigges suggested the following (replies are marked as (*)):\n\n&gt; (choice A) – publish an impractical version of the package that will use the lm() \/ rstudent() functions on the CRAN, but compliant to the CRAN --- AND --- publish another version of the package, that will use C_Cdqrls + influence on a GitHub repository (not compliant with the CRAN). However, we think that this solution is really not satisfactory, for both the R user and us.\n\n(*) « Part 1 (CRAN version) is fine, fo course.\nPart 2: Note that some of the entry points are hidden since a recent version of\nR-devel, so the \"Githib\" version epxlained above will stop working.\nAlthough most CRAN team mebers are in R-core, but we are not those that started\nto hide the entry points. We are just checking against recent versions of\nR-devel. So this is not about CRAN compliance but R compliance as the entry\npoints got hidden from R. »\n\n&gt; (choice B) – As suggested by the CRAN, if these two functions can &gt; possibly « get exposed at C level or get thin R wrappers » then it would be the ideal solution for the user.\n(*) « So send a wishlist item by opening acase via a bug report. »\n\n&gt; What kind of solution would you recommend in that case ?\n(*) « Try B and otherwise go for A. »\n\nWith best regards",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718094655.583659",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "oBsVp",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "publish another version of the package, that will use C_Cdqrls + influence on a\nGitHub repository (not compliant with the CRAN). However, we think that this\nsolution is really not satisfactory, for both the R user and us (please see the\nCRAN answer in the section *** Previous Interactions *** below).\n\n(choice B) – As suggested by the CRAN, if these two functions can possibly «\nget exposed at C level or get thin R wrappers » then it would be the ideal\nsolution for the user.\n\n(choice C) – As suggested by the CRAN, copy the C-code of the current version\ndirectly into the R package. Which is impractical given the very large number\nof dependencies of these two C files.\n\nWe have exhausted all possible other solutions (custom C++ functions, wrappers,\n…), which ultimately underline the very efficient coding\/approach of the\ninternal functions of R (bravo !). \nIt is also frustrating as some researchers started to use our package and we\ncannot propose an official version of it.\n\nThus, we hereby make a wishlist item for including either allow for a direct\ncall to Cdqrls + influence or a thin wrapper to these two functions.\n\nThan you very much.\n\n*** Previous Interactions section  ***\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "CRAN : « "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:CRAN@R-project.org",
+                                "text": "CRAN@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": " »\nWe got in touch with them, especially with Uwe Ligges, Kurt Hornik, Tomas\nKalibera, Brian D. Ripley and Simon Urbanek from the QA of the CRAN. They\nsuggested that we directly contact the R-core team regarding our very specific\nquestion. They stated : \n(*) « Not sure how much CRAN can help here: in principle, you would need to ask\nR Core whether these two functions could get exposed at C level or get thin R\nwrappers.  Alternatively, you could perhaps try to copy the C codes (not ideal,\nof course) ... » (see *** Previous Interactions *** section).\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": ">> « Ordinary  members » in the R foundation Membership page :"
+                            }
+                        ],
+                        "border": 1
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "We contacted Pr. Julie Josse, Pr. Torsten Hothorn, Pr. Uwe Ligges (again). Pr.\nLigges suggested the following (replies are marked as (*)):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "(choice A) – publish an impractical version of the package that will use the lm() \/ rstudent() functions on the CRAN, but compliant to the CRAN --- AND --- publish another version of the package, that will use C_Cdqrls + influence on a GitHub repository (not compliant with the CRAN). However, we think that this solution is really not satisfactory, for both the R user and us."
+                            }
+                        ],
+                        "border": 1
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n(*) « Part 1 (CRAN version) is fine, fo course.\nPart 2: Note that some of the entry points are hidden since a recent version of\nR-devel, so the \"Githib\" version epxlained above will stop working.\nAlthough most CRAN team mebers are in R-core, but we are not those that started\nto hide the entry points. We are just checking against recent versions of\nR-devel. So this is not about CRAN compliance but R compliance as the entry\npoints got hidden from R. »\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "(choice B) – As suggested by the CRAN, if these two functions can > possibly « get exposed at C level or get thin R wrappers » then it would be the ideal solution for the user."
+                            }
+                        ],
+                        "border": 1
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "(*) « So send a wishlist item by opening acase via a bug report. »\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "What kind of solution would you recommend in that case ?"
+                            }
+                        ],
+                        "border": 1
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "(*) « Try B and otherwise go for A. »\n\nWith best regards"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18740] New: txtProgressBar should output to`stderr` through `message(..., appendLF = FALSE)`?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18740>\n\n            Bug ID: 18740\n           Summary: txtProgressBar should output to`stderr` through\n                    `message(..., appendLF = FALSE)`?\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Add-ons\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:caiohamamura@gmail.com|caiohamamura@gmail.com>\n\nProgress bars are progress information log only and not real output, as the way\nit is we cannot suppress the progress bars from any of the packages using the\ndefault `txtProgressBar` unless using `capture.output` which is kind of a hacky\ntrick to actually avoid what should be only informational progress and not\nactually output.\n\nThat would solve issues with vignettes too, as it is today, we currently need\nto separate into multiple different chunks if we want clean reports without the\ncluttered progress bar being displayed or accept displaying the\n`capture.output` trick in the report. Otherwise, we could easily just add\n`message = FALSE` or use the semantic `suppressMessages`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718114561.035119",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "JGX0",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18740] New: txtProgressBar should output to`stderr` through ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "message(..., appendLF = FALSE)",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18740"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18740\n           Summary: txtProgressBar should output to`stderr` through\n                    "
+                            },
+                            {
+                                "type": "text",
+                                "text": "message(..., appendLF = FALSE)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "?\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Add-ons\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:caiohamamura@gmail.com",
+                                "text": "caiohamamura@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nProgress bars are progress information log only and not real output, as the way\nit is we cannot suppress the progress bars from any of the packages using the\ndefault "
+                            },
+                            {
+                                "type": "text",
+                                "text": "txtProgressBar",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " unless using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "capture.output",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " which is kind of a hacky\ntrick to actually avoid what should be only informational progress and not\nactually output.\n\nThat would solve issues with vignettes too, as it is today, we currently need\nto separate into multiple different chunks if we want clean reports without the\ncluttered progress bar being displayed or accept displaying the\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "capture.output",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " trick in the report. Otherwise, we could easily just add\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "message = FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or use the semantic "
+                            },
+                            {
+                                "type": "text",
+                                "text": "suppressMessages",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18739] On using Cdqrls() &amp; influence() in a R package (CRAN compliant)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18739>\n\nLuke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |luke@stat.uiowa.edu\n\n--- Comment #1 from Luke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) ---\nFor future reference, for a request like this it would be better to stick to a\nfew sentences with a basic in-line example, rather than ask people you want to\nhelp you to wade through a lot of prose, links, and long attachments.\n\nUsing `lm()` in performance-critical situations is usually a bad idea:\n`lm.fit()` is usually a better choice.\n\nThat said, you may still have a case for adding something along the lines of\n\n```\n<http:\/\/qr.ls|qr.ls> &lt;- function(x, y, tol = 1e-7)\n    .Call(C_Cdqrls, x, y, tol, FALSE)\n\nqr.influence &lt;- function(qr, res, tol = 10 * .Machine$double.eps)\n    .Call(C_influence, qr, res, tol)\n```\n\nin stats. I'll leave it to others more familiar with our modeling code to\ndecide whether this is reasonable.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718133658.321109",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "1b1L",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18739] On using Cdqrls() & influence() in a R package (CRAN compliant)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18739"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nLuke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |luke@stat.uiowa.edu\n\n--- Comment #1 from Luke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nFor future reference, for a request like this it would be better to stick to a\nfew sentences with a basic in-line example, rather than ask people you want to\nhelp you to wade through a lot of prose, links, and long attachments.\n\nUsing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lm()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in performance-critical situations is usually a bad idea:\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "lm.fit()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is usually a better choice.\n\nThat said, you may still have a case for adding something along the lines of\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "link",
+                                "url": "http:\/\/qr.ls",
+                                "text": "qr.ls"
+                            },
+                            {
+                                "type": "text",
+                                "text": " <- function(x, y, tol = 1e-7)\n    .Call(C_Cdqrls, x, y, tol, FALSE)\n\nqr.influence <- function(qr, res, tol = 10 * .Machine$double.eps)\n    .Call(C_influence, qr, res, tol)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nin stats. I'll leave it to others more familiar with our modeling code to\ndecide whether this is reasonable."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

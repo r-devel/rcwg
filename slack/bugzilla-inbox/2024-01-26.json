@@ -1,0 +1,789 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18660] as.matrix.dist performance*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18660>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #2 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\n\"Fascinating\" as KH would say ..\n\nNote that the current (non patched) code is really very nicely self-explaining\nin using the  `row(df) &gt; col(df)` idiom.\nI had added  `.row()` and `.col()` to R a while ago, to make such code slightly\nfaster.\nIt's too bad you're using commercial closed-source company owned chats for\ndeveloping and discussion free software.\n\nCan you summarize the major improvement we get practically by making the code\nless self-explainable and hence somewhat harder to maintain?\nA factor of three on one platform in one extreme example is not enough of an\nanalysis to me.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1706267299.888279",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "5\/XZ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18660] as.matrix.dist performance",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18660"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #2 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n\"Fascinating\" as KH would say ..\n\nNote that the current (non patched) code is really very nicely self-explaining\nin using the  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "row(df) > col(df)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " idiom.\nI had added  "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".row()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".col()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to R a while ago, to make such code slightly\nfaster.\nIt's too bad you're using commercial closed-source company owned chats for\ndeveloping and discussion free software.\n\nCan you summarize the major improvement we get practically by making the code\nless self-explainable and hence somewhat harder to maintain?\nA factor of three on one platform in one extreme example is not enough of an\nanalysis to me."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18616] TukeyHSD not functioning properly with nested designs*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18616>\n\n--- Comment #6 from Flavio Bello Fialho (<mailto:bello.flavio@gmail.com|bello.flavio@gmail.com>) ---\nThe p-values reported by TukeyHSD when there are non-estimable means are WRONG!\nTukey's HSD test corrects p-values when the number of compared means is greater\nthan 2, in order to account for simultaneous multiple comparisons (when\ncomparing only 2 means, it is equivalent to a t-test). However, you cannot\ncompare something to nothing. The correction must be made based on the real\nnumber of means being compared (non-existing means cannot be used, and any\ncomparison involving them always results in NA). If this number is artificially\ninflated by including non-existant means in the count, p-values will be\nincorrectly higher. That is why you see a reduction in the p-value when the\nerror is corrected.\n\nOn <https:\/\/www.stata.com\/manuals13\/rpwcompare.pdf> (pages 13-14), we can see\nthat, when there is no interest in testing one of the marginal means, the\np-value is reduced, because the number of means being compared is smaller.\nApplying that to our case, one will never have interest in comparing anything\nto a non-existing mean, which should not be considered in the count.\n\nI believe a reasonable alternative is to inform the correct p-value, but warn\nthe user if there are empty cells in the grid, thus allowing the user to decide\nwhether TukeyHSD should be used or not:\n\n    ## remove levels with no observations\n    if (sum(n == 0) &gt; 0) {\n        warning(sum(n == 0), \" empty combinations of factors were dropped\")\n        nms &lt;- nms[!<http:\/\/is.na|is.na>(means)]\n        means &lt;- means[!<http:\/\/is.na|is.na>(means)]\n        n &lt;- n[n &gt; 0]\n    }\n\nWould that be proper default behavior?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1706276027.134979",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "LC9",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18616] TukeyHSD not functioning properly with nested designs",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18616"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #6 from Flavio Bello Fialho ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:bello.flavio@gmail.com",
+                                "text": "bello.flavio@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe p-values reported by TukeyHSD when there are non-estimable means are WRONG!\nTukey's HSD test corrects p-values when the number of compared means is greater\nthan 2, in order to account for simultaneous multiple comparisons (when\ncomparing only 2 means, it is equivalent to a t-test). However, you cannot\ncompare something to nothing. The correction must be made based on the real\nnumber of means being compared (non-existing means cannot be used, and any\ncomparison involving them always results in NA). If this number is artificially\ninflated by including non-existant means in the count, p-values will be\nincorrectly higher. That is why you see a reduction in the p-value when the\nerror is corrected.\n\nOn "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/www.stata.com\/manuals13\/rpwcompare.pdf"
+                            },
+                            {
+                                "type": "text",
+                                "text": " (pages 13-14), we can see\nthat, when there is no interest in testing one of the marginal means, the\np-value is reduced, because the number of means being compared is smaller.\nApplying that to our case, one will never have interest in comparing anything\nto a non-existing mean, which should not be considered in the count.\n\nI believe a reasonable alternative is to inform the correct p-value, but warn\nthe user if there are empty cells in the grid, thus allowing the user to decide\nwhether TukeyHSD should be used or not:\n\n    ## remove levels with no observations\n    if (sum(n == 0) > 0) {\n        warning(sum(n == 0), \" empty combinations of factors were dropped\")\n        nms <- nms[!"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(means)]\n        means <- means[!"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(means)]\n        n <- n[n > 0]\n    }\n\nWould that be proper default behavior?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18660] as.matrix.dist performance*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18660>\n\n--- Comment #4 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\n(In reply to Martin Maechler from comment #2)\nI did an analysis myself; also I was exaggerating a bit;  the new code *is* not\nas self-explaining as the original one.\nOTOH, it's been a nice exercise to work to improve its R efficieny, and I do\nbelieve this should be honored.\n\nAlso, BTW, I did like the use `%||%` in Tim's original patch. .. after a bit\nmore \"compacting\" the Heather's code, I've analyzed its empirical complexity\nmyself \n-- and the usual  log-log plot does show that indeed, the improvements do\nhappen also for small n, but you need to measure a bit more carefully to\nnotice.\nHere's some nice base R - only code for the analysis and I will attach the\nplot, too.\n```\n## parametrized in  {n,p}\ndo1 &lt;- function(n1, p=2) {\n    di &lt;- dist(matrix(runif(n1*p), ncol = p))\n    if(n1 &lt;= 200) { ## too fast for just one as.matrix() --&gt;  do k times\n        ik &lt;- seq_len( k &lt;- floor((400\/n1)^1.5) )\n        system.time(for(i in ik) m &lt;- as.matrix(di)) \/ k\n    } else\n        system.time(m &lt;- as.matrix(di))\n}\nif(dir.exists(myD &lt;- \"....\/MISC\/Speed\")) # for saved results\n    setwd(myD)\n\n(n.s &lt;- sort(outer(c(1,2,5), 10^(1:4)))[1:6]) # 10 20 ... 500 -- be fast for\nchecking\n(n.s &lt;- sort(outer(c(1,2,5), 10^(1:4)))[1:10]) # 10 20 ... 5000 10000\n\n## 16 replicates {want confidence!}\nset.seed(1)\nsystem.time(\n    st.n &lt;- sapply(setNames(n.s, paste0(\"n=\",n.s)), \n                   function(n) replicate(16, do1(n)), simplify=\"array\")\n); attr(st.n, \"version\") &lt;- R.version.string\n## R 4.3.2 patched  (2024-01-25):\n##    user  system elapsed\n##  80.568  28.208 109.453\nif(FALSE)\n    saveRDS(st.n, \"as.mat.D_st_R432p.rds\")\n## R-devel 2nd patch (by HT; + %in% .. by MMr)\n ##   user  system elapsed\n ## 29.250  10.617  40.121\nif(FALSE)\n    saveRDS(st.n, \"as.mat.D_st_Rdev.rds\")\n\n\nstPlot &lt;- function(st, ver = R.version.string, do.plot=TRUE) {\n    stopifnot(is.array(st), length(dim(st)) == 3,\n              is.character(R.version.string &lt;- attr(st, \"version\")))\n    <http:\/\/st.mn|st.mn> &lt;- colMeans(st[\"user.self\",,])\n    n. &lt;- as.integer(sub(\"^n=\",\"\", dimnames(st)[[3]]))\n    if(do.plot)\n        plot(n., <http:\/\/st.mn|st.mn>, type=\"b\", log=\"xy\", lwd=2, xlab = quote(n),  ylim =\nc(1e-5, 5),\n             main = \"system.time(as.matrix.dist(n x n))[\\\"user.self\\\"]\")\n    else\n        lines(n., <http:\/\/st.mn|st.mn>, type=\"b\", lwd=2, lty=3, col=\"darkgreen\")\n    ## ~ linear in log-log (for non-small n)\n    matlines(n.s, t(st[\"user.self\",,]), col=adjustcolor(1:6, 1\/2))\n    mtext(R.version.string, adj=1, cex=3\/4, line = if(do.plot) 0 else -1)\n}\n\nstPlot(st.n)\n\nst.n432p &lt;- readRDS(\"as.mat.D_st_R432p.rds\")\n\nstPlot(st.n432p, do.plot=FALSE)\n\n<http:\/\/stRdev.mn|stRdev.mn> &lt;- colMeans(st.n    [\"user.self\",,])\n<http:\/\/stR432.mn|stR432.mn> &lt;- colMeans(st.n432p[\"user.self\",,])\ncbind(<http:\/\/stR432.mn|stR432.mn>, <http:\/\/stRdev.mn|stRdev.mn>)\n\nnoquote(cbind(format(cbind(<http:\/\/stR432.mn|stR432.mn>, <http:\/\/stRdev.mn|stRdev.mn>) * 1e9 \/ n.s^1.65),\n              q = sprintf(\"%2.1f%%\", 100* <http:\/\/stR432.mn|stR432.mn> \/ <http:\/\/stRdev.mn|stRdev.mn>)))\n\n##         <http:\/\/stR432.mn|stR432.mn> <http:\/\/stRdev.mn|stRdev.mn> q\n## n=10    322.03826 249.85727 128.9%\n## n=20    100.18911  95.17965 105.3%\n## n=50     67.02674  49.15294 136.4%\n## n=100    62.64840  43.07078 145.5%\n## n=200    74.85862  29.94345 250.0%\n## n=500    96.83496  61.62225 157.1%\n## n=1000  154.97880  75.03498 206.5%\n## n=2000  401.31635 107.92639 371.8%\n## n=5000  580.69214 176.92733 328.2%\n## n=10000 855.79971 234.89278 364.3%\n\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1706281682.436229",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "xTdlx",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18660] as.matrix.dist performance",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18660"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Martin Maechler from comment #2)\nI did an analysis myself; also I was exaggerating a bit;  the new code "
+                            },
+                            {
+                                "type": "text",
+                                "text": "is",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " not\nas self-explaining as the original one.\nOTOH, it's been a nice exercise to work to improve its R efficieny, and I do\nbelieve this should be honored.\n\nAlso, BTW, I did like the use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "%||%",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in Tim's original patch. .. after a bit\nmore \"compacting\" the Heather's code, I've analyzed its empirical complexity\nmyself \n-- and the usual  log-log plot does show that indeed, the improvements do\nhappen also for small n, but you need to measure a bit more carefully to\nnotice.\nHere's some nice base R - only code for the analysis and I will attach the\nplot, too."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "## parametrized in  {n,p}\ndo1 <- function(n1, p=2) {\n    di <- dist(matrix(runif(n1*p), ncol = p))\n    if(n1 <= 200) { ## too fast for just one as.matrix() -->  do k times\n        ik <- seq_len( k <- floor((400\/n1)^1.5) )\n        system.time(for(i in ik) m <- as.matrix(di)) \/ k\n    } else\n        system.time(m <- as.matrix(di))\n}\nif(dir.exists(myD <- \"....\/MISC\/Speed\")) # for saved results\n    setwd(myD)\n\n(n.s <- sort(outer(c(1,2,5), 10^(1:4)))[1:6]) # 10 20 ... 500 -- be fast for\nchecking\n(n.s <- sort(outer(c(1,2,5), 10^(1:4)))[1:10]) # 10 20 ... 5000 10000\n\n## 16 replicates {want confidence!}\nset.seed(1)\nsystem.time(\n    st.n <- sapply(setNames(n.s, paste0(\"n=\",n.s)), \n                   function(n) replicate(16, do1(n)), simplify=\"array\")\n); attr(st.n, \"version\") <- R.version.string\n## R 4.3.2 patched  (2024-01-25):\n##    user  system elapsed\n##  80.568  28.208 109.453\nif(FALSE)\n    saveRDS(st.n, \"as.mat.D_st_R432p.rds\")\n## R-devel 2nd patch (by HT; + %in% .. by MMr)\n ##   user  system elapsed\n ## 29.250  10.617  40.121\nif(FALSE)\n    saveRDS(st.n, \"as.mat.D_st_Rdev.rds\")\n\n\nstPlot <- function(st, ver = R.version.string, do.plot=TRUE) {\n    stopifnot(is.array(st), length(dim(st)) == 3,\n              is.character(R.version.string <- attr(st, \"version\")))\n    "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/st.mn",
+                                "text": "st.mn"
+                            },
+                            {
+                                "type": "text",
+                                "text": " <- colMeans(st[\"user.self\",,])\n    n. <- as.integer(sub(\"^n=\",\"\", dimnames(st)[[3]]))\n    if(do.plot)\n        plot(n., "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/st.mn",
+                                "text": "st.mn"
+                            },
+                            {
+                                "type": "text",
+                                "text": ", type=\"b\", log=\"xy\", lwd=2, xlab = quote(n),  ylim =\nc(1e-5, 5),\n             main = \"system.time(as.matrix.dist(n x n))[\\\"user.self\\\"]\")\n    else\n        lines(n., "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/st.mn",
+                                "text": "st.mn"
+                            },
+                            {
+                                "type": "text",
+                                "text": ", type=\"b\", lwd=2, lty=3, col=\"darkgreen\")\n    ## ~ linear in log-log (for non-small n)\n    matlines(n.s, t(st[\"user.self\",,]), col=adjustcolor(1:6, 1\/2))\n    mtext(R.version.string, adj=1, cex=3\/4, line = if(do.plot) 0 else -1)\n}\n\nstPlot(st.n)\n\nst.n432p <- readRDS(\"as.mat.D_st_R432p.rds\")\n\nstPlot(st.n432p, do.plot=FALSE)\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/stRdev.mn",
+                                "text": "stRdev.mn"
+                            },
+                            {
+                                "type": "text",
+                                "text": " <- colMeans(st.n    [\"user.self\",,])\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/stR432.mn",
+                                "text": "stR432.mn"
+                            },
+                            {
+                                "type": "text",
+                                "text": " <- colMeans(st.n432p[\"user.self\",,])\ncbind("
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/stR432.mn",
+                                "text": "stR432.mn"
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/stRdev.mn",
+                                "text": "stRdev.mn"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n\nnoquote(cbind(format(cbind("
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/stR432.mn",
+                                "text": "stR432.mn"
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/stRdev.mn",
+                                "text": "stRdev.mn"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") * 1e9 \/ n.s^1.65),\n              q = sprintf(\"%2.1f%%\", 100* "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/stR432.mn",
+                                "text": "stR432.mn"
+                            },
+                            {
+                                "type": "text",
+                                "text": " \/ "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/stRdev.mn",
+                                "text": "stRdev.mn"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")))\n\n##         "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/stR432.mn",
+                                "text": "stR432.mn"
+                            },
+                            {
+                                "type": "text",
+                                "text": " "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/stRdev.mn",
+                                "text": "stRdev.mn"
+                            },
+                            {
+                                "type": "text",
+                                "text": " q\n## n=10    322.03826 249.85727 128.9%\n## n=20    100.18911  95.17965 105.3%\n## n=50     67.02674  49.15294 136.4%\n## n=100    62.64840  43.07078 145.5%\n## n=200    74.85862  29.94345 250.0%\n## n=500    96.83496  61.62225 157.1%\n## n=1000  154.97880  75.03498 206.5%\n## n=2000  401.31635 107.92639 371.8%\n## n=5000  580.69214 176.92733 328.2%\n## n=10000 855.79971 234.89278 364.3%\n\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18660] as.matrix.dist performance*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18660>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #5 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nCommitted to R-devel svn rev 85827 -- with thank to the contributors!",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1706285199.330159",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Vp=7",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18660] as.matrix.dist performance",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18660"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #5 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCommitted to R-devel svn rev 85827 -- with thank to the contributors!"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18655] Enhancements to `*wilcox` functions for large population sizes*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655>\n\n--- Comment #14 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nWell, runtime is one thing...  correctness is  `Inf` times more important ;-)\nWith the latest patch (comment 10, attachment id 3239), I see\n\n```\n20 * dwilcox(0:12, 3,3) # giving     1 1 2 3 3 -2 -2 -1 0 1 0 0 0\n                       ## instead of 1 1 2 3 3  3  3  2 1 1 0 0 0\n```\n\n.. a version of which is fortunately detected by `tests\/d-p-q-r-tests.R`  where\n cumsum(dwilcox()) suddenly differs from pwilcox().\n\nOptimistically, I assume this is just a small \"typo\" somewhere you'll find..",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1706285721.334689",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "kp1s",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18655] Enhancements to ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "*wilcox",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " functions for large population sizes",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #14 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nWell, runtime is one thing...  correctness is  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Inf",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " times more important ;-)\nWith the latest patch (comment 10, attachment id 3239), I see\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "20 * dwilcox(0:12, 3,3) # giving     1 1 2 3 3 -2 -2 -1 0 1 0 0 0\n                       ## instead of 1 1 2 3 3  3  3  2 1 1 0 0 0\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n.. a version of which is fortunately detected by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tests\/d-p-q-r-tests.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  where\n cumsum(dwilcox()) suddenly differs from pwilcox().\n\nOptimistically, I assume this is just a small \"typo\" somewhere you'll find.."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18656] Allow interrupting pmatch()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18656>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|CONFIRMED                   |CLOSED\n\n--- Comment #2 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nFix committed to R-devel svn rev 85816   -- 4 days ago, eventually to be back\nported",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1706286651.568859",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "p+8+",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18656] Allow interrupting pmatch()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18656"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|CONFIRMED                   |CLOSED\n\n--- Comment #2 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nFix committed to R-devel svn rev 85816   -- 4 days ago, eventually to be back\nported"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18655] Enhancements to `*wilcox` functions for large population sizes*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655>\n\n--- Comment #15 from Aidan H Lakshman (<mailto:AHL27@pitt.edu|AHL27@pitt.edu>) ---\n(In reply to Martin Maechler from comment #14)\nThis is indeed a small typo somewhere that I found, thanks for the catch. \n\nI'm including a new patch now. This one passes the checks in\n`tests\/d-p-q-r-tests.R`.\n\nThe large diff file I submitted previously was also due to random EOL\ndifferences, which I've since corrected.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1706289841.748489",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "vIe",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18655] Enhancements to ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "*wilcox",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " functions for large population sizes",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #15 from Aidan H Lakshman ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:AHL27@pitt.edu",
+                                "text": "AHL27@pitt.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Martin Maechler from comment #14)\nThis is indeed a small typo somewhere that I found, thanks for the catch. \n\nI'm including a new patch now. This one passes the checks in\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "tests\/d-p-q-r-tests.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nThe large diff file I submitted previously was also due to random EOL\ndifferences, which I've since corrected."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18655] Enhancements to `*wilcox` functions for large population sizes*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655>\n\nAidan H Lakshman (<mailto:AHL27@pitt.edu|AHL27@pitt.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3287|0                           |1\n        is obsolete|                            |\n   Attachment #3290|0                           |1\n        is obsolete|                            |\n\n--- Comment #16 from Aidan H Lakshman (<mailto:AHL27@pitt.edu|AHL27@pitt.edu>) ---\nCreated attachment 3303\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3303&amp;action=edit>\nSVN Patch Diff v4\n\nupdated patch passing tests in `tests\/d-p-q-r-tests.R`",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1706290241.925139",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "YuONK",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18655] Enhancements to ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "*wilcox",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " functions for large population sizes",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nAidan H Lakshman ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:AHL27@pitt.edu",
+                                "text": "AHL27@pitt.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3287|0                           |1\n        is obsolete|                            |\n   Attachment #3290|0                           |1\n        is obsolete|                            |\n\n--- Comment #16 from Aidan H Lakshman ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:AHL27@pitt.edu",
+                                "text": "AHL27@pitt.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3303\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3303&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3303&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nSVN Patch Diff v4\n\nupdated patch passing tests in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tests\/d-p-q-r-tests.R",
+                                "style": {
+                                    "code": true
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,433 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18642] New: dgeom accuracy*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18642>\n\n            Bug ID: 18642\n           Summary: dgeom accuracy\n           Product: R\n           Version: R 4.3.x\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Accuracy\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:mwelinder@gmail.com|mwelinder@gmail.com>\n\n```dgeom``` currently defers to ```dbinom_raw``` for the guts:\n\n```\n    \/* prob = (1-p)^x, stable for small p *\/\n    prob = dbinom_raw(0.,x, p,1-p, give_log);\n```\n\nSince ```dbinom_raw``` always goes through logs this is problematic\nwhen the result is very small.\n\nConsider ```dgeom(201,31\/32)``` which yields\n```\nR:           2.8253097825781101802e-303\nMathematica: 2.8253097825781040281e-303\n```\n\nThe code appears to predate ```log1p```.  I suggest the more direct code\nbelow which takes advantage of ```1-p``` being rounding-free when ```p&gt;.5```.\n\n```\n    \/* prob = (1-p)^x, stable for small p *\/\n    if (give_log)\n            prob = x * log1p (-p);\n    else if (p &gt;= .5)\n            prob = pow (1 - p, x);\n    else\n            prob = exp (x * log1p (-p));\n```\n\nAlternatively one could make the similar change in ```dbinom_raw```'s special\ncases for ```x==0``` and ```x==n```.  It would be best to base the calculations\non the smaller of ```p``` and ```q``` since that is the most accurate number.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1703793793.102389",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "gnT",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18642] New: dgeom accuracy",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18642"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18642\n           Summary: dgeom accuracy\n           Product: R\n           Version: R 4.3.x\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Accuracy\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:mwelinder@gmail.com",
+                                "text": "mwelinder@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "dgeom"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " currently defers to "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "dbinom_raw"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " for the guts:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "    \/* prob = (1-p)^x, stable for small p *\/\n    prob = dbinom_raw(0.,x, p,1-p, give_log);\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSince "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "dbinom_raw"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " always goes through logs this is problematic\nwhen the result is very small.\n\nConsider "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "dgeom(201,31\/32)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " which yields"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "R:           2.8253097825781101802e-303\nMathematica: 2.8253097825781040281e-303\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe code appears to predate "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "log1p"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": ".  I suggest the more direct code\nbelow which takes advantage of "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "1-p"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " being rounding-free when "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "p>.5"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": ".\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "    \/* prob = (1-p)^x, stable for small p *\/\n    if (give_log)\n            prob = x * log1p (-p);\n    else if (p >= .5)\n            prob = pow (1 - p, x);\n    else\n            prob = exp (x * log1p (-p));\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nAlternatively one could make the similar change in "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "dbinom_raw```'s special\ncases for ```x==0"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " and "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "x==n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": ".  It would be best to base the calculations\non the smaller of "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "p"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " and "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "q"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " since that is the most accurate number."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18642] dgeom accuracy*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18642>\n\n--- Comment #1 from M Welinder (<mailto:mwelinder@gmail.com|mwelinder@gmail.com>) ---\nFor reference, this is how it would look over in ```dbinom_raw```:\n\n```\n    if (x == 0) {\n        if(n == 0) return R_D__1;\n        \/\/ The smaller of p and q is the most accurate\n        if (p &gt; q)\n                return give_log ? n * log(q) : pow (q, n);\n        else\n                return give_log ? n * log1p (-p) : pow1p (-p, n);\n    }\n    if (x == n) {\n        \/\/ The smaller of p and q is the most accurate\n        if (p &gt; q)\n                return give_log ? n * log1p (-q) : pow1p (-q, n);\n        else\n                return give_log ? n * log (p) : pow (p, n);\n    }\n```\n\nThat uses a ```pow1p``` function:\n\n```\ndouble\npow1p (double x, double y)\n{\n        \/*\n         * We defer to the naive algorithm in two cases: (1) when 1+x\n         * is exact (let us hope the compiler does not mess this up),\n         * and (2) when |x|&gt;1\/2 and we have no better algorithm.\n         *\/\n\n        if ((x + 1) - 1 == x || fabs (x) &gt; 0.5 || isnan (x) || isnan (y))\n                return pow (1 + x, y);\n        else\n                \/\/ Not great, but also not horrible\n                return exp (y * log1p (x));\n}\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1703796740.923779",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "s5zX",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18642] dgeom accuracy",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18642"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from M Welinder ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:mwelinder@gmail.com",
+                                "text": "mwelinder@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nFor reference, this is how it would look over in "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "dbinom_raw"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "    if (x == 0) {\n        if(n == 0) return R_D__1;\n        \/\/ The smaller of p and q is the most accurate\n        if (p > q)\n                return give_log ? n * log(q) : pow (q, n);\n        else\n                return give_log ? n * log1p (-p) : pow1p (-p, n);\n    }\n    if (x == n) {\n        \/\/ The smaller of p and q is the most accurate\n        if (p > q)\n                return give_log ? n * log1p (-q) : pow1p (-q, n);\n        else\n                return give_log ? n * log (p) : pow (p, n);\n    }\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThat uses a "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "pow1p"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " function:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "double\npow1p (double x, double y)\n{\n        \/*\n         * We defer to the naive algorithm in two cases: (1) when 1+x\n         * is exact (let us hope the compiler does not mess this up),\n         * and (2) when |x|>1\/2 and we have no better algorithm.\n         *\/\n\n        if ((x + 1) - 1 == x || fabs (x) > 0.5 || isnan (x) || isnan (y))\n                return pow (1 + x, y);\n        else\n                \/\/ Not great, but also not horrible\n                return exp (y * log1p (x));\n}\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

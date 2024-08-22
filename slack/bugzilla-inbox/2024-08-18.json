@@ -1,0 +1,294 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18192] nlme crashes when spatial correlation structure is included*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18192>\n\nSebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |seb.meyer@fau.de\n         Resolution|---                         |FIXED\n             Status|CONFIRMED                   |CLOSED\n\n--- Comment #10 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\n@Elin: scoping problems were a red herring this time.\n\nRunning the example script under valgrind showed\n\n```\n Beginning PNLS step: ..\n==12111== Invalid read of size 8\n==12111==    at 0xD1986C0: mult_mat (matrix.c:92)\n==12111==    by 0xD196149: corStruct_recalc (corStruct.c:61)\n==12111==    by 0xD1996ED: nlme_iterate (nlme.c:314)\n==12111==    by 0xD1996ED: fit_nlme (nlme.c:379)\n```\n\nI then debugged the involved functions manually (inserting REprintf()\nstatements) to understand where the indexing goes wrong. I could have saved\nsome hours if I had read Mikko's analysis of the gnls() crash from Bug 17227\ncomment 1 (not a duplicate but indeed caused by the same issue).\n\nGoing further, I found that using the `start` positions to shift `Xy` in\ncorStruct_recalc() was not compatible with a spatial correlation structure as\nits `Dim()$start` indexes the *distance* vector, not the observations (this is\nalso documented in `?Dim.corSpatial`). However, changing the saved `start` to\nmatch the other correlation structures would invalidate the `corMatrix()`\ncalculations for grouped spatial correlations. I only noticed this by comparing\nthe output from running the nlme book scripts to previously saved reference\noutput; I have now added an explicit test for this. So the right fix was to\nshift `Xy` via `Xy += len[i]` (the number of observations in the group) instead\nof using `start` in corStruct_recalc(). I added a regression test following the\nidea of the OP: reproducing a simple random-intercept lme() using nlme() (but\nusing a built-in dataset rather than simulations).\n\nMany \"detective\" hours later, I am happy that these crashes could finally be\nfixed. The changes are in the nlme trunk (c8439) and should appear in the next\nrelease (so nlme &gt; 3.1-166).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1724003484.253819",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "AH9eE",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18192] nlme crashes when spatial correlation structure is included",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18192"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |seb.meyer@fau.de\n         Resolution|---                         |FIXED\n             Status|CONFIRMED                   |CLOSED\n\n--- Comment #10 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n@Elin: scoping problems were a red herring this time.\n\nRunning the example script under valgrind showed\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " Beginning PNLS step: ..\n==12111== Invalid read of size 8\n==12111==    at 0xD1986C0: mult_mat (matrix.c:92)\n==12111==    by 0xD196149: corStruct_recalc (corStruct.c:61)\n==12111==    by 0xD1996ED: nlme_iterate (nlme.c:314)\n==12111==    by 0xD1996ED: fit_nlme (nlme.c:379)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI then debugged the involved functions manually (inserting REprintf()\nstatements) to understand where the indexing goes wrong. I could have saved\nsome hours if I had read Mikko's analysis of the gnls() crash from Bug 17227\ncomment 1 (not a duplicate but indeed caused by the same issue).\n\nGoing further, I found that using the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "start",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " positions to shift "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Xy",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in\ncorStruct_recalc() was not compatible with a spatial correlation structure as\nits "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Dim()$start",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " indexes the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "distance",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " vector, not the observations (this is\nalso documented in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "?Dim.corSpatial",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "). However, changing the saved "
+                            },
+                            {
+                                "type": "text",
+                                "text": "start",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to\nmatch the other correlation structures would invalidate the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "corMatrix()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ncalculations for grouped spatial correlations. I only noticed this by comparing\nthe output from running the nlme book scripts to previously saved reference\noutput; I have now added an explicit test for this. So the right fix was to\nshift "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Xy",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " via "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Xy += len[i]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (the number of observations in the group) instead\nof using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "start",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in corStruct_recalc(). I added a regression test following the\nidea of the OP: reproducing a simple random-intercept lme() using nlme() (but\nusing a built-in dataset rather than simulations).\n\nMany \"detective\" hours later, I am happy that these crashes could finally be\nfixed. The changes are in the nlme trunk (c8439) and should appear in the next\nrelease (so nlme > 3.1-166)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17227] nlme::gnls  seg.fault (reported in 2008)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17227>\n\nSebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n         Resolution|---                         |FIXED\n                 CC|                            |seb.meyer@fau.de\n\n--- Comment #10 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\nThis has been fixed via Bug 18192 (c8439 in the nlme trunk). The nlme() and\ngnls() crashes were caused by the same indexing error: For spatial correlation\nstructures, `Dim()$start` indexes the distance vector and thus cannot be used\nto iterate over `Xy` in corStruct_recalc(). Thanks to all for the initial\ndebugging.\n\n\n(In reply to Ivan Krylov from comment #4)\n&gt; I can see this line of code in nlme 3.1-1 from 1999, the oldest version on\n&gt; CRAN\n\nFWIW, it was also in its predecessor lme 3.0.0 from June 1999.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1724006148.473069",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "gc9dJ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17227] nlme::gnls  seg.fault (reported in 2008)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17227"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n         Resolution|---                         |FIXED\n                 CC|                            |seb.meyer@fau.de\n\n--- Comment #10 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThis has been fixed via Bug 18192 (c8439 in the nlme trunk). The nlme() and\ngnls() crashes were caused by the same indexing error: For spatial correlation\nstructures, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Dim()$start",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " indexes the distance vector and thus cannot be used\nto iterate over "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Xy",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in corStruct_recalc(). Thanks to all for the initial\ndebugging.\n\n\n\n(In reply to Ivan Krylov from comment #4)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I can see this line of code in nlme 3.1-1 from 1999, the oldest version on\nCRAN"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nFWIW, it was also in its predecessor lme 3.0.0 from June 1999."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

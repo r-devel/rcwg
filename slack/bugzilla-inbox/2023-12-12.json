@@ -1,0 +1,318 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18634] R leaks sockets on error in download.file when options(warn = 2) is set*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18634>\n\n--- Comment #2 from Ivan Krylov (<mailto:krylov.r00t@gmail.com|krylov.r00t@gmail.com>) ---\nCreated attachment 3274\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3274&amp;action=edit>\nAvoid FD_SET overflows in internet module, parallel package\n\nI wasn't able to reproduce the stack overflow from `FD_SET`, I think due to it\nbeing defined in a fail-safe manner on my system\n(`\/usr\/include\/x86_64-linux-gnu\/bits\/select2.h` defines `__FD_ELT(d)`\ncontaining a comparison between `d` and `FD_SETSIZE`), but that's no excuse for\ncausing undefined behaviour when such checks are not available.\n\nI think that the existing checks are all off by one. POSIX is not being precise\nabout this ([`FD_SETSIZE`: Maximum number of file descriptors in an **fd_set**\nstructure.][FD_SETSIZE]), but Linux man pages are [quite\nexplicit](<https:\/\/www.man7.org\/linux\/man-pages\/man2\/select.2.html>):\n\n&gt; Executing `FD_CLR()` or `FD_SET()` with a value of `fd` that is negative or is _equal to_ or larger than `FD_SETSIZE` will result in undefined behavior.\n\n[FD_SETSIZE]:\n<https:\/\/pubs.opengroup.org\/onlinepubs\/9699919799\/basedefs\/sys_select.h.html>\n\nUnchecked `FD_SET` is also currently reachable via `parallel:::readChildren`\n(it's actually checked in `parallel:::selectChildren`), but it's not exported\nand commented to be unused.\n\nI've reused the `error()` message from existing checks. Is the reason why\n`Rsock.c` avoided `error()` because it uses struct members named `error`? I had\nto bring it in with `R_NO_REMAP` defined. The patch passes `make check-devel`\non Linux.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1702382963.419719",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "rx+V",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18634] R leaks sockets on error in download.file when options(warn = 2) is set",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18634"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:krylov.r00t@gmail.com",
+                                "text": "krylov.r00t@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3274\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3274&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3274&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nAvoid FD_SET overflows in internet module, parallel package\n\nI wasn't able to reproduce the stack overflow from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "FD_SET",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", I think due to it\nbeing defined in a fail-safe manner on my system\n("
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/usr\/include\/x86_64-linux-gnu\/bits\/select2.h",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " defines "
+                            },
+                            {
+                                "type": "text",
+                                "text": "__FD_ELT(d)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ncontaining a comparison between "
+                            },
+                            {
+                                "type": "text",
+                                "text": "d",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "FD_SETSIZE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), but that's no excuse for\ncausing undefined behaviour when such checks are not available.\n\nI think that the existing checks are all off by one. POSIX is not being precise\nabout this (["
+                            },
+                            {
+                                "type": "text",
+                                "text": "FD_SETSIZE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ": Maximum number of file descriptors in an **fd_set**\nstructure.][FD_SETSIZE]), but Linux man pages are [quite\nexplicit]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/www.man7.org\/linux\/man-pages\/man2\/select.2.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Executing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "FD_CLR()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "FD_SET()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " with a value of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "fd",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " that is negative or is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "equal to",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or larger than "
+                            },
+                            {
+                                "type": "text",
+                                "text": "FD_SETSIZE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " will result in undefined behavior."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n[FD_SETSIZE]:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/pubs.opengroup.org\/onlinepubs\/9699919799\/basedefs\/sys_select.h.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nUnchecked "
+                            },
+                            {
+                                "type": "text",
+                                "text": "FD_SET",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is also currently reachable via "
+                            },
+                            {
+                                "type": "text",
+                                "text": "parallel:::readChildren",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n(it's actually checked in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "parallel:::selectChildren",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), but it's not exported\nand commented to be unused.\n\nI've reused the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "error()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " message from existing checks. Is the reason why\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rsock.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " avoided "
+                            },
+                            {
+                                "type": "text",
+                                "text": "error()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " because it uses struct members named "
+                            },
+                            {
+                                "type": "text",
+                                "text": "error",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "? I had\nto bring it in with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_NO_REMAP",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " defined. The patch passes "
+                            },
+                            {
+                                "type": "text",
+                                "text": "make check-devel",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\non Linux."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

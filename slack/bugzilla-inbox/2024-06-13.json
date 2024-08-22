@@ -1,0 +1,1027 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18741] `seq()` error message of bad `length.out`*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18741>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #2 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nI'm not at all convinced this should be changed.\n`NA` is definitely *not* a  non-negative number\n\nAlso the warning for `length(length.out)` is one fair possibility,\nand making it into an error after all those years will only be work and not\ngain much.   Elin's solution would have to use things like gettext(),\ntranslators will have to translate the new message ...",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718263407.989749",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "8VXFr",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18741] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " error message of bad ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "length.out",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18741"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #2 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI'm not at all convinced this should be changed.\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is definitely "
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " a  non-negative number\n\nAlso the warning for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length(length.out)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is one fair possibility,\nand making it into an error after all those years will only be work and not\ngain much.   Elin's solution would have to use things like gettext(),\ntranslators will have to translate the new message ..."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18739] On using Cdqrls() &amp; influence() in a R package (CRAN compliant)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18739>\n\n--- Comment #7 from Geoffroy Berthelot (<mailto:geoffroy.berthelot@insep.fr|geoffroy.berthelot@insep.fr>) ---\nComparing:\n```\nfast_rstudent &lt;- function( n ){\n  set.seed(1)\n  y = rnorm(n)\n  x &lt;- rnorm(n)\n  tol &lt;- .Machine$double.eps\n  mqr &lt;- .Call(stats:::C_Cdqrls, cbind(TRUE, y), x, tol, FALSE)\n  res &lt;- .Call(stats:::C_influence, mqr,  mqr$residuals, 1e-12)\n  mqr$residuals \/ (res$sigma * sqrt(1 - cbind(res$hat)))\n}\n\nbasic_r2 &lt;- function( n ){\n  set.seed(1)\n  y = rnorm(n)\n  x &lt;- rnorm(n)\n\n  reg &lt;- .lm.fit(cbind(1, y), x)\n  reg$qr &lt;- reg\n  inf &lt;- lm.influence(reg, do.coef = FALSE)\n  inf$wt.res \/ (inf$sigma * sqrt(1 - cbind(inf$hat)))\n}\n```\n\nShows that the overhead is costly for small values of `n`:\n```\nn = 100 values, 500 repetitions\n29.3\n103.7\n\nn = 5000 values, 500 repetitions\n819.80\n1110.05\n\nn = 10000, 500 repetitions\n1.64\n2.13\n\nn = 100000, 500 repetitions\n15.13\n20.08\n```\n\nand using Bench::mark it also indicates that it consumes more memory (as more\nquantities are computed using `lm.influence(reg, do.coef = FALSE)`:\n```\n  expression              median  itr\/sec  mem_alloc n_itr  n_gc total_time\n1 fast_rstudent(n_values) 26.6µs    36536.    16.5KB 49977    23      1.37s\n2 basic_r2(n_values)      97.4µs     9970.    23.3KB 49974    26      5.01s\n\nn = 100000, 500 repetitions\n  expression              median   itr\/sec mem_alloc n_itr  n_gc total_time\n1 fast_rstudent(n_values) 14.5ms      68.1     8.4MB   380   120      5.58s\n2 basic_r2(n_values)      17.6ms      55.8    14.5MB   289   211      5.18s\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718268110.564419",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "z6B",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18739] On using Cdqrls() & influence() in a R package (CRAN compliant)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18739"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #7 from Geoffroy Berthelot ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:geoffroy.berthelot@insep.fr",
+                                "text": "geoffroy.berthelot@insep.fr"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nComparing:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "fast_rstudent <- function( n ){\n  set.seed(1)\n  y = rnorm(n)\n  x <- rnorm(n)\n  tol <- .Machine$double.eps\n  mqr <- .Call(stats:::C_Cdqrls, cbind(TRUE, y), x, tol, FALSE)\n  res <- .Call(stats:::C_influence, mqr,  mqr$residuals, 1e-12)\n  mqr$residuals \/ (res$sigma * sqrt(1 - cbind(res$hat)))\n}\n\nbasic_r2 <- function( n ){\n  set.seed(1)\n  y = rnorm(n)\n  x <- rnorm(n)\n\n  reg <- .lm.fit(cbind(1, y), x)\n  reg$qr <- reg\n  inf <- lm.influence(reg, do.coef = FALSE)\n  inf$wt.res \/ (inf$sigma * sqrt(1 - cbind(inf$hat)))\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nShows that the overhead is costly for small values of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "n",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "n = 100 values, 500 repetitions\n29.3\n103.7\n\nn = 5000 values, 500 repetitions\n819.80\n1110.05\n\nn = 10000, 500 repetitions\n1.64\n2.13\n\nn = 100000, 500 repetitions\n15.13\n20.08\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nand using Bench::mark it also indicates that it consumes more memory (as more\nquantities are computed using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lm.influence(reg, do.coef = FALSE)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "  expression              median  itr\/sec  mem_alloc n_itr  n_gc total_time\n1 fast_rstudent(n_values) 26.6µs    36536.    16.5KB 49977    23      1.37s\n2 basic_r2(n_values)      97.4µs     9970.    23.3KB 49974    26      5.01s\n\nn = 100000, 500 repetitions\n  expression              median   itr\/sec mem_alloc n_itr  n_gc total_time\n1 fast_rstudent(n_values) 14.5ms      68.1     8.4MB   380   120      5.58s\n2 basic_r2(n_values)      17.6ms      55.8    14.5MB   289   211      5.18s\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18739] On using Cdqrls() &amp; influence() in a R package (CRAN compliant)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18739>\n\n--- Comment #8 from Geoffroy Berthelot (<mailto:geoffroy.berthelot@insep.fr|geoffroy.berthelot@insep.fr>) ---\nSorry, the format was wrong in the last message, here it is with the correct\nformating:\n\nComparing:\n\n```\nfast_rstudent &lt;- function( n ){\n  set.seed(1)\n  y = rnorm(n)\n  x &lt;- rnorm(n)\n  tol &lt;- .Machine$double.eps\n  mqr &lt;- .Call(stats:::C_Cdqrls, cbind(TRUE, y), x, tol, FALSE)\n  res &lt;- .Call(stats:::C_influence, mqr,  mqr$residuals, 1e-12)\n  mqr$residuals \/ (res$sigma * sqrt(1 - cbind(res$hat)))\n}\n\nbasic_r2 &lt;- function( n ){\n  set.seed(1)\n  y = rnorm(n)\n  x &lt;- rnorm(n)\n\n  reg &lt;- .lm.fit(cbind(1, y), x)\n  reg$qr &lt;- reg\n  inf &lt;- lm.influence(reg, do.coef = FALSE)\n  inf$wt.res \/ (inf$sigma * sqrt(1 - cbind(inf$hat)))\n}\n```\n\nShows that the overhead is costly for small values of n:\n```\nn = 100 values, 500 repetitions\n29.3\n103.7\n\nn = 5000 values, 500 repetitions\n819.80\n1110.05\n\nn = 10000, 500 repetitions\n1.64\n2.13\n\nn = 100000, 500 repetitions\n15.13\n20.08\n```\n\nand using Bench::mark it also indicates that it consumes more memory (as more\nquantities are computed using lm.influence(reg, do.coef = FALSE):\n\n```\nn = 100 values, 50000 repetitions\n  expression              median `itr\/sec` mem_alloc n_itr  n_gc total_time\n1 fast_rstudent(n_values) 26.6µs    36536.    16.5KB 49977    23      1.37s\n2 basic_r2(n_values)      97.4µs     9970.    23.3KB 49974    26      5.01s\n\nn = 100000, 500 repetitions\n  expression              median `itr\/sec` mem_alloc n_itr  n_gc total_time\n1 fast_rstudent(n_values) 14.5ms      68.1     8.4MB   380   120      5.58s\n2 basic_r2(n_values)      17.6ms      55.8    14.5MB   289   211      5.18s\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718268385.513659",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "opbV",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18739] On using Cdqrls() & influence() in a R package (CRAN compliant)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18739"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #8 from Geoffroy Berthelot ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:geoffroy.berthelot@insep.fr",
+                                "text": "geoffroy.berthelot@insep.fr"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nSorry, the format was wrong in the last message, here it is with the correct\nformating:\n\nComparing:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "fast_rstudent <- function( n ){\n  set.seed(1)\n  y = rnorm(n)\n  x <- rnorm(n)\n  tol <- .Machine$double.eps\n  mqr <- .Call(stats:::C_Cdqrls, cbind(TRUE, y), x, tol, FALSE)\n  res <- .Call(stats:::C_influence, mqr,  mqr$residuals, 1e-12)\n  mqr$residuals \/ (res$sigma * sqrt(1 - cbind(res$hat)))\n}\n\nbasic_r2 <- function( n ){\n  set.seed(1)\n  y = rnorm(n)\n  x <- rnorm(n)\n\n  reg <- .lm.fit(cbind(1, y), x)\n  reg$qr <- reg\n  inf <- lm.influence(reg, do.coef = FALSE)\n  inf$wt.res \/ (inf$sigma * sqrt(1 - cbind(inf$hat)))\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nShows that the overhead is costly for small values of n:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "n = 100 values, 500 repetitions\n29.3\n103.7\n\nn = 5000 values, 500 repetitions\n819.80\n1110.05\n\nn = 10000, 500 repetitions\n1.64\n2.13\n\nn = 100000, 500 repetitions\n15.13\n20.08\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nand using Bench::mark it also indicates that it consumes more memory (as more\nquantities are computed using lm.influence(reg, do.coef = FALSE):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "n = 100 values, 50000 repetitions\n  expression              median `itr\/sec` mem_alloc n_itr  n_gc total_time\n1 fast_rstudent(n_values) 26.6µs    36536.    16.5KB 49977    23      1.37s\n2 basic_r2(n_values)      97.4µs     9970.    23.3KB 49974    26      5.01s\n\nn = 100000, 500 repetitions\n  expression              median `itr\/sec` mem_alloc n_itr  n_gc total_time\n1 fast_rstudent(n_values) 14.5ms      68.1     8.4MB   380   120      5.58s\n2 basic_r2(n_values)      17.6ms      55.8    14.5MB   289   211      5.18s\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18739] On using Cdqrls() &amp; influence() in a R package (CRAN compliant)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18739>\n\n--- Comment #9 from Geoffroy Berthelot (<mailto:geoffroy.berthelot@insep.fr|geoffroy.berthelot@insep.fr>) ---\nI can't understand why all pieces of codes got messed up with the formatting.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718268447.910849",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "fGr",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18739] On using Cdqrls() & influence() in a R package (CRAN compliant)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18739"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #9 from Geoffroy Berthelot ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:geoffroy.berthelot@insep.fr",
+                                "text": "geoffroy.berthelot@insep.fr"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI can't understand why all pieces of codes got messed up with the formatting."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18739] On using Cdqrls() &amp; influence() in a R package (CRAN compliant)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18739>\n\n--- Comment #10 from Geoffroy Berthelot (<mailto:geoffroy.berthelot@insep.fr|geoffroy.berthelot@insep.fr>) ---\nIgnoring the two previous messages (i can't delete), the correct format is:\n\nComparing:\n\nfast_rstudent &lt;- function( n ){\n  set.seed(1)\n  y = rnorm(n)\n  x &lt;- rnorm(n)\n  tol &lt;- .Machine$double.eps\n  mqr &lt;- .Call(stats:::C_Cdqrls, cbind(TRUE, y), x, tol, FALSE)\n  res &lt;- .Call(stats:::C_influence, mqr,  mqr$residuals, 1e-12)\n  mqr$residuals \/ (res$sigma * sqrt(1 - cbind(res$hat)))\n}\n\nbasic_r2 &lt;- function( n ){\n  set.seed(1)\n  y = rnorm(n)\n  x &lt;- rnorm(n)\n\n  reg &lt;- .lm.fit(cbind(1, y), x)\n  reg$qr &lt;- reg\n  inf &lt;- lm.influence(reg, do.coef = FALSE)\n  inf$wt.res \/ (inf$sigma * sqrt(1 - cbind(inf$hat)))\n}\n\nShows that the overhead is costly for small values of n:\n\nn = 100 values, 500 repetitions\n29.3\n103.7\n\nn = 5000 values, 500 repetitions\n819.80\n1110.05\n\nn = 10000, 500 repetitions\n1.64\n2.13\n\nn = 100000, 500 repetitions\n15.13\n20.08\n\nand using Bench::mark it also indicates that it consumes more memory (as more\nquantities are computed using lm.influence(reg, do.coef = FALSE):\n\n  expression              median ; itr\/sec ; mem_alloc ; n_itr ; n_gc ;\ntotal_time\n1 fast_rstudent(n_values) 26.6µs ; 36536. ; 16.5KB ; 49977 ; 23 ; 1.37s\n2 basic_r2(n_values)      97.4µs ; 9970. ; 23.3KB ; 49974 ; 26 ; 5.01s\n\nn = 100000, 500 repetitions\n  expression              median ; itr\/sec ; mem_alloc ; n_itr ; n_gc ;\ntotal_time\n1 fast_rstudent(n_values) 14.5ms ; 68.1 ; 8.4MB ; 380 ; 120 ; 5.58s\n2 basic_r2(n_values)      17.6ms ; 55.8 ; 14.5MB ; 289 ; 211 ; 5.18s",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718268849.835519",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "rih",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18739] On using Cdqrls() & influence() in a R package (CRAN compliant)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18739"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #10 from Geoffroy Berthelot ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:geoffroy.berthelot@insep.fr",
+                                "text": "geoffroy.berthelot@insep.fr"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nIgnoring the two previous messages (i can't delete), the correct format is:\n\nComparing:\n\nfast_rstudent <- function( n ){\n  set.seed(1)\n  y = rnorm(n)\n  x <- rnorm(n)\n  tol <- .Machine$double.eps\n  mqr <- .Call(stats:::C_Cdqrls, cbind(TRUE, y), x, tol, FALSE)\n  res <- .Call(stats:::C_influence, mqr,  mqr$residuals, 1e-12)\n  mqr$residuals \/ (res$sigma * sqrt(1 - cbind(res$hat)))\n}\n\nbasic_r2 <- function( n ){\n  set.seed(1)\n  y = rnorm(n)\n  x <- rnorm(n)\n\n  reg <- .lm.fit(cbind(1, y), x)\n  reg$qr <- reg\n  inf <- lm.influence(reg, do.coef = FALSE)\n  inf$wt.res \/ (inf$sigma * sqrt(1 - cbind(inf$hat)))\n}\n\nShows that the overhead is costly for small values of n:\n\nn = 100 values, 500 repetitions\n29.3\n103.7\n\nn = 5000 values, 500 repetitions\n819.80\n1110.05\n\nn = 10000, 500 repetitions\n1.64\n2.13\n\nn = 100000, 500 repetitions\n15.13\n20.08\n\nand using Bench::mark it also indicates that it consumes more memory (as more\nquantities are computed using lm.influence(reg, do.coef = FALSE):\n\n  expression              median ; itr\/sec ; mem_alloc ; n_itr ; n_gc ;\ntotal_time\n1 fast_rstudent(n_values) 26.6µs ; 36536. ; 16.5KB ; 49977 ; 23 ; 1.37s\n2 basic_r2(n_values)      97.4µs ; 9970. ; 23.3KB ; 49974 ; 26 ; 5.01s\n\nn = 100000, 500 repetitions\n  expression              median ; itr\/sec ; mem_alloc ; n_itr ; n_gc ;\ntotal_time\n1 fast_rstudent(n_values) 14.5ms ; 68.1 ; 8.4MB ; 380 ; 120 ; 5.58s\n2 basic_r2(n_values)      17.6ms ; 55.8 ; 14.5MB ; 289 ; 211 ; 5.18s"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18743] New: \"hclust()\" documentation about \"ward.D\" and \"ward.D2\" need to be revised. In addition to the incorrect description of the \"ward.D\" and \"ward.D2\" options, there is a lack of correct information about the value of d to be set.*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18743>\n\n            Bug ID: 18743\n           Summary: \"hclust()\" documentation about \"ward.D\" and \"ward.D2\"\n                    need to be revised. In addition to the incorrect\n                    description of the \"ward.D\" and \"ward.D2\" options,\n                    there is a lack of correct information about the value\n                    of d to be set.\n           Product: R\n           Version: R 4.4.x\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Documentation\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:atkimura@nstac.go.jp|atkimura@nstac.go.jp>\n\nI think the third paragraph in the \"Details\" chapter needs to be revised as\nfollows:\n\nTwo different algorithms are found in the literature for Ward\nclustering(Murtagh and Legendre 2014). The one used by option 'ward.D'\n(equivalent to the only Ward option \"ward\" in R version &lt;= 3.0.3) implement\nWard's (1963) clustering criterion(ESS), and the height value of the result is\nalso returned as ESS. The option 'ward.D2' implements processing based on the\nsquare root of the ESS, and the height value of the result is also returned as\nthe square root of the ESS. Therefore, the argument d of hclust() must be the\nresult of the dist() function squared and multiplied by 1\/2 in 'ward.D', and\nthe result of the dist() function multiplied by sqrt(1\/2) in 'ward.D2' (see\nEX2). By setting and passing d correctly, the results of 'ward.D' and 'ward.D2'\nwill be equivalent.\nNote that the coefficients 1\/2 and sqrt(1\/2) are used because in the initial\nESS calculation, all clusters have only one element, and therefore, according\nto the definition of Ward (1963), 1*1\/(1+1)=1\/2.\n\n\nAnd \"Example2\" needs to be revised as follows:\n\n### Example 2: Straight-line distances among 10 US cities\n##  Compare the results of algorithms \"ward.D\" and \"ward.D2\"\n\nmds2 &lt;- -cmdscale(UScitiesD)\nplot(mds2, type=\"n\", axes=FALSE, ann=FALSE)\ntext(mds2, labels=rownames(mds2), xpd = NA)\n\nhcity.D  &lt;- hclust(1\/2*(UScitiesD)^2, \"ward.D\") # Ward(1963) ESS base\nhcity.D2 &lt;- hclust(sqrt(1\/2)*UScitiesD, \"ward.D2\") #    sqrt(ESS) base\nopar &lt;- par(mfrow = c(1, 2))\nplot(hcity.D,  hang=-1)\nplot(hcity.D2, hang=-1)\npar(opar)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718269659.673179",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "VVf9",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18743] New: \"hclust()\" documentation about \"ward.D\" and \"ward.D2\" need to be revised. In addition to the incorrect description of the \"ward.D\" and \"ward.D2\" options, there is a lack of correct information about the value of d to be set.",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18743"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18743\n           Summary: \"hclust()\" documentation about \"ward.D\" and \"ward.D2\"\n                    need to be revised. In addition to the incorrect\n                    description of the \"ward.D\" and \"ward.D2\" options,\n                    there is a lack of correct information about the value\n                    of d to be set.\n           Product: R\n           Version: R 4.4.x\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Documentation\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:atkimura@nstac.go.jp",
+                                "text": "atkimura@nstac.go.jp",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nI think the third paragraph in the \"Details\" chapter needs to be revised as\nfollows:\n\nTwo different algorithms are found in the literature for Ward\nclustering(Murtagh and Legendre 2014). The one used by option 'ward.D'\n(equivalent to the only Ward option \"ward\" in R version <= 3.0.3) implement\nWard's (1963) clustering criterion(ESS), and the height value of the result is\nalso returned as ESS. The option 'ward.D2' implements processing based on the\nsquare root of the ESS, and the height value of the result is also returned as\nthe square root of the ESS. Therefore, the argument d of hclust() must be the\nresult of the dist() function squared and multiplied by 1\/2 in 'ward.D', and\nthe result of the dist() function multiplied by sqrt(1\/2) in 'ward.D2' (see\nEX2). By setting and passing d correctly, the results of 'ward.D' and 'ward.D2'\nwill be equivalent.\nNote that the coefficients 1\/2 and sqrt(1\/2) are used because in the initial\nESS calculation, all clusters have only one element, and therefore, according\nto the definition of Ward (1963), 1*1\/(1+1)=1\/2.\n\n\n\nAnd \"Example2\" needs to be revised as follows:\n\n### Example 2: Straight-line distances among 10 US cities\n##  Compare the results of algorithms \"ward.D\" and \"ward.D2\"\n\nmds2 <- -cmdscale(UScitiesD)\nplot(mds2, type=\"n\", axes=FALSE, ann=FALSE)\ntext(mds2, labels=rownames(mds2), xpd = NA)\n\nhcity.D  <- hclust(1\/2*(UScitiesD)^2, \"ward.D\") # Ward(1963) ESS base\nhcity.D2 <- hclust(sqrt(1\/2)*UScitiesD, \"ward.D2\") #    sqrt(ESS) base\nopar <- par(mfrow = c(1, 2))\nplot(hcity.D,  hang=-1)\nplot(hcity.D2, hang=-1)\npar(opar)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18741] `seq()` error message of bad `length.out`*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18741>\n\n--- Comment #3 from Olivier Roy (<mailto:olivierroy71@hotmail.com|olivierroy71@hotmail.com>) ---\nThanks for the reply!\n\nIndeed, there are 2 things in this report.\n\n1. Indeed, I think it would be useful to have this\n\n```\nelse if (!is.finite(length.out) || length.out &lt; 0L) \n        stop(paste0(\"'length.out' must be a non-negative number not \",\nlength.out))\n```\n\nThis is exactly what I had in mind. For some reason, integer(0), NA can be\nwrongfully passed. It would be useful to know exactly what ended up to\n`length.out`.\n\n.2. After investigating more, I thought that maybe error instead of warning for\nlength &gt; 1 would be desirable, but agreed it is not worth a breaking change.\n\n&gt; Elin's solution would have to use things like gettext(), translators will have to translate the new message ...\n\nAgreed.\n\nIn French, it could be \"'length.out' doit être un nombre positif ou nul, pas\"",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718281871.768649",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "+UoG",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18741] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " error message of bad ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "length.out",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18741"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Olivier Roy ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:olivierroy71@hotmail.com",
+                                "text": "olivierroy71@hotmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for the reply!\n\nIndeed, there are 2 things in this report.\n\n1. Indeed, I think it would be useful to have this\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "else if (!is.finite(length.out) || length.out < 0L) \n        stop(paste0(\"'length.out' must be a non-negative number not \",\nlength.out))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis is exactly what I had in mind. For some reason, integer(0), NA can be\nwrongfully passed. It would be useful to know exactly what ended up to\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "length.out",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n.2. After investigating more, I thought that maybe error instead of warning for\nlength > 1 would be desirable, but agreed it is not worth a breaking change.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Elin's solution would have to use things like gettext(), translators will have to translate the new message ..."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nAgreed.\n\nIn French, it could be \"'length.out' doit être un nombre positif ou nul, pas\""
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18739] On using Cdqrls() &amp; influence() in a R package (CRAN compliant)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18739>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|CONFIRMED                   |CLOSED\n\n--- Comment #11 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nI have added  qr.influence() {including, doc, example, NEWS}\nin svn rev 86732    a couple of hours ago, \ni.e., for R-devel  (to become 4.5.0 possibly in April 2025).\n\nThis will *not* be part of the upcoming 4.4.1  but could possibly be ported to \n\"4.4.1 patched\"  which would become 4.4.2 eventually,  if that seems important\nenough.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718312642.622349",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "zrE",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18739] On using Cdqrls() & influence() in a R package (CRAN compliant)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18739"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|CONFIRMED                   |CLOSED\n\n--- Comment #11 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI have added  qr.influence() {including, doc, example, NEWS}\nin svn rev 86732    a couple of hours ago, \ni.e., for R-devel  (to become 4.5.0 possibly in April 2025).\n\nThis will "
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " be part of the upcoming 4.4.1  but could possibly be ported to \n\"4.4.1 patched\"  which would become 4.4.2 eventually,  if that seems important\nenough."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18741] `seq()` error message of bad `length.out`*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18741>\n\n--- Comment #4 from Elin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) ---\nI agree that it is obvious to anyone that NA is not a non-negative number.\n\nIf you just do the function on the command line you can see what value of\nlength.out is. I think the issue being pointed out is that when used in a\nscript or function that information is not provided.  That said, I'm actually\nmore of the view that if you have `seq()` in your code and it is hard to debug,\nthen you should probably check for appropriate inputs and create your own\nmessages that apply to your situation.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718327782.150099",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "wXowt",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18741] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " error message of bad ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "length.out",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18741"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Elin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI agree that it is obvious to anyone that NA is not a non-negative number.\n\nIf you just do the function on the command line you can see what value of\nlength.out is. I think the issue being pointed out is that when used in a\nscript or function that information is not provided.  That said, I'm actually\nmore of the view that if you have "
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in your code and it is hard to debug,\nthen you should probably check for appropriate inputs and create your own\nmessages that apply to your situation."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18741] `seq()` error message of bad `length.out`*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18741>\n\n--- Comment #5 from Olivier Roy (<mailto:olivierroy71@hotmail.com|olivierroy71@hotmail.com>) ---\nIt is just that in `lapply()` for example, it would just be nice to use the\nbase function seq, and get an informative error out of the box. In all code,\nyou can personalize and catch things. I just find it extremely useful when the\nerror message tells you exactly what went wrong, in this case tell me what\nended up being passed to `length.out` to be able to act quickly and easily.\n\nFeel free to close if there is no interest.\n\n```\nseq_catch &lt;- function(x, length.out) {\n  tryCatch(seq(x, length.out = length.out), error = function(e)\nstop(\"length.out was \", length.out)})\n}\n```\n\nI just feel like code like this ends up being much less readable and just\ntweaking the base error message with a bit more information decreases the need\nfor verbose code like this.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718329073.446919",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "veMk",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18741] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " error message of bad ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "length.out",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18741"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Olivier Roy ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:olivierroy71@hotmail.com",
+                                "text": "olivierroy71@hotmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nIt is just that in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lapply()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for example, it would just be nice to use the\nbase function seq, and get an informative error out of the box. In all code,\nyou can personalize and catch things. I just find it extremely useful when the\nerror message tells you exactly what went wrong, in this case tell me what\nended up being passed to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length.out",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to be able to act quickly and easily.\n\nFeel free to close if there is no interest.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "seq_catch <- function(x, length.out) {\n  tryCatch(seq(x, length.out = length.out), error = function(e)\nstop(\"length.out was \", length.out)})\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI just feel like code like this ends up being much less readable and just\ntweaking the base error message with a bit more information decreases the need\nfor verbose code like this."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18743] \"hclust()\" documentation about \"ward.D\" and \"ward.D2\" need to be revised. In addition to the incorrect description of the \"ward.D\" and \"ward.D2\" options, there is a lack of correct information about the value of d to be set.*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18743>\n\nElin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |elin.waring@gmail.com\n\n--- Comment #1 from Elin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) ---\nFor example 2, the change you are suggesting is to the comments.  They make\nsense to me -- the current \"wrong\" is not helpful.\n\nIf this help is updated, perhaps the references could be alphabetized.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718343634.595059",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Djq0",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18743] \"hclust()\" documentation about \"ward.D\" and \"ward.D2\" need to be revised. In addition to the incorrect description of the \"ward.D\" and \"ward.D2\" options, there is a lack of correct information about the value of d to be set.",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18743"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nElin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |elin.waring@gmail.com\n\n--- Comment #1 from Elin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nFor example 2, the change you are suggesting is to the comments.  They make\nsense to me -- the current \"wrong\" is not helpful.\n\nIf this help is updated, perhaps the references could be alphabetized."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18743] \"hclust()\" documentation about \"ward.D\" and \"ward.D2\" need to be revised. In addition to the incorrect description of the \"ward.D\" and \"ward.D2\" options, there is a lack of correct information about the value of d to be set.*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18743>\n\n--- Comment #2 from Atsushi Kimura (<mailto:atkimura@nstac.go.jp|atkimura@nstac.go.jp>) ---\n(In reply to Elin Waring from comment #1)\nThank you for your comment.\n\nIn the current help, Example 2 says\n\n　hcity.D &lt;- hclust(UScitiesD, \"ward.D\") # \"wrong\"\n　hcity.D2 &lt;- hclust(UScitiesD, \"ward.D2\")\n\nHowever, in the \"ward.D\" option example, if you do not pass (UScitiesD)^2, the\nUScitiesD analyzed in \"ward.D2\" will have a completely different structure.\nTherefore, it is natural that the results will be completely different.\n\nIn my proposed documentation patch, it is written as\n\n　hcity.D &lt;- hclust(1\/2*(UScitiesD)^2, \"ward.D\") # Ward(1963) ESS base\n　hcity.D2 &lt;- hclust(sqrt(1\/2)*UScitiesD, \"ward.D2\") # sqrt(ESS) base\n\nIn this case, the cluster agglomeration results of both are equivalent. For the\nresulting Height value, the value of hcity.D$height is exactly equal to\nhcity.D2$height squared.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718345728.606639",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "qSMDv",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18743] \"hclust()\" documentation about \"ward.D\" and \"ward.D2\" need to be revised. In addition to the incorrect description of the \"ward.D\" and \"ward.D2\" options, there is a lack of correct information about the value of d to be set.",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18743"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Atsushi Kimura ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:atkimura@nstac.go.jp",
+                                "text": "atkimura@nstac.go.jp",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Elin Waring from comment #1)\nThank you for your comment.\n\nIn the current help, Example 2 says\n\n　hcity.D <- hclust(UScitiesD, \"ward.D\") # \"wrong\"\n　hcity.D2 <- hclust(UScitiesD, \"ward.D2\")\n\nHowever, in the \"ward.D\" option example, if you do not pass (UScitiesD)^2, the\nUScitiesD analyzed in \"ward.D2\" will have a completely different structure.\nTherefore, it is natural that the results will be completely different.\n\nIn my proposed documentation patch, it is written as\n\n　hcity.D <- hclust(1\/2*(UScitiesD)^2, \"ward.D\") # Ward(1963) ESS base\n　hcity.D2 <- hclust(sqrt(1\/2)*UScitiesD, \"ward.D2\") # sqrt(ESS) base\n\nIn this case, the cluster agglomeration results of both are equivalent. For the\nresulting Height value, the value of hcity.D$height is exactly equal to\nhcity.D2$height squared."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,341 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17148] rasterImage shows incorrect image orientation (MacOSX)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17148>\n\n--- Comment #12 from Paul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) ---\n\nThere are several issues here:\n\n1.  Consistency between graphics devices (uncontroversial).\n\n2.  Consistency between graphics systems, {graphics} and {grid}\n    (also uncontroversial, but more complicated).\n\n3.  Agreeing on the correct behaviour to be consistent on\n    (currently Cairo output, but this is perhaps controversial,\n     as suggested by the \"alternative patch\")\n\nThese issues should be tackled in reverse order.\n\nA useful first step would be to establish what a \"pure\" graphics\nsystem (e.g., PDF or SVG) does in this situation.  Perhaps a set of\nhand-crafted SVG files that perform a flip plus rotation operation\nwould be helpful.\n\nOne complication is that we do not necessarily want to follow what a\npure graphics system does anyway.  R graphics does not have a \"current\ntransformation matrix\" (CTM) in the way that PDF and SVG do.  R\ngraphics has different coordinate systems, but the transformations\ninduced by those coordinate systems only affect the location and size\nof drawing; for practical reasons, the coordinate system\ntransformations do not, for example, affect the size of text or the\nwidth of lines (both of which are affected by the CTM in pure graphics\nsystems).\n\nSo having established what a pure graphics system does, we would still\nneed to consider what R should do.  Something that might help here is\na comparison with other plotting systems, e.g., a Python library.  The\nTikZ system in the TeX world also has two types of transformations\n(only one of which is \"pure\").  Thanks to Heather Turner for this\nsuggestion.\n\nAnother complication is the difference between flipping the dimensions\nof a raster image and flipping the entire coordinate system that the\nraster image is drawn within.  This is the difference between ...\n\n```\nplot(..., xlim=c(larger, smaller))\n```\n\n... and ...\n\n```\nrasterImage(..., xleft=larger, xright=smaller)\n```\n\n... and in the {grid} world, the difference between ...\n\n```\npushViewport(viewport(..., xscale=c(larger, smaller)))\n```\n\n... and ...\n\n```\ngrid.raster(..., width=negative)\n```\n\nAre those equivalent situations or is flipping the entire coordinate\nsystem more significant?\n\nIn any case, in addition to a `quartz()` fix, there will also be fixes\nrequired for `x11(..., type=\"Xlib\")` and `windows()`.\n\nAnother helpful contribution would be a test image that is VERY easy\nto identify as correct.  Just as an example of what I mean, the\n`rotate-cairo-tweak.png` attachment has added arrows to help with the\norientation of each test case.  I think this could be made better.\n\nFinally, any changes to the current behaviour would have implications\nfor backwards-compatibility (though anyone relying on current\nbehaviour is presumably not working across platforms).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1721904966.963469",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Hp\/",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17148] rasterImage shows incorrect image orientation (MacOSX)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17148"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #12 from Paul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n\nThere are several issues here:\n\n1.  Consistency between graphics devices (uncontroversial).\n\n2.  Consistency between graphics systems, {graphics} and {grid}\n    (also uncontroversial, but more complicated).\n\n3.  Agreeing on the correct behaviour to be consistent on\n    (currently Cairo output, but this is perhaps controversial,\n     as suggested by the \"alternative patch\")\n\nThese issues should be tackled in reverse order.\n\nA useful first step would be to establish what a \"pure\" graphics\nsystem (e.g., PDF or SVG) does in this situation.  Perhaps a set of\nhand-crafted SVG files that perform a flip plus rotation operation\nwould be helpful.\n\nOne complication is that we do not necessarily want to follow what a\npure graphics system does anyway.  R graphics does not have a \"current\ntransformation matrix\" (CTM) in the way that PDF and SVG do.  R\ngraphics has different coordinate systems, but the transformations\ninduced by those coordinate systems only affect the location and size\nof drawing; for practical reasons, the coordinate system\ntransformations do not, for example, affect the size of text or the\nwidth of lines (both of which are affected by the CTM in pure graphics\nsystems).\n\nSo having established what a pure graphics system does, we would still\nneed to consider what R should do.  Something that might help here is\na comparison with other plotting systems, e.g., a Python library.  The\nTikZ system in the TeX world also has two types of transformations\n(only one of which is \"pure\").  Thanks to Heather Turner for this\nsuggestion.\n\nAnother complication is the difference between flipping the dimensions\nof a raster image and flipping the entire coordinate system that the\nraster image is drawn within.  This is the difference between ...\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "plot(..., xlim=c(larger, smaller))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n... and ...\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "rasterImage(..., xleft=larger, xright=smaller)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n... and in the {grid} world, the difference between ...\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "pushViewport(viewport(..., xscale=c(larger, smaller)))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n... and ...\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "grid.raster(..., width=negative)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nAre those equivalent situations or is flipping the entire coordinate\nsystem more significant?\n\nIn any case, in addition to a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "quartz()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " fix, there will also be fixes\nrequired for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x11(..., type=\"Xlib\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "windows()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nAnother helpful contribution would be a test image that is VERY easy\nto identify as correct.  Just as an example of what I mean, the\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "rotate-cairo-tweak.png",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " attachment has added arrows to help with the\norientation of each test case.  I think this could be made better.\n\nFinally, any changes to the current behaviour would have implications\nfor backwards-compatibility (though anyone relying on current\nbehaviour is presumably not working across platforms)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17148] rasterImage shows incorrect image orientation (MacOSX)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17148>\n\n--- Comment #13 from Paul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) ---\nCreated attachment 3380\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3380&amp;action=edit>\ntest image with arrows added",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1721905129.209939",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "1g8",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17148] rasterImage shows incorrect image orientation (MacOSX)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17148"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #13 from Paul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3380\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3380&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3380&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ntest image with arrows added"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16780] make install fails if TeX\/texinfo is not available*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16780>\n\nSebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |seb.meyer@fau.de\n\n--- Comment #1 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\nNote this only affects building from an svn checkout; distributed tarballs come\nwith pre-built versions of the plain-text FAQ\/RESOURCES files and the NEWS.pdf.\n\nI can still reproduce the reported messages about the missing files with\ncurrent R-devel when pdflatex and texinfo are unavailable, but `make install`\ndoesn't fail because nowadays there are further files in the `make\ninstall-sources2` loop and the final one (NEWS.3.rds) exists so the exit status\nof the loop is 0 and make proceeds. So the originally reported issue should be\ngone.\n\nHowever, thinking about these versions of the files, I wonder if they are still\nuseful nowadays. Not sure how many users rely on `RShowDoc(\"NEWS\", \"pdf\")`\nrather than `news()` or the link in the HTML help system or the online NEWS on\nCRAN or R-announce ... No strong opinion here, but I am really less convinced\nabout the \"front-matter\" plain-text FAQ and RESOURCES files, which also\ncomplicate the Makefiles (I have just now tried `RShowDoc(\"FAQ\", \"txt\")` for\nthe first time). Keeping the HTML version of the FAQ along with the manuals\nshould be sufficient (the help index automatically links to the CRAN versions\nif they could not be made). Finally, IMO the brief RESOURCES text is of little\nuse nowadays. An HTML version of this overview is linked from the help index,\nbut that and the README could\/should instead provide a link to the main\nR-project website.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1721942824.801219",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ygy",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16780] make install fails if TeX\/texinfo is not available",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16780"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |seb.meyer@fau.de\n\n--- Comment #1 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nNote this only affects building from an svn checkout; distributed tarballs come\nwith pre-built versions of the plain-text FAQ\/RESOURCES files and the NEWS.pdf.\n\nI can still reproduce the reported messages about the missing files with\ncurrent R-devel when pdflatex and texinfo are unavailable, but "
+                            },
+                            {
+                                "type": "text",
+                                "text": "make install",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ndoesn't fail because nowadays there are further files in the `make\ninstall-sources2` loop and the final one (NEWS.3.rds) exists so the exit status\nof the loop is 0 and make proceeds. So the originally reported issue should be\ngone.\n\nHowever, thinking about these versions of the files, I wonder if they are still\nuseful nowadays. Not sure how many users rely on "
+                            },
+                            {
+                                "type": "text",
+                                "text": "RShowDoc(\"NEWS\", \"pdf\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nrather than "
+                            },
+                            {
+                                "type": "text",
+                                "text": "news()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or the link in the HTML help system or the online NEWS on\nCRAN or R-announce ... No strong opinion here, but I am really less convinced\nabout the \"front-matter\" plain-text FAQ and RESOURCES files, which also\ncomplicate the Makefiles (I have just now tried "
+                            },
+                            {
+                                "type": "text",
+                                "text": "RShowDoc(\"FAQ\", \"txt\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for\nthe first time). Keeping the HTML version of the FAQ along with the manuals\nshould be sufficient (the help index automatically links to the CRAN versions\nif they could not be made). Finally, IMO the brief RESOURCES text is of little\nuse nowadays. An HTML version of this overview is linked from the help index,\nbut that and the README could\/should instead provide a link to the main\nR-project website."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

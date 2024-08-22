@@ -1,0 +1,117 @@
+[
+    {
+        "user": "U074BJYBWAJ",
+        "type": "message",
+        "ts": "1717902578.941309",
+        "edited": {
+            "user": "U074BJYBWAJ",
+            "ts": "1717902831.000000"
+        },
+        "client_msg_id": "915e04ab-0e43-4b0d-a10e-121e45d2e29d",
+        "text": "I'm using a script to transform .po files to a table, which is based in <@U01N3ET8N82> potools.  Basically it copies the translations to a table, then translate what you want in your preferred editor (one that accept columns for case) then copy back to R. Then you can combine the result using the menu \"file\" in weblate",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "ede55b8f14d6",
+            "image_72": "https:\/\/avatars.slack-edge.com\/2024-05-25\/7197646830592_ede55b8f14d6d526282e_72.jpg",
+            "first_name": "Ricardo",
+            "real_name": "Ricardo Villalba",
+            "display_name": "Ricardo Villalba",
+            "team": "T01DW9DLB2A",
+            "name": "rikivillalba",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1717902578.941309",
+        "reply_count": 3,
+        "reply_users_count": 2,
+        "latest_reply": "1718033664.767629",
+        "reply_users": [
+            "U074BJYBWAJ",
+            "U027JEHGZRA"
+        ],
+        "replies": [
+            {
+                "user": "U074BJYBWAJ",
+                "ts": "1717902852.233329"
+            },
+            {
+                "user": "U027JEHGZRA",
+                "ts": "1717932796.851659"
+            },
+            {
+                "user": "U074BJYBWAJ",
+                "ts": "1718033664.767629"
+            }
+        ],
+        "is_locked": false,
+        "subscribed": false,
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "uGn4e",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I'm using a script to transform .po files to a table, which is based in "
+                            },
+                            {
+                                "type": "user",
+                                "user_id": "U01N3ET8N82"
+                            },
+                            {
+                                "type": "text",
+                                "text": " potools.  Basically it copies the translations to a table, then translate what you want in your preferred editor (one that accept columns for case) then copy back to R. Then you can combine the result using the menu \"file\" in weblate"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "user": "U074BJYBWAJ",
+        "type": "message",
+        "ts": "1717902852.233329",
+        "client_msg_id": "b64f0bba-7f20-486c-8343-77e7e07066ca",
+        "text": "```library(data.table)\n#install.packages(\"potools\")\n# explain plurals\npotools::po_explain_plurals(\"es\")\n\ndt_out &lt;- potools:::get_po_messages(\"~\/..\/Downloads\/r-project-tools-r-es.po\")\n\n# unnest plural lists\ndt_out[, paste0(\"msgid_plural_\", 0:1) := \n    rbindlist(lapply(msgid_plural, \\(i) as.list(i %||% rep(\"&lt;NA&gt;\", 2))))]\ndt_out[, paste0(\"msgstr_plural_\", 0:1) := \n         rbindlist(lapply(msgstr_plural, \\(i) as.list(i %||% rep(\"&lt;NA&gt;\", 2))))]\ndt_out[, c(\"msgid_plural\", \"msgstr_plural\") := NULL]\n\n#add \"&gt;&gt;\" flag mark\ndt_out[, (cols) := lapply(.SD[,cols], \\(i) paste0(\"&gt;&gt;\", i)), \n         env = list(cols = I(grep(\"^msg\", names(dt_out), value=T)))]\n\ndt_out[, is_marked_for_translation := F]\ndt_out[, file := \"\"]\ndt_out[, is_templated := F]\ndt_out[, line_number := 0]\n\nsetcolorder(dt_out, \"is_marked_for_translation\")\n\n# write to clipboard\nclipr::write_clip(dt_out)\n\n# HERE: do te translation. \n# Mark IS_MARKET_FOR_TRANSLATION == TRUE on the translations\n\n# read from clipboard (tweak as necessary)\ndt_in &lt;- clipr::read_clip_tbl(sep=\"\\t\", quote=\"\", comment.char = \"\")\nsetDT(dt_in)\n\n# remove \"&gt;&gt;\"\ndt_in[, (cols) := lapply(.SD[,cols], \\(i) sub(\"^&gt;&gt;\", \"\", i)), \n       env = list(cols = I(grep(\"^msg\", names(dt_in), value=T)))]\n# make list columns\ndt_in[, msgid_plural := .(Map(msgid_plural_0, msgid_plural_1, f = \\(x, y) {\n  if (identical(c(x, y), c(\"&lt;NA&gt;\", \"&lt;NA&gt;\"))) NULL else c(x, y)})) ]\ndt_in[, msgstr_plural := .(Map(msgstr_plural_0, msgstr_plural_1, f = \\(x, y) {\n  if (identical(c(x, y), c(\"&lt;NA&gt;\", \"&lt;NA&gt;\"))) NULL else c(x, y)})) ]\ndt_in[, (cols) := NULL, \n      env = list(cols = I(grep(\"plural_\", names(dt_in), value = T)))]\n\n#dt_in[,is_marked_for_translation := TRUE]\n\npotools::write_po_file(\n  message_data = dt_in, \n  metadata = potools::po_metadata(language = \"es\"),\n  po_file = (tmp &lt;- tempfile()))\n\n# remove source metadata\nwriteLines( \n  con = \"~\/..\/Downloads\/r-project-utils-r-es_translated.po\", \n  text = readLines(tmp) |&gt; grep(pattern = \"^#\", invert = TRUE, value = TRUE))```",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "ede55b8f14d6",
+            "image_72": "https:\/\/avatars.slack-edge.com\/2024-05-25\/7197646830592_ede55b8f14d6d526282e_72.jpg",
+            "first_name": "Ricardo",
+            "real_name": "Ricardo Villalba",
+            "display_name": "Ricardo Villalba",
+            "team": "T01DW9DLB2A",
+            "name": "rikivillalba",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1717902578.941309",
+        "parent_user_id": "U074BJYBWAJ",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "5T0a9",
+                "elements": [
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "library(data.table)\n#install.packages(\"potools\")\n# explain plurals\npotools::po_explain_plurals(\"es\")\n\ndt_out <- potools:::get_po_messages(\"~\/..\/Downloads\/r-project-tools-r-es.po\")\n\n# unnest plural lists\ndt_out[, paste0(\"msgid_plural_\", 0:1) := \n    rbindlist(lapply(msgid_plural, \\(i) as.list(i %||% rep(\"<NA>\", 2))))]\ndt_out[, paste0(\"msgstr_plural_\", 0:1) := \n         rbindlist(lapply(msgstr_plural, \\(i) as.list(i %||% rep(\"<NA>\", 2))))]\ndt_out[, c(\"msgid_plural\", \"msgstr_plural\") := NULL]\n\n#add \">>\" flag mark\ndt_out[, (cols) := lapply(.SD[,cols], \\(i) paste0(\">>\", i)), \n         env = list(cols = I(grep(\"^msg\", names(dt_out), value=T)))]\n\ndt_out[, is_marked_for_translation := F]\ndt_out[, file := \"\"]\ndt_out[, is_templated := F]\ndt_out[, line_number := 0]\n\nsetcolorder(dt_out, \"is_marked_for_translation\")\n\n# write to clipboard\nclipr::write_clip(dt_out)\n\n# HERE: do te translation. \n# Mark IS_MARKET_FOR_TRANSLATION == TRUE on the translations\n\n# read from clipboard (tweak as necessary)\ndt_in <- clipr::read_clip_tbl(sep=\"\\t\", quote=\"\", comment.char = \"\")\nsetDT(dt_in)\n\n# remove \">>\"\ndt_in[, (cols) := lapply(.SD[,cols], \\(i) sub(\"^>>\", \"\", i)), \n       env = list(cols = I(grep(\"^msg\", names(dt_in), value=T)))]\n# make list columns\ndt_in[, msgid_plural := .(Map(msgid_plural_0, msgid_plural_1, f = \\(x, y) {\n  if (identical(c(x, y), c(\"<NA>\", \"<NA>\"))) NULL else c(x, y)})) ]\ndt_in[, msgstr_plural := .(Map(msgstr_plural_0, msgstr_plural_1, f = \\(x, y) {\n  if (identical(c(x, y), c(\"<NA>\", \"<NA>\"))) NULL else c(x, y)})) ]\ndt_in[, (cols) := NULL, \n      env = list(cols = I(grep(\"plural_\", names(dt_in), value = T)))]\n\n#dt_in[,is_marked_for_translation := TRUE]\n\npotools::write_po_file(\n  message_data = dt_in, \n  metadata = potools::po_metadata(language = \"es\"),\n  po_file = (tmp <- tempfile()))\n\n# remove source metadata\nwriteLines( \n  con = \"~\/..\/Downloads\/r-project-utils-r-es_translated.po\", \n  text = readLines(tmp) |> grep(pattern = \"^#\", invert = TRUE, value = TRUE))"
+                            }
+                        ],
+                        "border": 0
+                    }
+                ]
+            }
+        ]
+    }
+]

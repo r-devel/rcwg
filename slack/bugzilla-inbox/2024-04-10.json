@@ -1,0 +1,276 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18133] R on Windows does not remove one of its own test files in TMPDIR*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18133>\n\nIvan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #7 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nThe underlying reason for the problem is that the parent process cannot clean\nup its own temporary files while the child process has open handles to some of\nthem. Making `stopCluster()` wait until all child processes really exit for\nlocal clusters on Windows would indeed prevent this from happening. There are\nways to delete open files on Windows, but they require either cooperation from\nall programs handing the file (`FILE_SHARE_DELETE` or\n`FILE_FLAG_DELETE_ON_CLOSE` flags in `CreateFile`, so extra unportable code to\nobtain an `stdio` `FILE*`) or scary debugging operations (such as closing\nhandles from under processes).\n\nAttaching a debugger to both processes shows that the parent fails to unlink\nthe contents of its temp directory and (if present) its `Rscript*` file.\nSysinternals Handle shows that the still-existing child has an open handle to\nboth `Rtmp??????\\file????????????` (created by the parent inside `system()` to\nbe used as the standard input) and parent's `Rscript??????????` (which is\nharder to explain).\n\n(I had to temporarily comment out the `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE` flag\nso that the child wouldn't automatically die once the parent exits, but this\nflag is not the cause of the problem, even though it's theoretically possible\nfor it to make things worse.)\n\nAs observed by Process Monitor:\n\n```\nAdded temporary files and folders:\n[1] \"Rscript4fc6a3247\" \"RtmpkFsHNu\"\nDetritus temporary files:\n        name  pid    tempdir pid_hex         detritus\n1     parent 1592 RtmpOYBrvE     638             &lt;NA&gt;\n2      child 1276 RtmpkFsHNu     4fc Rscript4fc6a3247\n3 grandchild 5344 RtmpYJVthz    14e0             &lt;NA&gt;\n```\n\n```\n19:11:08,3589134        Rscript.exe     1276    CreateFile     \nC:\\rtools44\\tmp\\RtmpkFsHNu\\file4fc243b231d      SHARING VIOLATION\n Stack: R_CleanUp -&gt; ... -&gt; R_CleanTempDir -&gt; ... -&gt; wremove -&gt; ...\n19:11:08,3591625        Rscript.exe     1276    SetDispositionInformationFile  \nC:\\rtools44\\tmp\\RtmpkFsHNu      NOT EMPTY       Delete: True\n Stack: R_CleanUp -&gt; ... -&gt; R_CleanTempDir -&gt; ... -&gt; wrmdir -&gt; ...\n19:11:08,3595956        Rscript.exe     1276    CreateFile     \nC:\\rtools44\\tmp\\Rscript4fc6a3247        SHARING VIOLATION\n Stack: R_CleanUp -&gt; ... -&gt; remove -&gt; wremove -&gt; ...\n```\n\nI think that the grandchild is still running by the time the child starts to\nclean up. This must be failing because the grandchild holds open handles to\n`Rtmp??????\\file????????????` (the standard input given to it by child's\n`system()`) and child's `Rscript?????????` (somehow). Even if we find out why\ndoes the grandchild hold the parent's `Rscript?????????` open, we still have\nthe problem of it legitimately holding `Rtmp??????\\file????????????` that the\nchild cannot normally delete until the grandchild exits. It takes three\nprocesses to demonstrate this reliably, because the child process in the chain\ncan neither terminate too early (thus failing to clean up files open by the\ngrandchild) nor too late (thus preventing the parent from cleaning up). I think\nI also saw the parent fail to clean up properly a few times out of tens of\nexperiments.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1712781278.077779",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "pHB",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18133] R on Windows does not remove one of its own test files in TMPDIR",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18133"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIvan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #7 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe underlying reason for the problem is that the parent process cannot clean\nup its own temporary files while the child process has open handles to some of\nthem. Making "
+                            },
+                            {
+                                "type": "text",
+                                "text": "stopCluster()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " wait until all child processes really exit for\nlocal clusters on Windows would indeed prevent this from happening. There are\nways to delete open files on Windows, but they require either cooperation from\nall programs handing the file ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "FILE_SHARE_DELETE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "FILE_FLAG_DELETE_ON_CLOSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " flags in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "CreateFile",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", so extra unportable code to\nobtain an "
+                            },
+                            {
+                                "type": "text",
+                                "text": "stdio",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " "
+                            },
+                            {
+                                "type": "text",
+                                "text": "FILE*",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") or scary debugging operations (such as closing\nhandles from under processes).\n\nAttaching a debugger to both processes shows that the parent fails to unlink\nthe contents of its temp directory and (if present) its "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rscript*",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " file.\nSysinternals Handle shows that the still-existing child has an open handle to\nboth "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rtmp??????\\file????????????",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (created by the parent inside "
+                            },
+                            {
+                                "type": "text",
+                                "text": "system()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to\nbe used as the standard input) and parent's "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rscript??????????",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (which is\nharder to explain).\n\n(I had to temporarily comment out the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " flag\nso that the child wouldn't automatically die once the parent exits, but this\nflag is not the cause of the problem, even though it's theoretically possible\nfor it to make things worse.)\n\nAs observed by Process Monitor:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Added temporary files and folders:\n[1] \"Rscript4fc6a3247\" \"RtmpkFsHNu\"\nDetritus temporary files:\n        name  pid    tempdir pid_hex         detritus\n1     parent 1592 RtmpOYBrvE     638             <NA>\n2      child 1276 RtmpkFsHNu     4fc Rscript4fc6a3247\n3 grandchild 5344 RtmpYJVthz    14e0             <NA>\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "19:11:08,3589134        Rscript.exe     1276    CreateFile     \nC:\\rtools44\\tmp\\RtmpkFsHNu\\file4fc243b231d      SHARING VIOLATION\n Stack: R_CleanUp -> ... -> R_CleanTempDir -> ... -> wremove -> ...\n19:11:08,3591625        Rscript.exe     1276    SetDispositionInformationFile  \nC:\\rtools44\\tmp\\RtmpkFsHNu      NOT EMPTY       Delete: True\n Stack: R_CleanUp -> ... -> R_CleanTempDir -> ... -> wrmdir -> ...\n19:11:08,3595956        Rscript.exe     1276    CreateFile     \nC:\\rtools44\\tmp\\Rscript4fc6a3247        SHARING VIOLATION\n Stack: R_CleanUp -> ... -> remove -> wremove -> ...\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI think that the grandchild is still running by the time the child starts to\nclean up. This must be failing because the grandchild holds open handles to\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rtmp??????\\file????????????",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (the standard input given to it by child's\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "system()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") and child's "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rscript?????????",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (somehow). Even if we find out why\ndoes the grandchild hold the parent's "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rscript?????????",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " open, we still have\nthe problem of it legitimately holding "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rtmp??????\\file????????????",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " that the\nchild cannot normally delete until the grandchild exits. It takes three\nprocesses to demonstrate this reliably, because the child process in the chain\ncan neither terminate too early (thus failing to clean up files open by the\ngrandchild) nor too late (thus preventing the parent from cleaning up). I think\nI also saw the parent fail to clean up properly a few times out of tens of\nexperiments."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

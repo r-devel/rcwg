@@ -1,0 +1,139 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18693] New: rmultinom()  using LDOUBLE is platform dependent*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18693>\n\n            Bug ID: 18693\n           Summary: rmultinom()  using LDOUBLE is platform dependent\n           Product: R\n           Version: R 4.4.x\n          Hardware: Other\n                OS: Linux\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Accuracy\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>\n\nWe could decide to live with this and at least document,\nbut given the ARM based M1\/M2\/... Macs  and some tendencies in software to\ntrade speed for precision,  we at least should document the behavior.\n\nMy preference would to see if using Kahan's (or another) compensated summation\ninstead of the LDOUBLE type wouldn't be better as hopefully platform\nindependent.\n\nHere's one (of many possible) example:\n\n```{r}\npr &lt;- c(.5, .1,.1,.1,.1,.1)\nsum(pr) - 1 # 0 {in case of long double};  -1.11e-16  in no-long-double case\nset.seed(1); M4 &lt;- t(rmultinom(5, 4, pr))\nempty.dimnames(M4)\n```\ngives  \n# regular[l.DBL]  no-long-double\n```\n   1 0 1 2 0 0     3 0 0 1 0 0\n   1 2 1 0 0 0     3 1 0 0 0 0\n   2 0 0 0 0 2     0 1 1 0 2 0\n   2 0 1 0 1 0     3 0 0 1 0 0\n   4 0 0 0 0 0     2 1 1 0 0 0\n```\n\nand `empty.dimnames()` from our CRAN package\n[sfsmisc](<https:\/\/CRAN.R-project.org\/package=sfsmisc>) is simply\n\n```\nempty.dimnames &lt;- function(a) {\n    ## 'Remove' all dimension names from an array for compact printing.\n    n &lt;- length(da &lt;- dim(a))\n    if(n) dimnames(a) &lt;- lapply(1:n, function(i) <http:\/\/rep.int|rep.int>(\"\", da[i]))\n    a\n}\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1711822037.706679",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "qAJN",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18693] New: rmultinom()  using LDOUBLE is platform dependent",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18693"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18693\n           Summary: rmultinom()  using LDOUBLE is platform dependent\n           Product: R\n           Version: R 4.4.x\n          Hardware: Other\n                OS: Linux\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Accuracy\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nWe could decide to live with this and at least document,\nbut given the ARM based M1\/M2\/... Macs  and some tendencies in software to\ntrade speed for precision,  we at least should document the behavior.\n\nMy preference would to see if using Kahan's (or another) compensated summation\ninstead of the LDOUBLE type wouldn't be better as hopefully platform\nindependent.\n\nHere's one (of many possible) example:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "{r}\npr <- c(.5, .1,.1,.1,.1,.1)\nsum(pr) - 1 # 0 {in case of long double};  -1.11e-16  in no-long-double case\nset.seed(1); M4 <- t(rmultinom(5, 4, pr))\nempty.dimnames(M4)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "gives  \n# regular[l.DBL]  no-long-double"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "   1 0 1 2 0 0     3 0 0 1 0 0\n   1 2 1 0 0 0     3 1 0 0 0 0\n   2 0 0 0 0 2     0 1 1 0 2 0\n   2 0 1 0 1 0     3 0 0 1 0 0\n   4 0 0 0 0 0     2 1 1 0 0 0\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nand "
+                            },
+                            {
+                                "type": "text",
+                                "text": "empty.dimnames()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " from our CRAN package\n[sfsmisc]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/CRAN.R-project.org\/package=sfsmisc"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") is simply\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "empty.dimnames <- function(a) {\n    ## 'Remove' all dimension names from an array for compact printing.\n    n <- length(da <- dim(a))\n    if(n) dimnames(a) <- lapply(1:n, function(i) "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/rep.int",
+                                "text": "rep.int"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(\"\", da[i]))\n    a\n}\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,690 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18699] 10x faster duplicated() for numeric_version*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18699>\n\nKurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |Kurt.Hornik@wu.ac.at\n\n--- Comment #1 from Kurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) ---\nThanks.\nWhile we're at this:\nit would be good to check all uses of .encode_numeric_version().\nInitially, this was also used for the Ops method, but in late 2022 with \nc83442 I changed that to directly call C code on the internal representation.\nI applied Herve's patch for the Summary method yesterday. but of course one\ncould easily write C code doing which.min and which.max (handling missings\nat R level, see below).\nAfaict (or remember correctly), missing numeric version entries should be\nthe ones with length 0, so for the <http:\/\/is.na|is.na> and anyNA methods we could perhaps\nsimply work on the lengths.\nHowever, currently e.g.\n\nR&gt; v &lt;- getRversion()\nR&gt; v[[c(1, 2)]] &lt;- NA\nR&gt; v\n[1] ‘4.NA.0’\nR&gt; .encode_numeric_version(v)\n[1] \"04NA00\"\n\nwhich clearly is not \"as intended\", so that would need fixing as well.\n\nFor the xtfrm() method (hence sort et al) I think it should be ok to continue\nusing .encode_numeric_version().\n\n-k",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1712652621.550199",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "IKIA",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18699] 10x faster duplicated() for numeric_version",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18699"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nKurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |Kurt.Hornik@wu.ac.at\n\n--- Comment #1 from Kurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks.\nWhile we're at this:\nit would be good to check all uses of .encode_numeric_version().\nInitially, this was also used for the Ops method, but in late 2022 with \nc83442 I changed that to directly call C code on the internal representation.\nI applied Herve's patch for the Summary method yesterday. but of course one\ncould easily write C code doing which.min and which.max (handling missings\nat R level, see below).\nAfaict (or remember correctly), missing numeric version entries should be\nthe ones with length 0, so for the "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na"
+                            },
+                            {
+                                "type": "text",
+                                "text": " and anyNA methods we could perhaps\nsimply work on the lengths.\nHowever, currently e.g.\n\nR> v <- getRversion()\nR> v[[c(1, 2)]] <- NA\nR> v\n[1] ‘4.NA.0’\nR> .encode_numeric_version(v)\n[1] \"04NA00\"\n\nwhich clearly is not \"as intended\", so that would need fixing as well.\n\nFor the xtfrm() method (hence sort et al) I think it should be ok to continue\nusing .encode_numeric_version().\n\n-k"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18697] Ineffficiency in Summary.numeric_version*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18697>\n\n--- Comment #3 from Herv� Pag�s (<mailto:hpages.on.github@gmail.com|hpages.on.github@gmail.com>) ---\nThanks Kurt",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1712653359.747679",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "5TD",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18697] Ineffficiency in Summary.numeric_version",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18697"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Herv� Pag�s ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:hpages.on.github@gmail.com",
+                                "text": "hpages.on.github@gmail.com",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks Kurt"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18700] New: Error passing improvements in 'parallel'*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18700>\n\n            Bug ID: 18700\n           Summary: Error passing improvements in 'parallel'\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:ikrylov@disroot.org|ikrylov@disroot.org>\n\nCreated attachment 3328\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3328&amp;action=edit>\nSuggested changes\n\nI would like to suggest two changes to the way `parallel` behaves around\nerrors.\n\nFirst, I would like `parallel` to use out-of-band information, i.e.\n`recvData(node)$success`, as a test for whether evaluation has succeeded\ninstead of using `inherits(value, 'try-error')`. This test has served us well,\nbut it's not perfect. Imagine a situation where someone would like to use\n`clusterMap()` for a long computing job. The code of the job is flaky, so the\nexpression is wrapped into `try()` as a precaution. Later, when the error\nhappens, it is handled by `try`, but the whole result is still discarded\ndespite `$success` was true.\n\nThe proposed change complicates the users of `recvResult` and `recvOneResult`.\n\nSecond, I would like `staticClusterApply` and `dynamicClusterApply` to avoid\nsending more jobs to the cluster once it becomes evident that the whole run is\ndoomed.\n\nFor `staticClusterApply`, this means moving `checkForRemoteErrors` inside the\nper-node loop. For `dynamicClusterApply`, this means introducing a new function\nto \"drain\" the outstanding results once an operation fails and then raise the\nerror.\n\nPlease let me know if there is anything I should improve about the patch. In\nparticular, I'm not happy about the test for early stop on error.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1712656940.956109",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "1\/\/g",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18700] New: Error passing improvements in 'parallel'",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18700"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18700\n           Summary: Error passing improvements in 'parallel'\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3328\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3328&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3328&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nSuggested changes\n\nI would like to suggest two changes to the way "
+                            },
+                            {
+                                "type": "text",
+                                "text": "parallel",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " behaves around\nerrors.\n\nFirst, I would like "
+                            },
+                            {
+                                "type": "text",
+                                "text": "parallel",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to use out-of-band information, i.e.\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "recvData(node)$success",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", as a test for whether evaluation has succeeded\ninstead of using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "inherits(value, 'try-error')",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". This test has served us well,\nbut it's not perfect. Imagine a situation where someone would like to use\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "clusterMap()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for a long computing job. The code of the job is flaky, so the\nexpression is wrapped into "
+                            },
+                            {
+                                "type": "text",
+                                "text": "try()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as a precaution. Later, when the error\nhappens, it is handled by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "try",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", but the whole result is still discarded\ndespite "
+                            },
+                            {
+                                "type": "text",
+                                "text": "$success",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " was true.\n\nThe proposed change complicates the users of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "recvResult",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "recvOneResult",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nSecond, I would like "
+                            },
+                            {
+                                "type": "text",
+                                "text": "staticClusterApply",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dynamicClusterApply",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to avoid\nsending more jobs to the cluster once it becomes evident that the whole run is\ndoomed.\n\nFor "
+                            },
+                            {
+                                "type": "text",
+                                "text": "staticClusterApply",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", this means moving "
+                            },
+                            {
+                                "type": "text",
+                                "text": "checkForRemoteErrors",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " inside the\nper-node loop. For "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dynamicClusterApply",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", this means introducing a new function\nto \"drain\" the outstanding results once an operation fails and then raise the\nerror.\n\nPlease let me know if there is anything I should improve about the patch. In\nparticular, I'm not happy about the test for early stop on error."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18647] <http:\/\/boot.ci|boot.ci>() fails for type=\"bca\" when number of repititions less than data size*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18647>\n\n--- Comment #2 from Christoph Dalitz (<mailto:christoph.dalitz@hs-niederrhein.de|christoph.dalitz@hs-niederrhein.de>) ---\nEventually, we have found a simple fix for this issue. The error occurs because\nthe default method for estimating the acceleration constant uses a least\nsquares fit which is underspecified if the number of bootstrap repetitions is\nless than the sample size, i.e., for R &lt; n.\n\nFortunately, there is another method (\"jack\") already implemented in the\nfunction `empinf()` defined in `boot\/R\/bootfuns.q`, which can be used in this\ncase. The problem can thus be fixed by replacing lines 1640 to 1645 with the\nfollowing code:\n```\n    if (!is.null(t)) type &lt;- \"reg\"\n        else if (stype == \"w\") type &lt;- \"inf\"\n        else if (!is.null(boot.out) &amp;&amp;\n                 (boot.out$sim != \"parametric\") &amp;&amp;\n                 (boot.out$sim != \"permutation\")) {\n            if (boot.out$R &lt; n) type &lt;- \"jack\" else type &lt;- \"reg\"\n        }\n        else type &lt;- \"jack\"\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1712665882.576689",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "O0T",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18647] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/boot.ci",
+                                "text": "boot.ci",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "() fails for type=\"bca\" when number of repititions less than data size",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18647"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Christoph Dalitz ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:christoph.dalitz@hs-niederrhein.de",
+                                "text": "christoph.dalitz@hs-niederrhein.de",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nEventually, we have found a simple fix for this issue. The error occurs because\nthe default method for estimating the acceleration constant uses a least\nsquares fit which is underspecified if the number of bootstrap repetitions is\nless than the sample size, i.e., for R < n.\n\nFortunately, there is another method (\"jack\") already implemented in the\nfunction "
+                            },
+                            {
+                                "type": "text",
+                                "text": "empinf()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " defined in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "boot\/R\/bootfuns.q",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which can be used in this\ncase. The problem can thus be fixed by replacing lines 1640 to 1645 with the\nfollowing code:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "    if (!is.null(t)) type <- \"reg\"\n        else if (stype == \"w\") type <- \"inf\"\n        else if (!is.null(boot.out) &&\n                 (boot.out$sim != \"parametric\") &&\n                 (boot.out$sim != \"permutation\")) {\n            if (boot.out$R < n) type <- \"jack\" else type <- \"reg\"\n        }\n        else type <- \"jack\"\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18133] R on Windows does not remove one of its own test files in TMPDIR*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18133>\n\n--- Comment #5 from Henrik Bengtsson (<mailto:henrikb@braju.com|henrikb@braju.com>) ---\nThis problem causes lots of issues when it comes to tracking down the source of\nthese `Rscript&lt;hexcode&gt;` folders when running nested parallel processing on MS\nWindows. I understand it well enough to know how to resolve it for most cases,\nbut I think there are scenarios where it is very complicated to track it in\nnested parallelization taking place across multiple packages, etc.\n\nBecause of this, my ask would be to also exclude these Windows-specific\n`Rscript&lt;hexcode&gt;` folders in addition to similar `Rtmp&lt;hexcode&gt;` folders\nalready ignored. Here is a patch:\n\n```\nIndex: src\/library\/tools\/R\/check.R\n===================================================================\n--- src\/library\/tools\/R\/check.R (revision 86383)\n+++ src\/library\/tools\/R\/check.R (working copy)\n@@ -7523,7 +7523,7 @@\n             ff &lt;- list.files(sessdir, include.dirs = TRUE)\n             ## Exclude session temp dirs from crashed subprocesses\n             dir &lt;- <http:\/\/file.info|file.info>(ff)$isdir\n-            poss &lt;- grepl(\"^Rtmp[A-Za-z0-9.]{6}$\", ff, useBytes = TRUE)\n+            poss &lt;- grepl(\"^(Rscript[A-Za-z0-9.]{2,}|Rtmp[A-Za-z0-9.]{6})$\",\nff, useBytes = TRUE)\n             ff &lt;- ff[!(poss &amp; dir)]\n             patt &lt;- Sys.getenv(\"_R_CHECK_THINGS_IN_TEMP_DIR_EXCLUDE_\")\n             if (nzchar(patt)) ff &lt;- ff[!grepl(patt, ff, useBytes = TRUE)]\n```\n\nThe two-or-more hexadecimal characters (in `{2,}`) is based on how the folder\nname is produces by `src\/gnuwin32\/system.c`:\n\n```\n            needed = snprintf(NULL, 0, \"%s\/Rscript%x%x\", tm, getpid(), \n                              (unsigned int) GetTickCount()) + 1;\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1712692259.484389",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "9Sr",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18133] R on Windows does not remove one of its own test files in TMPDIR",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18133"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Henrik Bengtsson ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:henrikb@braju.com",
+                                "text": "henrikb@braju.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThis problem causes lots of issues when it comes to tracking down the source of\nthese "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rscript<hexcode>",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " folders when running nested parallel processing on MS\nWindows. I understand it well enough to know how to resolve it for most cases,\nbut I think there are scenarios where it is very complicated to track it in\nnested parallelization taking place across multiple packages, etc.\n\nBecause of this, my ask would be to also exclude these Windows-specific\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rscript<hexcode>",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " folders in addition to similar "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rtmp<hexcode>",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " folders\nalready ignored. Here is a patch:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/tools\/R\/check.R\n===================================================================\n--- src\/library\/tools\/R\/check.R (revision 86383)\n+++ src\/library\/tools\/R\/check.R (working copy)\n@@ -7523,7 +7523,7 @@\n             ff <- list.files(sessdir, include.dirs = TRUE)\n             ## Exclude session temp dirs from crashed subprocesses\n             dir <- "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/file.info",
+                                "text": "file.info"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(ff)$isdir\n-            poss <- grepl(\"^Rtmp[A-Za-z0-9.]{6}$\", ff, useBytes = TRUE)\n+            poss <- grepl(\"^(Rscript[A-Za-z0-9.]{2,}|Rtmp[A-Za-z0-9.]{6})$\",\nff, useBytes = TRUE)\n             ff <- ff[!(poss & dir)]\n             patt <- Sys.getenv(\"_R_CHECK_THINGS_IN_TEMP_DIR_EXCLUDE_\")\n             if (nzchar(patt)) ff <- ff[!grepl(patt, ff, useBytes = TRUE)]\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe two-or-more hexadecimal characters (in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "{2,}",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") is based on how the folder\nname is produces by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/gnuwin32\/system.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "            needed = snprintf(NULL, 0, \"%s\/Rscript%x%x\", tm, getpid(), \n                              (unsigned int) GetTickCount()) + 1;\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18133] R on Windows does not remove one of its own test files in TMPDIR*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18133>\n\n--- Comment #6 from Henrik Bengtsson (<mailto:henrikb@braju.com|henrikb@braju.com>) ---\nOh, sorry, I made a thinko. Those are files not folders, so the patch needs to\nbe:\n\n```\nIndex: src\/library\/tools\/R\/check.R\n===================================================================\n--- src\/library\/tools\/R\/check.R (revision 86383)\n+++ src\/library\/tools\/R\/check.R (working copy)\n@@ -7525,6 +7525,9 @@\n             dir &lt;- <http:\/\/file.info|file.info>(ff)$isdir\n             poss &lt;- grepl(\"^Rtmp[A-Za-z0-9.]{6}$\", ff, useBytes = TRUE)\n             ff &lt;- ff[!(poss &amp; dir)]\n+            ## Exclude session temp files from crashed MS Windows subprocesses\n+            poss &lt;- grepl(\"^Rscript[A-Za-z0-9.]{2,}$\", ff, useBytes = TRUE)\n+            ff &lt;- ff[!(poss &amp; !dir)]\n             patt &lt;- Sys.getenv(\"_R_CHECK_THINGS_IN_TEMP_DIR_EXCLUDE_\")\n             if (nzchar(patt)) ff &lt;- ff[!grepl(patt, ff, useBytes = TRUE)]\n             ff &lt;- ff[!<http:\/\/is.na|is.na>(ff)]\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1712693311.581159",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "bii",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18133] R on Windows does not remove one of its own test files in TMPDIR",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18133"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #6 from Henrik Bengtsson ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:henrikb@braju.com",
+                                "text": "henrikb@braju.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nOh, sorry, I made a thinko. Those are files not folders, so the patch needs to\nbe:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/tools\/R\/check.R\n===================================================================\n--- src\/library\/tools\/R\/check.R (revision 86383)\n+++ src\/library\/tools\/R\/check.R (working copy)\n@@ -7525,6 +7525,9 @@\n             dir <- "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/file.info",
+                                "text": "file.info"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(ff)$isdir\n             poss <- grepl(\"^Rtmp[A-Za-z0-9.]{6}$\", ff, useBytes = TRUE)\n             ff <- ff[!(poss & dir)]\n+            ## Exclude session temp files from crashed MS Windows subprocesses\n+            poss <- grepl(\"^Rscript[A-Za-z0-9.]{2,}$\", ff, useBytes = TRUE)\n+            ff <- ff[!(poss & !dir)]\n             patt <- Sys.getenv(\"_R_CHECK_THINGS_IN_TEMP_DIR_EXCLUDE_\")\n             if (nzchar(patt)) ff <- ff[!grepl(patt, ff, useBytes = TRUE)]\n             ff <- ff[!"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(ff)]\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

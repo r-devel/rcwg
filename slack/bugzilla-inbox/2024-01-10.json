@@ -1,0 +1,64 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18650] tools::startDynamicHelp(): Randomly prevents R from exiting (on MS Windows)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18650>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n                 CC|                            |tomas.kalibera@gmail.com\n         Resolution|---                         |FIXED\n\n--- Comment #3 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nThanks for the report and analysis. I can reproduce the problem and I find the\nanalysis plausible: the main thread is waiting for the heap lock which it never\ngets and it is documented that TerminateThread() would not unlock such lock if\nowned by a (server) thread. It is definitely better to avoid TerminateThread(),\nand doing so also removed the symptoms for me.\n\nI've fixed it in R-devel using a special event object (semaphore) which the\nmain thread can use to signal the server thread that it should terminate. The\nserver thread waits on this semaphore and on the bound server socket, and only\nwhen the server socket becomes ready for accepting a connection, it calls\naccept(). This uses WSAEVENT (as the semaphore) and WSAWaitForMultipleEvents\nwaiting for FD_ACCEPT event on the server socket. \n\nThe proposed solution of closing the socket from the main thread, in addition\nto the mentioned potential issue of socket number re-use, inherits the problems\nof the original code of unsynchronized access to a variable from multiple\nthreads (srv_sock).\n\nAn alternative solution would have been to implement termination of the server\nas a part of the communication protocol: the main thread could connect to the\nserver the normal way, via the same server socket, and instruct it to\nterminate.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1704919703.183039",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ZnPMA",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18650] tools::startDynamicHelp(): Randomly prevents R from exiting (on MS Windows)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18650"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n                 CC|                            |tomas.kalibera@gmail.com\n         Resolution|---                         |FIXED\n\n--- Comment #3 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for the report and analysis. I can reproduce the problem and I find the\nanalysis plausible: the main thread is waiting for the heap lock which it never\ngets and it is documented that TerminateThread() would not unlock such lock if\nowned by a (server) thread. It is definitely better to avoid TerminateThread(),\nand doing so also removed the symptoms for me.\n\nI've fixed it in R-devel using a special event object (semaphore) which the\nmain thread can use to signal the server thread that it should terminate. The\nserver thread waits on this semaphore and on the bound server socket, and only\nwhen the server socket becomes ready for accepting a connection, it calls\naccept(). This uses WSAEVENT (as the semaphore) and WSAWaitForMultipleEvents\nwaiting for FD_ACCEPT event on the server socket. \n\nThe proposed solution of closing the socket from the main thread, in addition\nto the mentioned potential issue of socket number re-use, inherits the problems\nof the original code of unsynchronized access to a variable from multiple\nthreads (srv_sock).\n\nAn alternative solution would have been to implement termination of the server\nas a part of the communication protocol: the main thread could connect to the\nserver the normal way, via the same server socket, and instruct it to\nterminate."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

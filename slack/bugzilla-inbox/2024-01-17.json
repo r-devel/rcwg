@@ -1,0 +1,1433 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18655] New: Enhancements to `*wilcox` functions for large population sizes*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655>\n\n            Bug ID: 18655\n           Summary: Enhancements to `*wilcox` functions for large\n                    population sizes\n           Product: R\n           Version: R 4.3.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: enhancement\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:AHL27@pitt.edu|AHL27@pitt.edu>\n\nCreated attachment 3286\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3286&amp;action=edit>\nPatch file with updated `cwilcox` implementation\n\n## Description\n\nThis suggested enhancement follows discussion introduced by Andreas Loeffler in\nR-devel regarding calculations involving the internal `cwilcox` function\n(`dwilcox`, `pwilcox`, `qwilcox`, and `wilcox.test`). \n\n`cwilcox` counts the number of choices with statistic=k. The current\nimplementation of this function allocates a three dimensional array and\nutilizes recursion for its calculation. This approach is efficient when neither\npopulation is larger than 50, but rapidly decreases in efficiency past this\npoint. This is a known issue, and is specifically mentioned in `?wilcox.test`.\n\nAndreas Loeffler emailed R-devel with a novel approach for calculating\n`cwilcox` that breaks the recursion and requires only a one dimensional array\nfor calculation (see References). I have implemented his idea with as much\nefficiency as I could for `cwilcox`, and the results perform significantly\nbetter when at least one population is larger than 50.\n\nThe code for this change is attached as a `.diff`, performance considerations\nare listed at the end. The rationale for the change is the following:\n\n1. This change breaks recursion and lessens memory requirements, reducing the\nrisk of an R crash at large population sizes.\n2. This change allows for wilcox statistics to be calculated for much larger\npopulation sizes in semi-reasonable time.\n3. In my opinion, this change simplifies code organization. Fewer memory\nallocations are made, and deallocation is greatly simplified.\n\nOf note is that this implementation can be slower than the existing one when\nboth populations is smaller than 50, especially on single calls. It may be a\ngood idea to include both implementations, and use Andreas's algorithm when\neither population is larger than 50.\n\n## Runtime Performance\n\nTiming was performed using `microbenchmark::microbenchmark` on Ubuntu machines\nwith 100 evaluations. Results are reported as median runtimes, with\nus=microseconds, ms=milliseconds, s=seconds. The points chosen are worst-case\nexamples, since `qwilcox(0.5, ...)` and `dwilcox((n*n)%\/%2, n, n)` require the\nmost iterations of `cwilcox`.\n\n```\nqwilcox(0.5, n, n)\n              n:     10      25     50     100     200\n    old version:  1.2us   2.9us  9.0us  87.4ms    2.3s\nAndreas version:  2.7us  68.6us  1.1ms  16.9ms 264.3ms\n\ndwilcox((n*n)%\/%2, n, n)\n              n:     10      25     50     100     200\n    old version:  1.4us   0.9us  0.9us  43.2ms 851.6ms\nAndreas version:  2.3us  53.9us  1.0ms  16.4ms 261.7ms\n\n\npwilcox(1:100, 10, 10)\n    old version:  62.9us\nAndreas version:  22.9us\n\nqwilcox(seq(0,1,0.1), 10, 10)\n    old version:  13.7us\nAndreas version:  13.8us\n\nx &lt;- runif(100)\nwilcox.test(x, exact=TRUE)\n    old version:  134.7us\nAndreas version:  132.2us\n\nx &lt;- runif(100); y &lt;- runif(100)\nwilcox.test(x, y, exact=TRUE)\n    old version:  83.0ms\nAndreas version:  15.9ms\n\n(if exact=FALSE, old version runs in 355.58us)\n```\n\n## Memory Scaling\n\nAssume `cwilcox` is called with statistic `k` and population sizes `m,n`.\n\nThe current algorithm will allocate space for `m+1` objects of type `**double`.\nEach `**double` allocates space for `n+1` objects of type `*double`. Each of\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1705503079.151339",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "1ED",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18655] New: Enhancements to ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "*wilcox",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " functions for large population sizes",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18655\n           Summary: Enhancements to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "*wilcox",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " functions for large\n                    population sizes\n           Product: R\n           Version: R 4.3.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: enhancement\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:AHL27@pitt.edu",
+                                "text": "AHL27@pitt.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3286\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3286&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3286&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch file with updated "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cwilcox",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " implementation\n\n## Description\n\nThis suggested enhancement follows discussion introduced by Andreas Loeffler in\nR-devel regarding calculations involving the internal "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cwilcox",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " function\n("
+                            },
+                            {
+                                "type": "text",
+                                "text": "dwilcox",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pwilcox",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "qwilcox",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "wilcox.test",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "). \n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "cwilcox",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " counts the number of choices with statistic=k. The current\nimplementation of this function allocates a three dimensional array and\nutilizes recursion for its calculation. This approach is efficient when neither\npopulation is larger than 50, but rapidly decreases in efficiency past this\npoint. This is a known issue, and is specifically mentioned in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "?wilcox.test",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nAndreas Loeffler emailed R-devel with a novel approach for calculating\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "cwilcox",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " that breaks the recursion and requires only a one dimensional array\nfor calculation (see References). I have implemented his idea with as much\nefficiency as I could for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cwilcox",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and the results perform significantly\nbetter when at least one population is larger than 50.\n\nThe code for this change is attached as a "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".diff",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", performance considerations\nare listed at the end. The rationale for the change is the following:\n\n1. This change breaks recursion and lessens memory requirements, reducing the\nrisk of an R crash at large population sizes.\n2. This change allows for wilcox statistics to be calculated for much larger\npopulation sizes in semi-reasonable time.\n3. In my opinion, this change simplifies code organization. Fewer memory\nallocations are made, and deallocation is greatly simplified.\n\nOf note is that this implementation can be slower than the existing one when\nboth populations is smaller than 50, especially on single calls. It may be a\ngood idea to include both implementations, and use Andreas's algorithm when\neither population is larger than 50.\n\n## Runtime Performance\n\nTiming was performed using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "microbenchmark::microbenchmark",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " on Ubuntu machines\nwith 100 evaluations. Results are reported as median runtimes, with\nus=microseconds, ms=milliseconds, s=seconds. The points chosen are worst-case\nexamples, since "
+                            },
+                            {
+                                "type": "text",
+                                "text": "qwilcox(0.5, ...)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dwilcox((n*n)%\/%2, n, n)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " require the\nmost iterations of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cwilcox",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "qwilcox(0.5, n, n)\n              n:     10      25     50     100     200\n    old version:  1.2us   2.9us  9.0us  87.4ms    2.3s\nAndreas version:  2.7us  68.6us  1.1ms  16.9ms 264.3ms\n\ndwilcox((n*n)%\/%2, n, n)\n              n:     10      25     50     100     200\n    old version:  1.4us   0.9us  0.9us  43.2ms 851.6ms\nAndreas version:  2.3us  53.9us  1.0ms  16.4ms 261.7ms\n\n\npwilcox(1:100, 10, 10)\n    old version:  62.9us\nAndreas version:  22.9us\n\nqwilcox(seq(0,1,0.1), 10, 10)\n    old version:  13.7us\nAndreas version:  13.8us\n\nx <- runif(100)\nwilcox.test(x, exact=TRUE)\n    old version:  134.7us\nAndreas version:  132.2us\n\nx <- runif(100); y <- runif(100)\nwilcox.test(x, y, exact=TRUE)\n    old version:  83.0ms\nAndreas version:  15.9ms\n\n(if exact=FALSE, old version runs in 355.58us)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n## Memory Scaling\n\nAssume "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cwilcox",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is called with statistic "
+                            },
+                            {
+                                "type": "text",
+                                "text": "k",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and population sizes "
+                            },
+                            {
+                                "type": "text",
+                                "text": "m,n",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nThe current algorithm will allocate space for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "m+1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " objects of type "
+                            },
+                            {
+                                "type": "text",
+                                "text": "**double",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\nEach "
+                            },
+                            {
+                                "type": "text",
+                                "text": "**double",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " allocates space for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "n+1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " objects of type "
+                            },
+                            {
+                                "type": "text",
+                                "text": "*double",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". Each of"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "those allocate space for `(m*n)\/2` objects of type `double`. Thus, the memory\nscaling is `O((mn)^2)`. There are additional optimizations to decrease the size\nof `m,n`, but this is the worst case space complexity. \n\nThe new algorithm requires two flat arrays of size `(m*n)\/2 + 1` (one . Thus,\nthe memory scaling is O(mn). One array contains objects of type `int` and the\nother of type `double`.\n\n## Additional examples\n\nIn testing on my machine, calls to `qwilcox` with both populations at least\nsize 500 crash the current version of R. `qwilcox(0.5, 500, 500)` crashed my R\nsession with the current algorithm, but executed in about 10 seconds using\nAndreas's algorithm. `qwilcox(0.01, 500, 500)` executed in about 8 seconds\nusing Andreas's algorithm, and again crashed my R session with the current\nalgorithm. Both algorithms successfully completed when both populations were of\nsize 400.\n\n## Other Observations \/ Recommendations\n\nIt's my (unconfirmed) belief that the central slowdown in this algorithm is the\ncalculation of `cwilcox_sigma`, which is roughly equivalent to finding all the\nfactors of `k`. If it were possible to speed up evaluation of this function, it\ncould be possible to decrease the runtime of the overall function\nsignificantly. Another potential speedup is improving how values of `w` are\nfilled in, since this calculation has quadratic scaling.\n\n## References\n\n- Andreas's original paper\n(German):<https:\/\/upload.wikimedia.org\/wikipedia\/commons\/f\/f5\/LoefflerWilcoxonMannWhitneyTest.pdf>\n\n- English translation:\n<https:\/\/upload.wikimedia.org\/wikipedia\/de\/1\/19\/MannWhitney_151102.pdf>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1705503079.175719",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "L9ERT",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "those allocate space for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(m*n)\/2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " objects of type "
+                            },
+                            {
+                                "type": "text",
+                                "text": "double",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". Thus, the memory\nscaling is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "O((mn)^2)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". There are additional optimizations to decrease the size\nof "
+                            },
+                            {
+                                "type": "text",
+                                "text": "m,n",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", but this is the worst case space complexity. \n\nThe new algorithm requires two flat arrays of size "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(m*n)\/2 + 1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (one . Thus,\nthe memory scaling is O(mn). One array contains objects of type "
+                            },
+                            {
+                                "type": "text",
+                                "text": "int",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and the\nother of type "
+                            },
+                            {
+                                "type": "text",
+                                "text": "double",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n## Additional examples\n\nIn testing on my machine, calls to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "qwilcox",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " with both populations at least\nsize 500 crash the current version of R. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "qwilcox(0.5, 500, 500)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " crashed my R\nsession with the current algorithm, but executed in about 10 seconds using\nAndreas's algorithm. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "qwilcox(0.01, 500, 500)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " executed in about 8 seconds\nusing Andreas's algorithm, and again crashed my R session with the current\nalgorithm. Both algorithms successfully completed when both populations were of\nsize 400.\n\n## Other Observations \/ Recommendations\n\nIt's my (unconfirmed) belief that the central slowdown in this algorithm is the\ncalculation of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cwilcox_sigma",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which is roughly equivalent to finding all the\nfactors of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "k",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". If it were possible to speed up evaluation of this function, it\ncould be possible to decrease the runtime of the overall function\nsignificantly. Another potential speedup is improving how values of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "w",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " are\nfilled in, since this calculation has quadratic scaling.\n\n## References\n\n- Andreas's original paper\n(German):"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/upload.wikimedia.org\/wikipedia\/commons\/f\/f5\/LoefflerWilcoxonMannWhitneyTest.pdf"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n- English translation:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/upload.wikimedia.org\/wikipedia\/de\/1\/19\/MannWhitney_151102.pdf"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18655] Enhancements to `*wilcox` functions for large population sizes*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655>\n\nAidan H Lakshman (<mailto:AHL27@pitt.edu|AHL27@pitt.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3286|0                           |1\n        is obsolete|                            |\n\n--- Comment #1 from Aidan H Lakshman (<mailto:AHL27@pitt.edu|AHL27@pitt.edu>) ---\nCreated attachment 3287\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3287&amp;action=edit>\nPatch Diff v2\n\nUpdated implementation. Removes things related to debugging that I forgot to\nremove (unnecessary import statement in `nmath.h`, some forgotten comments). \n\n`cwilcox_sigma` now stops once it reaches `k`, resulting in a modest\nperformance improvement. I'm beginning to doubt that `cwilcox_sigma` is a\nsubstantial performance burden, since it has worst-case runtime O(m+n) per\ncall, whereas finding the k'th entry of the distribution has runtime O(k^2).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1705505529.547259",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "WVU",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18655] Enhancements to ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "*wilcox",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " functions for large population sizes",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nAidan H Lakshman ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:AHL27@pitt.edu",
+                                "text": "AHL27@pitt.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3286|0                           |1\n        is obsolete|                            |\n\n--- Comment #1 from Aidan H Lakshman ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:AHL27@pitt.edu",
+                                "text": "AHL27@pitt.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3287\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3287&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3287&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch Diff v2\n\nUpdated implementation. Removes things related to debugging that I forgot to\nremove (unnecessary import statement in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nmath.h",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", some forgotten comments). \n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "cwilcox_sigma",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " now stops once it reaches "
+                            },
+                            {
+                                "type": "text",
+                                "text": "k",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", resulting in a modest\nperformance improvement. I'm beginning to doubt that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cwilcox_sigma",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is a\nsubstantial performance burden, since it has worst-case runtime O(m+n) per\ncall, whereas finding the k'th entry of the distribution has runtime O(k^2)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18654] xyTable fails when both x and y are NA*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18654>\n\nElin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |elin.waring@gmail.com\n\n--- Comment #2 from Elin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) ---\nI was also wondering whether part of the issue is that there is no explicit\nhandling of NAs in the code and no option for  na.rm, useNA (like in table()),\nor na.action() or something else.   Also xyTable() uses order() which itself\nhas three options for NA handling.  Something is definitely going wrong,\nbecause the data for `number` for the x =1.7, y = .4 point is being lost. It's\nas though the final value of the NA handling (the second or third NA) is\nreplacing the value for the last `number`  postion.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1705507080.707709",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ii0",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18654] xyTable fails when both x and y are NA",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18654"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nElin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |elin.waring@gmail.com\n\n--- Comment #2 from Elin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI was also wondering whether part of the issue is that there is no explicit\nhandling of NAs in the code and no option for  na.rm, useNA (like in table()),\nor na.action() or something else.   Also xyTable() uses order() which itself\nhas three options for NA handling.  Something is definitely going wrong,\nbecause the data for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "number",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for the x =1.7, y = .4 point is being lost. It's\nas though the final value of the NA handling (the second or third NA) is\nreplacing the value for the last "
+                            },
+                            {
+                                "type": "text",
+                                "text": "number",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  postion."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18654] xyTable fails when both x and y are NA*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18654>\n\n--- Comment #3 from Elin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) ---\nMaybe adding something like this\n\n\n```\n    not_nas &lt;- !<http:\/\/is.na|is.na>(x) &amp; !<http:\/\/is.na|is.na>(y)\n    x &lt;- x[not_nas]\n    y &lt;- y[not_nas]\n\n```\n\nBut I suppose that if you had a factor there you might want to treat NA as a\nvalue, but I would think allowing that would need an option or maybe the user\nneeds to prepare the data with NA as a level.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1705517386.655419",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "JKfXn",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18654] xyTable fails when both x and y are NA",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18654"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Elin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nMaybe adding something like this\n\n\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "    not_nas <- !"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(x) & !"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(y)\n    x <- x[not_nas]\n    y <- y[not_nas]\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nBut I suppose that if you had a factor there you might want to treat NA as a\nvalue, but I would think allowing that would need an option or maybe the user\nneeds to prepare the data with NA as a level."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18655] Enhancements to `*wilcox` functions for large population sizes*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655>\n\nIvan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #2 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nCreated attachment 3288\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3288&amp;action=edit>\nPatch v2 with integer overflow avoidance\n\nFor `replicate(1e4, qwilcox(0.5, 51, 51))` (with filtering by function being\nexecuted), `perf` insists that almost all time is spent in `cwilcox`, with more\nthan 50% of the time in the instructions corresponding to `s +=\nw[i]*sigma[k-i];`, and only less than half - in the inlined `cwilcox_sigma()`\n(significantly less with larger populations). Cachegrind agrees that `s +=\nw[i]*sigma[k-i];` is responsible for almost all memory accesses. It could be\npossible to improve cache locality for this line by flipping `sigma` and\nfilling it back-to-front or interleaving `w` and `sigma` in an array of\n`struct`s, but I'm not sure it can give significant improvements or is worth\nincreased code complexity.\n\nI have modified the code to use C idioms that avoid signed integer overflow,\nincluding in `double` to `int` conversions, addition and products. Without\nthese, R could still be crashed by giving `qwilcox()` and friends population\nsizes that sum to more than `INT_MAX` or give a product of more than `INT_MAX`\n(which could result in a short allocation after the overflow).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1705522187.049309",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "I3bF",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18655] Enhancements to ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "*wilcox",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " functions for large population sizes",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIvan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #2 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3288\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3288&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3288&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch v2 with integer overflow avoidance\n\nFor "
+                            },
+                            {
+                                "type": "text",
+                                "text": "replicate(1e4, qwilcox(0.5, 51, 51))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (with filtering by function being\nexecuted), "
+                            },
+                            {
+                                "type": "text",
+                                "text": "perf",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " insists that almost all time is spent in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cwilcox",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", with more\nthan 50% of the time in the instructions corresponding to `s +=\nw[i]*sigma[k-i];"
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and only less than half - in the inlined ",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "cwilcox_sigma()`\n(significantly less with larger populations). Cachegrind agrees that `s +=\nw[i]*sigma[k-i];` is responsible for almost all memory accesses. It could be\npossible to improve cache locality for this line by flipping "
+                            },
+                            {
+                                "type": "text",
+                                "text": "sigma",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and\nfilling it back-to-front or interleaving "
+                            },
+                            {
+                                "type": "text",
+                                "text": "w",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "sigma",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in an array of\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "struct",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "s, but I'm not sure it can give significant improvements or is worth\nincreased code complexity.\n\nI have modified the code to use C idioms that avoid signed integer overflow,\nincluding in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "double",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "int",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " conversions, addition and products. Without\nthese, R could still be crashed by giving "
+                            },
+                            {
+                                "type": "text",
+                                "text": "qwilcox()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and friends population\nsizes that sum to more than "
+                            },
+                            {
+                                "type": "text",
+                                "text": "INT_MAX",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or give a product of more than "
+                            },
+                            {
+                                "type": "text",
+                                "text": "INT_MAX",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n(which could result in a short allocation after the overflow)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18655] Enhancements to `*wilcox` functions for large population sizes*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655>\n\n--- Comment #3 from Aidan H Lakshman (<mailto:AHL27@pitt.edu|AHL27@pitt.edu>) ---\n(In reply to Ivan Krylov from comment #2)\n&gt; Created attachment 3288\n&gt; Patch v2 with integer overflow avoidance\n&gt; \n&gt; For `replicate(1e4, qwilcox(0.5, 51, 51))` (with filtering by function being\n&gt; executed), `perf` insists that almost all time is spent in `cwilcox`, with\n&gt; more than 50% of the time in the instructions corresponding to `s +=\n&gt; w[i]*sigma[k-i];`, and only less than half - in the inlined\n&gt; `cwilcox_sigma()` (significantly less with larger populations). Cachegrind\n&gt; agrees that `s += w[i]*sigma[k-i];` is responsible for almost all memory\n&gt; accesses. It could be possible to improve cache locality for this line by\n&gt; flipping `sigma` and filling it back-to-front or interleaving `w` and\n&gt; `sigma` in an array of `struct`s, but I'm not sure it can give significant\n&gt; improvements or is worth increased code complexity.\n\nI was also thinking about flipping `sigma` for cache locality...I think it\ncould shave a tiny amount of time, but I doubt it'll be enough to match the\ncurrent implementation for small population sizes (and as you mentioned, would\nmake things significantly more complex). Perhaps there's some way to simplify\nthe math to remove the need for the inside loop, but having read Andreas's\npaper it seems unlikely. Maybe the best solution is to just have both\nimplementations side-by-side and switch internally based on population sizes.\n\n&gt; I have modified the code to use C idioms that avoid signed integer overflow,\n&gt; including in `double` to `int` conversions, addition and products. Without\n&gt; these, R could still be crashed by giving `qwilcox()` and friends population\n&gt; sizes that sum to more than `INT_MAX` or give a product of more than\n&gt; `INT_MAX` (which could result in a short allocation after the overflow).\n\nGood catch, thanks Ivan!",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1705522898.107029",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ksT",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18655] Enhancements to ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "*wilcox",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " functions for large population sizes",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Aidan H Lakshman ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:AHL27@pitt.edu",
+                                "text": "AHL27@pitt.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Ivan Krylov from comment #2)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Created attachment 3288\nPatch v2 with integer overflow avoidance\n\nFor "
+                            },
+                            {
+                                "type": "text",
+                                "text": "replicate(1e4, qwilcox(0.5, 51, 51))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (with filtering by function being\nexecuted), "
+                            },
+                            {
+                                "type": "text",
+                                "text": "perf",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " insists that almost all time is spent in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cwilcox",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", with\nmore than 50% of the time in the instructions corresponding to `s +=\nw[i]*sigma[k-i];`, and only less than half - in the inlined\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "cwilcox_sigma()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (significantly less with larger populations). Cachegrind\nagrees that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "s += w[i]*sigma[k-i];",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is responsible for almost all memory\naccesses. It could be possible to improve cache locality for this line by\nflipping "
+                            },
+                            {
+                                "type": "text",
+                                "text": "sigma",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and filling it back-to-front or interleaving "
+                            },
+                            {
+                                "type": "text",
+                                "text": "w",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "sigma",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in an array of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "struct",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "s, but I'm not sure it can give significant\nimprovements or is worth increased code complexity."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI was also thinking about flipping "
+                            },
+                            {
+                                "type": "text",
+                                "text": "sigma",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for cache locality...I think it\ncould shave a tiny amount of time, but I doubt it'll be enough to match the\ncurrent implementation for small population sizes (and as you mentioned, would\nmake things significantly more complex). Perhaps there's some way to simplify\nthe math to remove the need for the inside loop, but having read Andreas's\npaper it seems unlikely. Maybe the best solution is to just have both\nimplementations side-by-side and switch internally based on population sizes.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I have modified the code to use C idioms that avoid signed integer overflow,\nincluding in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "double",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "int",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " conversions, addition and products. Without\nthese, R could still be crashed by giving "
+                            },
+                            {
+                                "type": "text",
+                                "text": "qwilcox()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and friends population\nsizes that sum to more than "
+                            },
+                            {
+                                "type": "text",
+                                "text": "INT_MAX",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or give a product of more than\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "INT_MAX",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (which could result in a short allocation after the overflow)."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nGood catch, thanks Ivan!"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18616] TukeyHSD not functioning properly with nested designs*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18616>\n\n--- Comment #5 from Elin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) ---\nOther people can definitely speak to the statistical issues (and reasons why R\ndoes what it does) better than me.  But in the meantime \nthe question is: What is the proper default behavior for HSD when there are\nempty cells?  \n\nYou have a view, but I think it is probably a controversial view.\n\nThe HSD test is designed to be conservative; if you are making changes that\nmake the p values lower that should raise some red flags.\n\nI think the issue is whether the test should be used for this situation (where\nsome of the means are not estimable because of empty columns). \n\nI didn't find a lot about this in R. But did find\n\n<https:\/\/www.stata.com\/manuals13\/rpwcompare.pdf>  (discussion of emptycell and\nnoestimcheck options)\n\n<https:\/\/www.pnw.edu\/wp-content\/uploads\/2020\/03\/Lecture-Notes-4-6.pdf>  (page\n137)\n\n<https:\/\/support.unicomsi.com\/manuals\/intelligence\/75\/index.html#page\/Desktop%20User%20Guides\/TableScripting.047.134.html>\n\nR has adopted an approach that runs the analysis despite the empty cells but\ntreats those cells as (nonestimated) comparisons, thus adjusting for them.  It\nmight be better to use something besides NA to represent this in order to avoid\nconfusion or at least explain that in the documentation.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1705544417.538399",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "e+P",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18616] TukeyHSD not functioning properly with nested designs",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18616"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Elin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nOther people can definitely speak to the statistical issues (and reasons why R\ndoes what it does) better than me.  But in the meantime \nthe question is: What is the proper default behavior for HSD when there are\nempty cells?  \n\nYou have a view, but I think it is probably a controversial view.\n\nThe HSD test is designed to be conservative; if you are making changes that\nmake the p values lower that should raise some red flags.\n\nI think the issue is whether the test should be used for this situation (where\nsome of the means are not estimable because of empty columns). \n\nI didn't find a lot about this in R. But did find\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/www.stata.com\/manuals13\/rpwcompare.pdf"
+                            },
+                            {
+                                "type": "text",
+                                "text": "  (discussion of emptycell and\nnoestimcheck options)\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/www.pnw.edu\/wp-content\/uploads\/2020\/03\/Lecture-Notes-4-6.pdf"
+                            },
+                            {
+                                "type": "text",
+                                "text": "  (page\n137)\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/support.unicomsi.com\/manuals\/intelligence\/75\/index.html#page\/Desktop%20User%20Guides\/TableScripting.047.134.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nR has adopted an approach that runs the analysis despite the empty cells but\ntreats those cells as (nonestimated) comparisons, thus adjusting for them.  It\nmight be better to use something besides NA to represent this in order to avoid\nconfusion or at least explain that in the documentation."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,383 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18747] New: utils::writeClipboard doesn't allocate enough for the 0-terminator in CF_UNICODETEXT*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18747>\n\n            Bug ID: 18747\n           Summary: utils::writeClipboard doesn't allocate enough for the\n                    0-terminator in CF_UNICODETEXT\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Windows GUI \/ Window specific\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:ikrylov@disroot.org|ikrylov@disroot.org>\n\nCreated attachment 3364\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3364&amp;action=edit>\nAllocate 2 bytes for the terminator in CF_UNICODETEXT\n\nOriginally reported by [Tanguy BARTHELEMY on\nR-help](<https:\/\/stat.ethz.ch\/pipermail\/r-help\/2024-June\/479511.html>).\n\nThis may be hard to reproduce (initially I saw it happen three times and then\nthe problem refused to appear again for tens of minutes while I was trying\ndifferent things), but I saw it on R-4.3.1 on Windows 7 and on R-devel r86784\non Windows 10 21H2:\n\n```\n# seems to be more frequent with non-ASCII content?\nwriteClipboard(x &lt;- strrep('\\ue9', 128))\nrepeat if (!identical(xx &lt;- readClipboard(), x)) stop(xx)\n# try restarting R if doesn't happen immediately?\n```\n\nBy the time R is looking at the clipboard contents on line 259 of\n`src\/library\/utils\/src\/windows\/util.c`, they already seemingly contain\ngarbage:\n\n```\n257                 } else if (format == CF_UNICODETEXT) {\n(gdb)\n260                     n = wcslen(wpc);\n(gdb)\n261                     char text[4*n+1];\n(gdb) p wpc\n$1 = 0x2500efe2690 L'&lt;U+00E9&gt;' &lt;repeats 128 times&gt;, \"\\r\\n&lt;mojibake&gt;d\"\n(gdb) p (DWORD)GlobalSize(hglb)\n$2 = 261\n(gdb) p n\n$3 = 133\n```\n\n261 bytes is only enough for `128*2` bytes of the text followed by `L\"\\r\\n\"`\nplus one more byte. This shouldn't be happening: Microsoft\n[says](<https:\/\/learn.microsoft.com\/en-us\/windows\/win32\/dataxchg\/standard-clipboard-formats>)\nthat `L'\\0'` should terminate contents of type `CF_UNICODETEXT`.\n\nI only saw this happen after a call to `writeClipboard` in R, not from copying\nfrom another program (e.g. the Win+R dialog). I think that `writeClipboard`\ndoesn't allocate enough memory for the terminating `L'\\0'`. The problem doesn't\nreappear with the attached patch.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718806156.913639",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ggtji",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18747] New: utils::writeClipboard doesn't allocate enough for the 0-terminator in CF_UNICODETEXT",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18747"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18747\n           Summary: utils::writeClipboard doesn't allocate enough for the\n                    0-terminator in CF_UNICODETEXT\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Windows GUI \/ Window specific\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3364\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3364&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3364&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nAllocate 2 bytes for the terminator in CF_UNICODETEXT\n\nOriginally reported by [Tanguy BARTHELEMY on\nR-help]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-help\/2024-June\/479511.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\n\nThis may be hard to reproduce (initially I saw it happen three times and then\nthe problem refused to appear again for tens of minutes while I was trying\ndifferent things), but I saw it on R-4.3.1 on Windows 7 and on R-devel r86784\non Windows 10 21H2:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# seems to be more frequent with non-ASCII content?\nwriteClipboard(x <- strrep('\\ue9', 128))\nrepeat if (!identical(xx <- readClipboard(), x)) stop(xx)\n# try restarting R if doesn't happen immediately?\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nBy the time R is looking at the clipboard contents on line 259 of\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/library\/utils\/src\/windows\/util.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", they already seemingly contain\ngarbage:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "257                 } else if (format == CF_UNICODETEXT) {\n(gdb)\n260                     n = wcslen(wpc);\n(gdb)\n261                     char text[4*n+1];\n(gdb) p wpc\n$1 = 0x2500efe2690 L'<U+00E9>' <repeats 128 times>, \"\\r\\n<mojibake>d\"\n(gdb) p (DWORD)GlobalSize(hglb)\n$2 = 261\n(gdb) p n\n$3 = 133\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n261 bytes is only enough for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "128*2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " bytes of the text followed by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "L\"\\r\\n\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nplus one more byte. This shouldn't be happening: Microsoft\n[says]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/learn.microsoft.com\/en-us\/windows\/win32\/dataxchg\/standard-clipboard-formats"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\nthat "
+                            },
+                            {
+                                "type": "text",
+                                "text": "L'\\0'",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " should terminate contents of type "
+                            },
+                            {
+                                "type": "text",
+                                "text": "CF_UNICODETEXT",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nI only saw this happen after a call to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "writeClipboard",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in R, not from copying\nfrom another program (e.g. the Win+R dialog). I think that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "writeClipboard",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ndoesn't allocate enough memory for the terminating "
+                            },
+                            {
+                                "type": "text",
+                                "text": "L'\\0'",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". The problem doesn't\nreappear with the attached patch."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18745] format(&lt;data.frame&gt;) does not keep `_NA_character` column names*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18745>\n\nSebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |seb.meyer@fau.de\n\n--- Comment #2 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\n(In reply to Martin Maechler from comment #1)\n&gt; My gut feeling would signal that committing fix to R-devel (see\n&gt; 'Attachment') may well break R code  \"out there\".\n\nNot in my test set. I get (after 17.2 hours):\n\n&gt; Comparing check results for 6202 CRAN\/BIOC packages ...\n&gt; No changes to worse!\n\nI didn't look into the actual patch (it seems to cover unrelated changes), but\nI can see that it changes the default printing of\n\n    (x &lt;- setNames(data.frame(TRUE), NA_character_))\n\nfrom\n```\n    NA\n1 TRUE\n```\nto\n```\n  &lt;NA&gt;\n1 TRUE\n```\nwhich seems right and is consistent with how `as.list(x)` prints\n```\n$&lt;NA&gt;\n[1] TRUE\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718812258.548739",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "97dW",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18745] format(<data.frame>) does not keep ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "_NA_character",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " column names",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18745"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |seb.meyer@fau.de\n\n--- Comment #2 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Martin Maechler from comment #1)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "My gut feeling would signal that committing fix to R-devel (see\n'Attachment') may well break R code  \"out there\"."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nNot in my test set. I get (after 17.2 hours):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Comparing check results for 6202 CRAN\/BIOC packages ...\nNo changes to worse!"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI didn't look into the actual patch (it seems to cover unrelated changes), but\nI can see that it changes the default printing of\n\n    (x <- setNames(data.frame(TRUE), NA_character_))\n\nfrom"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "    NA\n1 TRUE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "to"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "  <NA>\n1 TRUE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "which seems right and is consistent with how "
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.list(x)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " prints"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$<NA>\n[1] TRUE\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

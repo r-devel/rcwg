@@ -1,0 +1,159 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18738] New: javareconf incorrectly managing Java out-of-memory situations on SGE*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18738>\n\n            Bug ID: 18738\n           Summary: javareconf incorrectly managing Java out-of-memory\n                    situations on SGE\n           Product: R\n           Version: R 4.3.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Linux-Ubuntu\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Installation\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:alexander.tyakht@tuebingen.mpg.de|alexander.tyakht@tuebingen.mpg.de>\n\nWhen \"R CMD javareconf\" is run under strong memory limitations via a job\nsubmitted to SGE not allowing Java to initialize properly, Java's erroneous\noutput is improperly treated by javareconf, when the SGE-submitted job requests\n&gt;1 node. This leads to unexpected spawning of R processes on the node that are\nstuck in infinite cycle of ENOMEM errors (observed via strace'ing them). The\nerror occurs most of the times, but not 100%.\n\n\nHow to reproduce:\n\n\nJob submission script - job.sh:\n\n#!\/bin\/bash\n#$ -pe parallel 2 # request 2 nodes (looks like with 1 there is no problem)\n#$ -l mem_free=3G\n#$ -l h_vmem=3G\nR CMD javareconf\n\n\nSubmitting:\nqsub job.sh\n\n\nSGE version:\n8.1.9\n\n\nComments:\nApparently, the 1st improper treatment of Java output could happen in\njavareconf script at these lines:\n\njires=`$JAVA -classpath ${tools_classpath} getsp -test`\nif test \"$jires\" != \"Test1234OK\"; then\n\n- here looks like when jires is not a single string rather a multi-line Java\nerror message, the following lines malfunction.\n\nThere might be more similar cases in the following javareconf.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1716974982.916859",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "FMqU",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18738] New: javareconf incorrectly managing Java out-of-memory situations on SGE",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18738"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18738\n           Summary: javareconf incorrectly managing Java out-of-memory\n                    situations on SGE\n           Product: R\n           Version: R 4.3.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Linux-Ubuntu\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Installation\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:alexander.tyakht@tuebingen.mpg.de",
+                                "text": "alexander.tyakht@tuebingen.mpg.de",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nWhen \"R CMD javareconf\" is run under strong memory limitations via a job\nsubmitted to SGE not allowing Java to initialize properly, Java's erroneous\noutput is improperly treated by javareconf, when the SGE-submitted job requests"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "1 node. This leads to unexpected spawning of R processes on the node that are"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "stuck in infinite cycle of ENOMEM errors (observed via strace'ing them). The\nerror occurs most of the times, but not 100%.\n\n\n\nHow to reproduce:\n\n\n\nJob submission script - job.sh:\n\n#!\/bin\/bash\n#$ -pe parallel 2 # request 2 nodes (looks like with 1 there is no problem)\n#$ -l mem_free=3G\n#$ -l h_vmem=3G\nR CMD javareconf\n\n\n\nSubmitting:\nqsub job.sh\n\n\n\nSGE version:\n8.1.9\n\n\n\nComments:\nApparently, the 1st improper treatment of Java output could happen in\njavareconf script at these lines:\n\njires="
+                            },
+                            {
+                                "type": "text",
+                                "text": "$JAVA -classpath ${tools_classpath} getsp -test",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nif test \"$jires\" != \"Test1234OK\"; then\n\n- here looks like when jires is not a single string rather a multi-line Java\nerror message, the following lines malfunction.\n\nThere might be more similar cases in the following javareconf."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18738] javareconf incorrectly managing Java out-of-memory situations on SGE*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18738>\n\nSimon Urbanek (<mailto:simon.urbanek@r-project.org|simon.urbanek@r-project.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |simon.urbanek@r-project.org\n\n--- Comment #1 from Simon Urbanek (<mailto:simon.urbanek@r-project.org|simon.urbanek@r-project.org>) ---\nCan you provide actual details, please? No idea what SGE is (According to\nWikipedia  \"SGE, acronym of The School for Good and Evil\") - please use a\nreproducible example without 3rd party software (or else you should report it\nto the software maintainer as it's then likely unrelated to R). You are also\nhypothesising without context - please include the full output of `$JAVA\n-classpath ${tools_classpath} getsp -test` if you think that is the problem\n(although that one is unlikely the cause, but it would be a start).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1717040263.524759",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Xu8R",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18738] javareconf incorrectly managing Java out-of-memory situations on SGE",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18738"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSimon Urbanek ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:simon.urbanek@r-project.org",
+                                "text": "simon.urbanek@r-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |simon.urbanek@r-project.org\n\n--- Comment #1 from Simon Urbanek ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:simon.urbanek@r-project.org",
+                                "text": "simon.urbanek@r-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCan you provide actual details, please? No idea what SGE is (According to\nWikipedia  \"SGE, acronym of The School for Good and Evil\") - please use a\nreproducible example without 3rd party software (or else you should report it\nto the software maintainer as it's then likely unrelated to R). You are also\nhypothesising without context - please include the full output of `$JAVA\n-classpath ${tools_classpath} getsp -test` if you think that is the problem\n(although that one is unlikely the cause, but it would be a start)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

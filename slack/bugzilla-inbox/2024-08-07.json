@@ -1,0 +1,339 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18778] New: R_FindNamespace needlessly looks up getNamespace in the global environment*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18778>\n\n            Bug ID: 18778\n           Summary: R_FindNamespace needlessly looks up getNamespace in\n                    the global environment\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: trivial\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:ikrylov@disroot.org|ikrylov@disroot.org>\n\nWhile exploring the experimental API of R, I noticed that `R_FindNamespace`\nevaluates the call to `getNamespace()` in the global environment. This makes it\nrelatively easy for the user code to break the function:\n\n```\n#include &lt;Rinternals.h&gt;\nSEXP foo(void) {\n    SEXP info = PROTECT(mkString(\"lattice\"));\n    SEXP ret = R_FindNamespace(info); \/\/ should return an ENVSXP\n    UNPROTECT(1);\n    return ret;\n}\n```\n```\n$ R -q -s -e 'getNamespace &lt;- function(...) \"...\"; dyn.load(\"ex.so\");\n.Call(\"foo\")'\n[1] \"...\" # not an ENVSXP\n```\n\nWith the attached patch, R survives `make check-devel`, and `R_FindNamespace`\nno longer depends on `getNamespace` not being shadowed. Technically, the\nbehaviour of the function is now different when given a `SYMSXP` as an\nargument, but that was probably not intended as part of the API contract. All\nthe uses on CRAN I was able to find seem to call this function with a `STRSXP`\nargument.\n\nPlease let me know if such relatively unimportant &amp; contrived problems (also\nresulting from exploring the API: Bug 18748, Bug 18775) are not relevant here\nwhile more serious problems exist.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1723042613.414099",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "lUYA2",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18778] New: R_FindNamespace needlessly looks up getNamespace in the global environment",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18778"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18778\n           Summary: R_FindNamespace needlessly looks up getNamespace in\n                    the global environment\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: trivial\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nWhile exploring the experimental API of R, I noticed that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_FindNamespace",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nevaluates the call to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getNamespace()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in the global environment. This makes it\nrelatively easy for the user code to break the function:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "#include <Rinternals.h>\nSEXP foo(void) {\n    SEXP info = PROTECT(mkString(\"lattice\"));\n    SEXP ret = R_FindNamespace(info); \/\/ should return an ENVSXP\n    UNPROTECT(1);\n    return ret;\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$ R -q -s -e 'getNamespace <- function(...) \"...\"; dyn.load(\"ex.so\");\n.Call(\"foo\")'\n[1] \"...\" # not an ENVSXP\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWith the attached patch, R survives "
+                            },
+                            {
+                                "type": "text",
+                                "text": "make check-devel",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_FindNamespace",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nno longer depends on "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getNamespace",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " not being shadowed. Technically, the\nbehaviour of the function is now different when given a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "SYMSXP",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as an\nargument, but that was probably not intended as part of the API contract. All\nthe uses on CRAN I was able to find seem to call this function with a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "STRSXP",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nargument.\n\nPlease let me know if such relatively unimportant & contrived problems (also\nresulting from exploring the API: Bug 18748, Bug 18775) are not relevant here\nwhile more serious problems exist."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18778] R_FindNamespace needlessly looks up getNamespace in the global environment*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18778>\n\n--- Comment #1 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nCreated attachment 3385\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3385&amp;action=edit>\nsuggested fix\n\nApologies for the double e-mail. Bugzilla says \"The bug was created\nsuccessfully, but attachment creation failed\".",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1723042722.301099",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "2VMb",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18778] R_FindNamespace needlessly looks up getNamespace in the global environment",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18778"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3385\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3385&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3385&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nsuggested fix\n\nApologies for the double e-mail. Bugzilla says \"The bug was created\nsuccessfully, but attachment creation failed\"."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18778] R_FindNamespace needlessly looks up getNamespace in the global environment*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18778>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CONFIRMED\n                 CC|                            |maechler@stat.math.ethz.ch\n     Ever confirmed|0                           |1\n\n--- Comment #2 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\n\"fascinating\".. \nOn one hand, I think you are right about the fix, OTOH, we have 38 grep matches\nin `src\/main\/*.?` for `eval(.*, R_GlobalEnv)` and \"only\"  22 such matches for\n`...., R_BaseEnv)`  where I think that in quite a few cases it does not matter\n(but then I think in those cases R_BaseEnv would be more efficient),\nbut I also guess (or \"bet\" :-) that there are more cases like this one, where\n`R_BaseEnv` would be safer {and more efficient}.\n\n... but probably I'm forgetting to consider some aspects.\n\nStill, I have a feeling we should look into these cases slightly more\nsystematically.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1723045082.198269",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "35i",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18778] R_FindNamespace needlessly looks up getNamespace in the global environment",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18778"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CONFIRMED\n                 CC|                            |maechler@stat.math.ethz.ch\n     Ever confirmed|0                           |1\n\n--- Comment #2 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n\"fascinating\".. \nOn one hand, I think you are right about the fix, OTOH, we have 38 grep matches\nin "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/*.?",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "eval(.*, R_GlobalEnv)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and \"only\"  22 such matches for\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "...., R_BaseEnv)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  where I think that in quite a few cases it does not matter\n(but then I think in those cases R_BaseEnv would be more efficient),\nbut I also guess (or \"bet\" :-) that there are more cases like this one, where\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_BaseEnv",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " would be safer {and more efficient}.\n\n... but probably I'm forgetting to consider some aspects.\n\nStill, I have a feeling we should look into these cases slightly more\nsystematically."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

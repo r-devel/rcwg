@@ -1,0 +1,204 @@
+[
+    {
+        "user": "U035M81N341",
+        "type": "message",
+        "ts": "1718950723.057809",
+        "client_msg_id": "ae5ebfc2-8e43-4d59-82a2-e88c20e1e93f",
+        "text": "In case it’s interesting for anyone to see in advance of the C Study Group next week, here’s an R package that contains my C implementation of `rle()`. Having read the Deep R chapter, and Davis’s blog post once through, and got the implementation of `c_rle()` working in a single script, the package itself came together in less than 10 minutes, following Davis’s blog post shared earlier. <https:\/\/github.com\/EllaKaye\/crle>",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "c4cd2d45eb7b",
+            "image_72": "https:\/\/avatars.slack-edge.com\/2024-02-05\/6583494822997_c4cd2d45eb7bfbf5886a_72.jpg",
+            "first_name": "Ella",
+            "real_name": "Ella Kaye",
+            "display_name": "Ella Kaye",
+            "team": "T01DW9DLB2A",
+            "name": "ella.kaye",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "attachments": [
+            {
+                "id": 1,
+                "color": "24292f",
+                "bot_id": "B01V53YD4FJ",
+                "app_unfurl_url": "https:\/\/github.com\/EllaKaye\/crle",
+                "is_app_unfurl": true,
+                "app_id": "A01BP7R4KNY",
+                "fallback": "EllaKaye\/crle",
+                "text": "A demonstration package including C code",
+                "title": "EllaKaye\/crle",
+                "fields": [
+                    {
+                        "value": "C",
+                        "title": "Language",
+                        "short": true
+                    },
+                    {
+                        "value": "3 minutes ago",
+                        "title": "Last updated",
+                        "short": true
+                    }
+                ]
+            }
+        ],
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "MY8xy",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "In case it’s interesting for anyone to see in advance of the C Study Group next week, here’s an R package that contains my C implementation of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "rle()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". Having read the Deep R chapter, and Davis’s blog post once through, and got the implementation of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "c_rle()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " working in a single script, the package itself came together in less than 10 minutes, following Davis’s blog post shared earlier. "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/EllaKaye\/crle"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "user": "U035M81N341",
+        "type": "message",
+        "ts": "1718950954.350679",
+        "client_msg_id": "0b166c0f-a4f6-4033-a8d4-5e80ca5c29bd",
+        "text": "To get `c_rle()` working in a single script, I forked `cpackagedemo` and made use of the `csource()` function in there, using one of his `inst\/examples` as a starting point. <https:\/\/github.com\/EllaKaye\/cpackagedemo\/blob\/master\/inst\/examples\/c_rle.c>",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "c4cd2d45eb7b",
+            "image_72": "https:\/\/avatars.slack-edge.com\/2024-02-05\/6583494822997_c4cd2d45eb7bfbf5886a_72.jpg",
+            "first_name": "Ella",
+            "real_name": "Ella Kaye",
+            "display_name": "Ella Kaye",
+            "team": "T01DW9DLB2A",
+            "name": "ella.kaye",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "attachments": [
+            {
+                "id": 1,
+                "footer_icon": "https:\/\/slack.github.com\/static\/img\/favicon-neutral.png",
+                "color": "24292f",
+                "bot_id": "B01V53YD4FJ",
+                "app_unfurl_url": "https:\/\/github.com\/EllaKaye\/cpackagedemo\/blob\/master\/inst\/examples\/c_rle.c",
+                "is_app_unfurl": true,
+                "app_id": "A01BP7R4KNY",
+                "fallback": "<https:\/\/github.com\/EllaKaye\/cpackagedemo\/blob\/master\/inst\/examples\/c_rle.c | c_rle.c>",
+                "text": "```\nSEXP C_rle(SEXP x)\n{\n\t\/\/ no need to call PROTECT(x), it is already in use\n\tif (!Rf_isReal(x)) Rf_error(\"`x` should be of the type 'double'\");\n\t\n\tsize_t n = XLENGTH(x);\n\tconst double *xp = REAL(x);\n\t\n\tSEXP rle = PROTECT(Rf_allocVector(VECSXP, 2));\n\t\n\tSEXP values = PROTECT(Rf_allocVector(REALSXP, n));  \/\/ won't be GC'd\n\tdouble *valuesp = REAL(values);\n\t\n\tSEXP lengths = PROTECT(Rf_allocVector(INTSXP, n));  \/\/ won't be GC'd\n\tint *lengthsp = INTEGER(lengths);\n\t\n\tint index = 0;\n\tint rl = 1; \/\/ current run length\n\t\n\tfor (size_t i = 0; i < n - 1; ++i) {\n\t\t\/\/ COULD DO: DEAL WITH NA\n\t\t\n\t\t\/\/ run continues\n\t\tif (xp[i] == xp[i + 1]) {\n\t\t\trl++;\n\t\t} else { \/\/ run ends\n\t\t\t\/\/ update output vectors\n\t\t\tlengthsp[index] = rl;\n\t\t\tvaluesp[index] = xp[i];\n\t\t\t\n\t\t\t\/\/reset\n\t\t\tindex++;\n\t\t\trl = 1;\n\t\t}\n\t}\n\t\n\t\/\/ after loop, deal with final value\n\tif (xp[n - 2] == xp[n - 1]) {\n  \t\/\/ have already added 1 to rl in last loop iteration\n\t\t\/\/ and index is in right place too\n\t\tlengthsp[index] = rl; \n\t\tvaluesp[index] = xp[n - 1];\n\t} else {\n\t\tlengthsp[index] = 1;\n\t\tvaluesp[index] = xp[n - 1];\n\t}\n\t\n\t\/\/ COULD DO: can return if index == n - 1\n\t\n\t\/\/ now restrict to length of rle\n\tSEXP values_rle = PROTECT(Rf_allocVector(REALSXP, index + 1));  \/\/ won't be GC'd\n\tdouble *values_rlep = REAL(values_rle);\n\t\n\tSEXP lengths_rle = PROTECT(Rf_allocVector(INTSXP, index + 1));  \/\/ won't be GC'd\n\tint *lengths_rlep = INTEGER(lengths_rle);\n\t\n\tfor (size_t i = 0; i <= index; ++i) {\n\t\tvalues_rlep[i] = valuesp[i];\n\t\tlengths_rlep[i] = lengthsp[i];\n\t}\n\t\n\tSET_VECTOR_ELT(rle, 0, lengths_rle);\n\tSET_VECTOR_ELT(rle, 1, values_rle);\t\n\t\n\tUNPROTECT(5);  \/\/ pops five objects from the protect stack;\n\t\/\/ does not trigger garbage collection, so we can return `rle` now\n\t\n\treturn rle;  \/\/ R will retrieve and protect it\n}\n\n\/* R\nc_rle <- function(x)\n {\n if (!is.double(x)) x <- as.double(x)\n        s <- .Call(\"C_rle\", x, PACKAGE=\"c_rle\")\n\t\t\t\tnames(s) <- c(\"lengths\", \"values\")\n\t\t\t\tclass(s) <- \"rle\"\n\t\t\t\ts\n }\n R *\/\n\n```",
+                "title": "<https:\/\/github.com\/EllaKaye\/cpackagedemo\/blob\/master\/inst\/examples\/c_rle.c | c_rle.c>",
+                "footer": "<https:\/\/github.com\/EllaKaye\/cpackagedemo|EllaKaye\/cpackagedemo>",
+                "mrkdwn_in": [
+                    "text"
+                ]
+            }
+        ],
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "YMDQi",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "To get "
+                            },
+                            {
+                                "type": "text",
+                                "text": "c_rle()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " working in a single script, I forked "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cpackagedemo",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and made use of the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "csource()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " function in there, using one of his "
+                            },
+                            {
+                                "type": "text",
+                                "text": "inst\/examples",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as a starting point. "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/EllaKaye\/cpackagedemo\/blob\/master\/inst\/examples\/c_rle.c"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "reactions": [
+            {
+                "name": "eyes",
+                "users": [
+                    "U060RULT44D"
+                ],
+                "count": 1
+            }
+        ]
+    }
+]

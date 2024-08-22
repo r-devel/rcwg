@@ -1,0 +1,911 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18774] HDF5 library does not have FORTRAN support*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18774>\n\n--- Comment #1 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nThanks for the report but please provide more details and a minimal\nreproducible example.\n\nLibraries shipped with Rtools &gt;= 42 are not from Msys2, but are cross-compiled\nusing MXE. So it is not surprising if they are different from Msys2 (e.g.\nucrt64).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1722932871.128609",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "2Iyh0",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18774] HDF5 library does not have FORTRAN support",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18774"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for the report but please provide more details and a minimal\nreproducible example.\n\nLibraries shipped with Rtools >= 42 are not from Msys2, but are cross-compiled\nusing MXE. So it is not surprising if they are different from Msys2 (e.g.\nucrt64)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18775] New: copyListMatrix(s, t, TRUE) uses a STREXP as temporary SEXP storage*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18775>\n\n            Bug ID: 18775\n           Summary: copyListMatrix(s, t, TRUE) uses a STREXP as temporary\n                    SEXP storage\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: trivial\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:ikrylov@disroot.org|ikrylov@disroot.org>\n\nIn modern versions of R, `copyListMatrix` tries and fails to use a `STRSXP`\nvector as temporary storage for arbitrary `SEXP` objects:\n\n```\nif(byrow) {\n    PROTECT(tmp = allocVector(STRSXP, nr*nc)); \/\/ &lt;-- here\n    for (i = 0; i &lt; nr; i++)\n        for (j = 0; j &lt; nc; j++) {\n            SET_STRING_ELT(tmp, i + j * nr, duplicate(CAR(pt))); \/\/ &lt;-- and\nhere\n```\n\nThis code dates back to SVN revision 2 mostly unchanged and uses\n`STRING(tmp)[...]` in the original version; `VECSXP` lists didn't exist back\nthen. \n\nIt broke some time between r53696, which was the last version of R in which\n`matrix(&lt;pairlist&gt;, ...)` worked:\n\n```\n$ $R -q -s -e 'noquote(R.version.string); matrix(as.pairlist(1:12), 3)'\n[1] R version 2.13.0 Under development (unstable) (-- r53696)\n     [,1]        [,2]        [,3]        [,4]       \n[1,] \"Numeric,1\" \"Numeric,1\" \"Numeric,1\" \"Numeric,1\"\n[2,] \"Numeric,1\" \"Numeric,1\" \"Numeric,1\" \"Numeric,1\"\n[3,] \"Numeric,1\" \"Numeric,1\" \"Numeric,1\" \"Numeric,1\"\n```\n\n```\n$ $R -q -s -e 'noquote(R.version.string); matrix(as.pairlist(1:12), 3)'\n[1] R version 2.13.0 Under development (unstable) (-- r53697)\nError in matrix(as.pairlist(1:12), 3) : 'data' must be of a vector type\nExecution halted\n```\n\n...and r60943, where the function has been exported, probably for use in\nMatrix:\n\n```\n#include &lt;Rinternals.h&gt;\nSEXP foo(SEXP dest, SEXP src) {\n SEXP ddest = PROTECT(duplicate(dest));\n copyListMatrix(ddest, src, TRUE);\n UNPROTECT(1);\n return ddest;\n}\n```\n\n```\n$ $R -q -s -e 'noquote(R.version.string); dyn.load(\"ex.so\"); src &lt;-\nas.pairlist(1:12); dst &lt;- structure(vector(\"pairlist\", 12), dim = c(3, 4));\n.Call(\"foo\", dst, src)'\n[1] R Under development (unstable) (-- r60943)\nError: Value of SET_STRING_ELT() must be a 'CHARSXP' not a 'integer'\nExecution halted\n```\n\nThe only use of this function inside R itself is `do_matrix()`, and the call is\nunreachable:\n\n```\n    switch(TYPEOF(vals)) {\n        case LGLSXP:\n        case INTSXP:\n        case REALSXP:\n        case CPLXSXP:\n        case STRSXP:\n        case RAWSXP:\n        case EXPRSXP:\n        case VECSXP:\n            break;\n        default: \/\/ &lt;-- pairlist types land here\n            error(_(\"'data' must be of a vector type\"));\n    }\n\/\/ later:\n        if (isVector(vals)) \/\/ &lt;-- covers all types mentioned above\n            copyMatrix(ans, vals, byrow);\n        else \/\/ &lt;-- unreachable\n            copyListMatrix(ans, vals, byrow);\n```\n\nThe only uses on CRAN are a few declarations in the Rust code and a similarly\nunreachable call in Matrix, function `SEXP Mmatrix(SEXP args)`:\n\n```\ncargo_0.4.9.tar.gz:    pub fn Rf_copyListMatrix(arg1: SEXP, arg2: SEXP, arg3:\nRboolean);\ncaviarpd_0.3.9.tar.gz:    pub fn Rf_copyListMatrix(arg1: SEXP, arg2: SEXP,\narg3: Rboolean);\nfangs_0.2.13.tar.gz:    pub fn Rf_copyListMatrix(arg1: SEXP, arg2: SEXP, arg3:\nRboolean);\nMatrix_1.7-0.tar.gz:                    copyListMatrix(ans, vals, byrow);\nsalso_0.3.35.tar.gz:    pub fn Rf_copyListMatrix(arg1: SEXP, arg2: SEXP, arg3:\nRboolean);\n```\n\nThere [don't seem to be any uses on\nBioconductor](<https:\/\/code.bioconductor.org\/search\/search?q=copyListMatrix>).\n\nSince the pairlists have long been discouraged, the function is marked `eapi`\nand almost not used, can it be removed instead of being fixed to use `VECSXP`\nlists?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1722935328.499159",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "6tl",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18775] New: copyListMatrix(s, t, TRUE) uses a STREXP as temporary SEXP storage",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18775"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18775\n           Summary: copyListMatrix(s, t, TRUE) uses a STREXP as temporary\n                    SEXP storage\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: trivial\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIn modern versions of R, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "copyListMatrix",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " tries and fails to use a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "STRSXP",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nvector as temporary storage for arbitrary "
+                            },
+                            {
+                                "type": "text",
+                                "text": "SEXP",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " objects:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "if(byrow) {\n    PROTECT(tmp = allocVector(STRSXP, nr*nc)); \/\/ <-- here\n    for (i = 0; i < nr; i++)\n        for (j = 0; j < nc; j++) {\n            SET_STRING_ELT(tmp, i + j * nr, duplicate(CAR(pt))); \/\/ <-- and\nhere\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis code dates back to SVN revision 2 mostly unchanged and uses\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "STRING(tmp)[...]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in the original version; "
+                            },
+                            {
+                                "type": "text",
+                                "text": "VECSXP",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " lists didn't exist back\nthen. \n\nIt broke some time between r53696, which was the last version of R in which\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "matrix(<pairlist>, ...)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " worked:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$ $R -q -s -e 'noquote(R.version.string); matrix(as.pairlist(1:12), 3)'\n[1] R version 2.13.0 Under development (unstable) (-- r53696)\n     [,1]        [,2]        [,3]        [,4]       \n[1,] \"Numeric,1\" \"Numeric,1\" \"Numeric,1\" \"Numeric,1\"\n[2,] \"Numeric,1\" \"Numeric,1\" \"Numeric,1\" \"Numeric,1\"\n[3,] \"Numeric,1\" \"Numeric,1\" \"Numeric,1\" \"Numeric,1\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$ $R -q -s -e 'noquote(R.version.string); matrix(as.pairlist(1:12), 3)'\n[1] R version 2.13.0 Under development (unstable) (-- r53697)\nError in matrix(as.pairlist(1:12), 3) : 'data' must be of a vector type\nExecution halted\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n...and r60943, where the function has been exported, probably for use in\nMatrix:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "#include <Rinternals.h>\nSEXP foo(SEXP dest, SEXP src) {\n SEXP ddest = PROTECT(duplicate(dest));\n copyListMatrix(ddest, src, TRUE);\n UNPROTECT(1);\n return ddest;\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$ $R -q -s -e 'noquote(R.version.string); dyn.load(\"ex.so\"); src <-\nas.pairlist(1:12); dst <- structure(vector(\"pairlist\", 12), dim = c(3, 4));\n.Call(\"foo\", dst, src)'\n[1] R Under development (unstable) (-- r60943)\nError: Value of SET_STRING_ELT() must be a 'CHARSXP' not a 'integer'\nExecution halted\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe only use of this function inside R itself is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_matrix()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and the call is\nunreachable:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "    switch(TYPEOF(vals)) {\n        case LGLSXP:\n        case INTSXP:\n        case REALSXP:\n        case CPLXSXP:\n        case STRSXP:\n        case RAWSXP:\n        case EXPRSXP:\n        case VECSXP:\n            break;\n        default: \/\/ <-- pairlist types land here\n            error(_(\"'data' must be of a vector type\"));\n    }\n\/\/ later:\n        if (isVector(vals)) \/\/ <-- covers all types mentioned above\n            copyMatrix(ans, vals, byrow);\n        else \/\/ <-- unreachable\n            copyListMatrix(ans, vals, byrow);\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe only uses on CRAN are a few declarations in the Rust code and a similarly\nunreachable call in Matrix, function "
+                            },
+                            {
+                                "type": "text",
+                                "text": "SEXP Mmatrix(SEXP args)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "cargo_0.4.9.tar.gz:    pub fn Rf_copyListMatrix(arg1: SEXP, arg2: SEXP, arg3:\nRboolean);\ncaviarpd_0.3.9.tar.gz:    pub fn Rf_copyListMatrix(arg1: SEXP, arg2: SEXP,\narg3: Rboolean);\nfangs_0.2.13.tar.gz:    pub fn Rf_copyListMatrix(arg1: SEXP, arg2: SEXP, arg3:\nRboolean);\nMatrix_1.7-0.tar.gz:                    copyListMatrix(ans, vals, byrow);\nsalso_0.3.35.tar.gz:    pub fn Rf_copyListMatrix(arg1: SEXP, arg2: SEXP, arg3:\nRboolean);\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThere [don't seem to be any uses on\nBioconductor]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/code.bioconductor.org\/search\/search?q=copyListMatrix"
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\n\nSince the pairlists have long been discouraged, the function is marked "
+                            },
+                            {
+                                "type": "text",
+                                "text": "eapi",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nand almost not used, can it be removed instead of being fixed to use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "VECSXP",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nlists?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18776] New: Delayed S3 methods from reverse dependencies may fail*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18776>\n\n            Bug ID: 18776\n           Summary: Delayed S3 methods from reverse dependencies may fail\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Language\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:csardi.gabor@gmail.com|csardi.gabor@gmail.com>\n\nSince R 3.6.0 we can have delayed S3 methods in `NAMESPACE`. E.g. one version\nof the glue package has\n```\nS3method(waldo::compare_proxy,glue)\n```\nin `NAMESPACE`\n(<https:\/\/github.com\/tidyverse\/glue\/blob\/81bd4787fbf6f7e6a15c0317ff7bdd12fd842d0d\/NAMESPACE#L18C1-L19C1>)\n\nOTOH, the current CRAN version of the waldo package imports glue via\n`NAMESPACE`:\n```\nimportFrom(glue,glue)\n```\n(<https:\/\/github.com\/cran\/waldo\/blob\/e630c781bbb6e06aaa27a97db58ba80551aa8819\/NAMESPACE#L19>)\n\nThis causes an installation failure for waldo:\n```\n* installing *source* package ‘waldo’ ...\nstaged installation is only possible with locking\n** using non-staged installation\n** R\n** byte-compile and prepare package for lazy loading\nError in get(genname, envir = envir) : object 'compare_proxy' not found\nCalls: &lt;Anonymous&gt; ... register_S3_method_delayed -&gt; registerS3method -&gt; get\nExecution halted\nERROR: lazy loading failed for package ‘waldo’\n```\n\nWhile waldo is loading, it loads the glue package as a `NAMESPACE` dependency,\nand when glue is loading it considers waldo to be loaded (even though it is not\ncompletely loaded yet), which triggers the conditional method. But the generic\nis not at the right place yet for the conditional method, causing the failure.\n\nWhile it is possible to work around this by avoiding the glue import in waldo,\nthis is probably still a bug.\n\nOne easy way to reproduce this via Docker:\n```\ndocker run -ti <http:\/\/ghcr.io\/r-hub\/r-minimal\/r-minimal:4.4.1|ghcr.io\/r-hub\/r-minimal\/r-minimal:4.4.1> bash\ninstallr -p -c tidyverse\/glue@81bd478 cran\/waldo@0.5.2\n```\n\nIt is present in all R versions, AFAICT.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1722948094.492639",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "hfntb",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18776] New: Delayed S3 methods from reverse dependencies may fail",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18776"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18776\n           Summary: Delayed S3 methods from reverse dependencies may fail\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Language\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:csardi.gabor@gmail.com",
+                                "text": "csardi.gabor@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSince R 3.6.0 we can have delayed S3 methods in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NAMESPACE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". E.g. one version\nof the glue package has"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "S3method(waldo::compare_proxy,glue)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NAMESPACE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/tidyverse\/glue\/blob\/81bd4787fbf6f7e6a15c0317ff7bdd12fd842d0d\/NAMESPACE#L18C1-L19C1"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n\nOTOH, the current CRAN version of the waldo package imports glue via\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "NAMESPACE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "importFrom(glue,glue)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/cran\/waldo\/blob\/e630c781bbb6e06aaa27a97db58ba80551aa8819\/NAMESPACE#L19"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n\nThis causes an installation failure for waldo:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "* installing *source* package 'waldo' ...\nstaged installation is only possible with locking\n** using non-staged installation\n** R\n** byte-compile and prepare package for lazy loading\nError in get(genname, envir = envir) : object 'compare_proxy' not found\nCalls: <Anonymous> ... register_S3_method_delayed -> registerS3method -> get\nExecution halted\nERROR: lazy loading failed for package 'waldo'\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWhile waldo is loading, it loads the glue package as a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NAMESPACE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " dependency,\nand when glue is loading it considers waldo to be loaded (even though it is not\ncompletely loaded yet), which triggers the conditional method. But the generic\nis not at the right place yet for the conditional method, causing the failure.\n\nWhile it is possible to work around this by avoiding the glue import in waldo,\nthis is probably still a bug.\n\nOne easy way to reproduce this via Docker:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "docker run -ti "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/ghcr.io\/r-hub\/r-minimal\/r-minimal:4.4.1",
+                                "text": "ghcr.io\/r-hub\/r-minimal\/r-minimal:4.4.1"
+                            },
+                            {
+                                "type": "text",
+                                "text": " bash\ninstallr -p -c tidyverse\/glue@81bd478 cran\/waldo@0.5.2\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIt is present in all R versions, AFAICT."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18774] HDF5 library does not have FORTRAN support*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18774>\n\n--- Comment #2 from Caio Hamamura (<mailto:caiohamamura@gmail.com|caiohamamura@gmail.com>) ---\nOh, I understand. That is because I'm creating packages using the Fortran HDF5,\nso we need to be able to link to -lhdf5_fortran and have the include file\n'hdf5.mod' in the include directory. \n\nAlso, `pkg-config` should be able to find the library for ensuring a consistent\nbuilding system with `pkg-config --libs hdf5_fortran`, which doesn't work\nwithin the x86_64-w64-mingw32.static.posix environment, but the `pkg-config\n--libs hdf5` works for compiling C code linking to hdf5.\n\nTo test you can run this in R:\n\n```r\n# Write a simple fortran program to test linking to hdf5\nfilename &lt;- \"hdf5test.f90\"\nhdf5file &lt;- file(filename, \"w\")\n\nwrite(\"program hdf5_link_test\n  use hdf5\n  implicit none\n\n  integer :: error\n\n  ! Initialize the HDF5 library\n  call h5open_f(error)\n  if (error \/= 0) then\n      print *, 'Error initializing HDF5 library.'\n  else\n      print *, 'HDF5 library initialized successfully.'\n  end if\n\n  ! Close the HDF5 library\n  call h5close_f(error)\n  if (error \/= 0) then\n      print *, 'Error closing HDF5 library.'\n  else\n      print *, 'HDF5 library closed successfully.'\n  end if\n\nend program hdf5_link_test\", hdf5file)\n\n# This won't work because hdf5 fortran is not present in the default\nx86_64-w64-mingw32.static.posix environment\nsystem('gfortran -o hdf5_link_test hdf5test.f90\n-Ic:\/rtools44\/x86_64-w64-mingw32.static.posix\/include\n-Lc:\/rtools44\/x86_64-w64-mingw32.static.posix\/lib -lhdf5_fortran -lhdf5')\n\n# This will work because we install the hdf5 fortran package within the ucrt64\nenvironment\nsystem('pacman -S ucrt64\/mingw-w64-ucrt-x86_64-hdf5 --noconfirm')\nsystem('gfortran -o hdf5_link_test hdf5test.f90 -Ic:\/rtools44\/ucrt64\/include\n-Lc:\/rtools44\/ucrt64\/lib -lhdf5_fortran -lhdf5')\n\n\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1722961892.673579",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "\/y38u",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18774] HDF5 library does not have FORTRAN support",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18774"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Caio Hamamura ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:caiohamamura@gmail.com",
+                                "text": "caiohamamura@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nOh, I understand. That is because I'm creating packages using the Fortran HDF5,\nso we need to be able to link to -lhdf5_fortran and have the include file\n'hdf5.mod' in the include directory. \n\nAlso, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pkg-config",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " should be able to find the library for ensuring a consistent\nbuilding system with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pkg-config --libs hdf5_fortran",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which doesn't work\nwithin the x86_64-w64-mingw32.static.posix environment, but the `pkg-config\n--libs hdf5` works for compiling C code linking to hdf5.\n\nTo test you can run this in R:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "r\n# Write a simple fortran program to test linking to hdf5\nfilename <- \"hdf5test.f90\"\nhdf5file <- file(filename, \"w\")\n\nwrite(\"program hdf5_link_test\n  use hdf5\n  implicit none\n\n  integer :: error\n\n  ! Initialize the HDF5 library\n  call h5open_f(error)\n  if (error \/= 0) then\n      print *, 'Error initializing HDF5 library.'\n  else\n      print *, 'HDF5 library initialized successfully.'\n  end if\n\n  ! Close the HDF5 library\n  call h5close_f(error)\n  if (error \/= 0) then\n      print *, 'Error closing HDF5 library.'\n  else\n      print *, 'HDF5 library closed successfully.'\n  end if\n\nend program hdf5_link_test\", hdf5file)\n\n# This won't work because hdf5 fortran is not present in the default\nx86_64-w64-mingw32.static.posix environment\nsystem('gfortran -o hdf5_link_test hdf5test.f90\n-Ic:\/rtools44\/x86_64-w64-mingw32.static.posix\/include\n-Lc:\/rtools44\/x86_64-w64-mingw32.static.posix\/lib -lhdf5_fortran -lhdf5')\n\n# This will work because we install the hdf5 fortran package within the ucrt64\nenvironment\nsystem('pacman -S ucrt64\/mingw-w64-ucrt-x86_64-hdf5 --noconfirm')\nsystem('gfortran -o hdf5_link_test hdf5test.f90 -Ic:\/rtools44\/ucrt64\/include\n-Lc:\/rtools44\/ucrt64\/lib -lhdf5_fortran -lhdf5')\n\n\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18774] HDF5 library does not have FORTRAN support*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18774>\n\n--- Comment #3 from Caio Hamamura (<mailto:caiohamamura@gmail.com|caiohamamura@gmail.com>) ---\nOh, I understand. That is because I'm creating packages using the Fortran HDF5,\nso we need to be able to link to -lhdf5_fortran and have the include file\n'hdf5.mod' in the include directory.\n\nAlso, pkg-config should be able to find the library for ensuring a consistent\nbuilding system with pkg-config --libs hdf5_fortran, which doesn't work within\nthe x86_64-w64-mingw32.static.posix environment, but the pkg-config --libs hdf5\nworks for compiling C code linking to hdf5.\n\nTo test you can run this in R:\n\n```\nfilename &lt;- \"hdf5test.f90\"\nhdf5file &lt;- file(filename, \"w\")\n\nwrite(\"program hdf5_link_test\nuse hdf5\nimplicit none\n\n  integer :: error\n\n  ! Initialize the HDF5 library\n  call h5open_f(error)\n  if (error \/= 0) then\n      print *, 'Error initializing HDF5 library.'\n  else\n      print *, 'HDF5 library initialized successfully.'\n  end if\n\n  ! Close the HDF5 library\n  call h5close_f(error)\n  if (error \/= 0) then\n      print *, 'Error closing HDF5 library.'\n  else\n      print *, 'HDF5 library closed successfully.'\n  end if\nend program hdf5_link_test\", hdf5file)\n\nmingw32.static.posix environment\nsystem('gfortran -o hdf5_link_test hdf5test.f90\n-Ic:\/rtools44\/x86_64-w64-mingw32.static.posix\/include\n-Lc:\/rtools44\/x86_64-w64-mingw32.static.posix\/lib -lhdf5_fortran -lhdf5')\n\nsystem('pacman -S ucrt64\/mingw-w64-ucrt-x86_64-hdf5 --noconfirm')\nsystem('gfortran -o hdf5_link_test hdf5test.f90 -Ic:\/rtools44\/ucrt64\/include\n-Lc:\/rtools44\/ucrt64\/lib -lhdf5_fortran -lhdf5')\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1722962011.371139",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "t1HGa",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18774] HDF5 library does not have FORTRAN support",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18774"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Caio Hamamura ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:caiohamamura@gmail.com",
+                                "text": "caiohamamura@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nOh, I understand. That is because I'm creating packages using the Fortran HDF5,\nso we need to be able to link to -lhdf5_fortran and have the include file\n'hdf5.mod' in the include directory.\n\nAlso, pkg-config should be able to find the library for ensuring a consistent\nbuilding system with pkg-config --libs hdf5_fortran, which doesn't work within\nthe x86_64-w64-mingw32.static.posix environment, but the pkg-config --libs hdf5\nworks for compiling C code linking to hdf5.\n\nTo test you can run this in R:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "filename <- \"hdf5test.f90\"\nhdf5file <- file(filename, \"w\")\n\nwrite(\"program hdf5_link_test\nuse hdf5\nimplicit none\n\n  integer :: error\n\n  ! Initialize the HDF5 library\n  call h5open_f(error)\n  if (error \/= 0) then\n      print *, 'Error initializing HDF5 library.'\n  else\n      print *, 'HDF5 library initialized successfully.'\n  end if\n\n  ! Close the HDF5 library\n  call h5close_f(error)\n  if (error \/= 0) then\n      print *, 'Error closing HDF5 library.'\n  else\n      print *, 'HDF5 library closed successfully.'\n  end if\nend program hdf5_link_test\", hdf5file)\n\nmingw32.static.posix environment\nsystem('gfortran -o hdf5_link_test hdf5test.f90\n-Ic:\/rtools44\/x86_64-w64-mingw32.static.posix\/include\n-Lc:\/rtools44\/x86_64-w64-mingw32.static.posix\/lib -lhdf5_fortran -lhdf5')\n\nsystem('pacman -S ucrt64\/mingw-w64-ucrt-x86_64-hdf5 --noconfirm')\nsystem('gfortran -o hdf5_link_test hdf5test.f90 -Ic:\/rtools44\/ucrt64\/include\n-Lc:\/rtools44\/ucrt64\/lib -lhdf5_fortran -lhdf5')\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18777] New: nlme::gls crash when using corARMA but the data do not contain enough visits*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18777>\n\n            Bug ID: 18777\n           Summary: nlme::gls crash when using corARMA but the data do not\n                    contain enough visits\n           Product: R\n           Version: R 4.3.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Linux-Ubuntu\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Models\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:liming.li@roche.com|liming.li@roche.com>\n\ncorARMA requires two order parameters, p and q.\nWhen the data does not contain sufficient visits per subject, gls will crash.\n\nexample code is below\n\n```{r}\ndata &lt;- data.frame(\n  id = rep(1:10, each = 4),\n  visit = 1:4,\n  x = rnorm(40),\n  y = rnorm(40)\n)\ndata$visit2 &lt;- as.factor(data$visit)\n\nlibrary(nlme)\ngls(\n  y ~ x + visit2,\n  correlation = corARMA(form = ~ 1 | id, p = 5),\n  weights = varIdent(form = ~ 1 | visit2),\n  data = data\n)\n```\n\nin this data, we have fewer visit than the order, and you will see error\nmessage like\n\n```\nfree(): invalid next size (fast)\n```\n\nHere is the version \n\n```\n               _                           \nplatform       x86_64-pc-linux-gnu         \narch           x86_64                      \nos             linux-gnu                   \nsystem         x86_64, linux-gnu           \nstatus                                     \nmajor          4                           \nminor          3.1                         \nyear           2023                        \nmonth          06                          \nday            16                          \nsvn rev        84548                       \nlanguage       R                           \nversion.string R version 4.3.1 (2023-06-16)\nnickname       Beagle Scouts  \n```\n\nthe package version for nlme is `3.1-165`\n\npatch:\n\n```\nIndex: R\/corStruct.R\n===================================================================\n--- R\/corStruct.R       (revision 8428)\n+++ R\/corStruct.R       (working copy)\n@@ -1323,8 +1323,12 @@\n     class(object) &lt;- c(\"corAR1\", \"corStruct\")\n     Initialize(object, data)\n   } else {\n-    attr(object, \"maxLag\") &lt;-\n-      max(unlist(lapply(covar, function(el) max(abs(outer(el,el,\"-\"))))))\n+    maxLag &lt;- max(unlist(lapply(covar, function(el) diff(range(el)))))\n+    print(maxLag)\n+    if (maxLag + 1 &lt; attr(object, \"p\") || maxLag + 1 &lt; attr(object, \"q\")) {\n+      stop(\"maximum lag in data should be larger than the autogressive order\nand the moving average order for corARMA\")\n+    }\n+    attr(object, \"maxLag\") &lt;- maxLag\n     attr(object, \"factor\") &lt;- corFactor(object)\n     attr(object, \"logDet\") &lt;- -attr(attr(object, \"factor\"), \"logDet\")\n     object\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1723007811.252189",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "WMiiD",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18777] New: nlme::gls crash when using corARMA but the data do not contain enough visits",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18777"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18777\n           Summary: nlme::gls crash when using corARMA but the data do not\n                    contain enough visits\n           Product: R\n           Version: R 4.3.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Linux-Ubuntu\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Models\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:liming.li@roche.com",
+                                "text": "liming.li@roche.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\ncorARMA requires two order parameters, p and q.\nWhen the data does not contain sufficient visits per subject, gls will crash.\n\nexample code is below\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "{r}\ndata <- data.frame(\n  id = rep(1:10, each = 4),\n  visit = 1:4,\n  x = rnorm(40),\n  y = rnorm(40)\n)\ndata$visit2 <- as.factor(data$visit)\n\nlibrary(nlme)\ngls(\n  y ~ x + visit2,\n  correlation = corARMA(form = ~ 1 | id, p = 5),\n  weights = varIdent(form = ~ 1 | visit2),\n  data = data\n)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nin this data, we have fewer visit than the order, and you will see error\nmessage like\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "free(): invalid next size (fast)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nHere is the version \n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "               _                           \nplatform       x86_64-pc-linux-gnu         \narch           x86_64                      \nos             linux-gnu                   \nsystem         x86_64, linux-gnu           \nstatus                                     \nmajor          4                           \nminor          3.1                         \nyear           2023                        \nmonth          06                          \nday            16                          \nsvn rev        84548                       \nlanguage       R                           \nversion.string R version 4.3.1 (2023-06-16)\nnickname       Beagle Scouts  \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nthe package version for nlme is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "3.1-165",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\npatch:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: R\/corStruct.R\n===================================================================\n--- R\/corStruct.R       (revision 8428)\n+++ R\/corStruct.R       (working copy)\n@@ -1323,8 +1323,12 @@\n     class(object) <- c(\"corAR1\", \"corStruct\")\n     Initialize(object, data)\n   } else {\n-    attr(object, \"maxLag\") <-\n-      max(unlist(lapply(covar, function(el) max(abs(outer(el,el,\"-\"))))))\n+    maxLag <- max(unlist(lapply(covar, function(el) diff(range(el)))))\n+    print(maxLag)\n+    if (maxLag + 1 < attr(object, \"p\") || maxLag + 1 < attr(object, \"q\")) {\n+      stop(\"maximum lag in data should be larger than the autogressive order\nand the moving average order for corARMA\")\n+    }\n+    attr(object, \"maxLag\") <- maxLag\n     attr(object, \"factor\") <- corFactor(object)\n     attr(object, \"logDet\") <- -attr(attr(object, \"factor\"), \"logDet\")\n     object\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18777] nlme::gls crash when using corARMA but the data do not contain enough visits*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18777>\n\n--- Comment #1 from Liming Li (<mailto:liming.li@roche.com|liming.li@roche.com>) ---\nCreated attachment 3384\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3384&amp;action=edit>\nsolve nlme corARMA crash issue",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1723008055.601559",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "40GMp",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18777] nlme::gls crash when using corARMA but the data do not contain enough visits",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18777"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Liming Li ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:liming.li@roche.com",
+                                "text": "liming.li@roche.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3384\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3384&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3384&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nsolve nlme corARMA crash issue"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,225 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18688] correct overflow information in ?Dates*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18688>\n\nMikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jaganmn@mcmaster.ca\n\n--- Comment #2 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nIn case it helps:\n\n```\n&gt; n &lt;- 784351576776\n&gt; .Date(n)\n[1] \"2147483647-12-31\"\n&gt; .Date(n + 1)\n[1] \"-2147483648-01-01\"\n&gt; .Date(n + 1900 * 365.2425)\n[1] \"-2147481749-12-31\"\n&gt; .Date(n + 1900 * 365.2425 + 1)\n[1] NA\n&gt; .Call(utils:::C_tzcode_type)\n[1] \"internal\"\n```\n\nrevealing a distinct, low-level bug: the C function `do_formatPOSIXlt` (called\nfrom `print.Date-&gt;format.Date-&gt;format.POSIXlt`) does not check for integer\noverflow in `1900+tm.tm_year` before passing `tm` to `strftime` for output.\n\nMore directly:\n\n```\n&gt; x &lt;- as.POSIXlt(.Date(784352270736))\n&gt; str(unclass(x))\nList of 11\n $ sec   : num 0\n $ min   : int 0\n $ hour  : int 0\n $ mday  : int 31\n $ mon   : int 11\n $ year  : int 2147483647\n $ wday  : int 3\n $ yday  : int 364\n $ isdst : int 0\n $ zone  : chr \"UTC\"\n $ gmtoff: int 0\n - attr(*, \"tzone\")= chr \"UTC\"\n - attr(*, \"balanced\")= logi TRUE\n&gt; format(x)\n[1] \"-2147481749-12-31\"\n&gt; .Call(utils:::C_tzcode_type)\n[1] \"internal\"\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1711043513.808139",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Cupp",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18688] correct overflow information in ?Dates",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18688"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jaganmn@mcmaster.ca\n\n--- Comment #2 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nIn case it helps:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> n <- 784351576776\n> .Date(n)\n[1] \"2147483647-12-31\"\n> .Date(n + 1)\n[1] \"-2147483648-01-01\"\n> .Date(n + 1900 * 365.2425)\n[1] \"-2147481749-12-31\"\n> .Date(n + 1900 * 365.2425 + 1)\n[1] NA\n> .Call(utils:::C_tzcode_type)\n[1] \"internal\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nrevealing a distinct, low-level bug: the C function "
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_formatPOSIXlt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (called\nfrom "
+                            },
+                            {
+                                "type": "text",
+                                "text": "print.Date->format.Date->format.POSIXlt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") does not check for integer\noverflow in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "1900+tm.tm_year",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " before passing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tm",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "strftime",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for output.\n\nMore directly:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> x <- as.POSIXlt(.Date(784352270736))\n> str(unclass(x))\nList of 11\n $ sec   : num 0\n $ min   : int 0\n $ hour  : int 0\n $ mday  : int 31\n $ mon   : int 11\n $ year  : int 2147483647\n $ wday  : int 3\n $ yday  : int 364\n $ isdst : int 0\n $ zone  : chr \"UTC\"\n $ gmtoff: int 0\n - attr(*, \"tzone\")= chr \"UTC\"\n - attr(*, \"balanced\")= logi TRUE\n> format(x)\n[1] \"-2147481749-12-31\"\n> .Call(utils:::C_tzcode_type)\n[1] \"internal\"\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "reactions": [
+            {
+                "name": "+1",
+                "users": [
+                    "U01KXU8UNRX"
+                ],
+                "count": 1
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18688] correct overflow information in ?Dates*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18688>\n\nElin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |elin.waring@gmail.com\n\n--- Comment #3 from Elin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) ---\nThe meaning of billion can be ambiguous 10**9 or  10**12.  \n<https:\/\/en.wikipedia.org\/wiki\/Billion>\n\nI think it should be specified what definition of billion is being used.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1711076684.838709",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "n8aPM",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18688] correct overflow information in ?Dates",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18688"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nElin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |elin.waring@gmail.com\n\n--- Comment #3 from Elin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe meaning of billion can be ambiguous 10**9 or  10**12.  \n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/en.wikipedia.org\/wiki\/Billion"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nI think it should be specified what definition of billion is being used."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

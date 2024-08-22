@@ -1,0 +1,140 @@
+[
+    {
+        "user": "U06D8CVMZDG",
+        "type": "message",
+        "ts": "1705663516.836459",
+        "client_msg_id": "ebfb9fbf-08e5-4b21-8b2c-ebd3e839aff5",
+        "text": "I found `credit` really humbling. It’s been a minute since I got so thoroughly stuck even though the solution was right in front of me. I used integer truncation to do the checksum just fine, but then didn’t think about using it to get the first digits for checking card provider validity. Nor did I consider setting a counter to generate indices. In the end I resorted to looking at your solutions. Doesn’t help that I’ve started using the Vim extension and forcing myself to stick to it, which is adding a lot of mental overhead! :see_no_evil: So my solution ended up being very similar to <@U035M81N341>’s. <https:\/\/github.com\/jimgar\/c-study-group\/blob\/main\/week-01\/credit\/credit.c>",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "23cff9a84e50",
+            "image_72": "https:\/\/avatars.slack-edge.com\/2024-01-10\/6453146463508_23cff9a84e50988fbe34_72.png",
+            "first_name": "Jim",
+            "real_name": "Jim Gardner",
+            "display_name": "Jim Gardner",
+            "team": "T01DW9DLB2A",
+            "name": "jimmahgee",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1705076353.136199",
+        "parent_user_id": "U035M81N341",
+        "attachments": [
+            {
+                "id": 1,
+                "footer_icon": "https:\/\/slack.github.com\/static\/img\/favicon-neutral.png",
+                "color": "24292f",
+                "bot_id": "B01V53YD4FJ",
+                "app_unfurl_url": "https:\/\/github.com\/jimgar\/c-study-group\/blob\/main\/week-01\/credit\/credit.c",
+                "is_app_unfurl": true,
+                "app_id": "A01BP7R4KNY",
+                "fallback": "<https:\/\/github.com\/jimgar\/c-study-group\/blob\/main\/week-01\/credit\/credit.c | credit.c>",
+                "text": "```\n#include <cs50.h>\n#include <stdio.h>\n\nint validate_checksum(long number);\nint validate_american_express(long number);\nint validate_mastercard(long number);\nint validate_visa(long number);\n\nint main(void)\n{\n    \/\/ Prompt for input\n    long num = 0;\n    while (!num)\n    {\n    num = get_long(\"Number: \");\n    }\n\n    \/\/ Calculate and validate checksum\n    int checksum = validate_checksum(num);\n\n    if (checksum)\n    {\n        printf(\"INVALID\\n\");\n        return 0;\n    }\n\n    \/\/ Check card provider rules\n    if (validate_american_express(num))\n    {\n        printf(\"AMEX\\n\");\n    }\n    else if (validate_mastercard(num))\n    {\n        printf(\"MASTERCARD\\n\");\n    }\n    else if (validate_visa(num))\n    {\n        printf(\"VISA\\n\");\n    }\n    else\n    {\n        printf(\"INVALID\\n\");\n    }\n}\n\nint validate_checksum(long number)\n{\n    int checksum = 0;\n\n    \/\/ Work back through the first set of numbers, starting with\n    \/\/ the penultimate digit\n    long odds = number \/ 10;\n    do\n    {\n        int current_digit = odds % 10;\n        int multiplied = current_digit * 2;\n        if (multiplied > 9)\n        {\n            \/\/ `multiplied` will be between 10 (5 * 2), and 18 (9 * 2).\n            \/\/ i.e. first digit is always 1\n            multiplied = 1 + (multiplied % 10);\n        }\n        checksum += multiplied;\n\n        odds = odds \/ 100;\n    }\n    while (odds != 0);\n\n    \/\/ Add the second set of numbers to the checksum\n    long evens = number;\n    do\n    {\n        int current_digit = evens % 10;\n        checksum += current_digit;\n        evens = evens \/ 100;\n    }\n    while (evens != 0);\n\n    int checksum_modulo = checksum % 10;\n    return checksum_modulo;\n}\n\nint validate_american_express(long number)\n{\n    \/\/ 15 digits, starts with 34 or 37\n    \/\/ Examples that should pass:\n    \/\/ 378282246310005\n    \/\/ 371449635398431\n\n    int firsts = number \/ 1e13;\n    if (firsts == 34 || firsts == 37)\n    {\n        return 1;\n    }\n    else\n    {\n        return 0;\n    }\n}\n\nint validate_mastercard(long number)\n{\n    \/\/ 16 digits, starts with 51, 52, 53, 54, or 55\n    \/\/ Examples that should pass:\n    \/\/ 5555555555554444\n    \/\/ 5105105105105100\n\n    int firsts = number \/ 1e14;\n    if (firsts >= 51 && firsts <= 55)\n    {\n        return 1;\n    }\n    else\n    {\n        return 0;\n    }\n}\n\nint validate_visa(long number)\n{\n    \/\/ 13 or 16 digits, starts with 4\n    \/\/ Examples that should pass:\n    \/\/ 4111111111111111\n    \/\/ 4012888888881881\n    \/\/ 4222222222222\n    int short_form = number \/ 1e12;\n    int long_form = number \/ 1e15;\n    if (short_form == 4 || long_form == 4)\n    {\n        return 1;\n    }\n    else\n    {\n        return 0;\n    }\n}\n\n```",
+                "title": "<https:\/\/github.com\/jimgar\/c-study-group\/blob\/main\/week-01\/credit\/credit.c | credit.c>",
+                "footer": "<https:\/\/github.com\/jimgar\/c-study-group|jimgar\/c-study-group>",
+                "mrkdwn_in": [
+                    "text"
+                ]
+            }
+        ],
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "TEV0y",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I found "
+                            },
+                            {
+                                "type": "text",
+                                "text": "credit",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " really humbling. It’s been a minute since I got so thoroughly stuck even though the solution was right in front of me. I used integer truncation to do the checksum just fine, but then didn’t think about using it to get the first digits for checking card provider validity. Nor did I consider setting a counter to generate indices. In the end I resorted to looking at your solutions. Doesn’t help that I’ve started using the Vim extension and forcing myself to stick to it, which is adding a lot of mental overhead! "
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "see_no_evil",
+                                "unicode": "1f648"
+                            },
+                            {
+                                "type": "text",
+                                "text": " So my solution ended up being very similar to "
+                            },
+                            {
+                                "type": "user",
+                                "user_id": "U035M81N341"
+                            },
+                            {
+                                "type": "text",
+                                "text": "’s. "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/jimgar\/c-study-group\/blob\/main\/week-01\/credit\/credit.c"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "user": "U06360JH6FP",
+        "type": "message",
+        "ts": "1705737429.072769",
+        "edited": {
+            "user": "U06360JH6FP",
+            "ts": "1705737857.000000"
+        },
+        "client_msg_id": "8290A84F-6298-4FB6-88DF-18D83375D1F4",
+        "text": "<@U06D8CVMZDG> I think this solution is how the lecture was designed to lead to. BTW, I did some searching on truncation and there is a standard header, math.h, which provides a \/trunc\/ function out of the box. Which avoids some gotchas that relying on language semantics has. Also, trunc and floor are almost identical except in the case of negative numbers which can lead to another type of gotcha when the full domain of reals is possible",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "ccd10a98f3a6",
+            "image_72": "https:\/\/avatars.slack-edge.com\/2023-10-28\/6123580324497_ccd10a98f3a6190d4dd5_72.jpg",
+            "first_name": "Munawar",
+            "real_name": "Munawar Cheema",
+            "display_name": "Munawar Cheema",
+            "team": "T01DW9DLB2A",
+            "name": "munawar.a.cheema",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1705076353.136199",
+        "parent_user_id": "U035M81N341",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "\/+zk7",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "user",
+                                "user_id": "U06D8CVMZDG"
+                            },
+                            {
+                                "type": "text",
+                                "text": " I think this solution is how the lecture was designed to lead to. BTW, I did some searching on truncation and there is a standard header, math.h, which provides a \/trunc\/ function out of the box. Which avoids some gotchas that relying on language semantics has. Also, trunc and floor are almost identical except in the case of negative numbers which can lead to another type of gotcha when the full domain of reals is possible"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

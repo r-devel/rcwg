@@ -1,0 +1,299 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18706] double colon operator in formulas, in particular as relates to stats::offset*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18706>\n\nMichael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3334|0                           |1\n        is obsolete|                            |\n\n--- Comment #4 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nCreated attachment 3336\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3336&amp;action=edit>\nAdd a helper isOffset() to identify offset terms in more generality (with\ntests)\n\nUpdated to handle `stats:::offset()` as well, even though this is bad practice\nand not observed in practice\n(<https:\/\/github.com\/search?q=lang%3AR%20%2Fstats%3A%3A%3Aoffset%2F&amp;type=code>).\n\nThe code looks a little nicer, and I made the test more precise to the observed\nproblem (of `terms()` output). Updating now on the same GHA mirror PR.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1713510046.341099",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "OBib",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18706] double colon operator in formulas, in particular as relates to stats::offset",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18706"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMichael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3334|0                           |1\n        is obsolete|                            |\n\n--- Comment #4 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3336\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3336&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3336&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nAdd a helper isOffset() to identify offset terms in more generality (with\ntests)\n\nUpdated to handle "
+                            },
+                            {
+                                "type": "text",
+                                "text": "stats:::offset()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as well, even though this is bad practice\nand not observed in practice\n("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/search?q=lang%3AR%20%2Fstats%3A%3A%3Aoffset%2F&amp;type=code",
+                                "text": "https:\/\/github.com\/search?q=lang%3AR%20%2Fstats%3A%3A%3Aoffset%2F&type=code"
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\n\nThe code looks a little nicer, and I made the test more precise to the observed\nproblem (of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "terms()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " output). Updating now on the same GHA mirror PR."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18707] New: This seems to be a bug related to \"methods:::.TraceWithMethods()\"*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18707>\n\n            Bug ID: 18707\n           Summary: This seems to be a bug related to\n                    \"methods:::.TraceWithMethods()\"\n           Product: R\n           Version: R 4.3.x\n          Hardware: Other\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: S4methods\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:2283592023@qq.com|2283592023@qq.com>\n\nFor some reasons, I need to define a function, like the one below. In reality,\nboth the parameters and the body of the function are much more complex than\nthis example.\n```\nmyfun &lt;- function(method, insert, signature = NULL){\n  # Other code\n  trace(method, tracer = insert, signature = signature)\n  # Other code\n}\n```\n\nThen I create S3 and S4 methods with the same body, simulating the real-life\nscenario encountered.\n```\n# For S3\nS3Fun &lt;- function(x){ UseMethod(\"S3Fun\") }\nS3Fun.default &lt;- function(x){\n  .local &lt;- function(x){\n    x\n  }\n  .local(x)\n}\n\n# For S4\nsetGeneric(\"S4Fun\", function(x) standardGeneric(\"S4Fun\"))\nsetMethod(\"S4Fun\", \"ANY\", function(x){\n  .local &lt;- function(x){\n    x\n  }\n  .local(x)\n})\n```\n\nNext, I will proceed with the following steps:\n```\n# For S3\nmyfun(\"S3Fun.default\", insert = quote(message(\"tracing ...\")))\nS3Fun(1)\n\n# For S4\nmyfun(\"S4Fun\", insert = quote(message(\"tracing ...\")), signature = \"ANY\")\nS4Fun(1)\n```\n\nYou will find that \"S3Fun\" produces the expected result, while \"S4Fun\" throws\nan error.\n```\n# For S4\nError in eval(expr, p) : object 'insert' not found\n```\n\nI believe that \"trace()\" as a fundamental function should not produce such\ndifferences on S3 and S4. Therefore, I consider this to be a potential bug.\n\nI checked the source code of the \"trace()\" method and found that the problem\noccurred in this code in the \"`methods:::.TraceWithMethods()`\" method:\n```\nif (isRematched(def)) {\n  expr &lt;- substitute(trace(.local, tracer = tr, at = at,\n                           exit = ex, print = pr, edit = ed, where =\nsys.frame(sys.nframe())),\n                     list(tr = substitute(tracer), ex = exit, at = at, pr =\nprint, ed = edit))\n  at &lt;- 3L\n  tracer &lt;- expr\n  print &lt;- FALSE\n}\n```\n\nI think the 'substitute()' function should not be used here. When I change\n\"`substitute(tracer)`\" to just \"`tracer`\", the issue is indeed resolved.\n\nI think this segment of code should be modified to:\n```\nif (isRematched(def)) {\n  expr &lt;- substitute(trace(.local, tracer = tr, at = at,\n                           exit = ex, print = pr, edit = ed, where =\nsys.frame(sys.nframe())),\n                     list(tr = tracer, ex = exit, at = at, pr = print, ed =\nedit))\n  at &lt;- 3L\n  tracer &lt;- expr\n  print &lt;- FALSE\n}\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1713529529.191989",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "6P4g",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18707] New: This seems to be a bug related to \"methods:::.TraceWithMethods()\"",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18707"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18707\n           Summary: This seems to be a bug related to\n                    \"methods:::.TraceWithMethods()\"\n           Product: R\n           Version: R 4.3.x\n          Hardware: Other\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: S4methods\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:2283592023@qq.com",
+                                "text": "2283592023@qq.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nFor some reasons, I need to define a function, like the one below. In reality,\nboth the parameters and the body of the function are much more complex than\nthis example."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "myfun <- function(method, insert, signature = NULL){\n  # Other code\n  trace(method, tracer = insert, signature = signature)\n  # Other code\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThen I create S3 and S4 methods with the same body, simulating the real-life\nscenario encountered."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# For S3\nS3Fun <- function(x){ UseMethod(\"S3Fun\") }\nS3Fun.default <- function(x){\n  .local <- function(x){\n    x\n  }\n  .local(x)\n}\n\n# For S4\nsetGeneric(\"S4Fun\", function(x) standardGeneric(\"S4Fun\"))\nsetMethod(\"S4Fun\", \"ANY\", function(x){\n  .local <- function(x){\n    x\n  }\n  .local(x)\n})\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nNext, I will proceed with the following steps:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# For S3\nmyfun(\"S3Fun.default\", insert = quote(message(\"tracing ...\")))\nS3Fun(1)\n\n# For S4\nmyfun(\"S4Fun\", insert = quote(message(\"tracing ...\")), signature = \"ANY\")\nS4Fun(1)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nYou will find that \"S3Fun\" produces the expected result, while \"S4Fun\" throws\nan error."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# For S4\nError in eval(expr, p) : object 'insert' not found\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI believe that \"trace()\" as a fundamental function should not produce such\ndifferences on S3 and S4. Therefore, I consider this to be a potential bug.\n\nI checked the source code of the \"trace()\" method and found that the problem\noccurred in this code in the \""
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods:::.TraceWithMethods()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\" method:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "if (isRematched(def)) {\n  expr <- substitute(trace(.local, tracer = tr, at = at,\n                           exit = ex, print = pr, edit = ed, where =\nsys.frame(sys.nframe())),\n                     list(tr = substitute(tracer), ex = exit, at = at, pr =\nprint, ed = edit))\n  at <- 3L\n  tracer <- expr\n  print <- FALSE\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI think the 'substitute()' function should not be used here. When I change\n\""
+                            },
+                            {
+                                "type": "text",
+                                "text": "substitute(tracer)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\" to just \""
+                            },
+                            {
+                                "type": "text",
+                                "text": "tracer",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\", the issue is indeed resolved.\n\nI think this segment of code should be modified to:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "if (isRematched(def)) {\n  expr <- substitute(trace(.local, tracer = tr, at = at,\n                           exit = ex, print = pr, edit = ed, where =\nsys.frame(sys.nframe())),\n                     list(tr = tracer, ex = exit, at = at, pr = print, ed =\nedit))\n  at <- 3L\n  tracer <- expr\n  print <- FALSE\n}\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

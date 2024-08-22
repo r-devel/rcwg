@@ -1,0 +1,244 @@
+[
+    {
+        "user": "U01F5FZJ4MN",
+        "type": "message",
+        "ts": "1707919171.092719",
+        "edited": {
+            "user": "U01F5FZJ4MN",
+            "ts": "1707919323.000000"
+        },
+        "client_msg_id": "5a4b12c0-5aa1-4e66-b4f1-aa9d1f254939",
+        "text": "I was looking at R help system and noticed that there are a few strings used in the help system that are not tagged for translation. Here: <https:\/\/github.com\/r-devel\/r-svn\/blob\/b2c5976be46a2470d2174cb9b04667771f3b08de\/src\/library\/tools\/R\/dynamicHelp.R>\n\nThere's quite a lot going on in the `httpd` function, including hand-crafted HTML without translatable strings. For instance, lines 461-468 construct the disambiguation text for when a help topic is found on multiple packages, and \"(in package\" and \"in library\" are not translated.",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "g9f3e8927ec9",
+            "image_72": "https:\/\/secure.gravatar.com\/avatar\/9f3e8927ec981edfb1dc3320072539cc.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0002-72.png",
+            "first_name": "",
+            "real_name": "Elio",
+            "display_name": "Elio",
+            "team": "T01DW9DLB2A",
+            "name": "eliocampitelli",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "attachments": [
+            {
+                "id": 1,
+                "footer_icon": "https:\/\/slack.github.com\/static\/img\/favicon-neutral.png",
+                "color": "24292f",
+                "bot_id": "B01V53YD4FJ",
+                "app_unfurl_url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/b2c5976be46a2470d2174cb9b04667771f3b08de\/src\/library\/tools\/R\/dynamicHelp.R",
+                "is_app_unfurl": true,
+                "app_id": "A01BP7R4KNY",
+                "fallback": "<https:\/\/github.com\/r-devel\/r-svn\/blob\/b2c5976be46a2470d2174cb9b04667771f3b08de\/src\/library\/tools\/R\/dynamicHelp.R | dynamicHelp.R>",
+                "text": "```\n#  File src\/library\/tools\/R\/dynamicHelp.R\n#  Part of the R package, <https:\/\/www.R-project.org>\n#\n#  Copyright (C) 1995-2022 The R Core Team\n#\n#  This program is free software; you can redistribute it and\/or modify\n#  it under the terms of the GNU General Public License as published by\n#  the Free Software Foundation; either version 2 of the License, or\n#  (at your option) any later version.\n#\n#  This program is distributed in the hope that it will be useful,\n#  but WITHOUT ANY WARRANTY; without even the implied warranty of\n#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n#  GNU General Public License for more details.\n#\n#  A copy of the GNU General Public License is available at\n#  <https:\/\/www.R-project.org\/Licenses\/>\n\n\n## Helper function used to declare mime-type for files served by\n## dynamic help, and for base64-encoded files embedded in example\n## output (see code2html.R).\n\nmime_type <- function(path, ext = NULL)\n{\n    stopifnot(length(path) == 1L)\n    if (missing(ext)) ext <- file_ext(path)\n    switch(ext,\n           \"css\" = \"text\/css\",\n           \"js\" = \"text\/javascript\",  # for katex etc\n           \"sgml\" = \"text\/sgml\",    # in RGtk2\n           \"xml\" = \"text\/xml\",      # in RCurl (RFC 7303 recommends \"application\/xml\") \n           \"html\" = \"text\/html\",\n           \"htm\" = \"text\/html\",\n           \"xhtml\" = \"application\/xhtml+xml\",\n           \"php\" = \"application\/x-httpd-php\",\n           \"epub\" = \"application\/epub+zip\",\n           \"csv\" = \"text\/csv\",\n           \"json\" = \"application\/json\",\n           \"jsonld\"  = \"application\/ld+json\",\n           \"mjs\" = \"text\/javascript\",\n\n           ## common <img> types (see <https:\/\/developer.mozilla.org\/en-US\/docs\/Web\/Media\/Formats\/Image_types>)\n           \"gif\" = \"image\/gif\",     # in R2HTML\n           \"jpg\" = \"image\/jpeg\",\n           \"jpeg\" = \"image\/jpeg\",\n           \"png\" = \"image\/png\",\n           \"svg\" = \"image\/svg+xml\",\n           \"apng\" = \"image\/apng\",\n           \"avif\" = \"image\/avif\",\n           \"webp\" = \"image\/webp\",\n           \"bmp\" = \"image\/bmp\",\n           \"ico\" = \"image\/x-icon\",\n           \"tiff\" = \"image\/tiff\",\n           \"tif\" = \"image\/tiff\",\n\n           \"pdf\" = \"application\/pdf\",\n           \"eps\" =,\n           \"ps\" = \"application\/postscript\", # in GLMMGibbs, mclust\n\n           ## fonts\n           \"eot\" = \"application\/vnd.ms-fontobject\",\n           \"otf\" = \"font\/otf\",\n           \"ttf\" = \"font\/ttf\",\n           \"woff\" = \"font\/woff\",\n           \"woff2\" = \"font\/woff2\",\n\n           ## media\n           \"aac\" = \"audio\/aac\",\n           \"avi\" = \"video\/x-msvideo\",\n           \"cda\" = \"application\/x-cdf\",\n           \"mid\" = \"audio\/x-midi\",\n           \"midi\" = \"audio\/x-midi\",\n           \"mp3\" = \"audio\/mpeg\",\n           \"mp4\" = \"video\/mp4\",\n           \"mpeg\" = \"video\/mpeg\",\n           \"oga\" = \"audio\/ogg\",\n           \"ogv\" = \"video\/ogg\",\n           \"ogx\" = \"application\/ogg\",\n           \"opus\" = \"audio\/opus\",\n           \"3gp\" = \"video\/3gpp\",\n           \"3g2\" = \"video\/3gpp2\",\n           \"wav\" = \"audio\/wav\",\n           \"weba\" = \"audio\/webm\",\n           \"webm\" = \"video\/webm\",\n\n           ## archive \/ compression\n           \"bz\" = \"application\/x-bzip\",\n           \"bz2\" = \"application\/x-bzip2\",\n           \"gz\" = \"application\/gzip\",\n           \"rar\" = \"application\/vnd.rar\",\n           \"zip\" = \"application\/zip\",\n           \"7z\" = \"application\/x-7z-compressed\",\n           \"tar\" = \"application\/x-tar\",\n\n           ## default\n           \"text\/plain\")\n}\n\n\n## This may be asked for\n##  R.css, favicon.ico\n##  searches with path = \"\/doc\/html\/Search\"\n##  documentation with path = \"\/doc\/....\", possibly updated under tempdir()\/.R\n##  demos with path \"\/demo\/*\"\n##  Running demos, using path \"\/Demo\/*\"\n##  html help, either by topic, \/library\/<pkg>\/help\/<topic> (pkg=NULL means any)\n##             or by file, \/library\/<pkg>\/html\/<file>.html\n##\n##  As any R function, httpd() needs to produce R strings valid in their\n##  declared encoding (or valid in the native encoding if they have no\n##  encoding flag).  The C code of the server converts the response strings\n##  which are given as R strings to UTF-8, and hence the Content-type\n##  charset specified in the responses returned by httpd() must also be UTF-8\n##  (for errors and results passed as strings inside a list, this must be in\n##  sync with Rhttpd.c). \nhttpd <- function(path, query, ...)\n{\n    logHelpRequests <-\n        config_val_to_logical(Sys.getenv(\"_R_HTTPD_LOG_MESSAGES_\", \"FALSE\"))\n    if (logHelpRequests) {\n        message(sprintf(\"HTTPD-REQUEST %s%s\", path,\n                        if (is.null(query)) \"\"\n                        else { # query is a named chr vector \n                            paste(paste(names(query), query, sep = \"=\"),\n                                  collapse = \",\")\n                        }))\n    }\n    linksToTopics <-\n        config_val_to_logical(Sys.getenv(\"_R_HELP_LINKS_TO_TOPICS_\", \"TRUE\"))\n    .HTMLdirListing <- function(dir, base, up) {\n        files <- list.files(dir)    # note, no hidden files are listed\n        out <- HTMLheader(paste0(\"Listing of directory<br\/>\", dir),\n        \t\t  headerTitle = paste(\"R:\", dir), logo=FALSE,\n        \t\t  up = up)\n        if(!length(files))\n            out <- c(out, gettext(\"No files in this directory\"))\n        else {\n            urls <- paste0('<a href=\"', base, '\/', files, '\">', files, '<\/a>')\n            out <- c(out, \"<dl>\",\n                     paste0(\"<dd>\", mono(iconv(urls, \"\", \"UTF-8\")), \"<\/dd>\"),\n                     \"<\/dl>\")\n        }\n        out <- c(out, \"<hr\/>\\n<\/div><\/body><\/html>\")\n        list(payload = paste(out, collapse=\"\\n\"))\n    }\n\n    .HTMLusermanuals <- function() {\n        pkgs <- unlist(.get_standard_package_names())\n\n        out <- HTMLheader(\"R User Manuals\")\n        for (pkg in pkgs) {\n            vinfo <- getVignetteInfo(pkg)\n     \t    if (nrow(vinfo))\n         \tout <- c(out, paste0('<h2>Manuals in package', sQuote(pkg),'<\/h2>'),\n         \t\t makeVignetteTable(cbind(Package=pkg, vinfo[,c(\"File\", \"Title\", \"PDF\", \"R\"), drop = FALSE])))\n     \t}\n        out <- c(out, \"<hr\/>\\n<\/div><\/body><\/html>\")\n        list(payload = paste(out, collapse=\"\\n\"))\n    }\n\n    .HTMLsearch <- function(query) {\n    \tbool <- function(x) as.logical(as.numeric(x))\n        res <- if(identical(names(query), \"category\")) {\n            utils::help.search(keyword = query, verbose = 1L, use_UTF8 = TRUE)\n        } else if(identical(names(query), c(\"objects\", \"port\"))) {\n            .httpd_objects(query[\"port\"])\n        } else {\n            fields <- types <- NULL\n            args <- list(pattern = \".\")\n            for (i in seq_along(query))\n            \tswitch(names(query)[i],\n                       pattern = args$pattern <- query[i],\n                       fields.alias =\n                           if(bool(query[i]))\n                               fields <- c(fields, \"alias\"),\n                       fields.title =\n                           if(bool(query[i]))\n                               fields <- c(fields, \"title\"),\n                       fields.concept =\n                           if(bool(query[i]))\n                               fields <- c(fields, \"concept\"),\n                       fields.keyword =\n                           if(bool(query[i]))\n                               fields <- c(fields, \"keyword\"),\n                       ignore.case =\n                           args$ignore.case <- bool(query[i]),\n                       agrep =\n                           args$agrep <- bool(query[i]),\n                       <http:\/\/types.help|types.help> =\n                           if(bool(query[i]))\n                               types <- c(types, \"help\"),\n                       types.vignette =\n                           if(bool(query[i]))\n                               types <- c(types, \"vignette\"),\n                       types.demo =\n                           if(bool(query[i]))\n                               types <- c(types, \"demo\"),\n                       ## Possibly passed from utils:::printh…",
+                "title": "<https:\/\/github.com\/r-devel\/r-svn\/blob\/b2c5976be46a2470d2174cb9b04667771f3b08de\/src\/library\/tools\/R\/dynamicHelp.R | dynamicHelp.R>",
+                "footer": "<https:\/\/github.com\/r-devel\/r-svn|r-devel\/r-svn>",
+                "mrkdwn_in": [
+                    "text"
+                ]
+            }
+        ],
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "vzkih",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I was looking at R help system and noticed that there are a few strings used in the help system that are not tagged for translation. Here: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/b2c5976be46a2470d2174cb9b04667771f3b08de\/src\/library\/tools\/R\/dynamicHelp.R"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThere's quite a lot going on in the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "httpd",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " function, including hand-crafted HTML without translatable strings. For instance, lines 461-468 construct the disambiguation text for when a help topic is found on multiple packages, and \"(in package\" and \"in library\" are not translated."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "user": "U01DZUA88S1",
+        "type": "message",
+        "ts": "1707939886.110079",
+        "client_msg_id": "4dd514d7-c8c7-4c99-ac6c-2a638a50f14c",
+        "text": "<@U01N3ET8N82> has an open bug report with a patch to fix some untranslated strings: <https:\/\/bugs.r-project.org\/show_bug.cgi?id=17957>. I haven't looked in a lot detail, but I see that this includes some changes to dynamicHelp.R adding `domain = NA` to some cases, to indicate that the string should not be translated. It doesn't seem to touch the lines you mention, so it might be a separate issue, but worth comparing. Maybe if Mike has his patch on a fork somewhere, you could collaborate on how to update the file?",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "g580131f5a7a",
+            "image_72": "https:\/\/secure.gravatar.com\/avatar\/580131f5a7a4fa33c811dc6d20ab3ef8.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0004-72.png",
+            "first_name": "Heather",
+            "real_name": "Heather Turner (she\/her)",
+            "display_name": "Heather Turner",
+            "team": "T01DW9DLB2A",
+            "name": "ht",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "bEBQp",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "user",
+                                "user_id": "U01N3ET8N82"
+                            },
+                            {
+                                "type": "text",
+                                "text": " has an open bug report with a patch to fix some untranslated strings: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17957"
+                            },
+                            {
+                                "type": "text",
+                                "text": ". I haven't looked in a lot detail, but I see that this includes some changes to dynamicHelp.R adding "
+                            },
+                            {
+                                "type": "text",
+                                "text": "domain = NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to some cases, to indicate that the string should not be translated. It doesn't seem to touch the lines you mention, so it might be a separate issue, but worth comparing. Maybe if Mike has his patch on a fork somewhere, you could collaborate on how to update the file?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "user": "U01F5FZJ4MN",
+        "type": "message",
+        "ts": "1707940061.547599",
+        "client_msg_id": "58f1862b-8974-45b5-9590-ab2b7a60b7b7",
+        "text": "Thanks! I see that he updates some stuff for the messages, but not for the some of the text that is being shown in the help. Thanks for the pointer, I'll point those out and see if I can add them to the patch .",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "g9f3e8927ec9",
+            "image_72": "https:\/\/secure.gravatar.com\/avatar\/9f3e8927ec981edfb1dc3320072539cc.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0002-72.png",
+            "first_name": "",
+            "real_name": "Elio",
+            "display_name": "Elio",
+            "team": "T01DW9DLB2A",
+            "name": "eliocampitelli",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "h89lD",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Thanks! I see that he updates some stuff for the messages, but not for the some of the text that is being shown in the help. Thanks for the pointer, I'll point those out and see if I can add them to the patch ."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "text": "Take a look at the beautiful thing :heart_eyes_cat: Extremely hacky and brittle, but kind of working as a POC.",
+        "files": [
+            {
+                "id": "F06JYGF01BN",
+                "mode": "hidden_by_limit"
+            }
+        ],
+        "upload": false,
+        "user": "U01F5FZJ4MN",
+        "display_as_bot": false,
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "cayLG",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Take a look at the beautiful thing "
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "heart_eyes_cat",
+                                "unicode": "1f63b"
+                            },
+                            {
+                                "type": "text",
+                                "text": " Extremely hacky and brittle, but kind of working as a POC."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "type": "message",
+        "ts": "1707954341.380209",
+        "client_msg_id": "e176ac76-2093-4396-93ec-205fb715db69",
+        "reactions": [
+            {
+                "name": "raised_hands",
+                "users": [
+                    "U01KXU8UNRX",
+                    "U02K6E32EP2",
+                    "U01F5FZJ4MN",
+                    "U04Q1PMBFJ9",
+                    "U063EH97801",
+                    "U027JEHGZRA",
+                    "U01N3ET8N82",
+                    "U062MDESA6S"
+                ],
+                "count": 8
+            },
+            {
+                "name": "raised_hands::skin-tone-2",
+                "users": [
+                    "U01DZUA88S1"
+                ],
+                "count": 1
+            }
+        ]
+    }
+]

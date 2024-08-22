@@ -1,0 +1,749 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18133] R on Windows does not remove one of its own test files in TMPDIR*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18133>\n\n--- Comment #8 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nCreated attachment 3329\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3329&amp;action=edit>\nOpen the Rscript* files with FILE_FLAG_DELETE_ON_CLOSE set\n\nOn second thought, there does exist a workaround for the `Rscript*` files. This\npatch makes sure that they disappear not later than when the creating process\nterminates (even if it crashes!). Not sure whether to keep or remove the\n`unlink(ifile)` now.\n\nThe `Rtmp*` directories belonging to the child in Henrik's  attachment 3011\nstill stay, unfortunately. Will this be enough to satisfy `R CMD check`?\n\nI also removed the extra `+1` after `strlen()` because it resulted in a `NUL`\nbyte being added at the end of the command line file, but that's mostly\ncosmetic and can be kept as is.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1712920474.462439",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ucV",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18133] R on Windows does not remove one of its own test files in TMPDIR",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18133"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #8 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3329\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3329&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3329&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nOpen the Rscript* files with FILE_FLAG_DELETE_ON_CLOSE set\n\nOn second thought, there does exist a workaround for the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rscript*",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " files. This\npatch makes sure that they disappear not later than when the creating process\nterminates (even if it crashes!). Not sure whether to keep or remove the\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "unlink(ifile)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " now.\n\nThe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rtmp*",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " directories belonging to the child in Henrik's  attachment 3011\nstill stay, unfortunately. Will this be enough to satisfy "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R CMD check",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "?\n\nI also removed the extra "
+                            },
+                            {
+                                "type": "text",
+                                "text": "+1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " after "
+                            },
+                            {
+                                "type": "text",
+                                "text": "strlen()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " because it resulted in a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NUL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nbyte being added at the end of the command line file, but that's mostly\ncosmetic and can be kept as is."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18686] Uninitialized variable in toms708.c*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18686>\n\n--- Comment #1 from Rik Huijzer (<mailto:rikhuijzer@pm.me|rikhuijzer@pm.me>) ---\nUpon further inspection, it turns out that the initialized variable is never\nused (which would explain why this uninitialized variable was never seen in\nproduction). \n\nAt line 224, did_bup is set to FALSE. When going via the goto L131 on line 235,\ndid_bup remains FALSE, so the bup function is never called with b0-n since it\nwill only be called if did_bub is TRUE (which happens on line 246, but the goto\nL131 jumps over that).\n\nProbably still good to explicitly initialize variables (e.g.,\n<https:\/\/stackoverflow.com\/questions\/35877190>). But apart from the fact that the\ncode could use some cleaning up, the initialized n does not result in a bug.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1712932035.951949",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "MEyV3",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18686] Uninitialized variable in toms708.c",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18686"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Rik Huijzer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:rikhuijzer@pm.me",
+                                "text": "rikhuijzer@pm.me"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nUpon further inspection, it turns out that the initialized variable is never\nused (which would explain why this uninitialized variable was never seen in\nproduction). \n\nAt line 224, did_bup is set to FALSE. When going via the goto L131 on line 235,\ndid_bup remains FALSE, so the bup function is never called with b0-n since it\nwill only be called if did_bub is TRUE (which happens on line 246, but the goto\nL131 jumps over that).\n\nProbably still good to explicitly initialize variables (e.g.,\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stackoverflow.com\/questions\/35877190"
+                            },
+                            {
+                                "type": "text",
+                                "text": "). But apart from the fact that the\ncode could use some cleaning up, the initialized n does not result in a bug."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18686] Uninitialized variable in toms708.c*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18686>\n\nRik Huijzer (<mailto:rikhuijzer@pm.me|rikhuijzer@pm.me>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |INVALID\n             Status|UNCONFIRMED                 |CLOSED",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1712932070.393109",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "qhHJA",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18686] Uninitialized variable in toms708.c",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18686"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nRik Huijzer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:rikhuijzer@pm.me",
+                                "text": "rikhuijzer@pm.me"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |INVALID\n             Status|UNCONFIRMED                 |CLOSED"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18701] New: ?print.default gives misleading description of na.print=*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18701>\n\n            Bug ID: 18701\n           Summary: ?print.default gives misleading description of\n                    na.print=\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Documentation\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>\n\n`?print.default` describes `na.print=`:\n\n&gt; a character string which is used to indicate `NA` values in printed output, or `NULL` (see 'Details').\n\nHowever, \"na.print\" is not mentioned at all in Details.\n\nInvestigating, it looks like `na.print=` _only_ applies to character columns:\n\n```\nDF=data.frame(NA, NA_integer_, NA_real_, NA_complex_, NA_character_)\n# print(DF, na.print='xx')\n#   NA. NA_integer_. NA_real_. NA_complex_. NA_character_.\n# 1  NA           NA        NA           NA             xx\n```\n\nWhich is somewhat alluded to by this paragraph:\n\n&gt; The default for printing `NA`s is to print `NA` (without quotes) unless this is a character `NA` _and_ `quote = FALSE`, when `&lt;NA&gt;` is printed.\n\nThat at least implies NA printing is handled differently for character vs.\nnon-character columns, but doesn't cover `na.print=` explicitly.\n\nThe supplied patch is a suggestion for extending the Details section to\ndescribe `na.print`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1712960146.722939",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "f9j",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18701] New: ?print.default gives misleading description of na.print=",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18701"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18701\n           Summary: ?print.default gives misleading description of\n                    na.print=\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Documentation\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "?print.default",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " describes "
+                            },
+                            {
+                                "type": "text",
+                                "text": "na.print=",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "a character string which is used to indicate "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " values in printed output, or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (see 'Details')."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nHowever, \"na.print\" is not mentioned at all in Details.\n\nInvestigating, it looks like "
+                            },
+                            {
+                                "type": "text",
+                                "text": "na.print=",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " "
+                            },
+                            {
+                                "type": "text",
+                                "text": "only",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " applies to character columns:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "DF=data.frame(NA, NA_integer_, NA_real_, NA_complex_, NA_character_)\n# print(DF, na.print='xx')\n#   NA. NA_integer_. NA_real_. NA_complex_. NA_character_.\n# 1  NA           NA        NA           NA             xx\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWhich is somewhat alluded to by this paragraph:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "The default for printing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "s is to print "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (without quotes) unless this is a character "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " "
+                            },
+                            {
+                                "type": "text",
+                                "text": "and",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " "
+                            },
+                            {
+                                "type": "text",
+                                "text": "quote = FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", when "
+                            },
+                            {
+                                "type": "text",
+                                "text": "<NA>",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is printed."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThat at least implies NA printing is handled differently for character vs.\nnon-character columns, but doesn't cover "
+                            },
+                            {
+                                "type": "text",
+                                "text": "na.print=",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " explicitly.\n\nThe supplied patch is a suggestion for extending the Details section to\ndescribe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "na.print",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18701] ?print.default gives misleading description of na.print=*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18701>\n\n--- Comment #1 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nCreated attachment 3330\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3330&amp;action=edit>\nDescribe handling of na.print in ?print.default\n\nLooks like the attachment didn't go through in the initial post.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1712960216.814819",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "tig",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18701] ?print.default gives misleading description of na.print=",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18701"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3330\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3330&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3330&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nDescribe handling of na.print in ?print.default\n\nLooks like the attachment didn't go through in the initial post."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18702] New: print.data.frame does not respect na.print for missing column names*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18702>\n\n            Bug ID: 18702\n           Summary: print.data.frame does not respect na.print for missing\n                    column names\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Misc\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>\n\nIn `na.print`, `print.default()` handles missing vector names:\n\n```\nprint(setNames(TRUE, NA_character_), na.print=\"xxx\")\n#  xxx \n# TRUE\n```\n\nHowever, this does not work for `print.data.frame()`:\n\n```\nx = setNames(data.frame(TRUE), NA_character_)\n<http:\/\/is.na|is.na>(names(x))\n# [1] TRUE\nprint(x, na.print=\"xxx\")\n#     NA\n# 1 TRUE\n```\n\nThat means it's impossible to disambiguate columns named `\"NA\"` from missing\ncolumn names:\n\n```\nprint(setNames(data.frame(TRUE, FALSE), c(\"NA\", NA_character_)),\nna.print=\"xxx\")\n    NA    NA\n1 TRUE FALSE\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1712960580.038139",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "FLJw",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18702] New: print.data.frame does not respect na.print for missing column names",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18702"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18702\n           Summary: print.data.frame does not respect na.print for missing\n                    column names\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Misc\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIn "
+                            },
+                            {
+                                "type": "text",
+                                "text": "na.print",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "print.default()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " handles missing vector names:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "print(setNames(TRUE, NA_character_), na.print=\"xxx\")\n#  xxx \n# TRUE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nHowever, this does not work for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "print.data.frame()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "x = setNames(data.frame(TRUE), NA_character_)\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(names(x))\n# [1] TRUE\nprint(x, na.print=\"xxx\")\n#     NA\n# 1 TRUE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThat means it's impossible to disambiguate columns named "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"NA\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " from missing\ncolumn names:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "print(setNames(data.frame(TRUE, FALSE), c(\"NA\", NA_character_)),\nna.print=\"xxx\")\n    NA    NA\n1 TRUE FALSE\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

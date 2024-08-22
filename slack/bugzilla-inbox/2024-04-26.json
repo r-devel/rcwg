@@ -1,0 +1,875 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17988] nlme::getGroupsFormula on corARMA gives 'form' argument must be a formula*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17988>\n\nThomas Zwagerman (<mailto:thozwa@bas.ac.uk|thozwa@bas.ac.uk>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |thozwa@bas.ac.uk\n\n--- Comment #3 from Thomas Zwagerman (<mailto:thozwa@bas.ac.uk|thozwa@bas.ac.uk>) ---\nCreated attachment 3346\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3346&amp;action=edit>\nAdd error when corARMA() is called with p=q=0\n\nSmall patch to implement #Comment2 suggestion 2, by Martin Maechler.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1714131093.233679",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "fdRb",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17988] nlme::getGroupsFormula on corARMA gives 'form' argument must be a formula",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17988"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThomas Zwagerman ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:thozwa@bas.ac.uk",
+                                "text": "thozwa@bas.ac.uk",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |thozwa@bas.ac.uk\n\n--- Comment #3 from Thomas Zwagerman ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:thozwa@bas.ac.uk",
+                                "text": "thozwa@bas.ac.uk",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3346\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3346&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3346&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nAdd error when corARMA() is called with p=q=0\n\nSmall patch to implement #Comment2 suggestion 2, by Martin Maechler."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17988] nlme::getGroupsFormula on corARMA gives 'form' argument must be a formula*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17988>\n\nSebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |ASSIGNED\n\n--- Comment #4 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\nThanks for revisiting this PR.\n\n(In reply to Martin Maechler from comment #2)\n&gt; we should at least try to see if some of the very many reverse dependencies\n&gt; of `nlme`  would \"notice\".\n\nUsing a CRAN\/BIOC sync from two weeks ago, and checking 275 strong direct\nrevdeps (of about 400 in total on CRAN+BIOC) as well as 1421 recursive ones, I\ncan report that none of these packages would notice if `nlme::corARMA()` failed\nwith the default setting of p = 0 = q.\n\nI'm in favour of this change as it will give a much more helpful error message\nfor, e.g.,\n```\ngls(follicles ~ 1, Ovary, correlation = corARMA(form = ~ 1 | Mare))\n```\nthat *pretends* to fit ARMA error terms.\nCurrently we get this strange error (which motivated the original report, I\nguess):\n```\nError in getGroupsFormula.default(correlation) : \n  'form' argument must be a formula\n```\nWith the proposed patch:\n```\nError in corARMA(form = ~1 | Mare) : \n  at least one of 'p' and 'q' should be &gt; 0, use 'corAR1(0, *)' instead\n```\nI'd use a different message, though, without the confusing final clause.\n`corAR1(0)` isn't a valid replacement for `corARMA()` if you really intended to\nfit ARMA errors. The documented way to get uncorrelated errors is\n`correlation=NULL`. Theoretically, `corAR1(0, fixed=TRUE)` produces an\nequivalent uncorrelated fit (and it did in a simple example I just tested), but\nit unnecessarily complicates the model structure and misleadingly prints as\n```\nCorrelation Structure: AR(1)\n Formula: ~1 \n Parameter estimate(s):\nPhi \n  0 \n```\n\nI have set the status to ASSIGNED and will take care of committing the change\n(with the tweaked error message, no need for an updated patch) to the nlme\ntrunk.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1714140889.870639",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "jrot",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17988] nlme::getGroupsFormula on corARMA gives 'form' argument must be a formula",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17988"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |ASSIGNED\n\n--- Comment #4 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for revisiting this PR.\n\n(In reply to Martin Maechler from comment #2)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "we should at least try to see if some of the very many reverse dependencies\nof "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nlme",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  would \"notice\"."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nUsing a CRAN\/BIOC sync from two weeks ago, and checking 275 strong direct\nrevdeps (of about 400 in total on CRAN+BIOC) as well as 1421 recursive ones, I\ncan report that none of these packages would notice if "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nlme::corARMA()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " failed\nwith the default setting of p = 0 = q.\n\nI'm in favour of this change as it will give a much more helpful error message\nfor, e.g.,"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "gls(follicles ~ 1, Ovary, correlation = corARMA(form = ~ 1 | Mare))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pretends",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to fit ARMA error terms.\nCurrently we get this strange error (which motivated the original report, I\nguess):"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Error in getGroupsFormula.default(correlation) : \n  'form' argument must be a formula\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "With the proposed patch:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Error in corARMA(form = ~1 | Mare) : \n  at least one of 'p' and 'q' should be > 0, use 'corAR1(0, *)' instead\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I'd use a different message, though, without the confusing final clause.\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "corAR1(0)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " isn't a valid replacement for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "corARMA()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " if you really intended to\nfit ARMA errors. The documented way to get uncorrelated errors is\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "correlation=NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". Theoretically, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "corAR1(0, fixed=TRUE)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " produces an\nequivalent uncorrelated fit (and it did in a simple example I just tested), but\nit unnecessarily complicates the model structure and misleadingly prints as"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Correlation Structure: AR(1)\n Formula: ~1 \n Parameter estimate(s):\nPhi \n  0 \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI have set the status to ASSIGNED and will take care of committing the change\n(with the tweaked error message, no need for an updated patch) to the nlme\ntrunk."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18711] New: qbinom can return incorrect values for large size*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18711>\n\n            Bug ID: 18711\n           Summary: qbinom can return incorrect values for large size\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Accuracy\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:cchang@grailbio.com|cchang@grailbio.com>\n\nCreated attachment 3347\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3347&amp;action=edit>\nqDiscrete_search.h with correct backtrack\n\nIn R 4.1.1+, qbinom(p=0.05,size=6040:6045,prob=0.995) returns\n\n[1] 6001 6041 6042 6043 6004 6005\n\nwhen the correct value is\n\n[1] 6001 6002 6003 6004 6004 6005\n\n(see also\n<https:\/\/stackoverflow.com\/questions\/77023859\/unexpected-behavior-with-qbinom> )\n\nI believe this is due to an oversight in src\/nmath\/qDiscrete_search.h in the y\n&gt;= _yLarge_ case: it is necessary to backtrack after jumping too far, and this\nbacktrack does occur when jumping too far down, but not when jumping too far\nup.  I have attached a slightly-modified qDiscrete_search.h that should have\ncorrect backtracking.\n\nSince this code is also used by qnbinom(), I expect that it is also affected.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1714149532.048059",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "172R",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18711] New: qbinom can return incorrect values for large size",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18711"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18711\n           Summary: qbinom can return incorrect values for large size\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Accuracy\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:cchang@grailbio.com",
+                                "text": "cchang@grailbio.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3347\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3347&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3347&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nqDiscrete_search.h with correct backtrack\n\nIn R 4.1.1+, qbinom(p=0.05,size=6040:6045,prob=0.995) returns\n\n[1] 6001 6041 6042 6043 6004 6005\n\nwhen the correct value is\n\n[1] 6001 6002 6003 6004 6004 6005\n\n(see also\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stackoverflow.com\/questions\/77023859\/unexpected-behavior-with-qbinom"
+                            },
+                            {
+                                "type": "text",
+                                "text": " )\n\nI believe this is due to an oversight in src\/nmath\/qDiscrete_search.h in the y"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "= "
+                            },
+                            {
+                                "type": "text",
+                                "text": "yLarge",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " case: it is necessary to backtrack after jumping too far, and this"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "backtrack does occur when jumping too far down, but not when jumping too far\nup.  I have attached a slightly-modified qDiscrete_search.h that should have\ncorrect backtracking.\n\nSince this code is also used by qnbinom(), I expect that it is also affected."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18710] Partial matching issues in the R sources*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18710>\n\nMichael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3345|0                           |1\n        is obsolete|                            |\n\n--- Comment #1 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nCreated attachment 3348\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3348&amp;action=edit>\nFix all code relying on partial matching to be on by default\n\nFound a few mistakes in the above, fixing which led to more partial matches in\nother regression tests.\n\nThis now passes `make check` under the `warnPartialMatch*` options set to\n`TRUE`; some `.Rout` diffs still exist owing to issues in recommended-priority\npackages.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1714159945.076079",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "dnoXD",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18710] Partial matching issues in the R sources",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18710"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMichael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3345|0                           |1\n        is obsolete|                            |\n\n--- Comment #1 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3348\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3348&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3348&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nFix all code relying on partial matching to be on by default\n\nFound a few mistakes in the above, fixing which led to more partial matches in\nother regression tests.\n\nThis now passes "
+                            },
+                            {
+                                "type": "text",
+                                "text": "make check",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " under the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "warnPartialMatch*",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " options set to\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "; some "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".Rout",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " diffs still exist owing to issues in recommended-priority\npackages."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18712] New: make `outer()` set dimname names [with patch]*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18712>\n\n            Bug ID: 18712\n           Summary: make `outer()` set dimname names [with patch]\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Wishlist\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:Thomas.SOEIRO@ap-hm.fr|Thomas.SOEIRO@ap-hm.fr>\n\nHere is a patch to make `outer()` set dimname names automatically.\nIt is useful e.g. when processing `outer()` output with `array2DF()` to get\nproper names instead of `Var1` and `Var2`.\n\n```\n--- a\/outer.R        2024-04-26 20:17:22.074583600 +0200\n+++ b\/outer.R        2024-04-26 20:21:57.930734600 +0200\n@@ -18,6 +18,7 @@\n\n outer &lt;- function (X, Y, FUN = \"*\", ...)\n {\n+    dnn &lt;- c(deparse(substitute(X)), deparse(substitute(Y)))\n     if(is.array(X)) {\n         dX &lt;- dim(X)\n         nx &lt;- dimnames(X)\n@@ -57,6 +58,7 @@\n        if(no.nx) nx &lt;- vector(\"list\", length(dX)) else\n        if(no.ny) ny &lt;- vector(\"list\", length(dY))\n        dimnames(robj) &lt;- c(nx, ny)\n+    names(dimnames(robj)) &lt;- dnn\n     }\n     robj\n }\n```\n\nReprEx from `example(outer)`:\n```\nx &lt;- 1:9; names(x) &lt;- x\ny &lt;- 2:8; names(y) &lt;- paste(y,\":\", sep = \"\")\n```\n\nWithout the patch (no dimname names):\n```\nouter(y, x, `^`) |&gt; str()\n#  num [1:7, 1:9] 2 3 4 5 6 7 8 4 9 16 ...\n#  - attr(*, \"dimnames\")=List of 2\n#   ..$ : chr [1:7] \"2:\" \"3:\" \"4:\" \"5:\" ...\n#   ..$ : chr [1:9] \"1\" \"2\" \"3\" \"4\" ...\n\nouter(y, x, `^`) |&gt; array2DF() |&gt; str()\n# 'data.frame': 63 obs. of  3 variables:\n#  $ Var1 : chr  \"2:\" \"3:\" \"4:\" \"5:\" ...\n#  $ Var2 : chr  \"1\" \"1\" \"1\" \"1\" ...\n#  $ Value: num  2 3 4 5 6 7 8 4 9 16 ...\n```\n\nWith the patch (dimname names):\n```\nouter(y, x, `^`) |&gt; str()\n#  num [1:7, 1:9] 2 3 4 5 6 7 8 4 9 16 ...\n#  - attr(*, \"dimnames\")=List of 2\n#   ..$ y: chr [1:7] \"2:\" \"3:\" \"4:\" \"5:\" ...\n#   ..$ x: chr [1:9] \"1\" \"2\" \"3\" \"4\" ...\n\nouter(y, x, `^`) |&gt; array2DF() |&gt; str()\n# 'data.frame': 63 obs. of  3 variables:\n#  $ y    : chr  \"2:\" \"3:\" \"4:\" \"5:\" ...\n#  $ x    : chr  \"1\" \"1\" \"1\" \"1\" ...\n#  $ Value: num  2 3 4 5 6 7 8 4 9 16 ...\n```\n\n---\n\nThe current patch is very basic. Should we provide fallback for cases like\nthis?\n```\nouter(c(a = 1, b = 1), 1:3, paste) |&gt; str()\n# chr [1:2, 1:3] \"1 1\" \"1 1\" \"1 2\" \"1 2\" \"1 3\" \"1 3\"\n# - attr(*, \"dimnames\")=List of 2\n# ..$ c(a = 1, b = 1): chr [1:2] \"a\" \"b\"\n# ..$ 1:3            : NULL\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1714161963.307449",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "GmlE",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18712] New: make ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "outer()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " set dimname names [with patch]",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18712"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18712\n           Summary: make "
+                            },
+                            {
+                                "type": "text",
+                                "text": "outer()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " set dimname names [with patch]\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Wishlist\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Thomas.SOEIRO@ap-hm.fr",
+                                "text": "Thomas.SOEIRO@ap-hm.fr",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nHere is a patch to make "
+                            },
+                            {
+                                "type": "text",
+                                "text": "outer()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " set dimname names automatically.\nIt is useful e.g. when processing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "outer()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " output with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "array2DF()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to get\nproper names instead of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Var1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Var2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "--- a\/outer.R        2024-04-26 20:17:22.074583600 +0200\n+++ b\/outer.R        2024-04-26 20:21:57.930734600 +0200\n@@ -18,6 +18,7 @@\n\n outer <- function (X, Y, FUN = \"*\", ...)\n {\n+    dnn <- c(deparse(substitute(X)), deparse(substitute(Y)))\n     if(is.array(X)) {\n         dX <- dim(X)\n         nx <- dimnames(X)\n@@ -57,6 +58,7 @@\n        if(no.nx) nx <- vector(\"list\", length(dX)) else\n        if(no.ny) ny <- vector(\"list\", length(dY))\n        dimnames(robj) <- c(nx, ny)\n+    names(dimnames(robj)) <- dnn\n     }\n     robj\n }\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nReprEx from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "example(outer)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "x <- 1:9; names(x) <- x\ny <- 2:8; names(y) <- paste(y,\":\", sep = \"\")\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWithout the patch (no dimname names):"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "outer(y, x, `^`) |> str()\n#  num [1:7, 1:9] 2 3 4 5 6 7 8 4 9 16 ...\n#  - attr(*, \"dimnames\")=List of 2\n#   ..$ : chr [1:7] \"2:\" \"3:\" \"4:\" \"5:\" ...\n#   ..$ : chr [1:9] \"1\" \"2\" \"3\" \"4\" ...\n\nouter(y, x, `^`) |> array2DF() |> str()\n# 'data.frame': 63 obs. of  3 variables:\n#  $ Var1 : chr  \"2:\" \"3:\" \"4:\" \"5:\" ...\n#  $ Var2 : chr  \"1\" \"1\" \"1\" \"1\" ...\n#  $ Value: num  2 3 4 5 6 7 8 4 9 16 ...\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWith the patch (dimname names):"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "outer(y, x, `^`) |> str()\n#  num [1:7, 1:9] 2 3 4 5 6 7 8 4 9 16 ...\n#  - attr(*, \"dimnames\")=List of 2\n#   ..$ y: chr [1:7] \"2:\" \"3:\" \"4:\" \"5:\" ...\n#   ..$ x: chr [1:9] \"1\" \"2\" \"3\" \"4\" ...\n\nouter(y, x, `^`) |> array2DF() |> str()\n# 'data.frame': 63 obs. of  3 variables:\n#  $ y    : chr  \"2:\" \"3:\" \"4:\" \"5:\" ...\n#  $ x    : chr  \"1\" \"1\" \"1\" \"1\" ...\n#  $ Value: num  2 3 4 5 6 7 8 4 9 16 ...\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n---\n\nThe current patch is very basic. Should we provide fallback for cases like\nthis?"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "outer(c(a = 1, b = 1), 1:3, paste) |> str()\n# chr [1:2, 1:3] \"1 1\" \"1 1\" \"1 2\" \"1 2\" \"1 3\" \"1 3\"\n# - attr(*, \"dimnames\")=List of 2\n# ..$ c(a = 1, b = 1): chr [1:2] \"a\" \"b\"\n# ..$ 1:3            : NULL\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18712] make `outer()` set dimname names [with patch]*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18712>\n\n--- Comment #1 from Thomas Soeiro (<mailto:Thomas.SOEIRO@ap-hm.fr|Thomas.SOEIRO@ap-hm.fr>) ---\nAlso, it would be useful to mention `array2DF()` in `?outer()` (like in\n`?tapply()`, see\n<https:\/\/github.com\/r-devel\/r-svn\/commit\/d0ecb34d79d83c537b2b26f238ed441af7eafd9b>).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1714163598.427529",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "O63Gj",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18712] make ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "outer()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " set dimname names [with patch]",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18712"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Thomas Soeiro ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Thomas.SOEIRO@ap-hm.fr",
+                                "text": "Thomas.SOEIRO@ap-hm.fr",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nAlso, it would be useful to mention "
+                            },
+                            {
+                                "type": "text",
+                                "text": "array2DF()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "?outer()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (like in\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "?tapply()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", see\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/commit\/d0ecb34d79d83c537b2b26f238ed441af7eafd9b"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

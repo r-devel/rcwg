@@ -1,0 +1,656 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18746] ?all.equal should mention it ignores the S4 bit?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18746>\n\nLuke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |luke@stat.uiowa.edu\n\n--- Comment #1 from Luke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) ---\nI'm not sure we want to advertise that it is possible to have the S4 bit\/flag\nset without having a class attribute. That seems like a mis-feature we should\ntry to get rid of.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718536964.927659",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "d3QxF",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18746] ?all.equal should mention it ignores the S4 bit?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18746"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nLuke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |luke@stat.uiowa.edu\n\n--- Comment #1 from Luke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI'm not sure we want to advertise that it is possible to have the S4 bit\/flag\nset without having a class attribute. That seems like a mis-feature we should\ntry to get rid of."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18708] Custom class partialMatchWarning for partial matching*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18708>\n\nLuke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |luke@stat.uiowa.edu\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #2 from Luke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) ---\nSome comments on the patch:\n\nThis addresses partial matching in function arguments and attributes but not\n`$`. Should that be handled as well?\n\nTo be useful for a computational response the condition object should have\nslots with the relevant data. Something like\n\n- argument (or supplied)\n- formal\n- object \n\nThese names aren't great but would kind of work for all three cases. If we want\nbetter slot names we would probably need separate sub-classes for each of the\nthree separate settings. Unfortunately `match()` isn't passed the function,\nonly the formals, so filing in `object` would require more invasive changes\nthat probably aren't worth it for now.\n\nThe signaling isn't right. This should catch and return the error and suppress\nthe warning, but with the proposed patch it does neither:\n\n```\noptions(warnPartialMatchArgs = TRUE)\nfun &lt;- function(x, yy) c(x, yy)\nv &lt;- suppressWarnings(\n    withCallingHandlers(tryCatch({ fun(1, y = 2); stop(\"A\")},\n                                 error = identity),\n                        warning = identity))\n```\n\nTo make sure the error is caught you have to make sure the handler stack is\nrestored before returning. That isn't an issue for signaling an error since the\ndefault error handler does not return.\n\nTo make sure warnings can be suppressed you have to signal them with a\n`muffleWarnings` restart on the stack. Setting up a restart from C is currently\ntoo painful to contemplate, which is why the implementation of `warningcall()`\ncheats by calling back to `base::signalSimpleWarning`, That is probably the\nbest option here for now: call `base::warning()` to do the work:\n\n```\nattribute_hidden \/* for now *\/\nvoid R_signalWarningCondition(SEXP cond)\n{\n    static SEXP condSym = NULL;\n    static SEXP expr = NULL;\n    if (expr == NULL) {\n        condSym = install(\"cond\");\n        expr = R_ParseString(\"warning(cond)\");\n        R_PreserveObject(expr);\n    }\n    SEXP env = PROTECT(R_NewEnv(R_BaseNamespace, FALSE, 0));\n    defineVar(condSym, cond, env);\n    evalKeepVis(expr, env);\n    UNPROTECT(1); \/* env*\/\n}\n```\n\nI committed changes along these lines r86755. I did not handle the dollar case\nor add any regression tests, and I left out the `object` field. I'll leave this\nopen a bit in case you want to provide those.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718548084.768969",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "9LII",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18708] Custom class partialMatchWarning for partial matching",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18708"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nLuke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |luke@stat.uiowa.edu\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #2 from Luke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nSome comments on the patch:\n\nThis addresses partial matching in function arguments and attributes but not\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "$",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". Should that be handled as well?\n\nTo be useful for a computational response the condition object should have\nslots with the relevant data. Something like\n\n- argument (or supplied)\n- formal\n- object \n\nThese names aren't great but would kind of work for all three cases. If we want\nbetter slot names we would probably need separate sub-classes for each of the\nthree separate settings. Unfortunately "
+                            },
+                            {
+                                "type": "text",
+                                "text": "match()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " isn't passed the function,\nonly the formals, so filing in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "object",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " would require more invasive changes\nthat probably aren't worth it for now.\n\nThe signaling isn't right. This should catch and return the error and suppress\nthe warning, but with the proposed patch it does neither:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "options(warnPartialMatchArgs = TRUE)\nfun <- function(x, yy) c(x, yy)\nv <- suppressWarnings(\n    withCallingHandlers(tryCatch({ fun(1, y = 2); stop(\"A\")},\n                                 error = identity),\n                        warning = identity))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nTo make sure the error is caught you have to make sure the handler stack is\nrestored before returning. That isn't an issue for signaling an error since the\ndefault error handler does not return.\n\nTo make sure warnings can be suppressed you have to signal them with a\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "muffleWarnings",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " restart on the stack. Setting up a restart from C is currently\ntoo painful to contemplate, which is why the implementation of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "warningcall()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ncheats by calling back to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "base::signalSimpleWarning",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", That is probably the\nbest option here for now: call "
+                            },
+                            {
+                                "type": "text",
+                                "text": "base::warning()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to do the work:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "attribute_hidden \/* for now *\/\nvoid R_signalWarningCondition(SEXP cond)\n{\n    static SEXP condSym = NULL;\n    static SEXP expr = NULL;\n    if (expr == NULL) {\n        condSym = install(\"cond\");\n        expr = R_ParseString(\"warning(cond)\");\n        R_PreserveObject(expr);\n    }\n    SEXP env = PROTECT(R_NewEnv(R_BaseNamespace, FALSE, 0));\n    defineVar(condSym, cond, env);\n    evalKeepVis(expr, env);\n    UNPROTECT(1); \/* env*\/\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI committed changes along these lines r86755. I did not handle the dollar case\nor add any regression tests, and I left out the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "object",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " field. I'll leave this\nopen a bit in case you want to provide those."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18746] ?all.equal should mention it ignores the S4 bit?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18746>\n\n--- Comment #2 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nThanks Luke, I think that's a separate issue, I was just giving the minimal\npossible example to illustrate the point that `all.equal()` does not consider\nthe S4 bit when evaluating equality. We get the same from a classed example:\n\n```\nx=structure(1:10, class='foo')\nall.equal(x, asS4(x))\n# [1] TRUE\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718558517.651239",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "AtNxA",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18746] ?all.equal should mention it ignores the S4 bit?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18746"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks Luke, I think that's a separate issue, I was just giving the minimal\npossible example to illustrate the point that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "all.equal()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does not consider\nthe S4 bit when evaluating equality. We get the same from a classed example:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "x=structure(1:10, class='foo')\nall.equal(x, asS4(x))\n# [1] TRUE\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18746] ?all.equal should mention it ignores the S4 bit?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18746>\n\n--- Comment #3 from Luke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) ---\n(In reply to Michael Chirico from comment #2)\nIts a non-issue if the S4 bit is only set for an object with an S4 class, which\nis what we should work towards.\n\nAlso: the words 'S4 bit' should never have to appear in user-facing\ndocumentation. No one should have to think about a low level mechanism like\nthat while trying to get real work done.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718560702.439919",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "qiR",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18746] ?all.equal should mention it ignores the S4 bit?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18746"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Luke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Michael Chirico from comment #2)\nIts a non-issue if the S4 bit is only set for an object with an S4 class, which\nis what we should work towards.\n\nAlso: the words 'S4 bit' should never have to appear in user-facing\ndocumentation. No one should have to think about a low level mechanism like\nthat while trying to get real work done."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18746] ?all.equal should mention it ignores the S4 bit?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18746>\n\n--- Comment #4 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\n&gt; the words 'S4 bit' should never have to appear in user-facing documentation.\n\nFrom\n[`?isS4`](<https:\/\/github.com\/r-devel\/r-svn\/blob\/f369537ff89affe8707b6ce5108162a1cde4dc23\/src\/library\/base\/man\/isS4.Rd#L50-L60>)\n\n&gt; `isS4` always returns `TRUE` or `FALSE` according to whether the internal flag marking an S4 object has been turned on for this object.\n\nShould mention of the flag just be limited to `?isS4`, then, or is it \"internal\nflag\" vs. \"S4 bit\" phrasing that's the point of contention?\n\nAnyway, I don't think we need to mention the implementation detail to make\nprogress here. The following as an example in `?all.equal` would be enough:\n\n```\nx &lt;- structure(1:10, class=\"S3class\")\nall.equal(x, asS4(x)) # comparison is not affected by isS4()\n```\n\n&gt; Its a non-issue if the S4 bit is only set for an object with an S4 class, which is what we should work towards.\n\nThe issue is how to do this when creating an object based on an S4 object,\nensuring S4-ness is preserved, all within C.\n\nConcretely, are we doing something wrong in these cases?\n\n<https:\/\/github.com\/Rdatatable\/data.table\/blob\/bab0f1c7f08264d573d317524418b6e106169ecb\/src\/assign.c#L147-L156>\n\n<https:\/\/github.com\/Rdatatable\/data.table\/blob\/bab0f1c7f08264d573d317524418b6e106169ecb\/src\/dogroups.c#L480-L488>\n\nOr is the trouble not with what we do in C, but with our goal of writing good\nregression tests on whether we've handled S4 objects correctly?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718570986.858989",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "pKcTB",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18746] ?all.equal should mention it ignores the S4 bit?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18746"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "the words 'S4 bit' should never have to appear in user-facing documentation."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nFrom\n["
+                            },
+                            {
+                                "type": "text",
+                                "text": "?isS4",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/f369537ff89affe8707b6ce5108162a1cde4dc23\/src\/library\/base\/man\/isS4.Rd#L50-L60"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "isS4",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " always returns "
+                            },
+                            {
+                                "type": "text",
+                                "text": "TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " according to whether the internal flag marking an S4 object has been turned on for this object."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nShould mention of the flag just be limited to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "?isS4",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", then, or is it \"internal\nflag\" vs. \"S4 bit\" phrasing that's the point of contention?\n\nAnyway, I don't think we need to mention the implementation detail to make\nprogress here. The following as an example in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "?all.equal",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " would be enough:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "x <- structure(1:10, class=\"S3class\")\nall.equal(x, asS4(x)) # comparison is not affected by isS4()\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Its a non-issue if the S4 bit is only set for an object with an S4 class, which is what we should work towards."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe issue is how to do this when creating an object based on an S4 object,\nensuring S4-ness is preserved, all within C.\n\nConcretely, are we doing something wrong in these cases?\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/Rdatatable\/data.table\/blob\/bab0f1c7f08264d573d317524418b6e106169ecb\/src\/assign.c#L147-L156"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/Rdatatable\/data.table\/blob\/bab0f1c7f08264d573d317524418b6e106169ecb\/src\/dogroups.c#L480-L488"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nOr is the trouble not with what we do in C, but with our goal of writing good\nregression tests on whether we've handled S4 objects correctly?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18702] print.data.frame does not respect na.print for missing column names*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18702>\n\n--- Comment #4 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nHi Martin, thanks for the update. Unfortunately I'm a bit lost trying to follow\nyour comment+reasoning, my best guess is that Markdown formatting interfered\nwith your examples? Many of them don't parse, in particular many have unquoted\n`NA` on the LHS of assignment. Are those all with backticks perhaps?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1718571965.191479",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Hf2x",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18702] print.data.frame does not respect na.print for missing column names",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18702"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nHi Martin, thanks for the update. Unfortunately I'm a bit lost trying to follow\nyour comment+reasoning, my best guess is that Markdown formatting interfered\nwith your examples? Many of them don't parse, in particular many have unquoted\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " on the LHS of assignment. Are those all with backticks perhaps?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

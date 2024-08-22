@@ -1,0 +1,982 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18656] New: Allow interrupting pmatch()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18656>\n\n            Bug ID: 18656\n           Summary: Allow interrupting pmatch()\n           Product: R\n           Version: R 4.3.x\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:ikrylov@disroot.org|ikrylov@disroot.org>\n\nCreated attachment 3289\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3289&amp;action=edit>\nCheck for interrupts during the second pass\n\nOriginally discussed on\n[R-devel](<https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2023-December\/083066.html>).\nGiven a large data frame (1M rows) and a large, poorly matching set of rows to\nextract, `[.data.frame` -&gt; `pmatch()` will take a quadratic amount of\n`strncmp()` calls to complete, which takes a long time. There are no\ndestructors to run manually inside `do_pmatch`, so there is little additional\ncomplexity in an extra call to `R_CheckUserInterrupt()`.\n\nThanks to Simon Urbanek for letting me know about a faster idiom (`counter &amp;\nbitmask`) than I had originally suggested (`if (--counter &lt; threshold) { reset\ncounter... }`).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1705565194.368369",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "GRkc",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18656] New: Allow interrupting pmatch()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18656"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18656\n           Summary: Allow interrupting pmatch()\n           Product: R\n           Version: R 4.3.x\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3289\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3289&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3289&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCheck for interrupts during the second pass\n\nOriginally discussed on\n[R-devel]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2023-December\/083066.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\nGiven a large data frame (1M rows) and a large, poorly matching set of rows to\nextract, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "[.data.frame",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " -> "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pmatch()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " will take a quadratic amount of\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "strncmp()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " calls to complete, which takes a long time. There are no\ndestructors to run manually inside "
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_pmatch",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", so there is little additional\ncomplexity in an extra call to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_CheckUserInterrupt()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nThanks to Simon Urbanek for letting me know about a faster idiom (`counter &\nbitmask`) than I had originally suggested (`if (--counter < threshold) { reset\ncounter... }`)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18655] Enhancements to `*wilcox` functions for large population sizes*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655>\n\n--- Comment #4 from Andreas Löffler (<mailto:andreas.loeffler@gmail.com|andreas.loeffler@gmail.com>) ---\nThere is also a discussion in the python community about this, I will add a\nremark in their thread but I am not sure whether these things can be related to\neach other, <https:\/\/github.com\/scipy\/scipy\/pull\/4933>\n(it seems that python is running the test much faster then R)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1705565415.949059",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "h2D",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18655] Enhancements to ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "*wilcox",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " functions for large population sizes",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Andreas Löffler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:andreas.loeffler@gmail.com",
+                                "text": "andreas.loeffler@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThere is also a discussion in the python community about this, I will add a\nremark in their thread but I am not sure whether these things can be related to\neach other, "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/scipy\/scipy\/pull\/4933"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n(it seems that python is running the test much faster then R)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18655] Enhancements to `*wilcox` functions for large population sizes*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655>\n\n--- Comment #5 from Andreas Löffler (<mailto:andreas.loeffler@gmail.com|andreas.loeffler@gmail.com>) ---\nThere is also a discussion in the python community about this, I will add a\nremark in their thread but I am not sure whether these things can be related to\neach other, <https:\/\/github.com\/scipy\/scipy\/pull\/4933>\n(it seems that python is running the test much faster then R)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1705565428.922039",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "fcUB",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18655] Enhancements to ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "*wilcox",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " functions for large population sizes",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Andreas Löffler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:andreas.loeffler@gmail.com",
+                                "text": "andreas.loeffler@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThere is also a discussion in the python community about this, I will add a\nremark in their thread but I am not sure whether these things can be related to\neach other, "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/scipy\/scipy\/pull\/4933"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n(it seems that python is running the test much faster then R)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18655] Enhancements to `*wilcox` functions for large population sizes*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #6 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nJust some thoughts\/remark from one R-core member:\n\n1. Thanks a lot to Andreas Loeffler; the link to its first post (Jan 15) is\n   <https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2024-January\/083124.html>\n\n2. shaving a few percent of speed is *not* important. Rather is well\nmaintainable, i.e., nicely human readable and verifyable (e.g., close to the\npublished algorithm notation!) source code,\nand of course getting rid of extraneous large memory consumption and other\nscaling issues of usual ways of recursive algorithms.\n\nAlso, of course going from O((mn)^2)  to O(mn)  memory consumption *is*\ncrucial.\nSo, thank you very much, Andreas and Aidan.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1705569266.085289",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "nQMbV",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18655] Enhancements to ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "*wilcox",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " functions for large population sizes",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #6 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nJust some thoughts\/remark from one R-core member:\n\n1. Thanks a lot to Andreas Loeffler; the link to its first post (Jan 15) is\n   "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2024-January\/083124.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n2. shaving a few percent of speed is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " important. Rather is well\nmaintainable, i.e., nicely human readable and verifyable (e.g., close to the\npublished algorithm notation!) source code,\nand of course getting rid of extraneous large memory consumption and other\nscaling issues of usual ways of recursive algorithms.\n\nAlso, of course going from O((mn)^2)  to O(mn)  memory consumption "
+                            },
+                            {
+                                "type": "text",
+                                "text": "is",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ncrucial.\nSo, thank you very much, Andreas and Aidan."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18655] Enhancements to `*wilcox` functions for large population sizes*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655>\n\n--- Comment #8 from Aidan H Lakshman (<mailto:AHL27@pitt.edu|AHL27@pitt.edu>) ---\n(In reply to Martin Maechler from comment #6)\n\nThanks for your comments and feedback, Martin (and for linking the r-devel\ndiscussion)! \n\nAgreed. My view is that this implementation is simpler and thus more\nmaintainable, but that may be personal bias. As for human\nreadability\/verifiability, I believe the current version is good, but I'll go\nthrough it today to add more comments\/description as necessary.\n\nMy concern on speed is primarily the `qwilcox(q, 50, 50)` case, in which the\nold version runs 1,000x faster than the new version (9 microseconds vs. 1\nmillisecond). Lower population sizes do have differences in speed, but those\nare on the order of microseconds, so they're probably not noticeable to users.\nI'll also note that repeated calls to `qwilcox` do decrease the performance\ngap--`qwilcox(seq(0,1,0.01), 50, 50)` is only about 2x slower in the new\nversion (750 microseconds vs. 1.788 milliseconds). \n\nAnd again, once either population is larger than 50, the current version\nperforms much slower. Even `qwilcox(0.5, 10, 51)` runs 10x faster in the new\nversion.\n\nSo, my main question is, is this performance tradeoff worth it for the changes\nproposed? This change would provide a noticeably **large increase** in\nperformance for large population sizes, an arguably **non-noticeable decrease**\nin performance for small population sizes, and a **noticeable decrease** in\nperformance for single calls when both populations are close to (but less than)\n50. \n\nI personally think that's a good tradeoff, since the case where the new version\nis much slower is narrow enough to be uncommon, and because I doubt users will\nbe making repeated separate calls to `qwilcox`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1705582935.442659",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "s\/uT",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18655] Enhancements to ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "*wilcox",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " functions for large population sizes",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #8 from Aidan H Lakshman ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:AHL27@pitt.edu",
+                                "text": "AHL27@pitt.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Martin Maechler from comment #6)\n\nThanks for your comments and feedback, Martin (and for linking the r-devel\ndiscussion)! \n\nAgreed. My view is that this implementation is simpler and thus more\nmaintainable, but that may be personal bias. As for human\nreadability\/verifiability, I believe the current version is good, but I'll go\nthrough it today to add more comments\/description as necessary.\n\nMy concern on speed is primarily the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "qwilcox(q, 50, 50)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " case, in which the\nold version runs 1,000x faster than the new version (9 microseconds vs. 1\nmillisecond). Lower population sizes do have differences in speed, but those\nare on the order of microseconds, so they're probably not noticeable to users.\nI'll also note that repeated calls to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "qwilcox",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " do decrease the performance\ngap--"
+                            },
+                            {
+                                "type": "text",
+                                "text": "qwilcox(seq(0,1,0.01), 50, 50)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is only about 2x slower in the new\nversion (750 microseconds vs. 1.788 milliseconds). \n\nAnd again, once either population is larger than 50, the current version\nperforms much slower. Even "
+                            },
+                            {
+                                "type": "text",
+                                "text": "qwilcox(0.5, 10, 51)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " runs 10x faster in the new\nversion.\n\nSo, my main question is, is this performance tradeoff worth it for the changes\nproposed? This change would provide a noticeably **large increase** in\nperformance for large population sizes, an arguably **non-noticeable decrease**\nin performance for small population sizes, and a **noticeable decrease** in\nperformance for single calls when both populations are close to (but less than)\n50. \n\nI personally think that's a good tradeoff, since the case where the new version\nis much slower is narrow enough to be uncommon, and because I doubt users will\nbe making repeated separate calls to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "qwilcox",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18655] Enhancements to `*wilcox` functions for large population sizes*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655>\n\n--- Comment #9 from Aidan H Lakshman (<mailto:AHL27@pitt.edu|AHL27@pitt.edu>) ---\nCreated attachment 3290\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3290&amp;action=edit>\nSVN Patch Diff v3\n\nAdded more comments and updated relevant man pages. Used `svn diff` for this\ndiff file; diff is marking a lot of unchanged lines as changed. I couldn't\nfigure out how to fix that, unfortunately--code is identical to patch v2 for\n`wilcox.c` with the exception of some additional comments.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1705585915.529239",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "wLKq",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18655] Enhancements to ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "*wilcox",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " functions for large population sizes",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18655"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #9 from Aidan H Lakshman ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:AHL27@pitt.edu",
+                                "text": "AHL27@pitt.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3290\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3290&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3290&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nSVN Patch Diff v3\n\nAdded more comments and updated relevant man pages. Used "
+                            },
+                            {
+                                "type": "text",
+                                "text": "svn diff",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for this\ndiff file; diff is marking a lot of unchanged lines as changed. I couldn't\nfigure out how to fix that, unfortunately--code is identical to patch v2 for\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "wilcox.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " with the exception of some additional comments."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18656] Allow interrupting pmatch()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18656>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #1 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nThank you, Ivan.\n\nNote that  `unique.c` has about a dozen *commented* (i.e. disabled)\n`R_CheckUserInterrupt()` calls in other functions.\nWe had commented them because they did cause a notable penalty.\n\nStill, your check (including the choice of  0x1fff = 8191) seems to have been\ncareful such that I don't easily see any measurable CPU usage increase.\nand I can quite quickly interrupt as the check is in the inner loop.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1705589506.782709",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "jJu",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18656] Allow interrupting pmatch()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18656"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #1 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you, Ivan.\n\nNote that  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "unique.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has about a dozen "
+                            },
+                            {
+                                "type": "text",
+                                "text": "commented",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (i.e. disabled)\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_CheckUserInterrupt()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " calls in other functions.\nWe had commented them because they did cause a notable penalty.\n\nStill, your check (including the choice of  0x1fff = 8191) seems to have been\ncareful such that I don't easily see any measurable CPU usage increase.\nand I can quite quickly interrupt as the check is in the inner loop."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18654] xyTable fails when both x and y are NA*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18654>\n\nHeather Turner (<mailto:ht@heatherturner.net|ht@heatherturner.net>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3284|0                           |1\n        is obsolete|                            |\n   Attachment #3285|0                           |1\n        is obsolete|                            |\n\n--- Comment #4 from Heather Turner (<mailto:ht@heatherturner.net|ht@heatherturner.net>) ---\nCreated attachment 3291\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3291&amp;action=edit>\nUpdated patch\n\nGoing in to the detail of the code:\n\n* `order(x, y)` orders NAs last, but how it orders the NAs is unimportant here\n* `first` is is intended to identify when either the ordered x co-ordinates or\nthe ordered y co-ordinates change to a new value. The bug in the current code\ncomes from the fact that `z != NA` is `NA`, regardless of the value of `z`. So\nthe code \n    ```(x[-1L] != x[-n]) | (y[-1L] != y[-n])```\nreturns `NA`  when both comparisons involve an NA value.\n\nWriting this I realise you'll also get `NA` when one comparison is `FALSE` and\nthe other is `NA`. So it's possible to create another case that breaks both the\ncurrent code and my previous patch:\n\n```\n## Case 5: NA in y when x is duplicated\niris5 &lt;- iris[1:10, 3:4]\niris5[4, 2] &lt;- NA\nxyTable(iris5)\n#&gt; $x\n#&gt; [1] 1.3 1.4 1.4 1.5 1.5  NA 1.7\n#&gt; \n#&gt; $y\n#&gt; [1] 0.2 0.2 0.3 0.1 0.2  NA 0.4\n#&gt; \n#&gt; $number\n#&gt; [1]  1  4  1  1 NA NA  1\n```\n\nSo I think the simplest and most robust solution is to use \n\n```first &lt;- !duplicated(cbind(x, y))```\n\nwhich directly computes what we're after, even though it may be a little less\nefficient for data without NAs. I attach an updated patch.\n\nNote that this code was originally part of `sunflowerplot()` which will drop\nany co-ordinates with NAs, but since the code has been extracted into its own\nfunction I think it's reasonable to count them, so that\n`sum(xyTable(dat)$number)` will be equal to `nrow(dat)`.\n\nSome plotting methods make use of missing values, see e.g.\n<https:\/\/cran.r-project.org\/web\/packages\/naniar\/readme\/README.html>. Since they\nare easy to remove before\/after as required, I think it is better if xyTable\ncan handle them.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1705598674.382119",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Fin",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18654] xyTable fails when both x and y are NA",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18654"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nHeather Turner ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ht@heatherturner.net",
+                                "text": "ht@heatherturner.net"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3284|0                           |1\n        is obsolete|                            |\n   Attachment #3285|0                           |1\n        is obsolete|                            |\n\n--- Comment #4 from Heather Turner ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ht@heatherturner.net",
+                                "text": "ht@heatherturner.net"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3291\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3291&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3291&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nUpdated patch\n\nGoing in to the detail of the code:\n\n* "
+                            },
+                            {
+                                "type": "text",
+                                "text": "order(x, y)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " orders NAs last, but how it orders the NAs is unimportant here\n* "
+                            },
+                            {
+                                "type": "text",
+                                "text": "first",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is is intended to identify when either the ordered x co-ordinates or\nthe ordered y co-ordinates change to a new value. The bug in the current code\ncomes from the fact that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "z != NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", regardless of the value of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "z",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". So\nthe code \n    "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "(x[-1L] != x[-n]) | (y[-1L] != y[-n])"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "returns "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  when both comparisons involve an NA value.\n\nWriting this I realise you'll also get "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " when one comparison is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and\nthe other is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". So it's possible to create another case that breaks both the\ncurrent code and my previous patch:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "## Case 5: NA in y when x is duplicated\niris5 <- iris[1:10, 3:4]\niris5[4, 2] <- NA\nxyTable(iris5)\n#> $x\n#> [1] 1.3 1.4 1.4 1.5 1.5  NA 1.7\n#> \n#> $y\n#> [1] 0.2 0.2 0.3 0.1 0.2  NA 0.4\n#> \n#> $number\n#> [1]  1  4  1  1 NA NA  1\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSo I think the simplest and most robust solution is to use \n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "first <- !duplicated(cbind(x, y))"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nwhich directly computes what we're after, even though it may be a little less\nefficient for data without NAs. I attach an updated patch.\n\nNote that this code was originally part of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "sunflowerplot()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " which will drop\nany co-ordinates with NAs, but since the code has been extracted into its own\nfunction I think it's reasonable to count them, so that\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "sum(xyTable(dat)$number)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " will be equal to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nrow(dat)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nSome plotting methods make use of missing values, see e.g.\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/cran.r-project.org\/web\/packages\/naniar\/readme\/README.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": ". Since they\nare easy to remove before\/after as required, I think it is better if xyTable\ncan handle them."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,316 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17770] xtabs does not act as documented for na.action = na.pass*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17770>\n\nSebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|ASSIGNED                    |CLOSED\n\n--- Comment #11 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\n(In reply to Sebastian Meyer from comment #9)\n&gt; My current feeling is that `xtabs()` should ideally always call\n&gt; `model.frame(na.action = na.pass)` and gain `na.rm = FALSE` as a formal\n&gt; argument. Then, `addNA` controls if I want to know something about NA factor\n&gt; levels and `na.rm` controls how to sum the response (if any).\n\nFinally committed as c86402 to the trunk, still planned for R 4.4.0. I didn't\nfind any problems in checks of ~5600 BIOC\/CRAN packages.\n\nThis change means that `addNA=TRUE` (intended to include *factor missings* in\nthe table) does no longer have a side effect on how NA's on the *left*-hand\nside of the formula are handled. Previously,\n\n```\ndf &lt;- data.frame(y = NA_integer_, f = factor(\"A\"))\nxtabs(y ~ f, df)                |&gt; print(na.print = \"NA\")\n## f\n## A \n## 0 \nxtabs(y ~ f, df, addNA = TRUE)  |&gt; print(na.print = \"NA\")\n## f\n##  A \n## NA \n```\n\nNow both calls result in a missing value, following the default sum() behavior;\nthe `na.rm` argument can be used to change that.\n\n\n(In reply to Thomas Soeiro from comment #6)\n&gt; 2) Is it expected that we need `na.action = NULL` to get the \"correct\"\n&gt; output? (see comment 3)\n\nSumming available counts (by variable) can now be achieved simply by setting\n`na.rm = TRUE`. As mentioned previously, na.action=NULL should not and was not\nintended to behave differently from na.action=na.pass in xtabs().",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1712846702.701569",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "1\/M",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17770] xtabs does not act as documented for na.action = na.pass",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17770"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|ASSIGNED                    |CLOSED\n\n--- Comment #11 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Sebastian Meyer from comment #9)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "My current feeling is that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "xtabs()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " should ideally always call\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "model.frame(na.action = na.pass)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and gain "
+                            },
+                            {
+                                "type": "text",
+                                "text": "na.rm = FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as a formal\nargument. Then, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "addNA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " controls if I want to know something about NA factor\nlevels and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "na.rm",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " controls how to sum the response (if any)."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nFinally committed as c86402 to the trunk, still planned for R 4.4.0. I didn't\nfind any problems in checks of ~5600 BIOC\/CRAN packages.\n\nThis change means that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "addNA=TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (intended to include "
+                            },
+                            {
+                                "type": "text",
+                                "text": "factor missings",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in\nthe table) does no longer have a side effect on how NA's on the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "left",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "-hand\nside of the formula are handled. Previously,\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "df <- data.frame(y = NA_integer_, f = factor(\"A\"))\nxtabs(y ~ f, df)                |> print(na.print = \"NA\")\n## f\n## A \n## 0 \nxtabs(y ~ f, df, addNA = TRUE)  |> print(na.print = \"NA\")\n## f\n##  A \n## NA \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nNow both calls result in a missing value, following the default sum() behavior;\nthe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "na.rm",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " argument can be used to change that.\n\n\n\n(In reply to Thomas Soeiro from comment #6)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "2) Is it expected that we need "
+                            },
+                            {
+                                "type": "text",
+                                "text": "na.action = NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to get the \"correct\"\noutput? (see comment 3)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSumming available counts (by variable) can now be achieved simply by setting\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "na.rm = TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". As mentioned previously, na.action=NULL should not and was not\nintended to behave differently from na.action=na.pass in xtabs()."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16288] Unable to find application named '<http:\/\/X11.app|X11.app>'*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16288>\n\nTomek Gieorgijewski (<mailto:cybergeorge2020@gmail.com|cybergeorge2020@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |cybergeorge2020@gmail.com\n\n--- Comment #6 from Tomek Gieorgijewski (<mailto:cybergeorge2020@gmail.com|cybergeorge2020@gmail.com>) ---\nI'm still getting error message but we need considering, as mentioned above,\nwhat is the reason for this option (\"Run X11 Server\") to be there.\n\nOn my MacBook (Pro, 2016, Intel, Monterey 12.7.4), R.app produces plots via\nQuartz properly.\nI have also XQuartz installed but it seems it's not invoked. Either by \"Run X11\nServer\" item, either by basic plot.\n\nShould we:\n1) Drop this menu item entirely?\n2) Leave it for some older Macs? How old macOS do we support?\n3) Hide it on macOS which do not use X11?\n4) Hide it in newer versions of R?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1712849334.277249",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "pCOqH",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16288] Unable to find application named '",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/X11.app",
+                                "text": "X11.app",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "'",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16288"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomek Gieorgijewski ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:cybergeorge2020@gmail.com",
+                                "text": "cybergeorge2020@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |cybergeorge2020@gmail.com\n\n--- Comment #6 from Tomek Gieorgijewski ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:cybergeorge2020@gmail.com",
+                                "text": "cybergeorge2020@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI'm still getting error message but we need considering, as mentioned above,\nwhat is the reason for this option (\"Run X11 Server\") to be there.\n\nOn my MacBook (Pro, 2016, Intel, Monterey 12.7.4), R.app produces plots via\nQuartz properly.\nI have also XQuartz installed but it seems it's not invoked. Either by \"Run X11\nServer\" item, either by basic plot.\n\nShould we:\n1) Drop this menu item entirely?\n2) Leave it for some older Macs? How old macOS do we support?\n3) Hide it on macOS which do not use X11?\n4) Hide it in newer versions of R?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

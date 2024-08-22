@@ -1,0 +1,833 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18777] nlme::gls crash when using corARMA but the data do not contain enough visits*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18777>\n\nElin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |elin.waring@gmail.com\n\n--- Comment #2 from Elin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) ---\nWhen I run OP's code on my Mac, it runs long enough that I have to manually\nkill the process. \n\nThere are a number of issues in `nlme` model estimation in which the models\ncrash when the correlation structure of the model is not estimable with the\ndata. For example, the example that has come up multiple times is when trying\nto estimate spatial effects when there is at least 1 group of size 1 (i.e. that\nno effect can be estimated for that group).  \n\nFor `corARMA` this occurs when the `maxLag` attribute of the correlation\nstructure is greater than `maxLen -  1L`.\n\n```\ndata &lt;- data.frame(\n     id = rep(1:10, each = 4),\n     visit = 1:4,\n     x = rnorm(40),\n     y = rnorm(40)\n)\n\n# Fails\ncsp4 &lt;- corARMA(form = ~ 1 | id, p = 4)\ncsp4 &lt;- Initialize(csp4, data = data)\nDim(csp4)$maxLeng\nattr(csp4, \"maxLag\")\n\n\n# Works\ncsp3 &lt;- corARMA(form = ~ 1 | id, p = 3)\ncsp3 &lt;- Initialize(csp4, data = data)\nDim(csp3)$maxLeng\nattr(csp3, \"maxLag\")\n\n\n``` \n\nIt does seem relatively straightforward to check for this and fail with an\nerror message. But it really depends on what the expeted behavior is when, for\nexample, some groups have different sizes only some of which are below the\nnecessary size.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1723472841.334149",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "H33",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18777] nlme::gls crash when using corARMA but the data do not contain enough visits",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18777"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nElin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |elin.waring@gmail.com\n\n--- Comment #2 from Elin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nWhen I run OP's code on my Mac, it runs long enough that I have to manually\nkill the process. \n\nThere are a number of issues in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nlme",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " model estimation in which the models\ncrash when the correlation structure of the model is not estimable with the\ndata. For example, the example that has come up multiple times is when trying\nto estimate spatial effects when there is at least 1 group of size 1 (i.e. that\nno effect can be estimated for that group).  \n\nFor "
+                            },
+                            {
+                                "type": "text",
+                                "text": "corARMA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " this occurs when the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "maxLag",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " attribute of the correlation\nstructure is greater than "
+                            },
+                            {
+                                "type": "text",
+                                "text": "maxLen -  1L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "data <- data.frame(\n     id = rep(1:10, each = 4),\n     visit = 1:4,\n     x = rnorm(40),\n     y = rnorm(40)\n)\n\n# Fails\ncsp4 <- corARMA(form = ~ 1 | id, p = 4)\ncsp4 <- Initialize(csp4, data = data)\nDim(csp4)$maxLeng\nattr(csp4, \"maxLag\")\n\n\n# Works\ncsp3 <- corARMA(form = ~ 1 | id, p = 3)\ncsp3 <- Initialize(csp4, data = data)\nDim(csp3)$maxLeng\nattr(csp3, \"maxLag\")\n\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " \n\nIt does seem relatively straightforward to check for this and fail with an\nerror message. But it really depends on what the expeted behavior is when, for\nexample, some groups have different sizes only some of which are below the\nnecessary size."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17866] nlme gls() results for unbalanced data with corStruct correlation class change if Initialize() is called first*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17866>\n\nElin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |elin.waring@gmail.com\n\n--- Comment #2 from Elin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) ---\nIn looking at a different issue I noticed that inside `corStruct` there is\ninconsistency in checking if the object is already initialized.  In some places\nwe see\n\n```\n# ARMA\n  maxLag &lt;- attr(object, \"maxLag\")\n  if(is.null(maxLag)) stop(\"'object' has not been Initialize()d\")\n\n# corCompSymm\n  if (!is.null(attr(object, \"maxCov\"))) {# initialized - nothing to do\n    return(object)\n  }\n```\n\nI'm wondering here is one is stopping and one is returning the object if that\ninconsistency is why it's going ahead and estimating the models in the compound\nsymmetry case.  \n\nI think that there are some structures where this is not a check at all. \n\nMaybe making this consistent would at least make the results consistent (if not\nexplaining why they are different).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1723477517.993799",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "0ybPM",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17866] nlme gls() results for unbalanced data with corStruct correlation class change if Initialize() is called first",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17866"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nElin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |elin.waring@gmail.com\n\n--- Comment #2 from Elin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nIn looking at a different issue I noticed that inside "
+                            },
+                            {
+                                "type": "text",
+                                "text": "corStruct",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " there is\ninconsistency in checking if the object is already initialized.  In some places\nwe see\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# ARMA\n  maxLag <- attr(object, \"maxLag\")\n  if(is.null(maxLag)) stop(\"'object' has not been Initialize()d\")\n\n# corCompSymm\n  if (!is.null(attr(object, \"maxCov\"))) {# initialized - nothing to do\n    return(object)\n  }\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI'm wondering here is one is stopping and one is returning the object if that\ninconsistency is why it's going ahead and estimating the models in the compound\nsymmetry case.  \n\nI think that there are some structures where this is not a check at all. \n\nMaybe making this consistent would at least make the results consistent (if not\nexplaining why they are different)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18777] nlme::gls crash when using corARMA but the data do not contain enough visits*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18777>\n\n--- Comment #3 from Elin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) ---\nSorry don't know where those extra gs came from\n\n```\ncsp4 &lt;- corARMA(form = ~ 1 | id, p = 4)\ncsp4 &lt;- Initialize(csp4, data = data)\nDim(csp4)$maxLen\nattr(csp4, \"maxLag\")\n\ncsp3 &lt;- corARMA(form = ~ 1 | id, p = 3)\ncsp3 &lt;- Initialize(csp4, data = data)\nDim(csp3)$maxLen\nattr(csp3, \"maxLag\")\n\n\n```\n```\n&gt; Dim(csp4)$maxLen\n[1] 4\n&gt; attr(csp4, \"maxLag\")\n[1] 3\n\n&gt; Dim(csp3)$maxLen\n[1] 4\n&gt; attr(csp3, \"maxLag\")\n[1] 3\n\n```\n\nI'm actually wondering if one approach would be to use something like  and then\nchecking if `maxLag &lt; p`  either falling back to `p &lt;- maxLag` ... the code\nalready checks for `p == 1` so it would not be totally out of the blue to do a\nsecond check.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1723486797.667559",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "sbm",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18777] nlme::gls crash when using corARMA but the data do not contain enough visits",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18777"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Elin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nSorry don't know where those extra gs came from\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "csp4 <- corARMA(form = ~ 1 | id, p = 4)\ncsp4 <- Initialize(csp4, data = data)\nDim(csp4)$maxLen\nattr(csp4, \"maxLag\")\n\ncsp3 <- corARMA(form = ~ 1 | id, p = 3)\ncsp3 <- Initialize(csp4, data = data)\nDim(csp3)$maxLen\nattr(csp3, \"maxLag\")\n\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> Dim(csp4)$maxLen\n[1] 4\n> attr(csp4, \"maxLag\")\n[1] 3\n\n> Dim(csp3)$maxLen\n[1] 4\n> attr(csp3, \"maxLag\")\n[1] 3\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI'm actually wondering if one approach would be to use something like  and then\nchecking if "
+                            },
+                            {
+                                "type": "text",
+                                "text": "maxLag < p",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  either falling back to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "p <- maxLag",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ... the code\nalready checks for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "p == 1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " so it would not be totally out of the blue to do a\nsecond check."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18777] nlme::gls crash when using corARMA but the data do not contain enough visits*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18777>\n\nSebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n                 CC|                            |seb.meyer@fau.de\n         Resolution|---                         |FIXED\n\n--- Comment #4 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\nThanks for the report!\n\n(In reply to Elin Waring from comment #3)\n&gt; Sorry don't know where those extra gs came from\n\nFWIW, there was also a typo here (4 -&gt; 3):\n\n&gt; csp3 &lt;- Initialize(csp4, data = data)\n\nI had also looked at this report earlier today and could confirm the memory\nerror. It is not specific to `gls` as it happens when the \"corARMA\" structure\nis initialized (specifically in the `corFactor()` computation that goes to\nC-level `ARMA_factList`), which could also happen in `lme` or in a lonely\n`Initialize()` as shown by Elin, not even needing a response variable. I used\nthe following example for a regression test:\n\n```\nlibrary(nlme)\ndat3 &lt;- data.frame(ID = gl(5, 3), visit = 0:2)\ncsAR3 &lt;- corARMA(form = ~ visit | ID, p = 3)\n## Initialize(csAR3, dat3)  # crashes R\n```\n\nI came to the same conclusion as the OP that unsupported\/invalid values for p\nand q should be catched already in `Initialize.corARMA()`. Thanks for the\npatch. I dropped the leftover print statement, corrected the condition to `p &gt;\nmaxLag || q &gt; maxLag` (as also noticed by Elin) and reworded the error message\n(also reporting the actual maxLag).\n\nUsing nlme from the [svn\ntrunk](<https:\/\/svn.r-project.org\/R-packages\/trunk\/nlme\/>) the above gives:\n\n```\nError in Initialize.corARMA(csAR3, dat3) : \n  \"corARMA\" order (3, 0) exceeds maximum lag in data (2)\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1723496130.768719",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "jLGK",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18777] nlme::gls crash when using corARMA but the data do not contain enough visits",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18777"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n                 CC|                            |seb.meyer@fau.de\n         Resolution|---                         |FIXED\n\n--- Comment #4 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for the report!\n\n(In reply to Elin Waring from comment #3)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Sorry don't know where those extra gs came from"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nFWIW, there was also a typo here (4 -> 3):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "csp3 <- Initialize(csp4, data = data)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI had also looked at this report earlier today and could confirm the memory\nerror. It is not specific to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "gls",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as it happens when the \"corARMA\" structure\nis initialized (specifically in the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "corFactor()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " computation that goes to\nC-level "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ARMA_factList",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), which could also happen in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lme",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or in a lonely\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "Initialize()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as shown by Elin, not even needing a response variable. I used\nthe following example for a regression test:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "library(nlme)\ndat3 <- data.frame(ID = gl(5, 3), visit = 0:2)\ncsAR3 <- corARMA(form = ~ visit | ID, p = 3)\n## Initialize(csAR3, dat3)  # crashes R\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI came to the same conclusion as the OP that unsupported\/invalid values for p\nand q should be catched already in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Initialize.corARMA()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". Thanks for the\npatch. I dropped the leftover print statement, corrected the condition to `p >\nmaxLag || q > maxLag` (as also noticed by Elin) and reworded the error message\n(also reporting the actual maxLag).\n\nUsing nlme from the [svn\ntrunk]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/svn.r-project.org\/R-packages\/trunk\/nlme\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") the above gives:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Error in Initialize.corARMA(csAR3, dat3) : \n  \"corARMA\" order (3, 0) exceeds maximum lag in data (2)\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18777] nlme::gls crash when using corARMA but the data do not contain enough visits*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18777>\n\n--- Comment #5 from Liming Li (<mailto:liming.li@roche.com|liming.li@roche.com>) ---\n(In reply to Sebastian Meyer from comment #4)\n&gt; Thanks for the report!\n&gt; \n&gt; (In reply to Elin Waring from comment #3)\n&gt; &gt; Sorry don't know where those extra gs came from\n&gt; \n&gt; FWIW, there was also a typo here (4 -&gt; 3):\n&gt; \n&gt; &gt; csp3 &lt;- Initialize(csp4, data = data)\n&gt; \n&gt; I had also looked at this report earlier today and could confirm the memory\n&gt; error. It is not specific to `gls` as it happens when the \"corARMA\"\n&gt; structure is initialized (specifically in the `corFactor()` computation that\n&gt; goes to C-level `ARMA_factList`), which could also happen in `lme` or in a\n&gt; lonely `Initialize()` as shown by Elin, not even needing a response\n&gt; variable. I used the following example for a regression test:\n&gt; \n&gt; ```\n&gt; library(nlme)\n&gt; dat3 &lt;- data.frame(ID = gl(5, 3), visit = 0:2)\n&gt; csAR3 &lt;- corARMA(form = ~ visit | ID, p = 3)\n&gt; ## Initialize(csAR3, dat3)  # crashes R\n&gt; ```\n&gt; \n&gt; I came to the same conclusion as the OP that unsupported\/invalid values for\n&gt; p and q should be catched already in `Initialize.corARMA()`. Thanks for the\n&gt; patch. I dropped the leftover print statement, corrected the condition to `p\n&gt; &gt; maxLag || q &gt; maxLag` (as also noticed by Elin) and reworded the error\n&gt; message (also reporting the actual maxLag).\n&gt; \n&gt; Using nlme from the [svn\n&gt; trunk](<https:\/\/svn.r-project.org\/R-packages\/trunk\/nlme\/>) the above gives:\n&gt; \n&gt; ```\n&gt; Error in Initialize.corARMA(csAR3, dat3) : \n&gt;   \"corARMA\" order (3, 0) exceeds maximum lag in data (2)\n&gt; ```\n\nthank you; I (In reply to Sebastian Meyer from comment #4)\n&gt; Thanks for the report!\n&gt; \n&gt; (In reply to Elin Waring from comment #3)\n&gt; &gt; Sorry don't know where those extra gs came from\n&gt; \n&gt; FWIW, there was also a typo here (4 -&gt; 3):\n&gt; \n&gt; &gt; csp3 &lt;- Initialize(csp4, data = data)\n&gt; \n&gt; I had also looked at this report earlier today and could confirm the memory\n&gt; error. It is not specific to `gls` as it happens when the \"corARMA\"\n&gt; structure is initialized (specifically in the `corFactor()` computation that\n&gt; goes to C-level `ARMA_factList`), which could also happen in `lme` or in a\n&gt; lonely `Initialize()` as shown by Elin, not even needing a response\n&gt; variable. I used the following example for a regression test:\n&gt; \n&gt; ```\n&gt; library(nlme)\n&gt; dat3 &lt;- data.frame(ID = gl(5, 3), visit = 0:2)\n&gt; csAR3 &lt;- corARMA(form = ~ visit | ID, p = 3)\n&gt; ## Initialize(csAR3, dat3)  # crashes R\n&gt; ```\n&gt; \n&gt; I came to the same conclusion as the OP that unsupported\/invalid values for\n&gt; p and q should be catched already in `Initialize.corARMA()`. Thanks for the\n&gt; patch. I dropped the leftover print statement, corrected the condition to `p\n&gt; &gt; maxLag || q &gt; maxLag` (as also noticed by Elin) and reworded the error\n&gt; message (also reporting the actual maxLag).\n&gt; \n&gt; Using nlme from the [svn\n&gt; trunk](<https:\/\/svn.r-project.org\/R-packages\/trunk\/nlme\/>) the above gives:\n&gt; \n&gt; ```\n&gt; Error in Initialize.corARMA(csAR3, dat3) : \n&gt;   \"corARMA\" order (3, 0) exceeds maximum lag in data (2)\n&gt; ```\n\nThank you for the updated. Interestingly sometimes the lag can be the same as\norder, like the following example. It is very strange that sometimes it works\nbut sometimes it does not. But anyway if we add this check it works well.\n\n```\ncs1ARMA &lt;- corARMA(form = ~ 1 | Subject, p = 4)\ncs1ARMA &lt;- Initialize(cs1ARMA, data = Orthodont)\ncorMatrix(cs1ARMA)$F01\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1723514890.901659",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "J7jl",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18777] nlme::gls crash when using corARMA but the data do not contain enough visits",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18777"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Liming Li ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:liming.li@roche.com",
+                                "text": "liming.li@roche.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Sebastian Meyer from comment #4)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Thanks for the report!\n\n(In reply to Elin Waring from comment #3)\n> Sorry don't know where those extra gs came from\n\nFWIW, there was also a typo here (4 -> 3):\n\n> csp3 <- Initialize(csp4, data = data)\n\nI had also looked at this report earlier today and could confirm the memory\nerror. It is not specific to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "gls",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as it happens when the \"corARMA\"\nstructure is initialized (specifically in the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "corFactor()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " computation that\ngoes to C-level "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ARMA_factList",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), which could also happen in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lme",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or in a\nlonely "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Initialize()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as shown by Elin, not even needing a response\nvariable. I used the following example for a regression test:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> library(nlme)\n> dat3 <- data.frame(ID = gl(5, 3), visit = 0:2)\n> csAR3 <- corARMA(form = ~ visit | ID, p = 3)\n> ## Initialize(csAR3, dat3)  # crashes R\n> "
+                            }
+                        ],
+                        "border": 1
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nI came to the same conclusion as the OP that unsupported\/invalid values for\np and q should be catched already in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Initialize.corARMA()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". Thanks for the\npatch. I dropped the leftover print statement, corrected the condition to `p\n> maxLag || q > maxLag` (as also noticed by Elin) and reworded the error\nmessage (also reporting the actual maxLag).\n\nUsing nlme from the [svn\ntrunk]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/svn.r-project.org\/R-packages\/trunk\/nlme\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") the above gives:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> Error in Initialize.corARMA(csAR3, dat3) : \n>   \"corARMA\" order (3, 0) exceeds maximum lag in data (2)\n> "
+                            }
+                        ],
+                        "border": 1
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nthank you; I (In reply to Sebastian Meyer from comment #4)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Thanks for the report!\n\n(In reply to Elin Waring from comment #3)\n> Sorry don't know where those extra gs came from\n\nFWIW, there was also a typo here (4 -> 3):\n\n> csp3 <- Initialize(csp4, data = data)\n\nI had also looked at this report earlier today and could confirm the memory\nerror. It is not specific to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "gls",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as it happens when the \"corARMA\"\nstructure is initialized (specifically in the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "corFactor()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " computation that\ngoes to C-level "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ARMA_factList",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), which could also happen in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lme",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or in a\nlonely "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Initialize()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as shown by Elin, not even needing a response\nvariable. I used the following example for a regression test:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> library(nlme)\n> dat3 <- data.frame(ID = gl(5, 3), visit = 0:2)\n> csAR3 <- corARMA(form = ~ visit | ID, p = 3)\n> ## Initialize(csAR3, dat3)  # crashes R\n> "
+                            }
+                        ],
+                        "border": 1
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nI came to the same conclusion as the OP that unsupported\/invalid values for\np and q should be catched already in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Initialize.corARMA()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". Thanks for the\npatch. I dropped the leftover print statement, corrected the condition to `p\n> maxLag || q > maxLag` (as also noticed by Elin) and reworded the error\nmessage (also reporting the actual maxLag).\n\nUsing nlme from the [svn\ntrunk]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/svn.r-project.org\/R-packages\/trunk\/nlme\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") the above gives:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> Error in Initialize.corARMA(csAR3, dat3) : \n>   \"corARMA\" order (3, 0) exceeds maximum lag in data (2)\n> "
+                            }
+                        ],
+                        "border": 1
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThank you for the updated. Interestingly sometimes the lag can be the same as\norder, like the following example. It is very strange that sometimes it works\nbut sometimes it does not. But anyway if we add this check it works well.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "cs1ARMA <- corARMA(form = ~ 1 | Subject, p = 4)\ncs1ARMA <- Initialize(cs1ARMA, data = Orthodont)\ncorMatrix(cs1ARMA)$F01\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

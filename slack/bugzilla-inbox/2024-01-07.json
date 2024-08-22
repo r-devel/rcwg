@@ -1,0 +1,770 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18650] tools::startDynamicHelp(): Randomly prevents R from exiting (on MS Windows)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18650>\n\nIvan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #1 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nAt the time of the hang, two threads can be seen in the process, both sitting\nin `WaitForSingleObject`. The `ReaderThread` waiting for `EhiWakeUp` at\n`src\/gnuwin32\/system.c:360` is a red herring: it is always present while R is\nexiting and will terminate together with the rest of the process.\n\nThe main thread is stuck in a call to `exit()` waiting for a heap lock:\n```\n#0  0x0000000076e98d5a in ntdll!ZwWaitForSingleObject () from\n\/c\/Windows\/SYSTEM32\/ntdll.dll\n#1  0x0000000076e62ce8 in ntdll!RtlInitializeCriticalSectionEx ()\n   from \/c\/Windows\/SYSTEM32\/ntdll.dll\n#2  0x0000000076e5d411 in ntdll!RtlEnterCriticalSection () from\n\/c\/Windows\/SYSTEM32\/ntdll.dll\n#3  0x0000000076e6d049 in ntdll!LdrLockLoaderLock () from\n\/c\/Windows\/SYSTEM32\/ntdll.dll\n#4  0x000007fefcb2b18a in KERNELBASE!HeapDestroy () from\n\/c\/Windows\/system32\/KERNELBASE.dll\n#5  0x000007fefcb2b1f9 in KERNELBASE!GetModuleHandleExW ()\n   from \/c\/Windows\/system32\/KERNELBASE.dll\n#6  0x000007fef8096eb6 in ucrtbase!exit () from\n\/c\/Windows\/system32\/ucrtbase.DLL\n#7  0x000007fef8096e85 in ucrtbase!exit () from\n\/c\/Windows\/system32\/ucrtbase.DLL\n#8  0x000007fef8096e1f in ucrtbase!exit () from\n\/c\/Windows\/system32\/ucrtbase.DLL\n#9  0x000007fee45ef7c4 in Rstd_CleanUp (saveact=&lt;optimized out&gt;, status=0,\n    runLast=&lt;optimized out&gt;) at C:\/Users\/User\/R-devel\/src\/gnuwin32\/system.c:626\n```\n\nThis is due to `TerminateThread` stopping the server thread with a lock taken:\n\n```\n#ifdef _WIN32\n    \/* on Windows stop the server thread if it exists *\/\n    if (server_thread) {\n        DWORD ts = 0;\n        if (GetExitCodeThread(server_thread, &amp;ts) &amp;&amp; ts == STILL_ACTIVE)\n            TerminateThread(server_thread, 0);\n        server_thread = 0;\n    }\n```\n\nUnfortunately, [it is hard if not impossible to use `TerminateThread`\nsafely](<https:\/\/devblogs.microsoft.com\/oldnewthing\/20150814-00\/?p=91811>). The\nserver thread ought to be able to terminate by itself. Currently, it runs while\n`srv_sock != INVALID_SOCKET`, so as long as `closesocket()` interrupts the\n`accept()` call, it should be possible set `srv_sock` to `INVALID_SOCKET`,\nclose the socket and have the server thread terminate safely.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1704625549.609079",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "8p6=G",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18650] tools::startDynamicHelp(): Randomly prevents R from exiting (on MS Windows)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18650"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIvan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #1 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nAt the time of the hang, two threads can be seen in the process, both sitting\nin "
+                            },
+                            {
+                                "type": "text",
+                                "text": "WaitForSingleObject",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". The "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ReaderThread",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " waiting for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "EhiWakeUp",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " at\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/gnuwin32\/system.c:360",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is a red herring: it is always present while R is\nexiting and will terminate together with the rest of the process.\n\nThe main thread is stuck in a call to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "exit()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " waiting for a heap lock:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "#0  0x0000000076e98d5a in ntdll!ZwWaitForSingleObject () from\n\/c\/Windows\/SYSTEM32\/ntdll.dll\n#1  0x0000000076e62ce8 in ntdll!RtlInitializeCriticalSectionEx ()\n   from \/c\/Windows\/SYSTEM32\/ntdll.dll\n#2  0x0000000076e5d411 in ntdll!RtlEnterCriticalSection () from\n\/c\/Windows\/SYSTEM32\/ntdll.dll\n#3  0x0000000076e6d049 in ntdll!LdrLockLoaderLock () from\n\/c\/Windows\/SYSTEM32\/ntdll.dll\n#4  0x000007fefcb2b18a in KERNELBASE!HeapDestroy () from\n\/c\/Windows\/system32\/KERNELBASE.dll\n#5  0x000007fefcb2b1f9 in KERNELBASE!GetModuleHandleExW ()\n   from \/c\/Windows\/system32\/KERNELBASE.dll\n#6  0x000007fef8096eb6 in ucrtbase!exit () from\n\/c\/Windows\/system32\/ucrtbase.DLL\n#7  0x000007fef8096e85 in ucrtbase!exit () from\n\/c\/Windows\/system32\/ucrtbase.DLL\n#8  0x000007fef8096e1f in ucrtbase!exit () from\n\/c\/Windows\/system32\/ucrtbase.DLL\n#9  0x000007fee45ef7c4 in Rstd_CleanUp (saveact=<optimized out>, status=0,\n    runLast=<optimized out>) at C:\/Users\/User\/R-devel\/src\/gnuwin32\/system.c:626\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis is due to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "TerminateThread",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " stopping the server thread with a lock taken:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "#ifdef _WIN32\n    \/* on Windows stop the server thread if it exists *\/\n    if (server_thread) {\n        DWORD ts = 0;\n        if (GetExitCodeThread(server_thread, &ts) && ts == STILL_ACTIVE)\n            TerminateThread(server_thread, 0);\n        server_thread = 0;\n    }\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nUnfortunately, [it is hard if not impossible to use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "TerminateThread",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nsafely]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/devblogs.microsoft.com\/oldnewthing\/20150814-00\/?p=91811"
+                            },
+                            {
+                                "type": "text",
+                                "text": "). The\nserver thread ought to be able to terminate by itself. Currently, it runs while\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "srv_sock != INVALID_SOCKET",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", so as long as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "closesocket()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " interrupts the\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "accept()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " call, it should be possible set "
+                            },
+                            {
+                                "type": "text",
+                                "text": "srv_sock",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "INVALID_SOCKET",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\nclose the socket and have the server thread terminate safely."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18650] tools::startDynamicHelp(): Randomly prevents R from exiting (on MS Windows)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18650>\n\n--- Comment #2 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nCreated attachment 3282\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3282&amp;action=edit>\nReplace TerminateThread() with srv_sock = INVALID_SOCKET, WaitForSingleObject()\n\nWith the patch applied, I ran the reproducer in a loop for 1024 iterations, and\nit didn't hang. (It didn't pass `make check-devel` due to a failure in `dgeom`,\nbut it did pass `test-Internet{,2,-dev}`.) This also prevents a very small\nthread handle leak:\n\n&gt; [The thread object remains in the system until the thread has terminated and all handles to it have been closed through a call to CloseHandle.](<https:\/\/learn.microsoft.com\/en-us\/windows\/win32\/api\/processthreadsapi\/nf-processthreadsapi-createthread>)\n\nA similar leak likely exists for the worker threads. `finalize_worker` should\nprobably call `CloseHandle(c-&gt;thread)` to get rid of the handles.\n\nIn general, closing sockets in use by other threads is a bad idea: it is\npossible in theory for another thread to create a new socket that would\ncoincide in number with the just-closed socket, all between the server thread\nstarting the `accept()` call and it reaching the operating system. A safer\nprocedure would be to set the flag (here, `srv_sock = INVALID_SOCKET`) first,\nthen do something to interrupt `accept()` (would `shutdown()` work? Connecting\nto the listening socket and dropping the connection should definitely work) and\nwait for the thread to stop, then close the socket.\n\nHere, the race is possible only if an R extension is running a thread that\ncreates new sockets in the same process. Otherwise, the only source of new\nsockets is the server thread.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1704628408.878699",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "u+gwF",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18650] tools::startDynamicHelp(): Randomly prevents R from exiting (on MS Windows)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18650"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3282\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3282&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3282&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nReplace TerminateThread() with srv_sock = INVALID_SOCKET, WaitForSingleObject()\n\nWith the patch applied, I ran the reproducer in a loop for 1024 iterations, and\nit didn't hang. (It didn't pass "
+                            },
+                            {
+                                "type": "text",
+                                "text": "make check-devel",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " due to a failure in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dgeom",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\nbut it did pass "
+                            },
+                            {
+                                "type": "text",
+                                "text": "test-Internet{,2,-dev}",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".) This also prevents a very small\nthread handle leak:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[The thread object remains in the system until the thread has terminated and all handles to it have been closed through a call to CloseHandle.]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/learn.microsoft.com\/en-us\/windows\/win32\/api\/processthreadsapi\/nf-processthreadsapi-createthread"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nA similar leak likely exists for the worker threads. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "finalize_worker",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " should\nprobably call "
+                            },
+                            {
+                                "type": "text",
+                                "text": "CloseHandle(c->thread)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to get rid of the handles.\n\nIn general, closing sockets in use by other threads is a bad idea: it is\npossible in theory for another thread to create a new socket that would\ncoincide in number with the just-closed socket, all between the server thread\nstarting the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "accept()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " call and it reaching the operating system. A safer\nprocedure would be to set the flag (here, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "srv_sock = INVALID_SOCKET",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") first,\nthen do something to interrupt "
+                            },
+                            {
+                                "type": "text",
+                                "text": "accept()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (would "
+                            },
+                            {
+                                "type": "text",
+                                "text": "shutdown()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " work? Connecting\nto the listening socket and dropping the connection should definitely work) and\nwait for the thread to stop, then close the socket.\n\nHere, the race is possible only if an R extension is running a thread that\ncreates new sockets in the same process. Otherwise, the only source of new\nsockets is the server thread."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18645] tools::startDynamicHelp() does not fail if port is out of range (&gt; 65535)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18645>\n\nIvan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #1 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nCreated attachment 3283\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3283&amp;action=edit>\nSuggested fix\n\nSince R already raises an error on failures to `bind()`, we can also raise an\nerror when given an invalid port number:\n\n```\n&gt; options(help.ports = 12345678L)\n&gt; (port &lt;- tools::startDynamicHelp(TRUE))\nstarting httpd help server ...Error in tools::startDynamicHelp(TRUE) : \n  Invalid port number 12345678: should be between 0 and 65535, typically above\n1024\n&gt; options(help.ports = -1L)\n&gt; (port &lt;- tools::startDynamicHelp(TRUE))\nstarting httpd help server ...Error in tools::startDynamicHelp(TRUE) : \n  Invalid port number -1: should be between 0 and 65535, typically above 1024\n&gt; options(help.ports = 1L)\n&gt; (port &lt;- tools::startDynamicHelp(TRUE))\nstarting httpd help server ...Error in tools::startDynamicHelp(TRUE) : \n  unable to bind socket to TCP port 1\n&gt; options(help.ports = 12345L)\n&gt; (port &lt;- tools::startDynamicHelp(TRUE))\nstarting httpd help server ... done\n[1] 12345\n```\n\nThe check could be moved as deep in the call chain as `build_sin()` in\n`src\/modules\/internet\/Rhttpd.c` where `int port` is implicitly converted into a\n`uint16_t`, but it's easier to raise an error before any resources (such as\nsockets) are allocated.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1704632204.339849",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Szjt",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18645] tools::startDynamicHelp() does not fail if port is out of range (> 65535)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18645"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIvan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #1 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3283\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3283&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3283&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nSuggested fix\n\nSince R already raises an error on failures to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "bind()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", we can also raise an\nerror when given an invalid port number:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> options(help.ports = 12345678L)\n> (port <- tools::startDynamicHelp(TRUE))\nstarting httpd help server ...Error in tools::startDynamicHelp(TRUE) : \n  Invalid port number 12345678: should be between 0 and 65535, typically above\n1024\n> options(help.ports = -1L)\n> (port <- tools::startDynamicHelp(TRUE))\nstarting httpd help server ...Error in tools::startDynamicHelp(TRUE) : \n  Invalid port number -1: should be between 0 and 65535, typically above 1024\n> options(help.ports = 1L)\n> (port <- tools::startDynamicHelp(TRUE))\nstarting httpd help server ...Error in tools::startDynamicHelp(TRUE) : \n  unable to bind socket to TCP port 1\n> options(help.ports = 12345L)\n> (port <- tools::startDynamicHelp(TRUE))\nstarting httpd help server ... done\n[1] 12345\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe check could be moved as deep in the call chain as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "build_sin()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/modules\/internet\/Rhttpd.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " where "
+                            },
+                            {
+                                "type": "text",
+                                "text": "int port",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is implicitly converted into a\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "uint16_t",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", but it's easier to raise an error before any resources (such as\nsockets) are allocated."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18651] New: expose logspace_add, logspace_sub, logspace_sum ?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18651>\n\n            Bug ID: 18651\n           Summary: expose logspace_add, logspace_sub, logspace_sum ?\n           Product: R\n           Version: R 4.3.x\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: enhancement\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:bbolker@gmail.com|bbolker@gmail.com>\n\nR already implements these functions at the C level.  Exposing them seems like\nit would be a small amount of work and would add almost no admin burden going\nforward.  Versions of some of these functions already exist in (at least) the\n`DPQ`, `statnet.common`, `MatrixStats`, and `ramify` packages on CRAN, and I've\nthought about adding them to `gtools`\n(<https:\/\/github.com\/r-gregmisc\/gtools\/issues\/21>) (although it would be nice\n*not* to add additional source-level functionality there), and have been added\nto lots of user-level code (see e.g.\n<https:\/\/github.com\/search?q=logspace_add+language%3AR&amp;type=code>)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1704663363.499249",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "VT\/",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18651] New: expose logspace_add, logspace_sub, logspace_sum ?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18651"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18651\n           Summary: expose logspace_add, logspace_sub, logspace_sum ?\n           Product: R\n           Version: R 4.3.x\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: enhancement\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:bbolker@gmail.com",
+                                "text": "bbolker@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nR already implements these functions at the C level.  Exposing them seems like\nit would be a small amount of work and would add almost no admin burden going\nforward.  Versions of some of these functions already exist in (at least) the\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "DPQ",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "statnet.common",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "MatrixStats",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ramify",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " packages on CRAN, and I've\nthought about adding them to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "gtools",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-gregmisc\/gtools\/issues\/21"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") (although it would be nice\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to add additional source-level functionality there), and have been added\nto lots of user-level code (see e.g.\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/search?q=logspace_add+language%3AR&amp;type=code",
+                                "text": "https:\/\/github.com\/search?q=logspace_add+language%3AR&type=code"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18651] expose logspace_add, logspace_sub, logspace_sum ?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18651>\n\n--- Comment #1 from Ben Bolker (<mailto:bbolker@gmail.com|bbolker@gmail.com>) ---\n(By \"exposing\" I mean \"expose in the C API\", of course ...)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1704663385.520739",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "JL47",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18651] expose logspace_add, logspace_sub, logspace_sum ?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18651"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Ben Bolker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:bbolker@gmail.com",
+                                "text": "bbolker@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(By \"exposing\" I mean \"expose in the C API\", of course ...)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

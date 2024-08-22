@@ -1,0 +1,90 @@
+[
+    {
+        "user": "U01DZUA88S1",
+        "type": "message",
+        "ts": "1702461305.711719",
+        "client_msg_id": "74cb6fad-4454-4dc9-b86c-7c71e596eeea",
+        "text": "<@U06360JH6FP> Thanks for these comments and sorry for the delayed response. I have updated the macOS instructions to fix some issues that we noticed and made a few changes in the light of your comments. Note that we are following the recommendations of <https:\/\/mac.r-project.org> so if you have followed instructions there before, you may already have the prequisites installed. But I recommend reinstalling unless <https:\/\/github.com\/r-devel\/rcwg\/blob\/main\/working_documents\/install_r_macos.md|install_r_macos.md> suggests this is unnecessary, to check you have the latest versions. It would be great if you could test these instructions out and let me know how you get on!",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "g580131f5a7a",
+            "image_72": "https:\/\/secure.gravatar.com\/avatar\/580131f5a7a4fa33c811dc6d20ab3ef8.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0004-72.png",
+            "first_name": "Heather",
+            "real_name": "Heather Turner (she\/her)",
+            "display_name": "Heather Turner",
+            "team": "T01DW9DLB2A",
+            "name": "ht",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1691758557.727899",
+        "parent_user_id": "U01DZUA88S1",
+        "attachments": [
+            {
+                "id": 1,
+                "footer_icon": "https:\/\/slack.github.com\/static\/img\/favicon-neutral.png",
+                "color": "24292f",
+                "bot_id": "B01V53YD4FJ",
+                "app_unfurl_url": "https:\/\/github.com\/r-devel\/rcwg\/blob\/main\/working_documents\/install_r_macos.md",
+                "is_app_unfurl": true,
+                "app_id": "A01BP7R4KNY",
+                "fallback": "<https:\/\/github.com\/r-devel\/rcwg\/blob\/main\/working_documents\/install_r_macos.md | install_r_macos.md>",
+                "text": "*Installing R from Source on macOS*\n\n2023-12-11\n\n*Prerequisites*\n\nSome details and notes are hidden by default - click the black arrowhead  \nto expand or collapse these sections.\n\n*Set up R installation directory*\n\nIf you do not have an existing version of R installed on your computer,  \ndownload the installer for the latest release of R from the <https:\/\/cran.r-project.org\/bin\/macosx\/|CRAN macOS  \npage> and install this pre-built  \n(binary) version with the default settings.\n\nOpen <http:\/\/Terminal.app|Terminal.app> and follow these instructions:\n\n1. Set `LOCAL` as a temporary environment variable to match your  \n    architecture\n    \n    ```\n    # Intel\n    export LOCAL=\/opt\/R\/x86_64 \n    ```\n    \n    ```\n    # Apple Silicon (e.g. M1)\n    export LOCAL=\/opt\/R\/arm64  \n    ```\n2. Make your account own `\/opt\/R` so that we can install prerequisites  \n    for building from source with the helper R script described in the  \n    next subsection.\n    \n    ```\n    sudo chown -R $USER \/opt\/R\n    ```\n    \n    _Details…_\n    \n    If this is skipped, you get errors when running  \n    `install.libs(\"r-base-dev\")`, e.g. “Can’t restore time”, “Can’t  \n    unlink already-existing object”.\n3. Add `$LOCAL\/bin` to your path\n    \n    ```\n    cat << EOF >> \/Users\/$USER\/.zprofile\n    # Add R bin directory to PATH\n    export PATH=\"$LOCAL\/bin:\\${PATH}\"\n    EOF\n    ```\n    \n    _Note if using RStudio terminal, or using <http:\/\/Terminal.app|Terminal.app> on macOS <  \n    10.15 (Catalina)…_\n    \n    The code above assumes you are using a Zsh shell (the default on  \n    macOS ≥ 10.15). If you are using a bash shell, replace  \n    `.zprofile` with `.bash_profile`. The type of  \n    terminal in RStudio can be set in Terminal Options from the terminal  \n    or in Global Options.\n4. Make your account own the R framework folder (created when  \n    installing R from the binary)\n    \n    ```\n    sudo chown -R $USER \/Library\/Frameworks\/R.framework\/\n    ```\n\n*Install prerequisites*\n\nFor the following instructions, run the code within R:\n\n1. Use the helper R script to install commonly required prerequisites\n    \n    ```\n    source(\"<https:\/\/mac.R-project.org\/bin\/install.R>\")\n    install.libs(\"r-base-dev\")\n    ```\n2. (Optional), install Pango for full Cairo support\n    \n    ```\n    install.libs(\"pango\")\n    ```\n3. Check if you already have Subversion installed:\n    \n    ```\n    system2(\"which\", \"svn\")\n    ```\n    \n    This will print a path where Subversion is installed. If nothing is  \n    printed, install Subversion:\n    \n    ```\n    install.libs(\"subversion\", dep = FALSE)\n    ```\n    \n    _Troubleshooting…_\n    \n    If this does not work, try installing Subversion via your preferred  \n    package manager, e.g. with Homebrew: `brew install svn`.\n\nFor the remaining instructions, run the code within <http:\/\/Terminal.app|Terminal.app>\n\n1. Install GNU Fortran (gfortran) from the binary at  \n    <https:\/\/mac.r-project.org\/tools\/|https:\/\/mac.r-project.org\/tools\/>. This version is prepared for  \n    specifically for R and will be used in preference to any other  \n    version on your system.\n2. From the terminal, install Xcode Command Line Tools\n    \n    ```\n    xcode-select --install\n    ```\n    \n    (If already installed, shows “xcode-select: error: command line  \n    tools are already installed”).\n3. Check if you have a current version of MacTeX installed:\n    \n    ```\n    ls \/usr\/local\/texlive\n    ```\n    \n    If the `\/usr\/local\/texlive` directory exists, you will see one or  \n    more subdirectories named by year, e.g.\n    \n    ```\n    2022            2023            texmf-local\n    ```\n    \n    If this check doesn’t show a subdirectory for the current year,  \n    install MacTex from the binary at  \n    <https:\/\/tug.org\/mactex\/mactex-download.html|https:\/\/tug.org\/mactex\/mactex-download.html>.\n4. Check if you have XQuartz installed:\n    \n    ```\n    mdls -name kMDItemVersion \/Applications\/Utilities\/XQuartz.app\n    ```\n    \n    This will show the version number or  \n    `could not find \/Applications\/Utilities\/XQuartz.app`. If missing,  \n    install XQuartz from the binary at <https:\/\/www.xquartz.org\/|https:\/\/www.xquartz.org\/>.  \n    *Restart your computer* for XQuartz (and components that depend on  \n    it) to work!\n5. (Recommended) If you are not already using a tool such as  \n    <https:\/\/github.com\/r-lib\/rig|rig> to install and manage multiple R  \n    versions, install RSwitch from <https:\/\/rud.is\/rswitch\/|https:\/\/rud.is\/rswitch\/>. These are  \n    third-party tools, not part of the R Project, but are recommended  \n    here as they provide an easy way to switch R versions.\n\n*Build R*\n\nRun the following commands within <http:\/\/Terminal.app|Terminal.app>:\n\n0. Retrieve R source code into `TOP_SRCDIR`, note that we retrieve the  \n    `r-devel` source code:\n    \n    ```\n    export TOP_SRCDIR=\"$HOME\/svn\/R-devel\"\n    svn checkout <https:\/\/svn.r-project.org\/R\/trunk\/> \"$TOP_SRCDIR\"\n    ```\n1. Download the latest recommended packages:\n    \n    ```\n    $TOP_SRCDIR\/tools\/rsync-recommended\n    ```\n2. Create the build directory in the `BUILDDIR`:\n    \n    ```\n    export BUILDDIR=\"$HOME\/build\/R-devel\"\n    mkdir -p $BUILDDIR\n    cd $BUILDDIR\n    ```\n3. Create `<http:\/\/config.site|config.site>` within the build directory to set some  \n    configuration flags as recommended by the <https:\/\/cran.r-project.org\/doc\/manuals\/r-devel\/R-admin.html#Prerequisites|R-admin  \n    manual>.\n    \n    ```\n    cat << EOF > <http:\/\/config.site|config.site>\n    CC=clang\n    OBJC=\\$CC\n    FC=\"\/opt\/gfortran\/bin\/gfortran -mtune=native\"\n    CPPFLAGS='-isystem $LOCAL\/include'\n    CXX=clang++\n    PKG_CONFIG_PATH=$LOCAL\/lib\/pkgconfig:\/usr\/lib\/pkgconfig\n    EOF\n    ```\n    \n    If you are on Apple Silicon, also run the following to add some more  \n    configuration flags\n    \n    ```\n    cat << EOF >> <http:\/\/config.site|config.site>\n    CFLAGS=\"-falign-functions=8 -g -O0\"\n    FFLAGS=\"-g -O2 -mmacosx-version-min=11.0\"\n    FCFLAGS=\"-g -O2 -mmacosx-version-min=11.0\"\n    LDFLAGS=\"-L$LOCAL\/lib -L\/opt\/gfortran\/lib\"\n    CPPFLAGS=\"-isystem $LOCAL\/include -I$LOCAL\/include\"\n    EOF\n    ```\n    \n    _Details…_\n    \n    Some modifications to the recommendations in R-admin: `-O0` to  \n    enable debugging symbols and disable compiler optimisations for  \n    better debugging experience; `-mmacos-version-min` corrected [?]  \n    to `-mmacosx-version-min`;  \n    `LDFLAGS=\"-L$LOCAL\/lib -L\/opt\/gfortran\/lib\"` added so that liblzma  \n    (in `$LOCAL\/lib`) and gfortran libraries can be found. CPPFLAGS  \n    modified for Apple Silicon to link to the headers for liblzma.\n4. Configure the R installation with `--enable-R-framework` to install  \n    as an application framework so that we can switch between R versions  \n    with RSwitch:\n    \n    ```\n    \"$TOP_SRCDIR\/configure\" --enable-R-framework\n    ```\n    \n    _Working with multiple devel versions…_\n    \n    The code above assumes you only want to work with one development  \n    version of R that will be identified by the Major.Minor version  \n    number. To customize the version name use  \n    `--enable-R-framework FW=VERSION` where e.g. `VERSION=4.4-dev`. The  \n    configure options in <https:\/\/cran.r-project.org\/doc\/manuals\/r-devel\/R-admin.html#Prerequisites|R-admin  \n    manual>  \n    to define the location of X11 and tcltk libraries do not seem to be  \n    necessary.\n5. Build R :\n    \n    ```\n    make\n    ```\n6. Check that R works as expected:\n    \n    ```\n    make check\n    ```\n    \n    `make` will exit with an error if there are any problems.\n    \n    _Note if you are using RStudio terminal…_\n    \n    `make check` will fail unless you run `unset R_HOME` first\n7. Install the built version of R\n    \n    ```\n    make install\n    ```\n\nThe built version of R will now be your default version of R, which you  \ncan start by typing `R` in the terminal, or restarting the R session in  \nRStudio, etc. To switch versions, use RSwitch or rig, then restart your  \nR session.",
+                "title": "<https:\/\/github.com\/r-devel\/rcwg\/blob\/main\/working_documents\/install_r_macos.md | install_r_macos.md>",
+                "footer": "<https:\/\/github.com\/r-devel\/rcwg|r-devel\/rcwg>",
+                "mrkdwn_in": [
+                    "text"
+                ]
+            }
+        ],
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Q6\/Gj",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "user",
+                                "user_id": "U06360JH6FP"
+                            },
+                            {
+                                "type": "text",
+                                "text": " Thanks for these comments and sorry for the delayed response. I have updated the macOS instructions to fix some issues that we noticed and made a few changes in the light of your comments. Note that we are following the recommendations of "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/mac.r-project.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": " so if you have followed instructions there before, you may already have the prequisites installed. But I recommend reinstalling unless "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/rcwg\/blob\/main\/working_documents\/install_r_macos.md",
+                                "text": "install_r_macos.md"
+                            },
+                            {
+                                "type": "text",
+                                "text": " suggests this is unnecessary, to check you have the latest versions. It would be great if you could test these instructions out and let me know how you get on!"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "reactions": [
+            {
+                "name": "pray",
+                "users": [
+                    "U06360JH6FP"
+                ],
+                "count": 1
+            }
+        ]
+    }
+]

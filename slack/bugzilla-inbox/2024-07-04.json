@@ -1,0 +1,149 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18754] New: identical() gives bad result on weak references*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18754>\n\n            Bug ID: 18754\n           Summary: identical() gives bad result on weak references\n           Product: R\n           Version: R 4.4.x\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:murdoch.duncan@gmail.com|murdoch.duncan@gmail.com>\n\nThe identical() function finds two weak references as not being identical even\nwhen they reference the same object:\n\n```\ne &lt;- new.env()\n\nw1 &lt;- rlang::new_weakref(e)\nw2 &lt;- rlang::new_weakref(e)\n\nidentical(w1, w1) \n#&gt; [1] TRUE\n\nidentical(w1, w2)\n#&gt; [1] FALSE\n```\n\nThis arose in a question on StackOverflow: \n<https:\/\/stackoverflow.com\/q\/78704020> where a more elaborate version of this\ncode perplexed the writer:\n\n```\nlibrary(igraph)\n\ng &lt;- make_ring(3)\n\nidentical(E(g), E(g))\n#&gt; [1] FALSE\n```\n\nThe result is caused by these lines in src\/main\/identical.c:\n\n```\n    case ENVSXP:\n    case SYMSXP: \n    case WEAKREFSXP: \/**** is this the best approach? *\/\n        return(x == y ? TRUE : FALSE);\n```\n\nSince `w1` and `w2` were created separately as were the two weak refs in the\nsecond example, they have different addresses and compare as different.\n\nI think the code above makes sense for ENVSXP and SYMSXP, but not for\nWEAKREFSXP, which should be comparing the key, the value, and the finalizer.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1720122903.394589",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "CKi",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18754] New: identical() gives bad result on weak references",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18754"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18754\n           Summary: identical() gives bad result on weak references\n           Product: R\n           Version: R 4.4.x\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:murdoch.duncan@gmail.com",
+                                "text": "murdoch.duncan@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThe identical() function finds two weak references as not being identical even\nwhen they reference the same object:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "e <- new.env()\n\nw1 <- rlang::new_weakref(e)\nw2 <- rlang::new_weakref(e)\n\nidentical(w1, w1) \n#> [1] TRUE\n\nidentical(w1, w2)\n#> [1] FALSE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis arose in a question on StackOverflow: \n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stackoverflow.com\/q\/78704020"
+                            },
+                            {
+                                "type": "text",
+                                "text": " where a more elaborate version of this\ncode perplexed the writer:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "library(igraph)\n\ng <- make_ring(3)\n\nidentical(E(g), E(g))\n#> [1] FALSE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe result is caused by these lines in src\/main\/identical.c:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "    case ENVSXP:\n    case SYMSXP: \n    case WEAKREFSXP: \/**** is this the best approach? *\/\n        return(x == y ? TRUE : FALSE);\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSince "
+                            },
+                            {
+                                "type": "text",
+                                "text": "w1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "w2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " were created separately as were the two weak refs in the\nsecond example, they have different addresses and compare as different.\n\nI think the code above makes sense for ENVSXP and SYMSXP, but not for\nWEAKREFSXP, which should be comparing the key, the value, and the finalizer."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

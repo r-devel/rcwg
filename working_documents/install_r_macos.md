@@ -327,9 +327,11 @@ run the following commands within Terminal.app:
     You will need to update the Makefile template to infer the SVN
     revision number from the git mirror. Run the following line of code
     to replace an `svn` command in the template with a shell script that
-    will infer the SVN revision number: <br> <code> sed -i.bak
-    "s\|\\\$(GIT) svn info\|\$TOP_SRCDIR/.github/scripts/svn-info.sh\|"
-    "\$TOP_SRCDIR/Makefile.in" </code>
+    will infer the SVN revision number: <br>
+    
+    ``` sh
+    sed -i.bak "s|\$(GIT) svn info|$TOP_SRCDIR/.github/scripts/svn-info.sh|" "$TOP_SRCDIR/Makefile.in"
+    ```
 
     </details>
 

@@ -13,9 +13,9 @@ Fri 14:00 UTC: Jul 19, Sep 20, Nov 15
 3.  Create Google event +Zoom (use Method 2)
     - Method 1: Create event on Google calendar, make Zoom event. Makes a mess of Zoom instructions in description on Teamup, but just about usable.
     - Method 2: Create event on Zoom, add to Google calendar. Need to make sure on Forwards account
-        - Add to Forward Calendar (RSVPs work better from main calender - at least Outlook and fastmail, RSVPs don't work to (public?) group calendar). DO NOT INVITE ANYONE YET!!
-        - Copy event to R Contribution Working Group calendar for sharing on public calendar without any invitees.
-        - Add guest: r-contribution-wg@r-project.org on Forwards Calendar event.
+        - Add to Forward Calendar (RSVPs work better from main calender - at least Outlook and fastmail, RSVPs don't work to (public?) group calendar). DO NOT INVITE ANYONE YET ELSE THEY GET MULTIPLE INVITES!!
+        - Copy event to R Contribution Working Group calendar for sharing via Teamup.
+        - Now add guest: r-contribution-wg@r-project.org on Forwards Calendar event.
     - Cannot log in to Zoom or Gmail with RSelenium.
 4.  Will automatically show on Team up in 12 hours, or
     - Login to Team up 
@@ -70,11 +70,17 @@ Minutes of previous meetings: https://github.com/r-devel/rcwg/tree/main/team_min
     - Don't integrate Zoom - for a recurring event it created a duplicated zoom meeting, on the wrong day, that does not recur!
     - Don't announce till one week before (only announces one event at a time in any case)
 3. Add to Forwards Calendars
-    - Add to Forward Calendar from Zoom and edit description. DO NOT INVITE ANYONE YET!!
-    - Copy event to Office Hours calendar for sharing on public calendar without any invitees.
+    - Add to Forward Calendar from Zoom and edit description (RSVPs work better from main calender - at least Outlook and fastmail, RSVPs don't work to (public?) group calendar). DO NOT INVITE ANYONE YET ELSE THEY GET MULTIPLE INVITES!!
+    - Copy event to Office Hours calendar for sharing via Teamup.
     - Add guests: r-contribution-wg@r-project.org on Forwards Calendar event. FOR ALL EVENTS!!
 4. [Automated] Add to contributor.r-project.org/events
     - If need to force change refresh settings on Teamup
-5. Create events on LinkedIn (https://www.linkedin.com/company/64851099/admin/)
-    - See https://docs.google.com/document/d/1CsZrpwEsaSjIRi1o3Nw3g1QOJPlMJZgp62s5FFVDOaU/edit
-6. Post on social media with help from scripts/office_hours.R
+5. Post on social media with help from scripts/office_hours.R
+
+### Content for Forwards calendar
+
+Join the online Office Hour to
+
+- discuss how to get started contributing to R
+- get help/feedback on contributions you are working on
+- look at open bugs/work on translations together

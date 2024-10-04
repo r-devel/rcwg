@@ -1,14 +1,15 @@
 # Data for next office hours ----------------------------------------------
 
-# 8 Aug
-# 12 Sep
+# October onwards: TODO after checking time change
 
-day <- 8
-month <- "August"
-emea <- "https://www.meetup.com/r-contributors/events/300323847/"
-amer <- "https://www.meetup.com/r-contributors/events/302333288/"
+day <- 17
+month <- "October"
+emea <- "https://www.meetup.com/r-contributors/events/302437987"
+amer <- "https://www.meetup.com/r-contributors/events/302437989"
 emea_zoom <- "https://us02web.zoom.us/j/88093117300?pwd=bFlTWENoY2U2bW40SHFLcWxxTHp5Zz09"
 amer_zoom <- "https://us02web.zoom.us/j/85668115902?pwd=Z0NtN3hMOGZmaU9EcWx1SWE2ZUwzUT09"
+
+# ensure office hour annouced on meetup (see rcwg_tasks.md)
 
 # Social media posts ------------------------------------------------------
 
@@ -57,13 +58,13 @@ buffer_signin(browser = browser,
 # note posting day different from event day!
 # If NULL, will post this day, this month, next hour (UTC times)
 buffer_createpost(browser = browser,
-                  day = NULL,
+                  day = 10, # day number of month, e.g. 10
                   month = NULL,
-                  time = NULL,
+                  time = "09:00", # 24 hour clock, e.g. "09:00"
                   postcontent = post[[1]])
 
 buffer_createpost(browser = browser,
-                  day = NULL,
+                  day = 10,
                   month = NULL,
                   time = "16:30",
                   postcontent = post[[2]])

@@ -42,17 +42,17 @@ buffer_createpost <- function(
     # select outlets
     # all (mastodon, twitter and linked-in page) pre-selected by default
 
-    #elem <- browser$findElement(using = 'name',
-    #                            "mastodon-profile-button")
-    #elem$clickElement()
-
-    #elem <- browser$findElement(using = 'name',
-    #                            "twitter-profile-button")
-    #elem$clickElement()
+    elem <- browser$findElement(using = 'name',
+                                "mastodon-profile-button")
+    elem$clickElement()
 
     elem <- browser$findElement(using = 'name',
-                                "linkedin-profile-button")
+                                "twitter-profile-button")
     elem$clickElement()
+
+    #elem <- browser$findElement(using = 'name',
+    #                            "linkedin-profile-button")
+    #elem$clickElement()
 
     elem <- browser$findElement(using = 'xpath',
                                 "//div[@role='textbox']")

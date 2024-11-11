@@ -2,10 +2,16 @@
 
 # October onwards: TODO after checking time change
 
-day <- 17
-month <- "October"
-emea <- "https://www.meetup.com/r-contributors/events/302437987"
-amer <- "https://www.meetup.com/r-contributors/events/302437989"
+# Nov 14
+# Dec 12
+# Jan 9
+# Feb 13
+# Mar 13
+
+day <- 14
+month <- "November"
+emea <- "https://www.meetup.com/r-contributors/events/304502675"
+amer <- "https://www.meetup.com/r-contributors/events/304502698"
 emea_zoom <- "https://us02web.zoom.us/j/88093117300?pwd=bFlTWENoY2U2bW40SHFLcWxxTHp5Zz09"
 amer_zoom <- "https://us02web.zoom.us/j/85668115902?pwd=Z0NtN3hMOGZmaU9EcWx1SWE2ZUwzUT09"
 
@@ -29,7 +35,9 @@ post <- office_hour_post(month, day, c("09:00", "16:30"), # UTC times
 
 # Mastodon and Twitter via Buffer posts ------------------------------------
 
-post <- office_hour_post(month, day, c("09:00", "16:30"), # UTC times
+# Also Bluesky by bridging
+
+post <- office_hour_post(month, day, c("10:00", "17:30"), # UTC times
                          c(emea, amer), c(emea_zoom, amer_zoom),
                          venue = "mastodon",
                          templates = "admin/posts/office_hour")
@@ -58,16 +66,18 @@ buffer_signin(browser = browser,
 # note posting day different from event day!
 # If NULL, will post this day, this month, next hour (UTC times)
 buffer_createpost(browser = browser,
-                  day = 10, # day number of month, e.g. 10
+                  day = 11, # day number of month, e.g. 10
                   month = NULL,
-                  time = "09:00", # 24 hour clock, e.g. "09:00"
+                  time = NULL, # 24 hour clock, e.g. "09:00"
                   postcontent = post[[1]])
 
 buffer_createpost(browser = browser,
-                  day = 10,
+                  day = 11,
                   month = NULL,
-                  time = "16:30",
+                  time = "17:30",
                   postcontent = post[[2]])
+
+browser$close()
 
 # LinkedIn event ----------------------------------------------------------
 
@@ -117,8 +127,8 @@ linkedin_createevent(browser = browser,
                      tz = "(UTC+00:00) Coordinated Universal Time",
                      startday = day,
                      startmonth = month,
-                     starttime = "09:00",
-                     endtime = "10:00",
+                     starttime = "10:00", #UTC time
+                     endtime = "11:00",
                      eventlink = emea,
                      description = description,
                      postcontent = postcontent)
@@ -140,8 +150,8 @@ linkedin_createevent(browser = browser,
                      alttext = "Three people laughing together, as they sit around a table with laptops, notebooks and drinks.",
                      eventtype = "^External event link",
                      name = "R Contributor Office Hour (AMER)",
-                     tz = "(UTC-07:00) Pacific Time (US and Canada)",
-                     #tz = "(UTC-08:00) Pacific Time (US and Canada), Tijuana",
+                     #tz = "(UTC-07:00) Pacific Time (US and Canada)", # during summer
+                     tz = "(UTC-08:00) Pacific Time (US and Canada), Tijuana",
                      startday = day,
                      startmonth = month,
                      starttime = "09:30",

@@ -13,7 +13,7 @@ source("admin/R/update_readme_dates.R")
 
 # times here are UK times!
 # !! Think I have inconsistency here: Slack message and Twitter/Mastodon were wrong last time
-update_readme_dates(1, "July", 3, "Friday", "15:00", 2024)
+update_readme_dates(1, "November", 3, "Friday", "15:00", 2024)
 update_readme_dates(2, "August", 3, "Tuesday", "19:30", 2024)
 
 
@@ -25,9 +25,9 @@ source("admin/R/buffer_post.R")
 # auth_setup() # choose user token and login as RContributors on Mastodon
 
 # slack announcement
-month <- "June"
-day <- 18
-time <- "18:30" # UTC !!
+month <- "November"
+day <- 15
+time <- "15:00" # UTC !!
 weekday <- get_weekday(day, month, abbreviate = TRUE)
 agenda = c(
 "- Update on R Dev Day @ Imperial

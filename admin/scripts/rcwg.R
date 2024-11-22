@@ -2,9 +2,6 @@
 
 source("admin/R/update_readme_dates.R")
 
-# 20 Aug
-# 20 Sep
-# 15 Oct
 # 15 Nov
 # 17 Dec
 
@@ -30,17 +27,16 @@ day <- 15
 time <- "15:00" # UTC !!
 weekday <- get_weekday(day, month, abbreviate = TRUE)
 agenda = c(
-"- Update on R Dev Day @ Imperial
-- Preparation for future R Dev Days
-- RCWG contributions to useR!
-- Update on Google Summer of Code/other projects"
+"- Preparation for R Dev Day @ LatinR
+- Planned work on R Dev Guide
+- Updates on regular activities"
 )
 post <- social_post(weekday = weekday,
                     day = day,
                     month = month,
                     time = time,
                     agenda = agenda,
-                    venue = "mastodon",
+                    venue = "mastodon", # "slack"/"mastodon"
                     templates = "admin/posts/rcwg",
                     ask = TRUE)
 
@@ -66,9 +62,9 @@ buffer_signin(browser = browser,
 # note posting day different from event day!
 # If NULL, will post this day, this month, next hour
 buffer_createpost(browser = browser,
-                  day = NULL,
+                  day = 12,
                   month = NULL,
-                  time = "18:30", #UTC
+                  time = "15:00", #UTC
                   postcontent = post)
 
 browser$close()

@@ -1,0 +1,179 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18790] Internal tar implementation can produce corrupt archives when handling symlinks*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18790>\n\nIvan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #1 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nCreated attachment 3396\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3396&amp;action=edit>\nProposed fix\n\nIndeed, [POSIX requires symbolic link entries in `tar` archives to have a size\nof zero][POSIX]:\n\n&gt; The `size` field is the size of the file in octets. If the `typeflag` field is set to specify a file to be of type 1 (a hard link) or 2 (a symbolic link), the `size` field shall be specified as zero.\n\nR's internal `tar` had the logic to set the size to zero, but later mistakenly\noverwrote it with the size of the linked file. Depending on the size of the\nlinked file, GNU tar warns (&lt;= 1024) or fails for the resulting archives. I've\nbeen using the following reproducer:\n\n```\nwriteBin(as.raw(rep(c(0x55, 0xAA), length.out = 1025)), \"foo\")\nunlink(\"bar\")\nfile.symlink(\"foo\", \"bar\")\ntar(\"baz.tar\", c(\"foo\", \"bar\"), tar = \"internal\")\n```\n\nThe attached patch survives `LC_ALL=C.UTF-8 make check-devel` on amd64 Linux.\n\n[POSIX]:\n<https:\/\/pubs.opengroup.org\/onlinepubs\/9799919799\/utilities\/pax.html#tag_20_94_13_06>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1725447574.781139",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "nQ51X",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18790] Internal tar implementation can produce corrupt archives when handling symlinks",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18790"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIvan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #1 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3396\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3396&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3396&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nProposed fix\n\nIndeed, [POSIX requires symbolic link entries in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tar",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " archives to have a size\nof zero][POSIX]:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "The "
+                            },
+                            {
+                                "type": "text",
+                                "text": "size",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " field is the size of the file in octets. If the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "typeflag",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " field is set to specify a file to be of type 1 (a hard link) or 2 (a symbolic link), the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "size",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " field shall be specified as zero."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nR's internal "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tar",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " had the logic to set the size to zero, but later mistakenly\noverwrote it with the size of the linked file. Depending on the size of the\nlinked file, GNU tar warns (<= 1024) or fails for the resulting archives. I've\nbeen using the following reproducer:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "writeBin(as.raw(rep(c(0x55, 0xAA), length.out = 1025)), \"foo\")\nunlink(\"bar\")\nfile.symlink(\"foo\", \"bar\")\ntar(\"baz.tar\", c(\"foo\", \"bar\"), tar = \"internal\")\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe attached patch survives "
+                            },
+                            {
+                                "type": "text",
+                                "text": "LC_ALL=C.UTF-8 make check-devel",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " on amd64 Linux.\n\n[POSIX]:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/pubs.opengroup.org\/onlinepubs\/9799919799\/utilities\/pax.html#tag_20_94_13_06"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,250 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18789] New: R CMD check does not check symbol tables of linked static libraries*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18789>\n\n            Bug ID: 18789\n           Summary: R CMD check does not check symbol tables of linked\n                    static libraries\n           Product: R\n           Version: R 4.4.x\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Language\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>\n\n**Matrix** is one of many contributed packages that link static libraries built\nin subdirectories of `src\/`.  *Writing R Extensions* 1.2.1.3 (\"Compiling in\nsubdirectories\") recommends this approach as an alternative to enumerating all\nof the subdirectory objects in `OBJECTS`, in the situation where \"the\nsubdirectory is self-contained code with a suitable makefile\".  However, it\nseems that `R CMD check` does not report illegal entry points in the symbol\ntables of static libraries unless the static libraries are listed (dubiously)\nin `OBJECTS`.\n\nA corollary is that **Matrix** 1.7-0 passed its checks and was published on\nCRAN despite the fact that the internal SuiteSparse libraries (which had been\nupdated for the release) contained several calls to illegal entry points. \nThese calls have been noticed now because they happen to be reported when\n**Matrix** 1.7-0 is checked _with R_ as part of `make check-all`.  There, I see\n(under macOS):\n\n```\n* checking compiled code ... NOTE\nNote: information on .o files is not available\nFile\n'\/Users\/mikael\/Desktop\/R-setup\/R-devel_apple-llvm-null\/library\/Matrix\/libs\/Matrix.so':\n  Found '___sprintf_chk', possibly from 'sprintf' (C)\n  Found '___stderrp', possibly from 'stderr' (C)\n  Found '___stdoutp', possibly from 'stdout' (C)\n  Found '_exit', possibly from 'exit' (C)\n  Found '_printf', possibly from 'printf' (C)\n  Found '_rand', possibly from 'rand' (C)\n  Found '_srand', possibly from 'srand' (C)\n\nCompiled code should not call entry points which might terminate R nor\nwrite to stdout\/stderr instead of to the console, nor use Fortran I\/O\nnor system RNGs nor [v]sprintf. The detected symbols are linked into\nthe code but might come from libraries and not actually be called.\n\nSee 'Writing portable packages' in the 'Writing R Extensions' manual.\n```\n\nThat the `NOTE` is not emitted when `R CMD check` is run independently of `make\ncheck-all` seems to stem from the implementation of\n`tools:::check_compiled_code`, which in Unix-like cases has:\n\n```\n        bad &lt;- Filter(length, lapply(so_files, check_so_symbols))\n        objects_symbol_tables_file &lt;- if(nzchar(r_arch))\n            file.path(dir, \"libs\", r_arch, \"symbols.rds\")\n        else file.path(dir, \"libs\", \"symbols.rds\")\n        if(file_test(\"-f\", objects_symbol_tables_file)) {\n            tables &lt;- readRDS(objects_symbol_tables_file)\n            bad &lt;- Filter(length, lapply(bad, compare))\n        } else if(useST)\n            cat(\"Note: information on .o files is not available\\n\")\n```\n\n\"Bad\" symbols in the shared library are filtered out when `symbols.rds` exists\nbecause they do not appear in the symbol table of any object file listed in\n`OBJECTS`.  Whether that is intentional is unclear, but change appears to be\nneeded here: it is possible that many packages compiling code in subdirectories\nare evading a complete symbol table check ...\n\nFWIW, the internal SuiteSparse libraries have been patched in \"Matrix-devel\"\nand the patch ported to \"Matrix-patched\", to become **Matrix** 1.7-1:\n\n```\n$ svn checkout\n<svn:\/\/svn.r-forge.r-project.org\/svnroot\/matrix\/branches\/Matrix-1-7-branch>\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1725324785.793989",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "KYgeD",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18789] New: R CMD check does not check symbol tables of linked static libraries",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18789"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18789\n           Summary: R CMD check does not check symbol tables of linked\n                    static libraries\n           Product: R\n           Version: R 4.4.x\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Language\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n**Matrix** is one of many contributed packages that link static libraries built\nin subdirectories of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Writing R Extensions",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " 1.2.1.3 (\"Compiling in\nsubdirectories\") recommends this approach as an alternative to enumerating all\nof the subdirectory objects in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "OBJECTS",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", in the situation where \"the\nsubdirectory is self-contained code with a suitable makefile\".  However, it\nseems that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R CMD check",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does not report illegal entry points in the symbol\ntables of static libraries unless the static libraries are listed (dubiously)\nin "
+                            },
+                            {
+                                "type": "text",
+                                "text": "OBJECTS",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nA corollary is that **Matrix** 1.7-0 passed its checks and was published on\nCRAN despite the fact that the internal SuiteSparse libraries (which had been\nupdated for the release) contained several calls to illegal entry points. \nThese calls have been noticed now because they happen to be reported when\n**Matrix** 1.7-0 is checked "
+                            },
+                            {
+                                "type": "text",
+                                "text": "with R",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as part of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "make check-all",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  There, I see\n(under macOS):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "* checking compiled code ... NOTE\nNote: information on .o files is not available\nFile\n'\/Users\/mikael\/Desktop\/R-setup\/R-devel_apple-llvm-null\/library\/Matrix\/libs\/Matrix.so':\n  Found '___sprintf_chk', possibly from 'sprintf' (C)\n  Found '___stderrp', possibly from 'stderr' (C)\n  Found '___stdoutp', possibly from 'stdout' (C)\n  Found '_exit', possibly from 'exit' (C)\n  Found '_printf', possibly from 'printf' (C)\n  Found '_rand', possibly from 'rand' (C)\n  Found '_srand', possibly from 'srand' (C)\n\nCompiled code should not call entry points which might terminate R nor\nwrite to stdout\/stderr instead of to the console, nor use Fortran I\/O\nnor system RNGs nor [v]sprintf. The detected symbols are linked into\nthe code but might come from libraries and not actually be called.\n\nSee 'Writing portable packages' in the 'Writing R Extensions' manual.\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThat the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NOTE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is not emitted when "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R CMD check",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is run independently of `make\ncheck-all` seems to stem from the implementation of\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "tools:::check_compiled_code",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which in Unix-like cases has:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "        bad <- Filter(length, lapply(so_files, check_so_symbols))\n        objects_symbol_tables_file <- if(nzchar(r_arch))\n            file.path(dir, \"libs\", r_arch, \"symbols.rds\")\n        else file.path(dir, \"libs\", \"symbols.rds\")\n        if(file_test(\"-f\", objects_symbol_tables_file)) {\n            tables <- readRDS(objects_symbol_tables_file)\n            bad <- Filter(length, lapply(bad, compare))\n        } else if(useST)\n            cat(\"Note: information on .o files is not available\\n\")\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n\"Bad\" symbols in the shared library are filtered out when "
+                            },
+                            {
+                                "type": "text",
+                                "text": "symbols.rds",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " exists\nbecause they do not appear in the symbol table of any object file listed in\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "OBJECTS",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  Whether that is intentional is unclear, but change appears to be\nneeded here: it is possible that many packages compiling code in subdirectories\nare evading a complete symbol table check ...\n\nFWIW, the internal SuiteSparse libraries have been patched in \"Matrix-devel\"\nand the patch ported to \"Matrix-patched\", to become **Matrix** 1.7-1:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$ svn checkout\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "svn:\/\/svn.r-forge.r-project.org\/svnroot\/matrix\/branches\/Matrix-1-7-branch"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

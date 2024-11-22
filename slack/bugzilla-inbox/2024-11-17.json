@@ -1,0 +1,396 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18824] debugonce(fun, signature=) signals error on second invocation*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18824>\n\nElin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |elin.waring@gmail.com\n\n--- Comment #1 from Elin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) ---\nThe message comes from `methods:::.makeTracedFunction()`\n\n```\n           else if (!inherits(fBody, \"{\")) \n                stop(\"cannot use 'at' argument unless the function body has the\nform '{ ... }'\")\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1731895927.798299",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "hOrWb",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18824] debugonce(fun, signature=) signals error on second invocation",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18824"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nElin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |elin.waring@gmail.com\n\n--- Comment #1 from Elin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe message comes from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods:::.makeTracedFunction()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "           else if (!inherits(fBody, \"{\")) \n                stop(\"cannot use 'at' argument unless the function body has the\nform '{ ... }'\")\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18824] debugonce(fun, signature=) signals error on second invocation*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18824>\n\n--- Comment #2 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nI've just explored a bit.\n\nThe issue is restricted to methods whose bodies are _not_ calls to `{`.  Hence:\n\n```\n&gt; body(selectMethod(cbind2, signature = c(\"ANY\", \"ANY\")))\n.Internal(cbind(-1L, x, y))\n&gt; debugonce(cbind2, signature = c(\"ANY\", \"ANY\"))\nTracing specified method for function \"cbind2\" in environment\n&lt;namespace:methods&gt;\n&gt; body(selectMethod(cbind2, signature = c(\"ANY\", \"ANY\")))\n{\n    .doTrace({\n        untrace(.Generic, signature = .target)\n        browser()\n    }, \"on entry\")\n    .Internal(cbind(-1L, x, y))\n}\n&gt; debugonce(cbind2, signature = c(\"ANY\", \"ANY\"))\nError in .makeTracedFunction(def, tracer, exit, at, print, doEdit) : \n  cannot use 'at' argument unless the function body has the form '{ ... }'\n&gt; body(selectMethod(cbind2, signature = c(\"ANY\", \"ANY\")))\n{\n    .doTrace({\n        untrace(.Generic, signature = .target)\n        browser()\n    }, \"on entry\")\n    .Internal(cbind(-1L, x, y))\n}\n```\n\nWhereas:\n\n```\n&gt; setMethod(cbind2, c(\"NULL\", \"NULL\"), function(x, y, ...) { NULL })\n&gt; body(selectMethod(cbind2, signature = c(\"NULL\", \"NULL\")))\n{\n    NULL\n}\n&gt; debugonce(cbind2, signature = c(\"NULL\", \"NULL\"))\nTracing specified method for function \"cbind2\" in environment\n&lt;namespace:methods&gt;\n&gt; body(selectMethod(cbind2, signature = c(\"NULL\", \"NULL\")))\n{\n    {\n        .doTrace({\n            untrace(.Generic, signature = .target)\n            browser()\n        }, \"step 2\")\n        NULL\n    }\n}\n&gt; debugonce(cbind2, signature = c(\"NULL\", \"NULL\"))\nTracing specified method for function \"cbind2\" in environment\n&lt;namespace:methods&gt;\n&gt; body(selectMethod(cbind2, signature = c(\"NULL\", \"NULL\")))\n{\n    {\n        .doTrace({\n            untrace(.Generic, signature = .target)\n            browser()\n        }, \"step 2\")\n        NULL\n    }\n}\n```\n\nIn the example where we observe an error, the second invocation of `debugonce`\n(really `methods:::.debugMethod`) sees the body of the _traced_ method, which\nis a call to `{`, and accordingly calls `trace` with `at = 2L`.  But later\n`methods:::.TraceWithMethods` attempts to trace the _untraced_ (\"original\")\nmethod whose body _is not_ a call to `{`.  For the untraced method, `at = 2L`\nis invalid.\n\nPatching `methods:::.debugMethod` to compute `at` using the untraced method,\nwhere the method being debugged once is already traced, seems to be the most\nminimal fix.\n\n```\nIndex: src\/library\/methods\/R\/debug.R\n===================================================================\n--- src\/library\/methods\/R\/debug.R       (revision 87338)\n+++ src\/library\/methods\/R\/debug.R       (working copy)\n@@ -10,7 +10,7 @@\n     if(isdebugged(fun, signature = signature))\n         return(invisible(NULL))\n\n-    m &lt;- selectMethod(fun, signature)\n+    m &lt;- .untracedFunction(selectMethod(fun, signature))\n     bd &lt;- body(m)\n\n     isrematch &lt;- isRematched(m)\n```\n\nThis patch passes `make check-all`, but it appears that\n`methods:::.debugMethod` is not exercised at all by existing examples and\ntests.  Hence the \"real\" patch could\/should add some tests along these lines.\n\n```\nsetGeneric(\"zzz\", function(x) standardGeneric(\"zzz\"))\nsetMethod(\"zzz\", c(x = \"NULL\"), function(x) NULL)\nm0 &lt;- selectMethod(zzz, signature = \"NULL\")\ndebugonce(zzz, signature = \"NULL\")\nm1 &lt;- selectMethod(zzz, signature = \"NULL\")\ndebugonce(zzz, signature = \"NULL\") # error until R 4.5 =&gt; Bug 18824\nm2 &lt;- selectMethod(zzz, signature = \"NULL\")\nuntrace(zzz, signature = \"NULL\")\nm3 &lt;- selectMethod(zzz, signature = \"NULL\")\nstopifnot(is(m0, \"MethodDefinition\"),\n          is(m1, \"MethodDefinitionWithTrace\"),\n          identical(m0, m3),\n          identical(m1, m2))\n```\n\nComments on the diagnosis and patch are welcome ...",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1731909357.432559",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ZtV",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18824] debugonce(fun, signature=) signals error on second invocation",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18824"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI've just explored a bit.\n\nThe issue is restricted to methods whose bodies are "
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " calls to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "{",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  Hence:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> body(selectMethod(cbind2, signature = c(\"ANY\", \"ANY\")))\n.Internal(cbind(-1L, x, y))\n> debugonce(cbind2, signature = c(\"ANY\", \"ANY\"))\nTracing specified method for function \"cbind2\" in environment\n<namespace:methods>\n> body(selectMethod(cbind2, signature = c(\"ANY\", \"ANY\")))\n{\n    .doTrace({\n        untrace(.Generic, signature = .target)\n        browser()\n    }, \"on entry\")\n    .Internal(cbind(-1L, x, y))\n}\n> debugonce(cbind2, signature = c(\"ANY\", \"ANY\"))\nError in .makeTracedFunction(def, tracer, exit, at, print, doEdit) : \n  cannot use 'at' argument unless the function body has the form '{ ... }'\n> body(selectMethod(cbind2, signature = c(\"ANY\", \"ANY\")))\n{\n    .doTrace({\n        untrace(.Generic, signature = .target)\n        browser()\n    }, \"on entry\")\n    .Internal(cbind(-1L, x, y))\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWhereas:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> setMethod(cbind2, c(\"NULL\", \"NULL\"), function(x, y, ...) { NULL })\n> body(selectMethod(cbind2, signature = c(\"NULL\", \"NULL\")))\n{\n    NULL\n}\n> debugonce(cbind2, signature = c(\"NULL\", \"NULL\"))\nTracing specified method for function \"cbind2\" in environment\n<namespace:methods>\n> body(selectMethod(cbind2, signature = c(\"NULL\", \"NULL\")))\n{\n    {\n        .doTrace({\n            untrace(.Generic, signature = .target)\n            browser()\n        }, \"step 2\")\n        NULL\n    }\n}\n> debugonce(cbind2, signature = c(\"NULL\", \"NULL\"))\nTracing specified method for function \"cbind2\" in environment\n<namespace:methods>\n> body(selectMethod(cbind2, signature = c(\"NULL\", \"NULL\")))\n{\n    {\n        .doTrace({\n            untrace(.Generic, signature = .target)\n            browser()\n        }, \"step 2\")\n        NULL\n    }\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIn the example where we observe an error, the second invocation of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "debugonce",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n(really "
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods:::.debugMethod",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") sees the body of the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "traced",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method, which\nis a call to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "{",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and accordingly calls "
+                            },
+                            {
+                                "type": "text",
+                                "text": "trace",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "at = 2L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  But later\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods:::.TraceWithMethods",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " attempts to trace the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "untraced",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (\"original\")\nmethod whose body "
+                            },
+                            {
+                                "type": "text",
+                                "text": "is not",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " a call to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "{",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  For the untraced method, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "at = 2L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nis invalid.\n\nPatching "
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods:::.debugMethod",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to compute "
+                            },
+                            {
+                                "type": "text",
+                                "text": "at",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " using the untraced method,\nwhere the method being debugged once is already traced, seems to be the most\nminimal fix.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/methods\/R\/debug.R\n===================================================================\n--- src\/library\/methods\/R\/debug.R       (revision 87338)\n+++ src\/library\/methods\/R\/debug.R       (working copy)\n@@ -10,7 +10,7 @@\n     if(isdebugged(fun, signature = signature))\n         return(invisible(NULL))\n\n-    m <- selectMethod(fun, signature)\n+    m <- .untracedFunction(selectMethod(fun, signature))\n     bd <- body(m)\n\n     isrematch <- isRematched(m)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis patch passes "
+                            },
+                            {
+                                "type": "text",
+                                "text": "make check-all",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", but it appears that\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods:::.debugMethod",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is not exercised at all by existing examples and\ntests.  Hence the \"real\" patch could\/should add some tests along these lines.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "setGeneric(\"zzz\", function(x) standardGeneric(\"zzz\"))\nsetMethod(\"zzz\", c(x = \"NULL\"), function(x) NULL)\nm0 <- selectMethod(zzz, signature = \"NULL\")\ndebugonce(zzz, signature = \"NULL\")\nm1 <- selectMethod(zzz, signature = \"NULL\")\ndebugonce(zzz, signature = \"NULL\") # error until R 4.5 => Bug 18824\nm2 <- selectMethod(zzz, signature = \"NULL\")\nuntrace(zzz, signature = \"NULL\")\nm3 <- selectMethod(zzz, signature = \"NULL\")\nstopifnot(is(m0, \"MethodDefinition\"),\n          is(m1, \"MethodDefinitionWithTrace\"),\n          identical(m0, m3),\n          identical(m1, m2))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nComments on the diagnosis and patch are welcome ..."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

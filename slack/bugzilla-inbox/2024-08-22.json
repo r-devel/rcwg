@@ -1,0 +1,1031 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17672] seq.Date should accept to,by,length.out (i.e., no need for from)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17672>\n\nMichael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #2496|0                           |1\n        is obsolete|                            |\n\n--- Comment #4 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nCreated attachment 3393\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3393&amp;action=edit>\nPatch to seq.Date, seq.POSIXt allowing missing(from)\n\nHere is a patch allowing `missing(from)` in both `seq.POSIXt()` and\n`seq.Date()`.\n\nThis is the result of efforts at R Dev Day 2024 in Seattle in collaboration\nwith Shannon Pileggi.\n\nSome notes about the patch (some of which is digested from the discussion at\n<https:\/\/github.com\/r-devel\/r-dev-day\/issues\/46>):\n\n - The original issue is about `seq.Date()`, but all of the \"non-trivial\" logic\nin `seq.Date()` is for the non-arithmetic cases of `by %in% c(\"month\",\n\"quarter\", \"year\")`. Therefore we expanded the FR to include `seq.POSIXt()`\n(and anyway, it would be strange to support this feature in `seq.Date()` _but\nnot_ `seq.POSIXt()`.\n\n   + There is _some_ repetitiveness in argument checking where `seq.Date()`\nchecks arguments and then dispatches to `seq.POSIXt()`, which re-runs some of\nthe same checks. Typically, we might employ a helper function to avoid some\noverhead here, but that could entail a new base export; Michael Lawrence\nencouraged ignoring this overhead for now (it should be very small).\n - I also included an orthogonal change to use `as.double.difftime()` instead\nof duplicating logic for such conversion. I can separate this out into its own\npatch if requested.\n - This patch also fixes <https:\/\/bugs.r-project.org\/show_bug.cgi?id=18782>,\nincluding a regression test. I can also separate this part out into its own\npatch if requested.\n - Besides the tests offered by this patch directly (which pass on the GitHub\nmirror: <https:\/\/github.com\/r-devel\/r-svn\/pull\/177>), I also ran the patched\nversion of `R CMD check` against 33 other highly-relevant CRAN packages, which\nsucceeded:\n<https:\/\/github.com\/r-devel\/r-dev-day\/issues\/46#issuecomment-2295162704>\n - There are some minor things like trying to use whitespace for readability,\nswitching to character `missing_arg` from integer `status`, which are not\nstrictly necessary for the patch but I think beneficial.\n\n----\n\nSome further notes for future improvement of `seq.POSIXt()` we might consider:\n\n - There's no real reason not to support `by = \"1.5 secs\"` -- it would be a\ntrivial change (`as.numeric()` instead of `as.integer()`). For `seq.Date()`,\nthis is less appealing -- making it easier to work with fractional days is not\ngreat. Nor do we necessarily want to support `by = \"1.5 quarters\"` -- only the\narithmetic units. Right now, we can already get non-integer gaps by using `by =\nas.difftime(1.5, units=\"secs\")`, which is a bit clumsy. There are already some\nusers taking advantage of this:\n<https:\/\/github.com\/search?q=lang%3AR+%2Fby%5Cs*%3D%5Cs*%28as%5B.%5D%29%3Fdifftime%2F&amp;type=code>\n - This method handles both POSIXct and POSIXlt input, but always returns\nPOSIXct. Possibly we could consider returning POSIXlt for POSIXlt input.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1724349697.372179",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "2NU9D",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17672] seq.Date should accept to,by,length.out (i.e., no need for from)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17672"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMichael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #2496|0                           |1\n        is obsolete|                            |\n\n--- Comment #4 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3393\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3393&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3393&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch to seq.Date, seq.POSIXt allowing missing(from)\n\nHere is a patch allowing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "missing(from)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in both "
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq.POSIXt()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq.Date()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nThis is the result of efforts at R Dev Day 2024 in Seattle in collaboration\nwith Shannon Pileggi.\n\nSome notes about the patch (some of which is digested from the discussion at\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-dev-day\/issues\/46"
+                            },
+                            {
+                                "type": "text",
+                                "text": "):\n\n - The original issue is about "
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq.Date()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", but all of the \"non-trivial\" logic\nin "
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq.Date()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is for the non-arithmetic cases of `by %in% c(\"month\",\n\"quarter\", \"year\")`. Therefore we expanded the FR to include "
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq.POSIXt()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n(and anyway, it would be strange to support this feature in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq.Date()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " _but\nnot_ "
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq.POSIXt()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n   + There is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "some",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " repetitiveness in argument checking where "
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq.Date()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nchecks arguments and then dispatches to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq.POSIXt()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which re-runs some of\nthe same checks. Typically, we might employ a helper function to avoid some\noverhead here, but that could entail a new base export; Michael Lawrence\nencouraged ignoring this overhead for now (it should be very small).\n - I also included an orthogonal change to use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.double.difftime()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " instead\nof duplicating logic for such conversion. I can separate this out into its own\npatch if requested.\n - This patch also fixes "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18782"
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\nincluding a regression test. I can also separate this part out into its own\npatch if requested.\n - Besides the tests offered by this patch directly (which pass on the GitHub\nmirror: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/pull\/177"
+                            },
+                            {
+                                "type": "text",
+                                "text": "), I also ran the patched\nversion of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R CMD check",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " against 33 other highly-relevant CRAN packages, which\nsucceeded:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-dev-day\/issues\/46#issuecomment-2295162704"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n - There are some minor things like trying to use whitespace for readability,\nswitching to character "
+                            },
+                            {
+                                "type": "text",
+                                "text": "missing_arg",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " from integer "
+                            },
+                            {
+                                "type": "text",
+                                "text": "status",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which are not\nstrictly necessary for the patch but I think beneficial.\n\n----\n\nSome further notes for future improvement of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq.POSIXt()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " we might consider:\n\n - There's no real reason not to support "
+                            },
+                            {
+                                "type": "text",
+                                "text": "by = \"1.5 secs\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " -- it would be a\ntrivial change ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.numeric()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " instead of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.integer()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "). For "
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq.Date()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\nthis is less appealing -- making it easier to work with fractional days is not\ngreat. Nor do we necessarily want to support "
+                            },
+                            {
+                                "type": "text",
+                                "text": "by = \"1.5 quarters\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " -- only the\narithmetic units. Right now, we can already get non-integer gaps by using `by =\nas.difftime(1.5, units=\"secs\")`, which is a bit clumsy. There are already some\nusers taking advantage of this:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/search?q=lang%3AR+%2Fby%5Cs*%3D%5Cs*%28as%5B.%5D%29%3Fdifftime%2F&amp;type=code",
+                                "text": "https:\/\/github.com\/search?q=lang%3AR+%2Fby%5Cs*%3D%5Cs*%28as%5B.%5D%29%3Fdifftime%2F&type=code"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n - This method handles both POSIXct and POSIXlt input, but always returns\nPOSIXct. Possibly we could consider returning POSIXlt for POSIXlt input."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18782] seq.POSIXt can return POSIXct objects with integer storage type*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18782>\n\n--- Comment #1 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nThis would be closed by the patch on Bug #17672:\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17672>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1724352653.800889",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "SdJqr",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18782] seq.POSIXt can return POSIXct objects with integer storage type",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18782"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThis would be closed by the patch on Bug #17672:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17672"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18785] New: excessive memory consumption when computing `new.row.names` using `interaction()` in `reshape()`*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18785>\n\n            Bug ID: 18785\n           Summary: excessive memory consumption when computing\n                    `new.row.names` using `interaction()` in `reshape()`\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Misc\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:Thomas.SOEIRO@ap-hm.fr|Thomas.SOEIRO@ap-hm.fr>\n\n`reshape()` can fail in simple cases such as:\n\n```\nn &lt;- 1e5\nk &lt;- 5\n\nd &lt;- data.frame(\n  id1 = gl(n, k),\n  id2 = gl(n \/ 2, k * 2),\n  x = runif(n * k),\n  y = runif(n * k)\n)\n\nd_long &lt;- reshape(\n  d,\n  varying = c(\"x\", \"y\"),\n  v.names = \"values\",\n  timevar = \"xy\",\n  idvar = c(\"id1\", \"id2\"),\n  times = c(\"x\", \"y\"),\n  direction = \"long\"\n)\n# Error: cannot allocate vector of size 37.3 Gb\n# In addition: Warning message:\n# In ans * length(l) : NAs produced by integer overflow\n```\n\nIn fact, `reshape()` succeeds in reshaping the data, but fails to return due to\nexcessive memory consumption when computing `new.row.names` using\n`interaction()` ([line\n82](<https:\/\/github.com\/r-devel\/r-svn\/blob\/bed10be6f28052094d1750133599b8d910cd42aa\/src\/library\/stats\/R\/reshape.R#L82>)):\n\n```\ninteraction(d[c(\"id1\", \"id2\")], drop = TRUE)\n# Error: cannot allocate vector of size 37.3 Gb\n# In addition: Warning message:\n# In ans * length(l) : NAs produced by integer overflow\n```\n\nSo a workaround is to provide `new.row.names` manually:\n\n```\nd_long &lt;- reshape(\n  d,\n  varying = c(\"x\", \"y\"),\n  v.names = \"values\",\n  timevar = \"xy\",\n  idvar = c(\"id1\", \"id2\"),\n  times = c(\"x\", \"y\"),\n  direction = \"long\",\n  new.row.names = seq_len(n * k * 2)\n)\n```\n\nA simple fix would be to support e.g. `new.row.names = FALSE` to bypass the\ncall to `interaction()`.\n\nA more general fix would be to improve `interaction()`, which is not memory\nefficient with variables with many levels. It results in failure in several\nhigher-level functions in base R as previously reported e.g. in bug 14121, bug\n18223, or bug 18276.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1724363256.966279",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "D\/E0",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18785] New: excessive memory consumption when computing ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "new.row.names",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " using ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "interaction()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "reshape()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18785"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18785\n           Summary: excessive memory consumption when computing\n                    "
+                            },
+                            {
+                                "type": "text",
+                                "text": "new.row.names",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "interaction()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "reshape()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Misc\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Thomas.SOEIRO@ap-hm.fr",
+                                "text": "Thomas.SOEIRO@ap-hm.fr",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "reshape()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " can fail in simple cases such as:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "n <- 1e5\nk <- 5\n\nd <- data.frame(\n  id1 = gl(n, k),\n  id2 = gl(n \/ 2, k * 2),\n  x = runif(n * k),\n  y = runif(n * k)\n)\n\nd_long <- reshape(\n  d,\n  varying = c(\"x\", \"y\"),\n  v.names = \"values\",\n  timevar = \"xy\",\n  idvar = c(\"id1\", \"id2\"),\n  times = c(\"x\", \"y\"),\n  direction = \"long\"\n)\n# Error: cannot allocate vector of size 37.3 Gb\n# In addition: Warning message:\n# In ans * length(l) : NAs produced by integer overflow\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIn fact, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "reshape()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " succeeds in reshaping the data, but fails to return due to\nexcessive memory consumption when computing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "new.row.names",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " using\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "interaction()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ([line\n82]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/bed10be6f28052094d1750133599b8d910cd42aa\/src\/library\/stats\/R\/reshape.R#L82"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "interaction(d[c(\"id1\", \"id2\")], drop = TRUE)\n# Error: cannot allocate vector of size 37.3 Gb\n# In addition: Warning message:\n# In ans * length(l) : NAs produced by integer overflow\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSo a workaround is to provide "
+                            },
+                            {
+                                "type": "text",
+                                "text": "new.row.names",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " manually:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "d_long <- reshape(\n  d,\n  varying = c(\"x\", \"y\"),\n  v.names = \"values\",\n  timevar = \"xy\",\n  idvar = c(\"id1\", \"id2\"),\n  times = c(\"x\", \"y\"),\n  direction = \"long\",\n  new.row.names = seq_len(n * k * 2)\n)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nA simple fix would be to support e.g. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "new.row.names = FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to bypass the\ncall to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "interaction()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nA more general fix would be to improve "
+                            },
+                            {
+                                "type": "text",
+                                "text": "interaction()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which is not memory\nefficient with variables with many levels. It results in failure in several\nhigher-level functions in base R as previously reported e.g. in bug 14121, bug\n18223, or bug 18276."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16003] heatmap scale argument: description not complete*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16003>\n\nPaul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|NEW                         |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #7 from Paul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) ---\nFinal patch committed to r-devel (r87039).\nThanks very much!",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1724369875.260539",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "EuHe",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16003] heatmap scale argument: description not complete",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16003"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nPaul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|NEW                         |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #7 from Paul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nFinal patch committed to r-devel (r87039).\nThanks very much!"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18784] Function RQuartz_glyph in devQuartz.c segfaults when font is not found.*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18784>\n\nPaul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |paul@stat.auckland.ac.nz\n\n--- Comment #8 from Paul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) ---\nThanks for report, especially with the demonstration via R code of the possible\nsegfault.\n\nI see that there are two other \"releases\" happening (fillColorRef and ctFont).\nIs it possible for either of those to be NULL (based on the possible return\nvalues of the corresponding \"create\" functions)?\n(even if it is not necessarily possible to demonstrate NULLs via R code).\n\nRegarding the testing for file existence at R level, I would argue against that\nfor at least two reasons:\n\n1.  That would be another file system access, which might be costly.\n2.  Technically, the return value from glyphFont() is only a description of a\nfont;  it does not have to be true until it is used.\n\nRegarding the NA issue, it looks to me like the glyphFont() code has a bit of a\nhangover from early development when it could have expressed more than one\nfont.  I think it is now only ever supposed to return a single font -\nglyphFontList() is used to construct multiple fonts.  This could be a separate\nbug report, for which a nice patch would be welcome that simplifies glyphFont()\nto just ensure that a single font is returned.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1724372748.736289",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "BSD2q",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18784] Function RQuartz_glyph in devQuartz.c segfaults when font is not found.",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18784"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nPaul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |paul@stat.auckland.ac.nz\n\n--- Comment #8 from Paul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for report, especially with the demonstration via R code of the possible\nsegfault.\n\nI see that there are two other \"releases\" happening (fillColorRef and ctFont).\nIs it possible for either of those to be NULL (based on the possible return\nvalues of the corresponding \"create\" functions)?\n(even if it is not necessarily possible to demonstrate NULLs via R code).\n\nRegarding the testing for file existence at R level, I would argue against that\nfor at least two reasons:\n\n1.  That would be another file system access, which might be costly.\n2.  Technically, the return value from glyphFont() is only a description of a\nfont;  it does not have to be true until it is used.\n\nRegarding the NA issue, it looks to me like the glyphFont() code has a bit of a\nhangover from early development when it could have expressed more than one\nfont.  I think it is now only ever supposed to return a single font -\nglyphFontList() is used to construct multiple fonts.  This could be a separate\nbug report, for which a nice patch would be welcome that simplifies glyphFont()\nto just ensure that a single font is returned."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18786] New: show() on a non-syntactic name prints invalid code for showMethods()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18786>\n\n            Bug ID: 18786\n           Summary: show() on a non-syntactic name prints invalid code for\n                    showMethods()\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: S4methods\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>\n\nCreated attachment 3394\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3394&amp;action=edit>\nbacktick-wrap generic name to print in showMethods()\n\n```\nshow(`body&lt;-`)\n# standardGeneric for \"body&lt;-\" defined from package \"base\"\n\n# function (fun, envir = environment(fun), value) \n# standardGeneric(\"body&lt;-\")\n# &lt;bytecode: 0x55d9c863f400&gt;\n# &lt;environment: 0x55d9c6f2c558&gt;\n# Methods may be defined for arguments: fun, envir, value\n# Use  showMethods(body&lt;-)  for currently available ones.\n```\n\nI think the intent of \"Use ... for currently available ones.\" is to give\nsomething copy-pasteable, which we don't have here.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1724382932.323909",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "nBpwQ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18786] New: show() on a non-syntactic name prints invalid code for showMethods()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18786"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18786\n           Summary: show() on a non-syntactic name prints invalid code for\n                    showMethods()\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: S4methods\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3394\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3394&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3394&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nbacktick-wrap generic name to print in showMethods()\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "show(`body<-`)\n# standardGeneric for \"body<-\" defined from package \"base\"\n\n# function (fun, envir = environment(fun), value) \n# standardGeneric(\"body<-\")\n# <bytecode: 0x55d9c863f400>\n# <environment: 0x55d9c6f2c558>\n# Methods may be defined for arguments: fun, envir, value\n# Use  showMethods(body<-)  for currently available ones.\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI think the intent of \"Use ... for currently available ones.\" is to give\nsomething copy-pasteable, which we don't have here."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18675] plot() applies argument 'font' to tick mark labels, not just to plotted points*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18675>\n\n--- Comment #4 from Paul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) ---\nUnfortunately, \"I can't imagine that this change would break much existing\ncode\" is not a convincing enough argument to soothe my furrowed brow :)\n\nI share your sense of frustration with some of the inconsistencies related to\npar() settings (in fact, I have shared them since the 1990s when I first\nencountered the \"GRZ\" graphics library in S).  To quote Ross Ihaka's comment in\nthe source code in par.c ...\n\n```\n *  \"The horror, the horror ...\"\n *      Marlon Brando in Apocalypse Now.\n```\n\nI still believe that the practical solution at this point is to figure out how\nto get what you want from the existing behaviour.  To go back to your original\nexample, that is possibly ...\n\n```\nplot(1:10, pch=\"a\", font.axis=3)\n```\n\n... or perhaps ...\n\n```\nplot(1:10, type=\"n\", font.axis=3) \npoints(1:10, pch=\"a\", font=2) \n```\n\n... or perhaps ...\n\n```\nplot(1:10, type=\"n\")\npoints(1:10, pch=\"a\", font=2) \npar(font.axis=3)\naxis(1)\naxis(2)\nbox()\n```\n\nI am sorry if that is disappointing.\n\nRegarding the documentation error in ?axis (which I think you are correct\nabout), that has now been fixed in r-devel (r87040).  Thanks!",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1724385371.225539",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Q9d0",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18675] plot() applies argument 'font' to tick mark labels, not just to plotted points",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18675"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Paul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nUnfortunately, \"I can't imagine that this change would break much existing\ncode\" is not a convincing enough argument to soothe my furrowed brow :)\n\nI share your sense of frustration with some of the inconsistencies related to\npar() settings (in fact, I have shared them since the 1990s when I first\nencountered the \"GRZ\" graphics library in S).  To quote Ross Ihaka's comment in\nthe source code in par.c ...\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " *  \"The horror, the horror ...\"\n *      Marlon Brando in Apocalypse Now.\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI still believe that the practical solution at this point is to figure out how\nto get what you want from the existing behaviour.  To go back to your original\nexample, that is possibly ...\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "plot(1:10, pch=\"a\", font.axis=3)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n... or perhaps ...\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "plot(1:10, type=\"n\", font.axis=3) \npoints(1:10, pch=\"a\", font=2) \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n... or perhaps ...\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "plot(1:10, type=\"n\")\npoints(1:10, pch=\"a\", font=2) \npar(font.axis=3)\naxis(1)\naxis(2)\nbox()\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI am sorry if that is disappointing.\n\nRegarding the documentation error in ?axis (which I think you are correct\nabout), that has now been fixed in r-devel (r87040).  Thanks!"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

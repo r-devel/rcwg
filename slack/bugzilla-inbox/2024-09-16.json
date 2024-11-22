@@ -1,0 +1,647 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18800] New: Defining R_NO_REMAP_RMATH and calling Rf_*() results in compiler errors*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18800>\n\n            Bug ID: 18800\n           Summary: Defining R_NO_REMAP_RMATH and calling Rf_*() results\n                    in compiler errors\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: arm64\/M1\n                OS: macOS\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>\n\nWRE says:\n\nBut the function prototypes in `Rmath.h` do not use the `Rf_` prefix, so\ndefining `R_NO_REMAP_RMATH` and calling `Rf_xyz()` results in unexpected\ncompiler errors.\n\n```\n#include &lt;Rmath.h&gt;\nint main()\n{\n    Rf_logspace_add(0.0, 0.0);\n    return 0;\n}\n```\n```\n$ clang -DR_NO_REMAP_RMATH -I\"`R RHOME`\/include\" -L\"`R RHOME`\/lib\" -lR test.c\n-o test.o\ntest.c:4:5: error: call to undeclared function 'Rf_logspace_add'; ISO C99 and\nlater do not support implicit function declarations\n[-Wimplicit-function-declaration]\n    Rf_logspace_add(0.0, 0.0);\n    ^\ntest.c:4:5: note: did you mean 'logspace_add'?\n\/usr\/local\/lib\/R\/include\/Rmath.h:409:9: note: 'logspace_add' declared here\ndouble  logspace_add(double logx, double logy);\n        ^\n1 error generated.\n```\n\nMeanwhile, defining `R_NO_REMAP_RMATH` and calling `xyz()` results in a linker\nerror instead of an expected compiler error because the header is providing\nprototypes for declaring unprefixed functions with no definition.\n\n```\n#include &lt;Rmath.h&gt;\nint main()\n{\n    logspace_add(0.0, 0.0);\n    return 0;\n}\n```\n```\n$ clang -DR_NO_REMAP_RMATH -I\"`R RHOME`\/include\" -L\"`R RHOME`\/lib\" -lR test.c\n-o test.o\nUndefined symbols for architecture arm64:\n  \"_logspace_add\", referenced from:\n      _main in test-c2e027.o\nld: symbol(s) not found for architecture arm64\nclang: error: linker command failed with exit code 1 (use -v to see invocation)\n```\n\nIn contrast, defining `R_NO_REMAP` an calling, say, `Rf_allocVector`, works\nexactly as documented, because the function prototypes in `Rinternals.h` use\nthe `Rf_` prefix.\n\nPerhaps not many people are defining `R_NO_REMAP_RMATH`, if what I observe has\nnot been reported since `R_NO_REMAP_RMATH` was introduced in R 3.1.0 ... or\nmaybe I'm completely off the mark here ...",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1726470313.956209",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "IZmg4",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "*[Bug 18800] New: Defining R_NO_REMAP_RMATH and calling Rf_*() results in compiler errors*\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18800"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18800\n           Summary: Defining R_NO_REMAP_RMATH and calling Rf_*() results\n                    in compiler errors\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: arm64\/M1\n                OS: macOS\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nWRE says:\n\nBut the function prototypes in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rmath.h",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " do not use the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rf_",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " prefix, so\ndefining "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_NO_REMAP_RMATH",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and calling "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rf_xyz()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " results in unexpected\ncompiler errors.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "#include <Rmath.h>\nint main()\n{\n    Rf_logspace_add(0.0, 0.0);\n    return 0;\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$ clang -DR_NO_REMAP_RMATH -I\"`R RHOME`\/include\" -L\"`R RHOME`\/lib\" -lR test.c\n-o test.o\ntest.c:4:5: error: call to undeclared function 'Rf_logspace_add'; ISO C99 and\nlater do not support implicit function declarations\n[-Wimplicit-function-declaration]\n    Rf_logspace_add(0.0, 0.0);\n    ^\ntest.c:4:5: note: did you mean 'logspace_add'?\n\/usr\/local\/lib\/R\/include\/Rmath.h:409:9: note: 'logspace_add' declared here\ndouble  logspace_add(double logx, double logy);\n        ^\n1 error generated.\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nMeanwhile, defining "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_NO_REMAP_RMATH",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and calling "
+                            },
+                            {
+                                "type": "text",
+                                "text": "xyz()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " results in a linker\nerror instead of an expected compiler error because the header is providing\nprototypes for declaring unprefixed functions with no definition.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "#include <Rmath.h>\nint main()\n{\n    logspace_add(0.0, 0.0);\n    return 0;\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$ clang -DR_NO_REMAP_RMATH -I\"`R RHOME`\/include\" -L\"`R RHOME`\/lib\" -lR test.c\n-o test.o\nUndefined symbols for architecture arm64:\n  \"_logspace_add\", referenced from:\n      _main in test-c2e027.o\nld: symbol(s) not found for architecture arm64\nclang: error: linker command failed with exit code 1 (use -v to see invocation)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIn contrast, defining "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_NO_REMAP",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " an calling, say, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rf_allocVector",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", works\nexactly as documented, because the function prototypes in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rinternals.h",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " use\nthe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rf_",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " prefix.\n\nPerhaps not many people are defining "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_NO_REMAP_RMATH",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", if what I observe has\nnot been reported since "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_NO_REMAP_RMATH",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " was introduced in R 3.1.0 ... or\nmaybe I'm completely off the mark here ..."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18798] ... R-tools.pot  singular = plural*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18798>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |INVALID\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |CLOSED\n            Summary|R-4.4.1.tar\\R-4.4.1\\src\\lib |... R-tools.pot  singular =\n                   |rary\\tools\\po\\R-tools.pot   |plural\n                   |singular = plural           |\n\n--- Comment #3 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nRequests to change messages in `*.pot` are principally *misguided* :\nAll `*.pot` files are produced automatically from source files, in case of R,\neither from  &lt;pkg&gt;\/R\/*.R source files or  `&lt;pkg&gt;\/src\/*.c` (and `*.cpp` etc, but\nnot for base R code which has no C++).\n\nHence such reports are  __always invalid__ : One should not manually change\n*.pot files, but change the corresponding source file  and the corresponding\n`*.pot` file(s) will be updated {not immediately; we re-create them only once.\nsometimes twice a year ..}\n\nYou may report typos in source files .. even though *not* giving your Windows\npath names in the name of the report.\nOften it's considerable less work (in sum for all involved) if you do not\ncreate an extra bugzilla report for such small typos, but rather report them by\ne-mail, sometimes just to an R core member whom you know is willing..",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1726473095.683979",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "T3Q",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18798] ... R-tools.pot  singular = plural",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18798"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |INVALID\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |CLOSED\n            Summary|R-4.4.1.tar\\R-4.4.1\\src\\lib |... R-tools.pot  singular =\n                   |rary\\tools\\po\\R-tools.pot   |plural\n                   |singular = plural           |\n\n--- Comment #3 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nRequests to change messages in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "*.pot",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " are principally "
+                            },
+                            {
+                                "type": "text",
+                                "text": "misguided",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " :\nAll "
+                            },
+                            {
+                                "type": "text",
+                                "text": "*.pot",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " files are produced automatically from source files, in case of R,\neither from  <pkg>\/R\/*.R source files or  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "<pkg>\/src\/*.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "*.cpp",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " etc, but\nnot for base R code which has no C++).\n\nHence such reports are  __always invalid__ : One should not manually change\n*.pot files, but change the corresponding source file  and the corresponding\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "*.pot",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " file(s) will be updated {not immediately; we re-create them only once.\nsometimes twice a year ..}\n\nYou may report typos in source files .. even though "
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " giving your Windows\npath names in the name of the report.\nOften it's considerable less work (in sum for all involved) if you do not\ncreate an extra bugzilla report for such small typos, but rather report them by\ne-mail, sometimes just to an R core member whom you know is willing.."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18798] ... R-tools.pot  singular = plural*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18798>\n\n--- Comment #4 from Christian Wia (<mailto:w9204-rs@yahoo.com|w9204-rs@yahoo.com>) ---\nI understand but i need a response to my request closed now. If you take the\n.pot as shown below there is no link between the string to translate and the\nsource it comes from, and the repository it on. So it is impossible for the\nnewbies   translators to reach the author. \n\nI understand to email such topics but will you be @Martin Maechler the R core\nmember whom you know is willing..  ??  or who is he ?\n\n\nmsgid        \"object %s is created by more than one data call\"\nmsgid_plural \"objects %s are created by more than one data call\"\nmsgstr[0]    \"\"\nmsgstr[1]    \"\"\n\nmsgid        \"%d of the package tests failed\"\nmsgid_plural \"%d of the package tests failed\"\nmsgstr[0]    \"\"\nmsgstr[1]    \"\"\n\nmsgid        \"Corresponding BibTeX entry:\"\nmsgid_plural \"Corresponding BibTeX entries:\"\nmsgstr[0]    \"\"\nmsgstr[1]    \"\"",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1726482300.682159",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "CraG=",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18798] ... R-tools.pot  singular = plural",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18798"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Christian Wia ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:w9204-rs@yahoo.com",
+                                "text": "w9204-rs@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI understand but i need a response to my request closed now. If you take the\n.pot as shown below there is no link between the string to translate and the\nsource it comes from, and the repository it on. So it is impossible for the\nnewbies   translators to reach the author. \n\nI understand to email such topics but will you be @Martin Maechler the R core\nmember whom you know is willing..  ??  or who is he ?\n\n\n\nmsgid        \"object %s is created by more than one data call\"\nmsgid_plural \"objects %s are created by more than one data call\"\nmsgstr[0]    \"\"\nmsgstr[1]    \"\"\n\nmsgid        \"%d of the package tests failed\"\nmsgid_plural \"%d of the package tests failed\"\nmsgstr[0]    \"\"\nmsgstr[1]    \"\"\n\nmsgid        \"Corresponding BibTeX entry:\"\nmsgid_plural \"Corresponding BibTeX entries:\"\nmsgstr[0]    \"\"\nmsgstr[1]    \"\""
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18333] incorrect output for pattern with text*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18333>\n\nNicholas Tierney (<mailto:nicholas.tierney@gmail.com|nicholas.tierney@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |nicholas.tierney@gmail.com\n\n--- Comment #2 from Nicholas Tierney (<mailto:nicholas.tierney@gmail.com|nicholas.tierney@gmail.com>) ---\nCreated attachment 3404\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3404&amp;action=edit>\nDemonstrating height to width ratio of the bug\n\nWe have found that changing the height and width ratio when using png with\n`type = \"cairo\"`, that we can get cairo to produce the correct pattern. \n\nSpecifically, we note that for cairo\n\n- \"Square\" does NOT work--using equal height and width of 480\n- \"wide and short\" DOES work--using height = width \/ 2\n- \"tall and short\" does NOT work--using width = height \/ 2\n\nHowever if we use `type = \"quartz\"` then this always gives correct output.\n\nHere is the output of `grSoftVersion()`:\n\n```\n                   cairo                  cairoFT                    pango     \n             libpng \n                \"1.17.6\"                       \"\"                \"1.50.14\"     \n           \"1.6.40\" \n                    jpeg                  libtiff \n                   \"9.5\" \"LIBTIFF, Version 4.5.0\" \n```\n\nI am on an M1 mac, and running this on R 4.4.1 (\"Race for Your Life\").",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1726485275.773299",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "\/ek",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18333] incorrect output for pattern with text",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18333"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nNicholas Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:nicholas.tierney@gmail.com",
+                                "text": "nicholas.tierney@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |nicholas.tierney@gmail.com\n\n--- Comment #2 from Nicholas Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:nicholas.tierney@gmail.com",
+                                "text": "nicholas.tierney@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3404\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3404&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3404&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nDemonstrating height to width ratio of the bug\n\nWe have found that changing the height and width ratio when using png with\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "type = \"cairo\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", that we can get cairo to produce the correct pattern. \n\nSpecifically, we note that for cairo\n\n- \"Square\" does NOT work--using equal height and width of 480\n- \"wide and short\" DOES work--using height = width \/ 2\n- \"tall and short\" does NOT work--using width = height \/ 2\n\nHowever if we use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "type = \"quartz\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " then this always gives correct output.\n\nHere is the output of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "grSoftVersion()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "                   cairo                  cairoFT                    pango     \n             libpng \n                \"1.17.6\"                       \"\"                \"1.50.14\"     \n           \"1.6.40\" \n                    jpeg                  libtiff \n                   \"9.5\" \"LIBTIFF, Version 4.5.0\" \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI am on an M1 mac, and running this on R 4.4.1 (\"Race for Your Life\")."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18798] ... R-tools.pot  singular = plural*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18798>\n\n--- Comment #5 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\n(In reply to Christian Wia from comment #4)\nJust *never* send R bug reports about *.pot files.\nThe translation helpers could report them somewhere and have more experienced\npeople do the real bug reports  (about the typo in the source code, not in the\n*.pot file).\n\nNote that the `*.pot` file in the R sources  *do* keep the references to the\noriginal files (filename (incl directory name in case of R) + line number) for\nthe C sources.  \nFor the R code sources, it seems trivial to grep (or otherwise search) over all\n R\/*.R files of a package to find the culprit.\nAFAIK, we don't keep the file + line numbers there, because these (line\nnumbers) become too quickly outdated.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1726498879.057899",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "1Etwb",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18798] ... R-tools.pot  singular = plural",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18798"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Christian Wia from comment #4)\nJust "
+                            },
+                            {
+                                "type": "text",
+                                "text": "never",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " send R bug reports about *.pot files.\nThe translation helpers could report them somewhere and have more experienced\npeople do the real bug reports  (about the typo in the source code, not in the\n*.pot file).\n\nNote that the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "*.pot",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " file in the R sources  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "do",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " keep the references to the\noriginal files (filename (incl directory name in case of R) + line number) for\nthe C sources.  \nFor the R code sources, it seems trivial to grep (or otherwise search) over all\n R\/*.R files of a package to find the culprit.\nAFAIK, we don't keep the file + line numbers there, because these (line\nnumbers) become too quickly outdated."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

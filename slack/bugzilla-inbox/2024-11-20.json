@@ -1,0 +1,712 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350>\n\n--- Comment #10 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\n(In reply to Dirk Eddelbuettel from comment #9)\nHmm, I've spent time yesterday before seeing these, I had thought of saying\nhere why I do **not** agree with the proposal to display unnecessary trailing\nzeros.\n\nIn several recent (say last 0-3 years) changes to the (`Date` and) `POSIX*t`\nmethods were in the direction to treat these in analogy with numbers (for\n`Date`, integers, for `POSIXt` reals), e.g., allowing Inf etc.\nBut `format(&lt;numbers)` *does* care about trailing zeros and drops them always.\nE.g.,\n```\n&gt; options(digits= 7) # the \"factory fresh\" default\n&gt; (x &lt;- 59 + 0:3\/10)\n[1] 59.0 59.1 59.2 59.3\n&gt; sapply(setNames(,1:7), \\(dig) format(x, digits=dig))\n     1    2    3      4      5      6      7     \n[1,] \"59\" \"59\" \"59.0\" \"59.0\" \"59.0\" \"59.0\" \"59.0\"\n[2,] \"59\" \"59\" \"59.1\" \"59.1\" \"59.1\" \"59.1\" \"59.1\"\n[3,] \"59\" \"59\" \"59.2\" \"59.2\" \"59.2\" \"59.2\" \"59.2\"\n[4,] \"59\" \"59\" \"59.3\" \"59.3\" \"59.3\" \"59.3\" \"59.3\"\n```\nand this continues on, in this case even for  `format(x, digits = 16)`\nonly one digit is displayed after the decimal point, only for digits=17, you\nget to see that e.g., mathematical 59 + 1\/10 = 59.1 cannot be exactly\nrepresented by a double precision number:\n```\n&gt; sapply(setNames(,12:17), \\(dig) format(x, digits=dig))\n     12     13     14     15     16     17                  \n[1,] \"59.0\" \"59.0\" \"59.0\" \"59.0\" \"59.0\" \"59.000000000000000\"\n[2,] \"59.1\" \"59.1\" \"59.1\" \"59.1\" \"59.1\" \"59.100000000000001\"\n[3,] \"59.2\" \"59.2\" \"59.2\" \"59.2\" \"59.2\" \"59.200000000000003\"\n[4,] \"59.3\" \"59.3\" \"59.3\" \"59.3\" \"59.3\" \"59.299999999999997\"\n``` \n\nOf course, for numbers this is in C internal code, but still I surely don't\nwant to drop the loop `for(i in seq_len(np)......`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732092386.674979",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "5jPAJ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #10 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Dirk Eddelbuettel from comment #9)\nHmm, I've spent time yesterday before seeing these, I had thought of saying\nhere why I do **not** agree with the proposal to display unnecessary trailing\nzeros.\n\nIn several recent (say last 0-3 years) changes to the ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "Date",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and) "
+                            },
+                            {
+                                "type": "text",
+                                "text": "POSIX*t",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nmethods were in the direction to treat these in analogy with numbers (for\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "Date",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", integers, for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "POSIXt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " reals), e.g., allowing Inf etc.\nBut "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format(<numbers)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " "
+                            },
+                            {
+                                "type": "text",
+                                "text": "does",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " care about trailing zeros and drops them always.\nE.g.,"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> options(digits= 7) # the \"factory fresh\" default\n> (x <- 59 + 0:3\/10)\n[1] 59.0 59.1 59.2 59.3\n> sapply(setNames(,1:7), \\(dig) format(x, digits=dig))\n     1    2    3      4      5      6      7     \n[1,] \"59\" \"59\" \"59.0\" \"59.0\" \"59.0\" \"59.0\" \"59.0\"\n[2,] \"59\" \"59\" \"59.1\" \"59.1\" \"59.1\" \"59.1\" \"59.1\"\n[3,] \"59\" \"59\" \"59.2\" \"59.2\" \"59.2\" \"59.2\" \"59.2\"\n[4,] \"59\" \"59\" \"59.3\" \"59.3\" \"59.3\" \"59.3\" \"59.3\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "and this continues on, in this case even for  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format(x, digits = 16)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nonly one digit is displayed after the decimal point, only for digits=17, you\nget to see that e.g., mathematical 59 + 1\/10 = 59.1 cannot be exactly\nrepresented by a double precision number:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> sapply(setNames(,12:17), \\(dig) format(x, digits=dig))\n     12     13     14     15     16     17                  \n[1,] \"59.0\" \"59.0\" \"59.0\" \"59.0\" \"59.0\" \"59.000000000000000\"\n[2,] \"59.1\" \"59.1\" \"59.1\" \"59.1\" \"59.1\" \"59.100000000000001\"\n[3,] \"59.2\" \"59.2\" \"59.2\" \"59.2\" \"59.2\" \"59.200000000000003\"\n[4,] \"59.3\" \"59.3\" \"59.3\" \"59.3\" \"59.3\" \"59.299999999999997\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " \n\nOf course, for numbers this is in C internal code, but still I surely don't\nwant to drop the loop "
+                            },
+                            {
+                                "type": "text",
+                                "text": "for(i in seq_len(np)......",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18818] WRE rules about Language entry in DESCRIPTION are not enforced*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18818>\n\n--- Comment #5 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nAwesome, thanks!",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732115019.333899",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "leo0J",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18818] WRE rules about Language entry in DESCRIPTION are not enforced",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18818"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nAwesome, thanks!"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350>\n\nHeather Turner (<mailto:ht@heatherturner.net|ht@heatherturner.net>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ht@heatherturner.net\n\n--- Comment #11 from Heather Turner (<mailto:ht@heatherturner.net|ht@heatherturner.net>) ---\nCreated attachment 3426\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3426&amp;action=edit>\nUpdate patch to compute np based on truncation\n\nThanks for the feedback Martin.\n\nWe did also consider the option to drop trailing zeroes and believe an update\nis still required in this case. The updated patch:\n\n* has consistent behaviour whether digits is set by `options(digits.secs)` or\n`digits` argument\n* has consistent behaviour between the default format and formats with \"%OS\"\n* allows `digits` to override `options(digits.secs)`\n* drops trailing zeroes based on truncation (as used in the C code) vs rounding\n\nThis has been tested with `make check-all` on [pr 187 in\nr-devel\/r-svn](<https:\/\/github.com\/r-devel\/r-svn\/pull\/187>) - the comments there\nhave test examples demonstrating the behaviour above.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732116141.127489",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ou2",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nHeather Turner ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ht@heatherturner.net",
+                                "text": "ht@heatherturner.net"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ht@heatherturner.net\n\n--- Comment #11 from Heather Turner ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ht@heatherturner.net",
+                                "text": "ht@heatherturner.net"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3426\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3426&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3426&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nUpdate patch to compute np based on truncation\n\nThanks for the feedback Martin.\n\nWe did also consider the option to drop trailing zeroes and believe an update\nis still required in this case. The updated patch:\n\n* has consistent behaviour whether digits is set by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "options(digits.secs)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "digits",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " argument\n* has consistent behaviour between the default format and formats with \"%OS\"\n* allows "
+                            },
+                            {
+                                "type": "text",
+                                "text": "digits",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to override "
+                            },
+                            {
+                                "type": "text",
+                                "text": "options(digits.secs)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n* drops trailing zeroes based on truncation (as used in the C code) vs rounding\n\nThis has been tested with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "make check-all",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " on [pr 187 in\nr-devel\/r-svn]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/pull\/187"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") - the comments there\nhave test examples demonstrating the behaviour above."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18823] debugonce(coerce, signature=); as(...) signals error due to undefined .Generic*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18823>\n\n--- Comment #1 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nI am exploring the following patch:\n\n```\nIndex: src\/library\/methods\/R\/MethodsListClass.R\n===================================================================\n--- src\/library\/methods\/R\/MethodsListClass.R    (revision 87352)\n+++ src\/library\/methods\/R\/MethodsListClass.R    (working copy)\n@@ -125,6 +125,7 @@\n               function(method, fname, envir) {\n                   assign(\".target\", method@target, envir = envir)\n                   assign(\".defined\", method@defined, envir = envir)\n+                  assign(\".Generic\", method@generic, envir = envir)\n                   assign(\".Method\", method, envir = envir)\n                   method\n               }, where = envir)\nIndex: src\/library\/methods\/R\/as.R\n===================================================================\n--- src\/library\/methods\/R\/as.R  (revision 87352)\n+++ src\/library\/methods\/R\/as.R  (working copy)\n@@ -91,6 +91,9 @@\n            }\n         }\n     }\n+    environment(asMethod) &lt;- asMethodEnv &lt;-\n+        new.env(parent = environment(asMethod))\n+    loadMethod(asMethod, envir = asMethodEnv)\n     if(strict)\n         asMethod(object)\n     else\n```\n\nNormally, `methods::loadMethod` is called from `standardGeneric` (internally;\nsee `R_standardGeneric` in `methods_list_dispatch.c`) to ensure that method\nmetadata is available in the evaluation frame of method calls.  As suggested by\n`body(coerce)`, `methods::as` was designed as a mechanism for bypassing\n`standardGeneric`.  It seems that \"loading the method\" was forgotten when this\nmechanism was created.\n\nSome comments on the patch:\n\nIt struck me as odd that the method for generic function `loadMethod` with\nsignature `method=\"MethodDefinition\"` would load into the environment all but\nslot `generic` of the `MethodDefinition` object.  The patch adds the assignment\nbecause it is \"nice\" to be able to, from R, call `loadMethod` instead of\nconfiguring an environment \"by hand\".\n\nOn the other hand, the additional assignment seems to be redundant when\ndispatch happens in C code, where the name of the generic function seems to get\ninto the evaluation frame by other means (see `R_execMethod` in `eval.c`). \nHence a more conservative patch, affecting only coercion which happens partly\nin R code, would be:\n\n```\nIndex: src\/library\/methods\/R\/as.R\n===================================================================\n--- src\/library\/methods\/R\/as.R  (revision 87352)\n+++ src\/library\/methods\/R\/as.R  (working copy)\n@@ -91,6 +91,10 @@\n            }\n         }\n     }\n+    environment(asMethod) &lt;- asMethodEnv &lt;-\n+        new.env(parent = environment(asMethod))\n+    loadMethod(asMethod, envir = asMethodEnv)\n+    assign(\".Generic\", asMethod@generic, envir = asMethodEnv)\n     if(strict)\n         asMethod(object)\n     else\n```\n\nBoth patches pass `make check-all` and resolve this bug.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732167045.507079",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "mixr",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18823] debugonce(coerce, signature=); as(...) signals error due to undefined .Generic",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18823"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI am exploring the following patch:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/methods\/R\/MethodsListClass.R\n===================================================================\n--- src\/library\/methods\/R\/MethodsListClass.R    (revision 87352)\n+++ src\/library\/methods\/R\/MethodsListClass.R    (working copy)\n@@ -125,6 +125,7 @@\n               function(method, fname, envir) {\n                   assign(\".target\", method@target, envir = envir)\n                   assign(\".defined\", method@defined, envir = envir)\n+                  assign(\".Generic\", method@generic, envir = envir)\n                   assign(\".Method\", method, envir = envir)\n                   method\n               }, where = envir)\nIndex: src\/library\/methods\/R\/as.R\n===================================================================\n--- src\/library\/methods\/R\/as.R  (revision 87352)\n+++ src\/library\/methods\/R\/as.R  (working copy)\n@@ -91,6 +91,9 @@\n            }\n         }\n     }\n+    environment(asMethod) <- asMethodEnv <-\n+        new.env(parent = environment(asMethod))\n+    loadMethod(asMethod, envir = asMethodEnv)\n     if(strict)\n         asMethod(object)\n     else\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nNormally, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods::loadMethod",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is called from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "standardGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (internally;\nsee "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_standardGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods_list_dispatch.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") to ensure that method\nmetadata is available in the evaluation frame of method calls.  As suggested by\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "body(coerce)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods::as",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " was designed as a mechanism for bypassing\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "standardGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  It seems that \"loading the method\" was forgotten when this\nmechanism was created.\n\nSome comments on the patch:\n\nIt struck me as odd that the method for generic function "
+                            },
+                            {
+                                "type": "text",
+                                "text": "loadMethod",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " with\nsignature "
+                            },
+                            {
+                                "type": "text",
+                                "text": "method=\"MethodDefinition\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " would load into the environment all but\nslot "
+                            },
+                            {
+                                "type": "text",
+                                "text": "generic",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " of the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "MethodDefinition",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " object.  The patch adds the assignment\nbecause it is \"nice\" to be able to, from R, call "
+                            },
+                            {
+                                "type": "text",
+                                "text": "loadMethod",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " instead of\nconfiguring an environment \"by hand\".\n\nOn the other hand, the additional assignment seems to be redundant when\ndispatch happens in C code, where the name of the generic function seems to get\ninto the evaluation frame by other means (see "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_execMethod",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "eval.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "). \nHence a more conservative patch, affecting only coercion which happens partly\nin R code, would be:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/methods\/R\/as.R\n===================================================================\n--- src\/library\/methods\/R\/as.R  (revision 87352)\n+++ src\/library\/methods\/R\/as.R  (working copy)\n@@ -91,6 +91,10 @@\n            }\n         }\n     }\n+    environment(asMethod) <- asMethodEnv <-\n+        new.env(parent = environment(asMethod))\n+    loadMethod(asMethod, envir = asMethodEnv)\n+    assign(\".Generic\", asMethod@generic, envir = asMethodEnv)\n     if(strict)\n         asMethod(object)\n     else\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nBoth patches pass "
+                            },
+                            {
+                                "type": "text",
+                                "text": "make check-all",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and resolve this bug."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18827] New: ?par should better describe negative values of par(\"tcl\") (and thus par(\"tck\"))*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18827>\n\n            Bug ID: 18827\n           Summary: ?par should better describe negative values of\n                    par(\"tcl\") (and thus par(\"tck\"))\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Documentation\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>\n\nCreated attachment 3427\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3427&amp;action=edit>\nPatch describing negative values of tcl\n\nCurrently we are left to wonder what negative values mean. This is particularly\nimportant since the default value is negative.\n\nThankfully, they are described in R-intro:\n\n<https:\/\/github.com\/r-devel\/r-svn\/blob\/609d977a2433ea15f688876960966d74934e0dac\/doc\/manual\/R-intro.texi#L5955-L5961>\n\nSo I propose just copying that over to `?par` which I assume is the more common\nplace to try and understand the defaults for drawing axis ticks (I only thought\nto look there myself in the process of filing this bug).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732167716.792319",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "RelxK",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18827] New: ?par should better describe negative values of par(\"tcl\") (and thus par(\"tck\"))",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18827"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18827\n           Summary: ?par should better describe negative values of\n                    par(\"tcl\") (and thus par(\"tck\"))\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Documentation\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3427\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3427&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3427&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch describing negative values of tcl\n\nCurrently we are left to wonder what negative values mean. This is particularly\nimportant since the default value is negative.\n\nThankfully, they are described in R-intro:\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/609d977a2433ea15f688876960966d74934e0dac\/doc\/manual\/R-intro.texi#L5955-L5961"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSo I propose just copying that over to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "?par",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " which I assume is the more common\nplace to try and understand the defaults for drawing axis ticks (I only thought\nto look there myself in the process of filing this bug)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

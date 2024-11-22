@@ -1,0 +1,164 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16721] image() with png() plot error for certain pixel widths*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16721>\n\nPaul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |paul@stat.auckland.ac.nz\n\n--- Comment #9 from Paul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) ---\nThis looks pretty good.  Thanks!  A couple of comments:\n\n1.\nThe rounding in cairoRect() should only be needed for raster devices (which can\nbe checked by looking at `xd-&gt;type` - see cairoBM.h and some examples in\n`switch` statements in cairoBM.c).\n\n2.\nUsing round() (in C) might still result in some odd behaviour if the rounding\nmode is \"round to even\", like it is for round() in R ...\n\n```\n&gt; round(seq(0, 2, .5))\n[1] 0 0 1 2 2\n```\n\nFor example, this variation on the simple bug would still draw no line because\nthe .5 would round to 0 ...\n\n```\npng(\"bug-2-cairo.png\", type=\"cairo\", width=100, height=100)\ngrid.rect(x=0, width=.005, just=\"left\", gp=gpar(col=NA, fill=\"red\"))\ndev.off()\n```\n\nThat does NOT happen on my system (gcc Ubuntu 20.04), but maybe it is possible\non other systems.  One way to ensure always rounding up (at least for the\npositive values we will be dealing with) is to add .5 and then truncate, for\nexample, in R ...\n\n```\n&gt; trunc(seq(0, 2, .5) + .5)\n[1] 0 1 1 2 2\n```\n\nSo the equivalent in C, perhaps `(int)(x + .5)`, might be an even safer option.\nSort of half-way between Quartz and Xlib :)\n\n3.\nYes, testing would be great.  At least the usual `make check-devel`, but also\nsome visual regression testing (e.g., with {gdiff}) on the examples from\n'graphics', 'grid', 'lattice', and 'ggplot2' would be handy.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1728599814.202659",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "V+cg",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16721] image() with png() plot error for certain pixel widths",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16721"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nPaul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |paul@stat.auckland.ac.nz\n\n--- Comment #9 from Paul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThis looks pretty good.  Thanks!  A couple of comments:\n\n1.\nThe rounding in cairoRect() should only be needed for raster devices (which can\nbe checked by looking at "
+                            },
+                            {
+                                "type": "text",
+                                "text": "xd->type",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " - see cairoBM.h and some examples in\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "switch",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " statements in cairoBM.c).\n\n2.\nUsing round() (in C) might still result in some odd behaviour if the rounding\nmode is \"round to even\", like it is for round() in R ...\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> round(seq(0, 2, .5))\n[1] 0 0 1 2 2\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nFor example, this variation on the simple bug would still draw no line because\nthe .5 would round to 0 ...\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "png(\"bug-2-cairo.png\", type=\"cairo\", width=100, height=100)\ngrid.rect(x=0, width=.005, just=\"left\", gp=gpar(col=NA, fill=\"red\"))\ndev.off()\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThat does NOT happen on my system (gcc Ubuntu 20.04), but maybe it is possible\non other systems.  One way to ensure always rounding up (at least for the\npositive values we will be dealing with) is to add .5 and then truncate, for\nexample, in R ...\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> trunc(seq(0, 2, .5) + .5)\n[1] 0 1 1 2 2\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSo the equivalent in C, perhaps "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(int)(x + .5)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", might be an even safer option.\nSort of half-way between Quartz and Xlib :)\n\n3.\nYes, testing would be great.  At least the usual "
+                            },
+                            {
+                                "type": "text",
+                                "text": "make check-devel",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", but also\nsome visual regression testing (e.g., with {gdiff}) on the examples from\n'graphics', 'grid', 'lattice', and 'ggplot2' would be handy."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

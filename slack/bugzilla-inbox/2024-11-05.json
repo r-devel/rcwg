@@ -1,0 +1,363 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18817] kappa(x, exact = TRUE, norm = \"2\") badly wrong for exactly singular 'x'*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18817>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |ASSIGNED\n\n--- Comment #1 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nYes, indeed. \nThe problem *only* surfaces when *all* singular values are exactly zero.\n\nHistoRically interesting: the     ` max(s)\/min(s[s &gt; 0]) `\nformula was literally unchanged since the first version of\nthe kappa code I can see: in  svn rev 2744, on 1998-11-05\n(and yes, it now appears in both `kappa.default()` and `.kappa_tri()`)\n\nAs LAPACK (and our ?svd help page) very clearly documents that the singular\nvalues are non-negative and in decreasing order,\nI think we should use the following line instead :\n```\n  if(s[1]) s[1]\/s[length(s)] else Inf\n```\n\nand will commit this (after some minimal testing) unless \nbetter suggestions are mentioned here.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1730803502.581069",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "+bBr+",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18817] kappa(x, exact = TRUE, norm = \"2\") badly wrong for exactly singular 'x'",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18817"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |ASSIGNED\n\n--- Comment #1 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nYes, indeed. \nThe problem "
+                            },
+                            {
+                                "type": "text",
+                                "text": "only",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " surfaces when "
+                            },
+                            {
+                                "type": "text",
+                                "text": "all",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " singular values are exactly zero.\n\nHistoRically interesting: the     "
+                            },
+                            {
+                                "type": "text",
+                                "text": " max(s)\/min(s[s > 0]) ",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nformula was literally unchanged since the first version of\nthe kappa code I can see: in  svn rev 2744, on 1998-11-05\n(and yes, it now appears in both "
+                            },
+                            {
+                                "type": "text",
+                                "text": "kappa.default()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".kappa_tri()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n\nAs LAPACK (and our ?svd help page) very clearly documents that the singular\nvalues are non-negative and in decreasing order,\nI think we should use the following line instead :"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "  if(s[1]) s[1]\/s[length(s)] else Inf\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nand will commit this (after some minimal testing) unless \nbetter suggestions are mentioned here."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18817] kappa(x, exact = TRUE, norm = \"2\") badly wrong for exactly singular 'x'*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18817>\n\n--- Comment #2 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\n(In reply to Martin Maechler from comment #1)\n\n&gt; The problem *only* surfaces when *all* singular values are exactly zero.\n\nthat's non-sense, of course  ... but hopefully everything else *is* good.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1730804160.952849",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "8v7",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18817] kappa(x, exact = TRUE, norm = \"2\") badly wrong for exactly singular 'x'",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18817"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Martin Maechler from comment #1)\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "The problem "
+                            },
+                            {
+                                "type": "text",
+                                "text": "only",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " surfaces when "
+                            },
+                            {
+                                "type": "text",
+                                "text": "all",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " singular values are exactly zero."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nthat's non-sense, of course  ... but hopefully everything else "
+                            },
+                            {
+                                "type": "text",
+                                "text": "is",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " good."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18817] kappa(x, exact = TRUE, norm = \"2\") badly wrong for exactly singular 'x'*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18817>\n\n--- Comment #3 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nYour suggestion seems good to me.  Yes, it is also problematic that, currently,\n`kappa(x, exact = TRUE, norm = \"2\")` returns 0 if `all(x == 0)`.  It's less\nclear to me what the \"right\" value (between `NaN` and `Inf`) is there, but I\ndon't have a strong opinion.  LAPACK's [dz]*con() seem to return zero for\nall-zero matrices, which could be an argument for `Inf` over `NaN`, with the\ncaveat that those routines don't support the 2-norm (only 1 and Inf).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1730820370.181139",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "itmN",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18817] kappa(x, exact = TRUE, norm = \"2\") badly wrong for exactly singular 'x'",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18817"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nYour suggestion seems good to me.  Yes, it is also problematic that, currently,\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "kappa(x, exact = TRUE, norm = \"2\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " returns 0 if "
+                            },
+                            {
+                                "type": "text",
+                                "text": "all(x == 0)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  It's less\nclear to me what the \"right\" value (between "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NaN",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Inf",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") is there, but I\ndon't have a strong opinion.  LAPACK's [dz]*con() seem to return zero for\nall-zero matrices, which could be an argument for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Inf",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " over "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NaN",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", with the\ncaveat that those routines don't support the 2-norm (only 1 and Inf)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

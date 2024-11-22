@@ -1,0 +1,199 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18679] Antialiasing options for fonts are not set on the cairo device*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18679>\n\nSimon Urbanek (<mailto:simon.urbanek@r-project.org|simon.urbanek@r-project.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n                 CC|                            |simon.urbanek@r-project.org\n             Status|UNCONFIRMED                 |CONFIRMED\n\n--- Comment #3 from Simon Urbanek (<mailto:simon.urbanek@r-project.org|simon.urbanek@r-project.org>) ---\nI would argue that \"severely degrades\" is a gross overstatement - if you have\nto rely that heavily on seeing the anti-aliasing pixel colors on non-display\ndevices then you have picked the wrong resolution in the first place and the\noutput quality is already abysmal to start with.\n\nThat said, this seems system-specific since I could not reproduce it on several\nsystems, but finally one hit was the Ubuntu 24.04 docker image (stock libraries\nand R in the image). Since the original example was somewhat confusing (what\nhas a random sample and a histogram to do with it?) I replicated it with:\n\n```\npng(type=\"cairo\", antialias=\"gray\")\nplot(0, 0)\ndev.off()\n```\n\nAs for the patch - I'd probably use a different approach and handle\nfont-related options in the font part instead (but then I'm biased because\nthat's how I implemented it in the Cairo package).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1731550060.959519",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "QhWb6",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18679] Antialiasing options for fonts are not set on the cairo device",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18679"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSimon Urbanek ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:simon.urbanek@r-project.org",
+                                "text": "simon.urbanek@r-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n                 CC|                            |simon.urbanek@r-project.org\n             Status|UNCONFIRMED                 |CONFIRMED\n\n--- Comment #3 from Simon Urbanek ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:simon.urbanek@r-project.org",
+                                "text": "simon.urbanek@r-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI would argue that \"severely degrades\" is a gross overstatement - if you have\nto rely that heavily on seeing the anti-aliasing pixel colors on non-display\ndevices then you have picked the wrong resolution in the first place and the\noutput quality is already abysmal to start with.\n\nThat said, this seems system-specific since I could not reproduce it on several\nsystems, but finally one hit was the Ubuntu 24.04 docker image (stock libraries\nand R in the image). Since the original example was somewhat confusing (what\nhas a random sample and a histogram to do with it?) I replicated it with:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "png(type=\"cairo\", antialias=\"gray\")\nplot(0, 0)\ndev.off()\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nAs for the patch - I'd probably use a different approach and handle\nfont-related options in the font part instead (but then I'm biased because\nthat's how I implemented it in the Cairo package)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18679] Antialiasing options for fonts are not set on the cairo device*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18679>\n\n--- Comment #4 from Adam Fontenot (<mailto:adam.m.fontenot@gmail.com|adam.m.fontenot@gmail.com>) ---\n(In reply to Simon Urbanek from comment #3)\n&gt; I would argue that \"severely degrades\" is a gross overstatement - if you\n&gt; have to rely that heavily on seeing the anti-aliasing pixel colors on\n&gt; non-display devices then you have picked the wrong resolution in the first\n&gt; place and the output quality is already abysmal to start with.\n\nI see PNGs used in PDFs of scientific papers pretty regularly, and if you're\nzooming in to see details, any color fringe will be easily visible. \"Severe\"\nmay be exaggeration, but I certainly find it unprofessional looking.\n\n&gt; That said, this seems system-specific since I could not reproduce it on\n&gt; several systems, but finally one hit was the Ubuntu 24.04 docker image\n&gt; (stock libraries and R in the image).\n\nYes, it is partially a system-specific issue, in that the specific problem of\nantialias=\"gray\" being ignored will only appear if the system sets color\nantialiasing in the fontconfig. Many Linux distributions don't set this by\ndefault, but it may be enabled by individual users, and I think KDE sets it.\n\nAs far as I know, the fact that the antialias option is entirely ignored for\ntext when rendering with Cairo should not be system specific - but on many\nsystems Cairo's default option may be the most reasonable.\n\nSince the original example was\n&gt; somewhat confusing (what has a random sample and a histogram to do with it?)\n&gt; I replicated it with:\n\nYes, apologies for that. I attached a screenshot showing the issue\n(<https:\/\/bugs.r-project.org\/attachment.cgi?id=3317>), for which the code didn't\nmuch matter, but I just copied the actual code I used rather than making the\nexample as minimal as possible.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1731560981.302449",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "G8g",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18679] Antialiasing options for fonts are not set on the cairo device",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18679"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Adam Fontenot ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:adam.m.fontenot@gmail.com",
+                                "text": "adam.m.fontenot@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Simon Urbanek from comment #3)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I would argue that \"severely degrades\" is a gross overstatement - if you\nhave to rely that heavily on seeing the anti-aliasing pixel colors on\nnon-display devices then you have picked the wrong resolution in the first\nplace and the output quality is already abysmal to start with."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI see PNGs used in PDFs of scientific papers pretty regularly, and if you're\nzooming in to see details, any color fringe will be easily visible. \"Severe\"\nmay be exaggeration, but I certainly find it unprofessional looking.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "That said, this seems system-specific since I could not reproduce it on\nseveral systems, but finally one hit was the Ubuntu 24.04 docker image\n(stock libraries and R in the image)."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nYes, it is partially a system-specific issue, in that the specific problem of\nantialias=\"gray\" being ignored will only appear if the system sets color\nantialiasing in the fontconfig. Many Linux distributions don't set this by\ndefault, but it may be enabled by individual users, and I think KDE sets it.\n\nAs far as I know, the fact that the antialias option is entirely ignored for\ntext when rendering with Cairo should not be system specific - but on many\nsystems Cairo's default option may be the most reasonable.\n\nSince the original example was"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "somewhat confusing (what has a random sample and a histogram to do with it?)\nI replicated it with:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nYes, apologies for that. I attached a screenshot showing the issue\n("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3317"
+                            },
+                            {
+                                "type": "text",
+                                "text": "), for which the code didn't\nmuch matter, but I just copied the actual code I used rather than making the\nexample as minimal as possible."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

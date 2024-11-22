@@ -1,0 +1,409 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18805] R_atof(\"0x1.1\") ignores radix character for hexadecimal fractions without binary exponent*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18805>\n\n--- Comment #3 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nThank you for patching the bug! It used to be reachable through scan() too:\n\nscan(text = '0x1.001')\n# Read 1 item\n# [1] 4097\n\n...which now also behaves correctly:\n\nscan(text = '0x1.001')\n# Read 1 item\n# [1] 1.000244",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1731061889.348939",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "=BgH",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18805] R_atof(\"0x1.1\") ignores radix character for hexadecimal fractions without binary exponent",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18805"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you for patching the bug! It used to be reachable through scan() too:\n\nscan(text = '0x1.001')\n# Read 1 item\n# [1] 4097\n\n...which now also behaves correctly:\n\nscan(text = '0x1.001')\n# Read 1 item\n# [1] 1.000244"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18818] WRE rules about Language entry in DESCRIPTION are not enforced*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18818>\n\nKurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |Kurt.Hornik@wu.ac.at\n\n--- Comment #3 from Kurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) ---\nThanks.  Indeed, it would be good to ensure that the tags are really valid.\nI have code for this in NLP::parse_IETF_language_tag(), but wanted to avoid\npulling that into tools (or putting NLP into tools Suggests), and even that is\nnot strict enough.  (One could also need to add the IANA registry as sysdata\nand keep that up to date).\n\nCurrently,\n\nx &lt;- tools::CRAN_package_db()\ns &lt;- x$Language\nnames(s) &lt;- x$Package\ns &lt;- unlist(strsplit(s[!is.na(s)], \", *\"))\ntable(s)\n\ngives\n\n   \"en-GB\"    'en-US'         EN      EN-GB      EN-US         En    English \n         1          1          1          3          1          1          2 \n        NL         de      de-de         en      en-AU      en-CA      en-GB \n         2          3          1         22         11         17        372 \n     en-US     en-USx      en-Us      en-ca      en-gb      en-us      en_AU \n      1641          1          1          1         18         16          1 \n     en_GB      en_US         es      es-CL      es-ES         fr      fr-FR \n        13          4         20          1          1          4          1 \n        pt      pt-BR      pt_BR r(&gt;=3.3.0)         ru         sv         th \n         3          6          1          1          8          1          1 \n\nand\n\nz &lt;- lapply(s,\n            function(e)\n                tryCatch(NLP::parse_IETF_language_tag(e),\n                         error = identity))\ns[vapply(z, inherits, NA, \"error\")]\n\nfinds \n    codebook         DNH4    dsmSearch   HMDHFDplus       htmldf    inspectdf \n     \"en_GB\" \"r(&gt;=3.3.0)\"      \"en_GB\"    \"'en-US'\"      \"en_GB\"      \"en_GB\" \n KaradaColor     LTFHPlus       merlin      <http:\/\/MVar.pt|MVar.pt>   osmextract     paleopop \n     \"en_US\"  \"\\\"en-GB\\\"\"      \"en_GB\"      \"pt_BR\"      \"en_GB\"      \"en_AU\" \n   quickPWCR    RLoptimal  robotoolbox    rticulate       speakr  streetscape \n     \"en_GB\"      \"en_US\"      \"en_US\"      \"en_GB\"      \"en_GB\"      \"en_GB\" \n     tidygam       tidymv    viewscape  viscomplexr \n     \"en_GB\"      \"en_GB\"      \"en_GB\"      \"en_US\" \n\nas invalid (missing \"English\").  I am not so sure about capitaliziation, the\nRFC says\n   o  [ISO639-1] recommends that language codes be written in lowercase\n      ('mn' Mongolian).\n\n   o  [ISO15924] recommends that script codes use lowercase with the\n      initial letter capitalized ('Cyrl' Cyrillic).\n\n   o  [ISO3166-1] recommends that country codes be capitalized ('MN'\n      Mongolia).\n\nso only \"recommends\".\n\nI can try the effect of writing to the maintainers of the above packages.\n\nNeed to think more about this ...",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1731068316.404239",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "u23",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18818] WRE rules about Language entry in DESCRIPTION are not enforced",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18818"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nKurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |Kurt.Hornik@wu.ac.at\n\n--- Comment #3 from Kurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks.  Indeed, it would be good to ensure that the tags are really valid.\nI have code for this in NLP::parse_IETF_language_tag(), but wanted to avoid\npulling that into tools (or putting NLP into tools Suggests), and even that is\nnot strict enough.  (One could also need to add the IANA registry as sysdata\nand keep that up to date).\n\nCurrently,\n\nx <- tools::CRAN_package_db()\ns <- x$Language\nnames(s) <- x$Package\ns <- unlist(strsplit(s[!is.na(s)], \", *\"))\ntable(s)\n\ngives\n\n   \"en-GB\"    'en-US'         EN      EN-GB      EN-US         En    English \n         1          1          1          3          1          1          2 \n        NL         de      de-de         en      en-AU      en-CA      en-GB \n         2          3          1         22         11         17        372 \n     en-US     en-USx      en-Us      en-ca      en-gb      en-us      en_AU \n      1641          1          1          1         18         16          1 \n     en_GB      en_US         es      es-CL      es-ES         fr      fr-FR \n        13          4         20          1          1          4          1 \n        pt      pt-BR      pt_BR r(>=3.3.0)         ru         sv         th \n         3          6          1          1          8          1          1 \n\nand\n\nz <- lapply(s,\n            function(e)\n                tryCatch(NLP::parse_IETF_language_tag(e),\n                         error = identity))\ns[vapply(z, inherits, NA, \"error\")]\n\nfinds \n    codebook         DNH4    dsmSearch   HMDHFDplus       htmldf    inspectdf \n     \"en_GB\" \"r(>=3.3.0)\"      \"en_GB\"    \"'en-US'\"      \"en_GB\"      \"en_GB\" \n KaradaColor     LTFHPlus       merlin      "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/MVar.pt",
+                                "text": "MVar.pt"
+                            },
+                            {
+                                "type": "text",
+                                "text": "   osmextract     paleopop \n     \"en_US\"  \"\\\"en-GB\\\"\"      \"en_GB\"      \"pt_BR\"      \"en_GB\"      \"en_AU\" \n   quickPWCR    RLoptimal  robotoolbox    rticulate       speakr  streetscape \n     \"en_GB\"      \"en_US\"      \"en_US\"      \"en_GB\"      \"en_GB\"      \"en_GB\" \n     tidygam       tidymv    viewscape  viscomplexr \n     \"en_GB\"      \"en_GB\"      \"en_GB\"      \"en_US\" \n\nas invalid (missing \"English\").  I am not so sure about capitaliziation, the\nRFC says\n   o  [ISO639-1] recommends that language codes be written in lowercase\n      ('mn' Mongolian).\n\n   o  [ISO15924] recommends that script codes use lowercase with the\n      initial letter capitalized ('Cyrl' Cyrillic).\n\n   o  [ISO3166-1] recommends that country codes be capitalized ('MN'\n      Mongolia).\n\nso only \"recommends\".\n\nI can try the effect of writing to the maintainers of the above packages.\n\nNeed to think more about this ..."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16721] image() with png() plot error for certain pixel widths*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16721>\n\nGeorge Stagg (<mailto:george.stagg@posit.co|george.stagg@posit.co>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3415|0                           |1\n        is obsolete|                            |\n\n--- Comment #15 from George Stagg (<mailto:george.stagg@posit.co|george.stagg@posit.co>) ---\nCreated attachment 3421\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3421&amp;action=edit>\nLog of gdiff differing output",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1731068570.462659",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "9NsI",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16721] image() with png() plot error for certain pixel widths",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16721"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nGeorge Stagg ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:george.stagg@posit.co",
+                                "text": "george.stagg@posit.co"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3415|0                           |1\n        is obsolete|                            |\n\n--- Comment #15 from George Stagg ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:george.stagg@posit.co",
+                                "text": "george.stagg@posit.co"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3421\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3421&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3421&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nLog of gdiff differing output"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16721] image() with png() plot error for certain pixel widths*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16721>\n\nGeorge Stagg (<mailto:george.stagg@posit.co|george.stagg@posit.co>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3416|0                           |1\n        is obsolete|                            |\n\n--- Comment #16 from George Stagg (<mailto:george.stagg@posit.co|george.stagg@posit.co>) ---\nCreated attachment 3422\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3422&amp;action=edit>\nExamples of differing graphical output after proposed patch",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1731068742.488819",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "QsWqD",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16721] image() with png() plot error for certain pixel widths",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16721"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nGeorge Stagg ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:george.stagg@posit.co",
+                                "text": "george.stagg@posit.co"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3416|0                           |1\n        is obsolete|                            |\n\n--- Comment #16 from George Stagg ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:george.stagg@posit.co",
+                                "text": "george.stagg@posit.co"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3422\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3422&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3422&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nExamples of differing graphical output after proposed patch"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16721] image() with png() plot error for certain pixel widths*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16721>\n\n--- Comment #17 from George Stagg (<mailto:george.stagg@posit.co|george.stagg@posit.co>) ---\nThanks for the review. You are correct, there was indeed something else going\non affecting the plots... drat!\n\nI'm not sure what the issue was (perhaps a consequence of running unpatched R\nin RStudio; or perhaps I messed up setting the `device = ` argument), but I've\nrebuilt both patched and unpatched R from scratch, gave them a freshly\ninstalled library, and ran the R processes directly in a terminal. With that,\nthe set of changes from {gdiff} is smaller, though still quite a lot for\n{ggplot2}. I've updated the `differ_log.txt` attachment.\n\nI've also grabbed the files that now differ and updated the\n`gdiff-offenders.zip` attachment. The differences do now look to be related to\ndrawing rectangles, with what seems to be shifts of a single pixel when drawing\naxes and\/or data. I have to leave this for now, but if further investigation is\nrequired a future explorer could take a closer look at specific examples at a\nfuture R dev day.\n\nThe patch is unchanged from the previous version, I just redid my testing\nanalysis (more carefully, it seems...)\n\nApologies for the previous noise and thanks for the {gdiff} tips!\n\nGeorge",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1731068860.207079",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "\/RV",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16721] image() with png() plot error for certain pixel widths",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16721"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #17 from George Stagg ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:george.stagg@posit.co",
+                                "text": "george.stagg@posit.co"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for the review. You are correct, there was indeed something else going\non affecting the plots... drat!\n\nI'm not sure what the issue was (perhaps a consequence of running unpatched R\nin RStudio; or perhaps I messed up setting the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "device = ",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " argument), but I've\nrebuilt both patched and unpatched R from scratch, gave them a freshly\ninstalled library, and ran the R processes directly in a terminal. With that,\nthe set of changes from {gdiff} is smaller, though still quite a lot for\n{ggplot2}. I've updated the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "differ_log.txt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " attachment.\n\nI've also grabbed the files that now differ and updated the\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "gdiff-offenders.zip",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " attachment. The differences do now look to be related to\ndrawing rectangles, with what seems to be shifts of a single pixel when drawing\naxes and\/or data. I have to leave this for now, but if further investigation is\nrequired a future explorer could take a closer look at specific examples at a\nfuture R dev day.\n\nThe patch is unchanged from the previous version, I just redid my testing\nanalysis (more carefully, it seems...)\n\nApologies for the previous noise and thanks for the {gdiff} tips!\n\nGeorge"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16721] image() with png() plot error for certain pixel widths*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16721>\n\n--- Comment #18 from Ella Kaye (<mailto:ella.kaye@gmail.com|ella.kaye@gmail.com>) ---\nHi George and Paul. Thanks for your continued work and comments on this. I'm\nhappy to pick it up again for future exploration (though won't get a chance to\nlook at this again until towards the end of November).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1731069313.911219",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "D6V+Q",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16721] image() with png() plot error for certain pixel widths",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16721"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #18 from Ella Kaye ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ella.kaye@gmail.com",
+                                "text": "ella.kaye@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nHi George and Paul. Thanks for your continued work and comments on this. I'm\nhappy to pick it up again for future exploration (though won't get a chance to\nlook at this again until towards the end of November)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

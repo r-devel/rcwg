@@ -1,0 +1,269 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18823] debugonce(coerce, signature=); as(...) signals error due to undefined .Generic*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18823>\n\n--- Comment #2 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nOne approach to testing, totally independent of a debugging context, would be:\n\n```\ntrr &lt;- quote(list(.Generic, .Method, .defined, .target))\nsig &lt;- c(\"ANY\", \"logical\")\nm0 &lt;- selectMethod(coerce, signature = sig)\na0 &lt;- as(0, \"logical\")\ntrace(coerce, tracer = trr, signature = sig)\nm1 &lt;- selectMethod(coerce, signature = sig)\na1 &lt;- as(0, \"logical\") # error \"object '.Generic' not found\" in R &lt;= 4.4.2\nuntrace(coerce, signature = sig)\nm2 &lt;- selectMethod(coerce, signature = sig)\nstopifnot( is(m0, \"MethodDefinition\"),\n          !is(m0, \"MethodDefinitionWithTrace\"),\n           is(m1, \"MethodDefinitionWithTrace\"),\n          identical(m0, m2), identical(a0, a1))\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732200752.983179",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "W6i",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18823] debugonce(coerce, signature=); as(...) signals error due to undefined .Generic",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18823"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nOne approach to testing, totally independent of a debugging context, would be:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "trr <- quote(list(.Generic, .Method, .defined, .target))\nsig <- c(\"ANY\", \"logical\")\nm0 <- selectMethod(coerce, signature = sig)\na0 <- as(0, \"logical\")\ntrace(coerce, tracer = trr, signature = sig)\nm1 <- selectMethod(coerce, signature = sig)\na1 <- as(0, \"logical\") # error \"object '.Generic' not found\" in R <= 4.4.2\nuntrace(coerce, signature = sig)\nm2 <- selectMethod(coerce, signature = sig)\nstopifnot( is(m0, \"MethodDefinition\"),\n          !is(m0, \"MethodDefinitionWithTrace\"),\n           is(m1, \"MethodDefinitionWithTrace\"),\n          identical(m0, m2), identical(a0, a1))\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #12 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nThank you, Heather and Dirk and R dev day contributors at LatinR!\n\nI've committed a version of these changes (plus tests, partly also inspired by\nyour comments on the R Dev Day issue).\n\nExactly the two 1-line changes in your updated patch were indeed instrumental,\ni.e.,\n\n1.  additionally checking if a  `format = \".... %OS\"` was used\n2.  using `trunc()` instead of `round()` as the former is compatible with the\nlater `.Internal(..)` C code\n\nEvent though this is primarily a bug fix, I am slightly reluctant to port it to\nthe R 4.4.x (\"R-patched\") branch.\n\nI will commit another change to the `print()` methods (for date-time objects),\nensuring that `print(&lt;..&gt;, digits = n)` does pass the `digits` to\n`format.POSIXlt()`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732205027.058109",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "LuN",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #12 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you, Heather and Dirk and R dev day contributors at LatinR!\n\nI've committed a version of these changes (plus tests, partly also inspired by\nyour comments on the R Dev Day issue).\n\nExactly the two 1-line changes in your updated patch were indeed instrumental,\ni.e.,\n\n1.  additionally checking if a  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format = \".... %OS\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " was used\n2.  using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "trunc()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " instead of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "round()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as the former is compatible with the\nlater "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".Internal(..)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " C code\n\nEvent though this is primarily a bug fix, I am slightly reluctant to port it to\nthe R 4.4.x (\"R-patched\") branch.\n\nI will commit another change to the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "print()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " methods (for date-time objects),\nensuring that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "print(<..>, digits = n)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does pass the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "digits",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "format.POSIXlt()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350>\n\n--- Comment #13 from Dirk Eddelbuettel (<mailto:edd@debian.org|edd@debian.org>) ---\nFantastic news!\n\n(And if I may, from one Emacs user to another: this was the first time I\n\"picked up code\" from SVN which was clearly wrongly indented. After 25+ years,\ndid something change?  Not on my end (though a few months ago after a hint from\nKH I switched ess-set-style from 'C++' to 'RRR' -- is this a possible side\neffect?)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732205390.567249",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "+10az",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #13 from Dirk Eddelbuettel ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:edd@debian.org",
+                                "text": "edd@debian.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nFantastic news!\n\n(And if I may, from one Emacs user to another: this was the first time I\n\"picked up code\" from SVN which was clearly wrongly indented. After 25+ years,\ndid something change?  Not on my end (though a few months ago after a hint from\nKH I switched ess-set-style from 'C++' to 'RRR' -- is this a possible side\neffect?)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

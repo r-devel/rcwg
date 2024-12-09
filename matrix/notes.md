@@ -46,5 +46,7 @@ Present: Greg Sutcliffe, Ella Kaye, Mikael Jagan, Heather Turner
 * Make links to CoC and posting guide clearly visible in all spaces/rooms, to help enforce
 * Get Mjolnir for free if we can
 * Continue setting up rooms to match Slack channels
+* Set up Slack bridge for all channels to aid transition
+* Work on "Getting Started" documentation for users starting to use Matrix
 
 

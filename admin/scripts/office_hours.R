@@ -2,18 +2,17 @@
 
 # October onwards: TODO after checking time change
 
-# Nov 14
 # Dec 12
 # Jan 9
 # Feb 13
 # Mar 13
 
-day <- 14
-month <- "November"
-emea <- "https://www.meetup.com/r-contributors/events/304502675"
-amer <- "https://www.meetup.com/r-contributors/events/304502698"
+day <- 12
+month <- "December"
+emea <- "https://www.meetup.com/r-contributors/events/304705594"
+amer <- ""
 emea_zoom <- "https://us02web.zoom.us/j/88093117300?pwd=bFlTWENoY2U2bW40SHFLcWxxTHp5Zz09"
-amer_zoom <- "https://us02web.zoom.us/j/85668115902?pwd=Z0NtN3hMOGZmaU9EcWx1SWE2ZUwzUT09"
+amer_zoom <- ""
 
 # ensure office hour annouced on meetup (see rcwg_tasks.md)
 
@@ -26,7 +25,7 @@ source("admin/R/social_post.R")
 # venues: email, slack, R weekly
 # use "office_hour" for main post,
 # "office_hour_reminder" for twitter/mastodon/slack reminders
-post <- office_hour_post(month, day, c("09:00", "16:30"), # UTC times
+post <- office_hour_post(month, day, c("10:00", "17:30"), # UTC times
                          c(emea, amer), c(emea_zoom, amer_zoom),
                          venue = "slack",
                          templates = "admin/posts/office_hour")
@@ -63,7 +62,7 @@ buffer_signin(browser = browser,
               username = "heather@r-project.org",
               key = "Buffer password")
 
-# note posting day different from event day!
+# note posting day will usually be different from event day!
 # If NULL, will post this day, this month, next hour (UTC times)
 buffer_createpost(browser = browser,
                   day = 11, # day number of month, e.g. 10

@@ -1,18 +1,16 @@
 # Data for next office hours ----------------------------------------------
 
-# October onwards: TODO after checking time change
-
 # Dec 12
 # Jan 9
 # Feb 13
 # Mar 13
 
-day <- 12
-month <- "December"
-emea <- "https://www.meetup.com/r-contributors/events/304705594"
-amer <- ""
+day <- 9
+month <- "January"
+emea <- "https://www.meetup.com/r-contributors/events/305179912/"
+amer <- "https://www.meetup.com/r-contributors/events/305046519"
 emea_zoom <- "https://us02web.zoom.us/j/88093117300?pwd=bFlTWENoY2U2bW40SHFLcWxxTHp5Zz09"
-amer_zoom <- ""
+amer_zoom <- "https://us02web.zoom.us/j/85668115902?pwd=Z0NtN3hMOGZmaU9EcWx1SWE2ZUwzUT09"
 
 # ensure office hour annouced on meetup (see rcwg_tasks.md)
 
@@ -27,14 +25,15 @@ source("admin/R/social_post.R")
 # "office_hour_reminder" for twitter/mastodon/slack reminders
 post <- office_hour_post(month, day, c("10:00", "17:30"), # UTC times
                          c(emea, amer), c(emea_zoom, amer_zoom),
-                         venue = "slack",
+                         venue = "email",
                          templates = "admin/posts/office_hour")
 
 # Email r-contribution-wg@r-project.org -----------------------------------
 
-# Mastodon and Twitter via Buffer posts ------------------------------------
+# Mastodon via Buffer ------------------------------------
 
-# Also Bluesky by bridging
+# Also Bluesky by bridging. No longer post on Twitter.
+# This could replaced by rtoot now, but won't schedule in advance
 
 post <- office_hour_post(month, day, c("10:00", "17:30"), # UTC times
                          c(emea, amer), c(emea_zoom, amer_zoom),
@@ -65,16 +64,18 @@ buffer_signin(browser = browser,
 # note posting day will usually be different from event day!
 # If NULL, will post this day, this month, next hour (UTC times)
 buffer_createpost(browser = browser,
-                  day = 11, # day number of month, e.g. 10
+                  day = NULL, # day number of month, e.g. 10
                   month = NULL,
                   time = NULL, # 24 hour clock, e.g. "09:00"
-                  postcontent = post[[1]])
+                  postcontent = post[[1]],
+                  venue = "mastodon")
 
 buffer_createpost(browser = browser,
                   day = 11,
                   month = NULL,
                   time = "17:30",
-                  postcontent = post[[2]])
+                  postcontent = post[[2]],
+                  venue = "mastodon")
 
 browser$close()
 

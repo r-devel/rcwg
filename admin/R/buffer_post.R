@@ -25,7 +25,8 @@ buffer_signin <- function(browser, page, username, key = "Buffer password"){
 buffer_createpost <- function(
         browser,
         day = NULL, month = NULL, time = NULL,
-        postcontent){
+        postcontent,
+        venue = c("mastodon", "twitter")){
 
     if (is.null(day)) day <- format(Sys.Date(), "%d")
     if (is.null(month)) month <- format(Sys.Date(), "%B")
@@ -42,13 +43,17 @@ buffer_createpost <- function(
     # select outlets
     # all (mastodon, twitter and linked-in page) pre-selected by default
 
-    #elem <- browser$findElement(using = 'name',
-    #                            "mastodon-profile-button")
-    #elem$clickElement()
+    if (!"mastodon" %in% venue) {
+        elem <- browser$findElement(using = 'name',
+                                    "mastodon-profile-button")
+        elem$clickElement()
+    }
 
-    #elem <- browser$findElement(using = 'name',
-    #                            "twitter-profile-button")
-    #elem$clickElement()
+    if (!"twitter" %in% venue) {
+        elem <- browser$findElement(using = 'name',
+                                    "twitter-profile-button")
+        elem$clickElement()
+    }
 
     elem <- browser$findElement(using = 'name',
                                 "linkedin-profile-button")
@@ -58,10 +63,6 @@ buffer_createpost <- function(
                                 "//div[@role='textbox']")
 
     sendChar(elem, postcontent)
-
-    elem <- browser$findElement(using = 'xpath',
-                                "//button[text()='Customize for each network']")
-    elem$clickElement()
 
     # fragile (which number element to click?) - clicking on drop down arrow
     elem <- browser$findElements(using = 'xpath',

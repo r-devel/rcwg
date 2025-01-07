@@ -4,9 +4,9 @@ linkedin_signin <- function(browser, page, username, key = "LinkedIn password"){
     browser$navigate(page)
 
     # cookie control
-    elem <- browser$findElement(using = 'css',
-                                "[data-control-name='ga-cookie.consent.deny.v4']")
-    elem$clickElement()
+    #elem <- browser$findElement(using = 'css',
+    #                            "[data-control-name='ga-cookie.consent.deny.v4']")
+    #elem$clickElement()
 
     # sign in
     # keyring::key_set("LinkedIn password")

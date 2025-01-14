@@ -2,9 +2,6 @@
 
 ## Setting up R Contribution Working Group Meeting (scripts/rcwg.R)
 
-Tues 18:30 UTC: Jun 18, Aug 20, Oct 15, Dec 17
-Fri 14:00 UTC: Jul 19, Sep 20, Nov 15
- 
 1. Update GitHub README with dates for next month via R script
    - Based on usual pattern (n'th day of month at particular times)
    - Check dates and adjust if necessary

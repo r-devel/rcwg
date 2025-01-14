@@ -2,16 +2,20 @@
 
 source("admin/R/update_readme_dates.R")
 
-# 15 Nov
-# 17 Dec
-
-# N.B. Set up meetings till Dec 2024 but Friday ones (now July onwards)
-# not yet "announced" by inviting mailing list to this series!!!
+### 2025 dates
+# Fri 15:00 UK
+# Jan 24 (moved from Jan 17), Mar 21, May 16, Jul 17, Sep 26 (moved from Sep 19 due to posit::conf),
+# Nov 21 (May need to change time to AU/UK friendlyish time)
+#
+# Tues 18:30 UK:
+# Feb 18, Apr 15, Jan 17, Aug 19 (may skip, but see who signs up),
+# Oct 21, (May need to change time to AU/US friendlyish time)
+# Dec 16, (May need to change time to NZ/US friendlyish time)
 
 # times here are UK times!
 # !! Think I have inconsistency here: Slack message and Twitter/Mastodon were wrong last time
-update_readme_dates(1, "November", 3, "Friday", "15:00", 2024)
-update_readme_dates(2, "August", 3, "Tuesday", "19:30", 2024)
+update_readme_dates(1, "January", 24, "Friday", "15:00", 2025)
+update_readme_dates(2, "February", 18, "Tuesday", "19:30", 2025)
 
 
 # Social media posts ------------------------------------------------------

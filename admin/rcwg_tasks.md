@@ -13,6 +13,12 @@
         - Add to Forward Calendar (RSVPs work better from main calender - at least Outlook and fastmail, RSVPs don't work to (public?) group calendar). DO NOT INVITE ANYONE YET ELSE THEY GET MULTIPLE INVITES!!
         - Copy event to R Contribution Working Group calendar for sharing via Teamup.
         - Now add guest: r-contribution-wg@r-project.org on Forwards Calendar event.
+            - N.B. if change event in recurring series will send invite for series + invite for each changed event.
+            There for may be better to note intended change for self and just adjust individual event when advertising meeting/
+            writing up minutes of next meeting
+            - !! Maybe in future, better to add https://calendar.google.com/calendar/ical/nc4tg39nam44itn9uhnf751hbk%40group.calendar.google.com/public/basic.ics
+            as an attachment to email sent from Forwards account (avoiding Outlook messing with links). Also giving link to Google calendar and events calendar in body of email.
+            See e.g. email from 2025-01-15 as example to set up for the year.
     - Cannot log in to Zoom or Gmail with RSelenium.
 4.  Will automatically show on Team up in 12 hours, or
     - Login to Team up 

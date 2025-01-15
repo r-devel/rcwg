@@ -7,16 +7,25 @@ source("admin/R/update_readme_dates.R")
 # Jan 24 (moved from Jan 17), Mar 21, May 16, Jul 17, Sep 26 (moved from Sep 19 due to posit::conf),
 # Nov 21 (May need to change time to AU/UK friendlyish time)
 #
-# Tues 18:30 UK:
+# Tues 19:30 UK:
 # Feb 18, Apr 15, Jan 17, Aug 19 (may skip, but see who signs up),
 # Oct 21, (May need to change time to AU/US friendlyish time)
 # Dec 16, (May need to change time to NZ/US friendlyish time)
 
 # times here are UK times!
+# second number is n'th 'day' of the month, e.g. `3, "Friday"` = 3rd Friday
 # !! Think I have inconsistency here: Slack message and Twitter/Mastodon were wrong last time
-update_readme_dates(1, "January", 24, "Friday", "15:00", 2025)
-update_readme_dates(2, "February", 18, "Tuesday", "19:30", 2025)
+update_readme_dates(1, "January", 4, "Friday", "15:00", 2025)
+update_readme_dates(2, "February", 3, "Tuesday", "19:30", 2025)
 
+
+# Update RCWG -------------------------------------------------------------
+
+RCWG have been sent invite to recurring meeting
+
+Send update for this event only by adding specific agenda items to Google
+calendar invite.
+ - maybe send from something other than work outlook so don't get links expanded
 
 # Social media posts ------------------------------------------------------
 

@@ -15,17 +15,19 @@ source("admin/R/update_readme_dates.R")
 # times here are UK times!
 # second number is n'th 'day' of the month, e.g. `3, "Friday"` = 3rd Friday
 # !! Think I have inconsistency here: Slack message and Twitter/Mastodon were wrong last time
-update_readme_dates(1, "January", 4, "Friday", "15:00", 2025)
-update_readme_dates(2, "February", 3, "Tuesday", "19:30", 2025)
+update_readme_dates(1, "February", 3, "Tuesday", "19:30", 2025)
+update_readme_dates(2, "March", 3, "Friday", "15:00", 2025)
+
 
 
 # Update RCWG -------------------------------------------------------------
 
-RCWG have been sent invite to recurring meeting
+## RCWG have been sent invite to recurring meeting
+## - maybe send from something other than work outlook so don't get links expanded
 
-Send update for this event only by adding specific agenda items to Google
-calendar invite.
- - maybe send from something other than work outlook so don't get links expanded
+## Send update for this event only by adding specific agenda items to Google
+## calendar invite.
+
 
 # Social media posts ------------------------------------------------------
 
@@ -35,14 +37,13 @@ source("admin/R/buffer_post.R")
 # auth_setup() # choose user token and login as RContributors on Mastodon
 
 # slack announcement
-month <- "November"
-day <- 15
-time <- "15:00" # UTC !!
+month <- "February"
+day <- 18
+time <- "19:30" # UTC !!
 weekday <- get_weekday(day, month, abbreviate = TRUE)
 agenda = c(
-"- Preparation for R Dev Day @ LatinR
-- Planned work on R Dev Guide
-- Updates on regular activities"
+"- Plans for R Dev Days (especially post useR! 2025)
+- Projects for Google Summer of Code/Season of Docs"
 )
 post <- social_post(weekday = weekday,
                     day = day,
@@ -75,9 +76,10 @@ buffer_signin(browser = browser,
 # note posting day different from event day!
 # If NULL, will post this day, this month, next hour
 buffer_createpost(browser = browser,
-                  day = 12,
+                  day = NULL,
                   month = NULL,
-                  time = "15:00", #UTC
+                  time = NULL, #UTC
+                  venue = "mastodon",
                   postcontent = post)
 
 browser$close()

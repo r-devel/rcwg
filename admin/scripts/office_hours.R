@@ -1,14 +1,12 @@
 # Data for next office hours ----------------------------------------------
 
-# Dec 12
-# Jan 9
-# Feb 13
+# Feb 6
 # Mar 13
 
-day <- 9
-month <- "January"
-emea <- "https://www.meetup.com/r-contributors/events/305179912/"
-amer <- "https://www.meetup.com/r-contributors/events/305046519"
+day <- 6
+month <- "February"
+emea <- "https://www.meetup.com/r-contributors/events/305790230/"
+amer <- "https://www.meetup.com/r-contributors/events/305506311/"
 emea_zoom <- "https://us02web.zoom.us/j/88093117300?pwd=bFlTWENoY2U2bW40SHFLcWxxTHp5Zz09"
 amer_zoom <- "https://us02web.zoom.us/j/85668115902?pwd=Z0NtN3hMOGZmaU9EcWx1SWE2ZUwzUT09"
 
@@ -25,7 +23,7 @@ source("admin/R/social_post.R")
 # "office_hour_reminder" for twitter/mastodon/slack reminders
 post <- office_hour_post(month, day, c("10:00", "17:30"), # UTC times
                          c(emea, amer), c(emea_zoom, amer_zoom),
-                         venue = "email",
+                         venue = "rweekly",
                          templates = "admin/posts/office_hour")
 
 # Email r-contribution-wg@r-project.org -----------------------------------
@@ -71,7 +69,7 @@ buffer_createpost(browser = browser,
                   venue = "mastodon")
 
 buffer_createpost(browser = browser,
-                  day = 11,
+                  day = 29,
                   month = NULL,
                   time = "17:30",
                   postcontent = post[[2]],

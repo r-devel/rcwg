@@ -1,0 +1,254 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18369] isGeneric  is inconsistent about whether f is required when fdef is provided between base functions and others*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18369>\n\nMikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jaganmn@mcmaster.ca\n\n--- Comment #3 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nSorry, but aren't you just reinventing `methods:::.primname` and indirectly the\nC-level `PRIMNAME`?  It is essential here to investigate how the related\nfunction `getGeneric` handles its first argument:\n\n```\n&gt; body(getGeneric)[[2L]]\nif (is.function(f)) {\n    if (is(f, \"genericFunction\")) \n        return(f)\n    else if (is.primitive(f)) \n        return(genericForBasic(.primname(f), mustFind = mustFind))\n    else stop(\"argument 'f' must be a string, generic function, or primitive:\ngot an ordinary function\")\n}\n```\n\nHence the following _minimal_ patch (which passes `make check-all`) seems more\nappropriate:\n\n```\nIndex: R\/Methods.R\n===================================================================\n--- R\/Methods.R (revision 87365)\n+++ R\/Methods.R (working copy)\n@@ -273,11 +273,10 @@\n     if(is.null(fdef))\n       return(FALSE)\n     ## check primitives. These are never found as explicit generic functions.\n-    if(isBaseFun(fdef)) {\n-        if(is.character(f) &amp;&amp; f %in% \"as.double\") f &lt;- \"as.numeric\"\n+    if(is.primitive(fdef)) {\n         ## the definition of isGeneric() for a base function is that methods\nare defined\n         ## (other than the default primitive)\n-        gen &lt;- genericForBasic(f, mustFind = FALSE)\n+        gen &lt;- genericForBasic(.primname(fdef), mustFind = FALSE)\n         return(is.function(gen) &amp;&amp; length(names(.getMethodsTable(gen))) &gt; 1L)\n     }\n     if(!is(fdef, \"genericFunction\"))\n```\n\nIndeed, the \"real\" bug seems to have been the use of `isBaseFun` instead of\n`is.primitive` to test for a primitive function ...\n\nTo address the contrived `coolGeneric` example, I guess that the documentation\ncould be clarified to state that argument `where` is consulted only if argument\n`fdef` is `NULL` (which is true by default).\n\nNote that the above patch does not address an entirely different bug, which is\nthat, in the branch for primitive functions, `getName = TRUE` is not respected\nand a warning is not issued if `f` is a character string not equal to\n`.primname(fdef)`.  A patch for this second bug might restructure the body a\nbit to avoid repetition of the warning message, etc.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732341202.082409",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "xuD",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18369] isGeneric  is inconsistent about whether f is required when fdef is provided between base functions and others",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18369"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jaganmn@mcmaster.ca\n\n--- Comment #3 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nSorry, but aren't you just reinventing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods:::.primname",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and indirectly the\nC-level "
+                            },
+                            {
+                                "type": "text",
+                                "text": "PRIMNAME",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "?  It is essential here to investigate how the related\nfunction "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " handles its first argument:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> body(getGeneric)[[2L]]\nif (is.function(f)) {\n    if (is(f, \"genericFunction\")) \n        return(f)\n    else if (is.primitive(f)) \n        return(genericForBasic(.primname(f), mustFind = mustFind))\n    else stop(\"argument 'f' must be a string, generic function, or primitive:\ngot an ordinary function\")\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nHence the following "
+                            },
+                            {
+                                "type": "text",
+                                "text": "minimal",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " patch (which passes "
+                            },
+                            {
+                                "type": "text",
+                                "text": "make check-all",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") seems more\nappropriate:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: R\/Methods.R\n===================================================================\n--- R\/Methods.R (revision 87365)\n+++ R\/Methods.R (working copy)\n@@ -273,11 +273,10 @@\n     if(is.null(fdef))\n       return(FALSE)\n     ## check primitives. These are never found as explicit generic functions.\n-    if(isBaseFun(fdef)) {\n-        if(is.character(f) && f %in% \"as.double\") f <- \"as.numeric\"\n+    if(is.primitive(fdef)) {\n         ## the definition of isGeneric() for a base function is that methods\nare defined\n         ## (other than the default primitive)\n-        gen <- genericForBasic(f, mustFind = FALSE)\n+        gen <- genericForBasic(.primname(fdef), mustFind = FALSE)\n         return(is.function(gen) && length(names(.getMethodsTable(gen))) > 1L)\n     }\n     if(!is(fdef, \"genericFunction\"))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIndeed, the \"real\" bug seems to have been the use of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isBaseFun",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " instead of\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "is.primitive",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to test for a primitive function ...\n\nTo address the contrived "
+                            },
+                            {
+                                "type": "text",
+                                "text": "coolGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " example, I guess that the documentation\ncould be clarified to state that argument "
+                            },
+                            {
+                                "type": "text",
+                                "text": "where",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is consulted only if argument\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "fdef",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (which is true by default).\n\nNote that the above patch does not address an entirely different bug, which is\nthat, in the branch for primitive functions, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getName = TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is not respected\nand a warning is not issued if "
+                            },
+                            {
+                                "type": "text",
+                                "text": "f",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is a character string not equal to\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": ".primname(fdef)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  A patch for this second bug might restructure the body a\nbit to avoid repetition of the warning message, etc."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

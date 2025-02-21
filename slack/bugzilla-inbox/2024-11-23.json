@@ -1,0 +1,627 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18369] isGeneric  is inconsistent about whether f is required when fdef is provided between base functions and others*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18369>\n\n--- Comment #4 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nCreated attachment 3428\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3428&amp;action=edit>\nalign isGeneric implementation and behaviour\n\nThis patch includes the patch proposed in comment 3 and improvements to the\ndocumentation that clarify the behaviour of `isGeneric` when `fdef` is `NULL`\nand when `fdef` is non-`NULL`.  It cleans up the paragraph about primitive\nfunctions, in particular correcting the wrong implication of the original text\nthat _where_ the methods for a primitive function are defined affects the\nresult.\n\nI will create separate reports and patches for two other bugs, one being the\nbug that I mention at the end of comment 3.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732388103.045829",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Nqq",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18369] isGeneric  is inconsistent about whether f is required when fdef is provided between base functions and others",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18369"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3428\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3428&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3428&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nalign isGeneric implementation and behaviour\n\nThis patch includes the patch proposed in comment 3 and improvements to the\ndocumentation that clarify the behaviour of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " when "
+                            },
+                            {
+                                "type": "text",
+                                "text": "fdef",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nand when "
+                            },
+                            {
+                                "type": "text",
+                                "text": "fdef",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is non-"
+                            },
+                            {
+                                "type": "text",
+                                "text": "NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  It cleans up the paragraph about primitive\nfunctions, in particular correcting the wrong implication of the original text\nthat "
+                            },
+                            {
+                                "type": "text",
+                                "text": "where",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " the methods for a primitive function are defined affects the\nresult.\n\nI will create separate reports and patches for two other bugs, one being the\nbug that I mention at the end of comment 3."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18828] New: isGeneric(f=) and isGeneric(f=, fdef=) behave inconsistently for primitive functions*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18828>\n\n            Bug ID: 18828\n           Summary: isGeneric(f=) and isGeneric(f=, fdef=) behave\n                    inconsistently for primitive functions\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: S4methods\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>\n\nAn issue related to but different from Bug 18369.\n\nAnother aspect of `isGeneric` behaviour where clarification is needed concerns\ndefault and non-default methods for internally generic primitive functions. \nComments in the source code suggest that only non-default methods should affect\nthe result.\n\n```\n    ## check primitives. These are never found as explicit generic functions.\n    if(isBaseFun(fdef)) {\n        if(is.character(f) &amp;&amp; f %in% \"as.double\") f &lt;- \"as.numeric\"\n        ## the definition of isGeneric() for a base function is that methods\nare defined\n        ## (other than the default primitive)\n        gen &lt;- genericForBasic(f, mustFind = FALSE)\n        return(is.function(gen) &amp;&amp; length(names(.getMethodsTable(gen))) &gt; 1L)\n    }\n```\n\nHowever, the documentation does not distinguish between default and non-default\nmethods.\n\n&gt; A call to `isGeneric` tells you whether methods have been defined for this primitive function, anywhere in the current search list, or in the specified position `where`.\n\nThe implementation is itself inconsistent.  Specifically, calls `isGeneric(f=,\nfdef=)` analyze the method table, while calls `isGeneric(f=)` do not, leading\nto inconsistent results.  Consider any internally generic primitive function\nwhose generic \"proxy\" is not already cached in `methods:::.genericTable` at\nstart-up (because no methods for that function or its \"group\" are defined by\n**methods** itself).\n\n```\n&gt; exists(\"sum\", envir = methods:::.genericTable, inherits = FALSE)\n[1] FALSE\n```\n\nThe formal generic function object is defined in `methods:::.BasicFunsList`\nwith a method table containing only a default method.  This object is not yet\ncached in `methods:::.genericTable`.\n\n```\n&gt; fn &lt;- methods:::.BasicFunsList[[\"sum\"]]\n&gt; is(fn, \"genericFunction\")\n[1] TRUE\n&gt; mt &lt;- environment(fn)[[\".MTable\"]]\n&gt; names(mt)\n[1] \"ANY\"\n&gt; identical(mt[[\"ANY\"]], sum)\n[1] TRUE\n```\n\nAt this point, `sum` is not generic by any definition employed by `isGeneric`. \nThere is no such object in `.genericTable` (consulted by\n`.getGenericFromCache`) and the object in `.BasicFunsList` (consulted by\n`genericForBasic`) has no non-default methods in its method table.\n\n```\n&gt; isGeneric(\"sum\")\n[1] FALSE\n&gt; isGeneric(\"sum\", fdef = sum)\n[1] FALSE\n```\n\nNow call `getGeneric(\"sum\")`, which has the side effect of caching the object\nfrom `.BasicFunsList` in `.genericTable`.\n\n```\n&gt; identical(getGeneric(\"sum\"), fn)\n[1] TRUE\n&gt; exists(\"sum\", envir = methods:::.genericTable, inherits = FALSE)\n[1] TRUE\n&gt; identical(methods:::.genericTable[[\"sum\"]], fn)\n[1] TRUE\n```\n\nIt is still the case that only a default method is defined for `sum`.\n\n```\n&gt; names(environment(fn)[[\".MTable\"]])\n[1] \"ANY\"\n```\n\nBut now the first usage of `isGeneric` gives a different answer.\n\n```\n&gt; isGeneric(\"sum\")\n[1] TRUE\n&gt; isGeneric(\"sum\", fdef = sum)\n[1] FALSE\n```\n\nHence we should decide what is really meant (in the help page) by \"whether\nmethods have been defined for this primitive function\" and patch `isGeneric` to\nemploy this definition more rigorously.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732398599.311269",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "LQJLB",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18828] New: isGeneric(f=) and isGeneric(f=, fdef=) behave inconsistently for primitive functions",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18828"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18828\n           Summary: isGeneric(f=) and isGeneric(f=, fdef=) behave\n                    inconsistently for primitive functions\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: S4methods\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nAn issue related to but different from Bug 18369.\n\nAnother aspect of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " behaviour where clarification is needed concerns\ndefault and non-default methods for internally generic primitive functions. \nComments in the source code suggest that only non-default methods should affect\nthe result.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "    ## check primitives. These are never found as explicit generic functions.\n    if(isBaseFun(fdef)) {\n        if(is.character(f) && f %in% \"as.double\") f <- \"as.numeric\"\n        ## the definition of isGeneric() for a base function is that methods\nare defined\n        ## (other than the default primitive)\n        gen <- genericForBasic(f, mustFind = FALSE)\n        return(is.function(gen) && length(names(.getMethodsTable(gen))) > 1L)\n    }\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nHowever, the documentation does not distinguish between default and non-default\nmethods.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "A call to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " tells you whether methods have been defined for this primitive function, anywhere in the current search list, or in the specified position "
+                            },
+                            {
+                                "type": "text",
+                                "text": "where",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe implementation is itself inconsistent.  Specifically, calls `isGeneric(f=,\nfdef=)` analyze the method table, while calls "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric(f=)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " do not, leading\nto inconsistent results.  Consider any internally generic primitive function\nwhose generic \"proxy\" is not already cached in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods:::.genericTable",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " at\nstart-up (because no methods for that function or its \"group\" are defined by\n**methods** itself).\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> exists(\"sum\", envir = methods:::.genericTable, inherits = FALSE)\n[1] FALSE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe formal generic function object is defined in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods:::.BasicFunsList",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nwith a method table containing only a default method.  This object is not yet\ncached in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods:::.genericTable",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> fn <- methods:::.BasicFunsList[[\"sum\"]]\n> is(fn, \"genericFunction\")\n[1] TRUE\n> mt <- environment(fn)[[\".MTable\"]]\n> names(mt)\n[1] \"ANY\"\n> identical(mt[[\"ANY\"]], sum)\n[1] TRUE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nAt this point, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "sum",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is not generic by any definition employed by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". \nThere is no such object in "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".genericTable",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (consulted by\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": ".getGenericFromCache",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") and the object in "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".BasicFunsList",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (consulted by\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "genericForBasic",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") has no non-default methods in its method table.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> isGeneric(\"sum\")\n[1] FALSE\n> isGeneric(\"sum\", fdef = sum)\n[1] FALSE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nNow call "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getGeneric(\"sum\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which has the side effect of caching the object\nfrom "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".BasicFunsList",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".genericTable",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> identical(getGeneric(\"sum\"), fn)\n[1] TRUE\n> exists(\"sum\", envir = methods:::.genericTable, inherits = FALSE)\n[1] TRUE\n> identical(methods:::.genericTable[[\"sum\"]], fn)\n[1] TRUE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIt is still the case that only a default method is defined for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "sum",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> names(environment(fn)[[\".MTable\"]])\n[1] \"ANY\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nBut now the first usage of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " gives a different answer.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> isGeneric(\"sum\")\n[1] TRUE\n> isGeneric(\"sum\", fdef = sum)\n[1] FALSE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nHence we should decide what is really meant (in the help page) by \"whether\nmethods have been defined for this primitive function\" and patch "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to\nemploy this definition more rigorously."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18829] New: isGeneric(f=, fdef=, getName=TRUE) for primitive 'fdef' does not respect 'getName'*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18829>\n\n            Bug ID: 18829\n           Summary: isGeneric(f=, fdef=, getName=TRUE) for primitive\n                    'fdef' does not respect 'getName'\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: S4methods\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>\n\nAs mentioned in Bug 18369 comment 3:\n\n```\n&gt; ## Ensure that '+' is unambiguously \"generic\" as a primitive function:\n&gt; setClass(\"zzz\")\n&gt; setMethod(\"+\", c(e1 = \"zzz\", e2 = \"missing\"), function(e1, e2) e1)\n&gt; isGeneric(\"+\")\n[1] TRUE\n&gt; isGeneric(\"+\", getName = TRUE)\n[1] \"+\"\nattr(,\"package\")\n[1] \"base\"\n&gt; isGeneric(\"+\", fdef = `+`)\n[1] TRUE\n&gt; isGeneric(\"+\", fdef = `+`, getName = TRUE)\n[1] TRUE\n```\n\nThe fourth call should return the result of the second call.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732401165.978699",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "5kC",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18829] New: isGeneric(f=, fdef=, getName=TRUE) for primitive 'fdef' does not respect 'getName'",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18829"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18829\n           Summary: isGeneric(f=, fdef=, getName=TRUE) for primitive\n                    'fdef' does not respect 'getName'\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: S4methods\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nAs mentioned in Bug 18369 comment 3:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> ## Ensure that '+' is unambiguously \"generic\" as a primitive function:\n> setClass(\"zzz\")\n> setMethod(\"+\", c(e1 = \"zzz\", e2 = \"missing\"), function(e1, e2) e1)\n> isGeneric(\"+\")\n[1] TRUE\n> isGeneric(\"+\", getName = TRUE)\n[1] \"+\"\nattr(,\"package\")\n[1] \"base\"\n> isGeneric(\"+\", fdef = `+`)\n[1] TRUE\n> isGeneric(\"+\", fdef = `+`, getName = TRUE)\n[1] TRUE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe fourth call should return the result of the second call."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

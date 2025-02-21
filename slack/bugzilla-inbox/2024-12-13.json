@@ -1,0 +1,100 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18768] readLines incorrectly infers 'bzip2' based on false positive magic number match in rare cases*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18768>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tomas.kalibera@gmail.com\n\n--- Comment #1 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nThanks for the report.\n\nIt is documented in ?connections when compression is detected for input:\n\n\"\n     For reading, the type of compression (if any) can be determined\n     from the first few bytes of the file.  Thus for ‘file(raw =\n     FALSE)’ connections, if ‘open’ is ‘\"\"’, ‘\"r\"’ or ‘\"rt\"’ the\n     connection can read any of the compressed file types as well as\n     uncompressed files.  (Using ‘\"rb\"’ will allow compressed files to\n     be read byte-by-byte.)  Similarly, ‘gzfile’ connections can read\n     any of the forms of compression and uncompressed files in any read\n     mode.\n\"\n\nWhich also gives a hint how to avoid this, e.g. one can do\n\n&gt; readLines(file(\"tt.txt\", open=\"rb\"))\n[1] \"BZh says hello\"\n\n(with the consequence of no line-ending conversion on Windows)\n\nI don't think the documentation should be going to the level of detail of which\nmagic is used for which compression. It is not uncommon that bzip2 is detected\nusing just \"BZh\" (e.g. coreutils file utility does the same, GNU tar utility\ndoes the same, even though there the situation is different given tar itself\nhas a magic number). \n\nI think there should at least be a warning when the input turns out not to be\nvalid bzip2 during decompression. I've now modified R-devel to produce such a\nwarning.\n\n&gt; readLines(\"tt.txt\")\ncharacter(0)\nWarning message:\nIn readLines(\"tt.txt\") :\n  file 'tt.txt' appears not to be compressed by bzip2\n\nThis could still be puzzling, but an improvement. I am not yet convinced it is\nclear how to further improve this, just extending the bzip2 detection to take\ninto account more of the input is possible but there might be a more elegant\nsolution.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1734099377.796769",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "VSY",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18768] readLines incorrectly infers 'bzip2' based on false positive magic number match in rare cases",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18768"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tomas.kalibera@gmail.com\n\n--- Comment #1 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for the report.\n\nIt is documented in ?connections when compression is detected for input:\n\n\"\n     For reading, the type of compression (if any) can be determined\n     from the first few bytes of the file.  Thus for ‘file(raw =\n     FALSE)’ connections, if ‘open’ is ‘\"\"’, ‘\"r\"’ or ‘\"rt\"’ the\n     connection can read any of the compressed file types as well as\n     uncompressed files.  (Using ‘\"rb\"’ will allow compressed files to\n     be read byte-by-byte.)  Similarly, ‘gzfile’ connections can read\n     any of the forms of compression and uncompressed files in any read\n     mode.\n\"\n\nWhich also gives a hint how to avoid this, e.g. one can do\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "readLines(file(\"tt.txt\", open=\"rb\"))"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[1] \"BZh says hello\"\n\n(with the consequence of no line-ending conversion on Windows)\n\nI don't think the documentation should be going to the level of detail of which\nmagic is used for which compression. It is not uncommon that bzip2 is detected\nusing just \"BZh\" (e.g. coreutils file utility does the same, GNU tar utility\ndoes the same, even though there the situation is different given tar itself\nhas a magic number). \n\nI think there should at least be a warning when the input turns out not to be\nvalid bzip2 during decompression. I've now modified R-devel to produce such a\nwarning.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "readLines(\"tt.txt\")"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "character(0)\nWarning message:\nIn readLines(\"tt.txt\") :\n  file 'tt.txt' appears not to be compressed by bzip2\n\nThis could still be puzzling, but an improvement. I am not yet convinced it is\nclear how to further improve this, just extending the bzip2 detection to take\ninto account more of the input is possible but there might be a more elegant\nsolution."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,563 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18828] isGeneric(f=) and isGeneric(f=, fdef=) behave inconsistently for primitive functions*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18828>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CONFIRMED\n                 CC|                            |maechler@stat.math.ethz.ch\n     Ever confirmed|0                           |1\n\n--- Comment #1 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\n(Initially, ..) I agree this is a bug,\nand I think `isGeneric()` should try harder before saying `FALSE`.\nAs you showed, it _could_  call `getGeneric(*, mustWork=FALSE)` which I think\nshould always return `NULL` if it doesn't find anything.\nIf it does find something, almost surely  `isGeneric()` should return `TRUE`\nimmediately.\nOne could think of trying a more efficient version of `getGeneric()`, e.g.,\npossible `{methods}` own hidden `.getGeneric()`.\n\n**However**, I wrote the above before carefully rereading the subsection for\n`isGeneric` inside the `help(isGeneric)` section `Summary of Functions:`  which \nends with the paragraph\n\n&gt;  The behavior of `isGeneric` and getGeneric for primitive\n&gt;  functions is slightly different.  These functions don't exist\n&gt;  as formal generic function objects (for efficiency and\n&gt;  historical reasons), regardless of whether methods have been\n&gt;  defined for them.  For a primitive function, `isGeneric`\n&gt;  tests whether non-default methods have been defined, whereas\n&gt;  getGeneric returns what the formal generic function object\n&gt;  would be, even if no methods have been defined.\n\nI'm concluding from this that both functions behave as they do (well, \"almost\",\nsee below), on purpose.\n\n\nWhen you  say\n&gt; Now call `getGeneric(\"sum\")`, which has the side effect of caching the\n&gt; object from `.BasicFunsList` in `.genericTable`.\n\nand use\n\n```\n&gt; identical(getGeneric(\"sum\"), fn)\n[1] TRUE\n&gt; exists(\"sum\", envir = methods:::.genericTable, inherits = FALSE)\n[1] TRUE\n&gt; identical(methods:::.genericTable[[\"sum\"]], fn)\n[1] TRUE\n```\n&gt; \n&gt; It is still the case that only a default method is defined for `sum`.\n\nyou are right,  and given the documentation above, `isGeneric(\"sum\")` becoming\n`TRUE` is actually wrong.\nAs you mention, the `getGeneric()` *does* cache it in `.genericTable` which may\nbe the bug here:\nIf we want to keep the documented behaviour it should only cache it when \nisGeneric() is TRUE (or _\"would be true\"_, if there's an easier way to check\nthat).\n\n\nNote the 2nd to last line, when the result of `getGeneric()` is printed:\n```\n&gt; getGeneric(sum)\nstandardGeneric for \"sum\" defined from package \"base\"\n  belonging to group(s): Summary \n\nfunction (x, ..., na.rm = FALSE) \nstandardGeneric(\"sum\", .Primitive(\"sum\"))\n&lt;bytecode: 0xe807440&gt;\n&lt;environment: 0xe805a30&gt;\nMethods may be defined for arguments: x, na.rm\nUse  showMethods(&lt;pkg&gt;:::sum)  for currently available ones where &lt;pkg&gt; does\nnot seem to be among the loadedNamespaces().\n&gt; \n```\ni.e., the `show()` method __does__ note that it cannot find any S4 methods (in\nthe current R session with the currently loaded namespaces).\n\n.. of course, the further complication (also mentioned by the show() method) is\nthat `sum` is part of the groupGeneric `\"Summary\"`,\nand after, e.g.,  `loadNamespace(\"Matrix\")` the output above would not change,\nbut of course  `sum(&lt;..Matrix&gt;)` would use S4 methods from the Matrix package,\nand indeed,  `showMethods(Summary)`  will show them.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732788141.015589",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "LEUDg",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18828] isGeneric(f=) and isGeneric(f=, fdef=) behave inconsistently for primitive functions",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18828"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CONFIRMED\n                 CC|                            |maechler@stat.math.ethz.ch\n     Ever confirmed|0                           |1\n\n--- Comment #1 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(Initially, ..) I agree this is a bug,\nand I think "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " should try harder before saying "
+                            },
+                            {
+                                "type": "text",
+                                "text": "FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\nAs you showed, it "
+                            },
+                            {
+                                "type": "text",
+                                "text": "could",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  call "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getGeneric(*, mustWork=FALSE)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " which I think\nshould always return "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " if it doesn't find anything.\nIf it does find something, almost surely  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " should return "
+                            },
+                            {
+                                "type": "text",
+                                "text": "TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nimmediately.\nOne could think of trying a more efficient version of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getGeneric()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", e.g.,\npossible "
+                            },
+                            {
+                                "type": "text",
+                                "text": "{methods}",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " own hidden "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".getGeneric()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n**However**, I wrote the above before carefully rereading the subsection for\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " inside the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "help(isGeneric)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " section "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Summary of Functions:",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  which \nends with the paragraph\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " The behavior of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and getGeneric for primitive\n functions is slightly different.  These functions don't exist\n as formal generic function objects (for efficiency and\n historical reasons), regardless of whether methods have been\n defined for them.  For a primitive function, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n tests whether non-default methods have been defined, whereas\n getGeneric returns what the formal generic function object\n would be, even if no methods have been defined."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI'm concluding from this that both functions behave as they do (well, \"almost\",\nsee below), on purpose.\n\n\n\nWhen you  say"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Now call "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getGeneric(\"sum\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which has the side effect of caching the\nobject from "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".BasicFunsList",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".genericTable",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nand use\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> identical(getGeneric(\"sum\"), fn)\n[1] TRUE\n> exists(\"sum\", envir = methods:::.genericTable, inherits = FALSE)\n[1] TRUE\n> identical(methods:::.genericTable[[\"sum\"]], fn)\n[1] TRUE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nIt is still the case that only a default method is defined for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "sum",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nyou are right,  and given the documentation above, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric(\"sum\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " becoming\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is actually wrong.\nAs you mention, the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getGeneric()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " "
+                            },
+                            {
+                                "type": "text",
+                                "text": "does",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " cache it in "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".genericTable",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " which may\nbe the bug here:\nIf we want to keep the documented behaviour it should only cache it when \nisGeneric() is TRUE (or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"would be true\"",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", if there's an easier way to check\nthat).\n\n\n\nNote the 2nd to last line, when the result of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getGeneric()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is printed:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> getGeneric(sum)\nstandardGeneric for \"sum\" defined from package \"base\"\n  belonging to group(s): Summary \n\nfunction (x, ..., na.rm = FALSE) \nstandardGeneric(\"sum\", .Primitive(\"sum\"))\n<bytecode: 0xe807440>\n<environment: 0xe805a30>\nMethods may be defined for arguments: x, na.rm\nUse  showMethods(<pkg>:::sum)  for currently available ones where <pkg> does\nnot seem to be among the loadedNamespaces().\n> \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "i.e., the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "show()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method __does__ note that it cannot find any S4 methods (in\nthe current R session with the currently loaded namespaces).\n\n.. of course, the further complication (also mentioned by the show() method) is\nthat "
+                            },
+                            {
+                                "type": "text",
+                                "text": "sum",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is part of the groupGeneric "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"Summary\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\nand after, e.g.,  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "loadNamespace(\"Matrix\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " the output above would not change,\nbut of course  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "sum(<..Matrix>)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " would use S4 methods from the Matrix package,\nand indeed,  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "showMethods(Summary)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  will show them."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18784] Function RQuartz_glyph in devQuartz.c segfaults when font is not found.*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18784>\n\nPaul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #11 from Paul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) ---\nPatch committed (r87393).  Thanks!",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732839680.165579",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Kvp",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18784] Function RQuartz_glyph in devQuartz.c segfaults when font is not found.",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18784"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nPaul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #11 from Paul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nPatch committed (r87393).  Thanks!"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

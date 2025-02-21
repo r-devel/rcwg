@@ -1,0 +1,370 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17672] seq.Date should accept to,by,length.out (i.e., no need for from)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17672>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|WISHLIST                    |FIXED\n             Status|VERIFIED                    |CLOSED\n\n--- Comment #8 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nI have committed changes to R-devel now, fixing this, i.e., allowing `from` to\nbe optional for both `seq.Date()`  and `seq.POSIXt()`. \n Note that I've also made  `seq(&lt;from&gt;, &lt;to&gt;)`  working for  `\"Date\"` objects,\ncorresponding to a default `by = \"1 day\"`.\n\nAlso note that even for `\"POSIXct\"` I've allowed the result to be of type\n`\"integer\"` -- still more rarely than for `\"Date\"`.\n\n\n---\n\n\nLastly, only for interested experts: such internally integer sequences *could*\nbenefit from dramatical compactification via ALTREP, but unfortunately do not:\n```\n&gt; (ss &lt;- seq(as.Date(\"2024-12-1\"), as.Date(\"2025-1-1\")))\n [1] \"2024-12-01\" \"2024-12-02\" \"2024-12-03\" \"2024-12-04\" \"2024-12-05\"\n\"2024-12-06\" \n ......\n[29] \"2024-12-29\" \"2024-12-30\" \"2024-12-31\" \"2025-01-01\"\n&gt; dput(ss)\nstructure(20058:20089, class = \"Date\")\n&gt; .Internal(inspect(20058:20089))\n@2b473428 13 INTSXP g0c0 [REF(65535)]  20058 : 20089 (compact)\n&gt; .Internal(inspect(ss))\n@2b4690f8 13 INTSXP g0c5 [OBJ,REF(1),ATT] (len=32, tl=0)\n20058,20059,20060,20061,20062,...\nATTRIB:\n  @2b46aca8 02 LISTSXP g0c0 [REF(1)] \n    TAG: @276fc650 01 SYMSXP g0c0 [REF(16069),LCK,gp=0x4000] \"class\" (has\nvalue)\n    @2b40fa30 16 STRSXP g0c1 [REF(65535)] (len=1, tl=0)\n      @278a1bd0 09 CHARSXP g0c1 [REF(191),gp=0x61] [ASCII] [cached] \"Date\"\n&gt; \n```\n\nThis has however nothing to do with \"Date\" objects, etc.  Rather it currently\nseems impossible to keep the ALTREP when adding an attribute to an ALTREPed\nobject:\n```\n&gt; i6 &lt;- 1:1e6; .Internal(inspect(i6))\n@2b486338 13 INTSXP g0c0 [REF(65535)]  1 : 1000000 (compact)\n&gt; dput(a6 &lt;- `attr&lt;-`(i6, \"foo\", 6L))\nstructure(1:1000000, foo = 6L)\n&gt; .Internal(inspect(a6))\n@7f12e3000010 13 INTSXP g0c7 [REF(1),ATT] (len=1000000, tl=0) 1,2,3,4,5,...\nATTRIB:\n  @2b485650 02 LISTSXP g0c0 [REF(1)] \n    TAG: @27c975f8 01 SYMSXP g0c0 [REF(73)] \"foo\"\n    @2b484f78 13 INTSXP g0c1 [REF(3)] (len=1, tl=0) 6\n&gt; \n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1735812631.042119",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "XfR\/\/",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17672] seq.Date should accept to,by,length.out (i.e., no need for from)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17672"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|WISHLIST                    |FIXED\n             Status|VERIFIED                    |CLOSED\n\n--- Comment #8 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI have committed changes to R-devel now, fixing this, i.e., allowing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "from",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to\nbe optional for both "
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq.Date()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq.POSIXt()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". \n Note that I've also made  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "seq(<from>, <to>)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  working for  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"Date\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " objects,\ncorresponding to a default "
+                            },
+                            {
+                                "type": "text",
+                                "text": "by = \"1 day\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nAlso note that even for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"POSIXct\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " I've allowed the result to be of type\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"integer\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " -- still more rarely than for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"Date\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n\n\n---\n\n\n\nLastly, only for interested experts: such internally integer sequences "
+                            },
+                            {
+                                "type": "text",
+                                "text": "could",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nbenefit from dramatical compactification via ALTREP, but unfortunately do not:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> (ss <- seq(as.Date(\"2024-12-1\"), as.Date(\"2025-1-1\")))\n [1] \"2024-12-01\" \"2024-12-02\" \"2024-12-03\" \"2024-12-04\" \"2024-12-05\"\n\"2024-12-06\" \n ......\n[29] \"2024-12-29\" \"2024-12-30\" \"2024-12-31\" \"2025-01-01\"\n> dput(ss)\nstructure(20058:20089, class = \"Date\")\n> .Internal(inspect(20058:20089))\n@2b473428 13 INTSXP g0c0 [REF(65535)]  20058 : 20089 (compact)\n> .Internal(inspect(ss))\n@2b4690f8 13 INTSXP g0c5 [OBJ,REF(1),ATT] (len=32, tl=0)\n20058,20059,20060,20061,20062,...\nATTRIB:\n  @2b46aca8 02 LISTSXP g0c0 [REF(1)] \n    TAG: @276fc650 01 SYMSXP g0c0 [REF(16069),LCK,gp=0x4000] \"class\" (has\nvalue)\n    @2b40fa30 16 STRSXP g0c1 [REF(65535)] (len=1, tl=0)\n      @278a1bd0 09 CHARSXP g0c1 [REF(191),gp=0x61] [ASCII] [cached] \"Date\"\n> \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis has however nothing to do with \"Date\" objects, etc.  Rather it currently\nseems impossible to keep the ALTREP when adding an attribute to an ALTREPed\nobject:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> i6 <- 1:1e6; .Internal(inspect(i6))\n@2b486338 13 INTSXP g0c0 [REF(65535)]  1 : 1000000 (compact)\n> dput(a6 <- `attr<-`(i6, \"foo\", 6L))\nstructure(1:1000000, foo = 6L)\n> .Internal(inspect(a6))\n@7f12e3000010 13 INTSXP g0c7 [REF(1),ATT] (len=1000000, tl=0) 1,2,3,4,5,...\nATTRIB:\n  @2b485650 02 LISTSXP g0c0 [REF(1)] \n    TAG: @27c975f8 01 SYMSXP g0c0 [REF(73)] \"foo\"\n    @2b484f78 13 INTSXP g0c1 [REF(3)] (len=1, tl=0) 6\n> \n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18800] Defining R_NO_REMAP_RMATH and calling Rf_*() results in compiler errors*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18800>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|REOPENED                    |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #12 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nI now *have* committed a slight modification of Suharto's attachment 3432\n   svn rev 87511\nafter the following checks:\n\n- Mikael's small 2 x 2  C compilation &amp; run examples  (comment 0)\n- After patching, do `R-devel CMD INSTALL &lt;pkg&gt;`  for\n  `&lt;pkg&gt;` in  terra OpenMx BayesFactor  Rfast em robustHD\n- use `nm -U -g ...\/src\/nmath\/standalone\/libRmath.a`  and `libRmath.so`\n  and compare (Emacs `M-x ediff-buffer`) the outputs with the outputs before \n  applying the patch and of R 4.4.2 patched\n\nAll looks good to me... but of course there may still be some incongruency.\n\nNotably,  I had already previously committed a version of `src\/nmath\/snorm.c`\n(svn rev 87504) where I had changed a call from `qnorm5(..)`  to `qnorm(..)`.\nI vaguely recall to have seen some such `[dpq]norm*()` calls also among the\nfailing CRAN packages.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1735831473.086139",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "gDCAQ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "*[Bug 18800] Defining R_NO_REMAP_RMATH and calling Rf_*() results in compiler errors*\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18800"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|REOPENED                    |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #12 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI now "
+                            },
+                            {
+                                "type": "text",
+                                "text": "have",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " committed a slight modification of Suharto's attachment 3432\n   svn rev 87511\nafter the following checks:\n\n- Mikael's small 2 x 2  C compilation & run examples  (comment 0)\n- After patching, do "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R-devel CMD INSTALL <pkg>",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  for\n  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "<pkg>",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in  terra OpenMx BayesFactor  Rfast em robustHD\n- use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nm -U -g ...\/src\/nmath\/standalone\/libRmath.a",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "libRmath.so",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n  and compare (Emacs "
+                            },
+                            {
+                                "type": "text",
+                                "text": "M-x ediff-buffer",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") the outputs with the outputs before \n  applying the patch and of R 4.4.2 patched\n\nAll looks good to me... but of course there may still be some incongruency.\n\nNotably,  I had already previously committed a version of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/nmath\/snorm.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n(svn rev 87504) where I had changed a call from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "qnorm5(..)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "qnorm(..)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\nI vaguely recall to have seen some such "
+                            },
+                            {
+                                "type": "text",
+                                "text": "[dpq]norm*()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " calls also among the\nfailing CRAN packages."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

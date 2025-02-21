@@ -1,0 +1,399 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18852] R CMD check does not check return value from <https:\/\/worldtimeapi.org> robustly enough*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18852>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|ASSIGNED                    |CLOSED\n\n--- Comment #3 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nCommitted to R-devel as svn rev 87710. ... with repeated thanks to Michael!",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1739222491.050209",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "fOY",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18852] R CMD check does not check return value from ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/worldtimeapi.org",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " robustly enough",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18852"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|ASSIGNED                    |CLOSED\n\n--- Comment #3 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCommitted to R-devel as svn rev 87710. ... with repeated thanks to Michael!"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18186] Any broken symlinks prevent R CMD build from running, even if .Rbuildignored.*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18186>\n\nIvan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #4 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nThe command line built by `R CMD build` after the patch looks like:\n\n```\ncp -LR --preserve=timestamps path\/to\/file1 path\/to\/file2 ...\n\/tmp\/RtmpXXXXXX\/RbuildXXXXXX\/PackageName\n```\n\nWhat this tells `cp` to do is to follow the path to every file and copy it _by\nname_ into the destination directory. The end result would consist of files\nnamed `file1`, `file2`, and so on, without any other directory tree structure,\nunder `\/tmp\/RtmpXXXXXX\/RbuildXXXXXX\/PackageName\/`. That's how `cp` is indended\nto work. The same is true of `file.copy(src, destdir)`:\n\n```\nsrc &lt;- normalizePath(tempfile(), mustWork=FALSE)\nwriteLines('hello', src)\nsrc # &lt;-- src is an absolute path with three components\n# [1] \"\/tmp\/Rtmp02XpNH\/file32ec7411f08\"\nfile.copy(src, '.') # so let's copy it into the current directory\n# [1] TRUE\nfile.exists(print(basename(src))) # only the last component of the path is used\nas the name\n# [1] \"file32ec7411f08\"\n# [1] TRUE\n```\n\nWhat we need here is a way to preserve directory structure. This is not as easy\nas it looks because this process will need to create the intermediate\ndirectories where the files will reside. [GNU\n`cp`](<https:\/\/www.man7.org\/linux\/man-pages\/man1\/cp.1.html>) has a handy\n`--parents` option, but [POSIX\n`cp`](<https:\/\/pubs.opengroup.org\/onlinepubs\/9799919799\/utilities\/cp.html>) does\nnot. For `file.copy`, the following kludge gets relatively close:\n\n```\n# step 1: create the directories to contain the target files\nallfileparents &lt;- unique(file.path(Tpkg, dirname(allfiles[!exclude])))\nfor (d in allfileparents)\n    dir.create(d, showWarnings = FALSE, recursive = TRUE)\nstopifnot(dir.exists(allfileparents))\n# step 2: put the files into their (now existing) destinations\nstopifnot(file.copy(allfiles[!exclude &amp; !isdir],\n                    file.path(Tpkg, allfiles[!exclude &amp; !isdir]),\n                    copy.date = TRUE))\n```\n\nThis is far from a complete solution:\n\n* It is unclear how to omit directories. `R CMD build` knows to omit, e.g. the\n`.svn` directory, but since its children are present in the recursive file\nlist, the directory is effectively created anyway. Excluding a directory should\npropagate to its children, recursively.\n* Related: any directories must to be omitted from the list of files to copy.\nOtherwise recursive copying tries to copy the same file multiple times, e.g.,\n`.svn\/pristine` and implicitly its every child, but then `.svn\/pristine\/00`\nonce again because it was present in the `dir()` output. In particular, this\ntrips up `cp --parents`, causing it to report \"access denied\" errors instead of\ncreating the files anew.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1739224095.123069",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Tve",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18186] Any broken symlinks prevent R CMD build from running, even if .Rbuildignored.",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18186"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIvan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #4 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe command line built by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R CMD build",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " after the patch looks like:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "cp -LR --preserve=timestamps path\/to\/file1 path\/to\/file2 ...\n\/tmp\/RtmpXXXXXX\/RbuildXXXXXX\/PackageName\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWhat this tells "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cp",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to do is to follow the path to every file and copy it _by\nname_ into the destination directory. The end result would consist of files\nnamed "
+                            },
+                            {
+                                "type": "text",
+                                "text": "file1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "file2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and so on, without any other directory tree structure,\nunder "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/tmp\/RtmpXXXXXX\/RbuildXXXXXX\/PackageName\/",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". That's how "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cp",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is indended\nto work. The same is true of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "file.copy(src, destdir)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "src <- normalizePath(tempfile(), mustWork=FALSE)\nwriteLines('hello', src)\nsrc # <-- src is an absolute path with three components\n# [1] \"\/tmp\/Rtmp02XpNH\/file32ec7411f08\"\nfile.copy(src, '.') # so let's copy it into the current directory\n# [1] TRUE\nfile.exists(print(basename(src))) # only the last component of the path is used\nas the name\n# [1] \"file32ec7411f08\"\n# [1] TRUE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWhat we need here is a way to preserve directory structure. This is not as easy\nas it looks because this process will need to create the intermediate\ndirectories where the files will reside. [GNU\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "cp",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/www.man7.org\/linux\/man-pages\/man1\/cp.1.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") has a handy\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "--parents",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " option, but [POSIX\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "cp",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/pubs.opengroup.org\/onlinepubs\/9799919799\/utilities\/cp.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") does\nnot. For "
+                            },
+                            {
+                                "type": "text",
+                                "text": "file.copy",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", the following kludge gets relatively close:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# step 1: create the directories to contain the target files\nallfileparents <- unique(file.path(Tpkg, dirname(allfiles[!exclude])))\nfor (d in allfileparents)\n    dir.create(d, showWarnings = FALSE, recursive = TRUE)\nstopifnot(dir.exists(allfileparents))\n# step 2: put the files into their (now existing) destinations\nstopifnot(file.copy(allfiles[!exclude & !isdir],\n                    file.path(Tpkg, allfiles[!exclude & !isdir]),\n                    copy.date = TRUE))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis is far from a complete solution:\n\n* It is unclear how to omit directories. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R CMD build",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " knows to omit, e.g. the\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": ".svn",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " directory, but since its children are present in the recursive file\nlist, the directory is effectively created anyway. Excluding a directory should\npropagate to its children, recursively.\n* Related: any directories must to be omitted from the list of files to copy.\nOtherwise recursive copying tries to copy the same file multiple times, e.g.,\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": ".svn\/pristine",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and implicitly its every child, but then "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".svn\/pristine\/00",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nonce again because it was present in the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dir()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " output. In particular, this\ntrips up "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cp --parents",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", causing it to report \"access denied\" errors instead of\ncreating the files anew."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

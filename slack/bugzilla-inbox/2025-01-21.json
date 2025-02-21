@@ -1,0 +1,313 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18841] New: options(show.error.locations = TRUE) sometimes fails*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18841>\n\n            Bug ID: 18841\n           Summary: options(show.error.locations = TRUE) sometimes fails\n           Product: R\n           Version: R 4.4.x\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:murdoch.duncan@gmail.com|murdoch.duncan@gmail.com>\n\nThis is a separate bug from PR#18840, though it was also discussed in\n<https:\/\/stat.ethz.ch\/pipermail\/r-help\/2025-January\/480483.html>.\n\nSourcing this script displays an error without any error location:\n```\noptions(show.error.locations = TRUE)\n\nf &lt;- function() {\n  stop(\"an error\")\n}\nf()\n```\nHere's the display:\n```\n&gt; source(\"~\/temp\/test.R\", keep.source=TRUE)\nError in f() : an error\n```\n\nI have traced the internals.  The function R_GetCurrentSrcref() is called from\nverrorcall_dflt() on errors.c#813 \n\n  PROTECT(srcloc = GetSrcLoc(R_GetCurrentSrcref(skip)));\n\nin current R-devel.  It returns the symbol R_InBCInterpreter, which is not a\nsrcref, rather an indicator that we are in the bytecode interpreter.  However,\ncalling R_findBCInterpreterSrcref() which should produce a srcref produces a\nNULL, so no location is reported.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737459646.916419",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "VW0c",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18841] New: options(show.error.locations = TRUE) sometimes fails",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18841"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18841\n           Summary: options(show.error.locations = TRUE) sometimes fails\n           Product: R\n           Version: R 4.4.x\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:murdoch.duncan@gmail.com",
+                                "text": "murdoch.duncan@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThis is a separate bug from PR#18840, though it was also discussed in\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-help\/2025-January\/480483.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nSourcing this script displays an error without any error location:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "options(show.error.locations = TRUE)\n\nf <- function() {\n  stop(\"an error\")\n}\nf()\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Here's the display:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> source(\"~\/temp\/test.R\", keep.source=TRUE)\nError in f() : an error\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI have traced the internals.  The function R_GetCurrentSrcref() is called from\nverrorcall_dflt() on errors.c#813 \n\n  PROTECT(srcloc = GetSrcLoc(R_GetCurrentSrcref(skip)));\n\nin current R-devel.  It returns the symbol R_InBCInterpreter, which is not a\nsrcref, rather an indicator that we are in the bytecode interpreter.  However,\ncalling R_findBCInterpreterSrcref() which should produce a srcref produces a\nNULL, so no location is reported."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18841] options(show.error.locations = TRUE) sometimes fails*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18841>\n\n--- Comment #1 from Duncan Murdoch (<mailto:murdoch.duncan@gmail.com|murdoch.duncan@gmail.com>) ---\nCreated attachment 3441\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3441&amp;action=edit>\nPatch to fix issue\n\nThe problem was with the bytecode marker.  My first attempt didn't fix it; this\none does by fixing the API function R_GetCurrentSrcref.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737476479.737829",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "hZy",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18841] options(show.error.locations = TRUE) sometimes fails",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18841"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Duncan Murdoch ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:murdoch.duncan@gmail.com",
+                                "text": "murdoch.duncan@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3441\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3441&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3441&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch to fix issue\n\nThe problem was with the bytecode marker.  My first attempt didn't fix it; this\none does by fixing the API function R_GetCurrentSrcref."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18841] options(show.error.locations = TRUE) sometimes fails*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18841>\n\nDuncan Murdoch (<mailto:murdoch.duncan@gmail.com|murdoch.duncan@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3441|0                           |1\n        is obsolete|                            |\n\n--- Comment #2 from Duncan Murdoch (<mailto:murdoch.duncan@gmail.com|murdoch.duncan@gmail.com>) ---\nCreated attachment 3442\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3442&amp;action=edit>\nImproved fix, handles both this issue and PR#18840\n\nThis patch consolidates the patches for 18840 and 18841 into a single patch\nthat fixes both, since both were caused by the same underlying issue.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737479763.370719",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Xl+",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18841] options(show.error.locations = TRUE) sometimes fails",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18841"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nDuncan Murdoch ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:murdoch.duncan@gmail.com",
+                                "text": "murdoch.duncan@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3441|0                           |1\n        is obsolete|                            |\n\n--- Comment #2 from Duncan Murdoch ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:murdoch.duncan@gmail.com",
+                                "text": "murdoch.duncan@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3442\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3442&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3442&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nImproved fix, handles both this issue and PR#18840\n\nThis patch consolidates the patches for 18840 and 18841 into a single patch\nthat fixes both, since both were caused by the same underlying issue."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18840] traceback() should display error location if known*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18840>\n\nDuncan Murdoch (<mailto:murdoch.duncan@gmail.com|murdoch.duncan@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3440|0                           |1\n        is obsolete|                            |\n\n--- Comment #2 from Duncan Murdoch (<mailto:murdoch.duncan@gmail.com|murdoch.duncan@gmail.com>) ---\nCreated attachment 3443\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3443&amp;action=edit>\nPatch handling both this issue and PR#18841.\n\nThis bug and PR#18841 are related, so I have consolidated the patch into a\nsingle patch.  But Bugzilla doesn't let me delete an attachment, so I've\nattached the same patch to both issues.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737480044.437729",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "jQ03",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18840] traceback() should display error location if known",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18840"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nDuncan Murdoch ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:murdoch.duncan@gmail.com",
+                                "text": "murdoch.duncan@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3440|0                           |1\n        is obsolete|                            |\n\n--- Comment #2 from Duncan Murdoch ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:murdoch.duncan@gmail.com",
+                                "text": "murdoch.duncan@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3443\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3443&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3443&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch handling both this issue and PR#18841.\n\nThis bug and PR#18841 are related, so I have consolidated the patch into a\nsingle patch.  But Bugzilla doesn't let me delete an attachment, so I've\nattached the same patch to both issues."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

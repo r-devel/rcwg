@@ -1,0 +1,1079 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 15027] max.print is ignored for matrix  *and* other array headers*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=15027>\n\n--- Comment #18 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nThank you, Sherry!\nThis is good now, indeed, and I have committed (small modifications, white\nspace mostly, your indentations were partly wrong, ..) it to \nR-devel svn rev 87761, such that it is used already in CRAN package checks (for\nR-devel) and will make upcoming R 4.5.0  (~ mid April).\n\nOTOH, when rereading previous discussions and thoughts, and looking at some\nexamples where we now omit the only slice of an array (and print no data at\nall),\nI've come up with this (current behavior, i.e., R-devel rev &gt;= 87761) somewhat\nunsatisfying behaviour:\n```\n&gt; print(array(1:1200, dim = c(3,400)), max = 16)\n     [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13] [,14]\n[,15] [,16]\n[1,]    1    4    7   10   13   16   19   22   25    28    31    34    37    40\n   43    46\n [ reached 'max' \/ getOption(\"max.print\") -- omitted 2 rows and 384 columns ]\n\n&gt; print(array(1:1200, dim = c(3,400, 1)), max = 16)\n [ reached 'max' \/ getOption(\"max.print\") -- omitted 1 slice ] \n\n```\nunsatisfying indeed, as in the matrix case we *had* agreed that we should show\n*something* in any case (well, not in case `length(&lt;array&gt;) == 0`, of course),\nand in the above case, we should rather print something quite similar to the\nmatrix case.\n\nHence, I'll keep this PR open for now and am waiting for further tweeks.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1740047372.137259",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "WUPIK",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "*[Bug 15027] max.print is ignored for matrix  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "and",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " other array headers*\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=15027"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #18 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you, Sherry!\nThis is good now, indeed, and I have committed (small modifications, white\nspace mostly, your indentations were partly wrong, ..) it to \nR-devel svn rev 87761, such that it is used already in CRAN package checks (for\nR-devel) and will make upcoming R 4.5.0  (~ mid April).\n\nOTOH, when rereading previous discussions and thoughts, and looking at some\nexamples where we now omit the only slice of an array (and print no data at\nall),\nI've come up with this (current behavior, i.e., R-devel rev >= 87761) somewhat\nunsatisfying behaviour:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> print(array(1:1200, dim = c(3,400)), max = 16)\n     [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13] [,14]\n[,15] [,16]\n[1,]    1    4    7   10   13   16   19   22   25    28    31    34    37    40\n   43    46\n [ reached 'max' \/ getOption(\"max.print\") -- omitted 2 rows and 384 columns ]\n\n> print(array(1:1200, dim = c(3,400, 1)), max = 16)\n [ reached 'max' \/ getOption(\"max.print\") -- omitted 1 slice ] \n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "unsatisfying indeed, as in the matrix case we "
+                            },
+                            {
+                                "type": "text",
+                                "text": "had",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " agreed that we should show\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "something",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in any case (well, not in case "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length(<array>) == 0",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", of course),\nand in the above case, we should rather print something quite similar to the\nmatrix case.\n\nHence, I'll keep this PR open for now and am waiting for further tweeks."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18861] New: drop.terms fails to drop RHS variable when the formula only has on variable on the RHS*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18861>\n\n            Bug ID: 18861\n           Summary: drop.terms fails to drop RHS variable when the formula\n                    only has on variable on the RHS\n           Product: R\n           Version: R 4.4.x\n          Hardware: arm64\/M1\n                OS: macOS\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Analyses\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:benediktsommer92@gmail.com|benediktsommer92@gmail.com>\n\nDropping a covariate from a formula with only a single covariate fails\n\n```\ntt &lt;- terms(y ~ 1 + w1)\ndrop.terms(tt, 1)\n```\n\nbut retrieving terms from a formula with no specified covariates works.\n\n```\nterms(y ~ 1)\n```\n\nThis is the output that I would expect from the above expression.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1740051362.027689",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "euim",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18861] New: drop.terms fails to drop RHS variable when the formula only has on variable on the RHS",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18861"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18861\n           Summary: drop.terms fails to drop RHS variable when the formula\n                    only has on variable on the RHS\n           Product: R\n           Version: R 4.4.x\n          Hardware: arm64\/M1\n                OS: macOS\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Analyses\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:benediktsommer92@gmail.com",
+                                "text": "benediktsommer92@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nDropping a covariate from a formula with only a single covariate fails\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "tt <- terms(y ~ 1 + w1)\ndrop.terms(tt, 1)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nbut retrieving terms from a formula with no specified covariates works.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "terms(y ~ 1)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis is the output that I would expect from the above expression."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18861] drop.terms fails to drop RHS variable when the formula only has on variable on the RHS*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18861>\n\nHeather Turner (<mailto:ht@heatherturner.net|ht@heatherturner.net>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ht@heatherturner.net\n\n--- Comment #1 from Heather Turner (<mailto:ht@heatherturner.net|ht@heatherturner.net>) ---\nCreated attachment 3456\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3456&amp;action=edit>\ninclude intercept attribute in terms to be reformulated\n\nI think this can be fixed by explicitly including the intercept (or lack of\none) in the terms to be reformulated as in the attached diff.\n\nNote that `drop.terms` does not keep the response by default, so we would like\n\n```\ntt &lt;- terms(y ~ 1 + w1)\ndrop.terms(tt, 1)\n```\n\nto be the same as \n\n```\nterms(~ 1)\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1740057930.430839",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "xA4aJ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18861] drop.terms fails to drop RHS variable when the formula only has on variable on the RHS",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18861"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nHeather Turner ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ht@heatherturner.net",
+                                "text": "ht@heatherturner.net"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ht@heatherturner.net\n\n--- Comment #1 from Heather Turner ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ht@heatherturner.net",
+                                "text": "ht@heatherturner.net"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3456\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3456&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3456&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ninclude intercept attribute in terms to be reformulated\n\nI think this can be fixed by explicitly including the intercept (or lack of\none) in the terms to be reformulated as in the attached diff.\n\nNote that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "drop.terms",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does not keep the response by default, so we would like\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "tt <- terms(y ~ 1 + w1)\ndrop.terms(tt, 1)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nto be the same as \n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "terms(~ 1)\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18850] Illegal cflag in protobuf.pc*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18850>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #1 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nThis is from abseil-cpp, that project uses -Wnon-virtual-dtor and in its own\nheaders it selectively disables the warning where needed. It is, however, a\npractice that doesn't seem to scale for larger projects using more than just\nabseil libraries, turning on this warning has global effect, and other\nsoftwware\/libraries may be tuned to this warning being disabled, as it is by\ndefault.\n\nThe warning is somewhat controversial: in some cases, a non-virtual destructor\nin the base class is ok. I've removed it from the pkg-config file (when\nbuilding Rtools).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1740061239.893549",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "3MB",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18850] Illegal cflag in protobuf.pc",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18850"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #1 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThis is from abseil-cpp, that project uses -Wnon-virtual-dtor and in its own\nheaders it selectively disables the warning where needed. It is, however, a\npractice that doesn't seem to scale for larger projects using more than just\nabseil libraries, turning on this warning has global effect, and other\nsoftwware\/libraries may be tuned to this warning being disabled, as it is by\ndefault.\n\nThe warning is somewhat controversial: in some cases, a non-virtual destructor\nin the base class is ok. I've removed it from the pkg-config file (when\nbuilding Rtools)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18848] libpq missing ldap support*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18848>\n\n--- Comment #7 from Jeroen Ooms (<mailto:jeroenooms@gmail.com|jeroenooms@gmail.com>) ---\nI'm really sorry but they just released yet another version to address a\nregression from their security fix :\/\n<https:\/\/www.postgresql.org\/docs\/13\/release-13-20.html>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1740061785.597979",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "0PET9",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18848] libpq missing ldap support",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18848"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #7 from Jeroen Ooms ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jeroenooms@gmail.com",
+                                "text": "jeroenooms@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI'm really sorry but they just released yet another version to address a\nregression from their security fix :\/\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/www.postgresql.org\/docs\/13\/release-13-20.html"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18848] libpq missing ldap support*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18848>\n\n--- Comment #8 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\n(In reply to Jeroen Ooms from comment #7)\nThanks for letting me know. Now updated to 13.20.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1740065536.043769",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Pxe",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18848] libpq missing ldap support",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18848"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #8 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Jeroen Ooms from comment #7)\nThanks for letting me know. Now updated to 13.20."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 15027] max.print is ignored for matrix  *and* other array headers*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=15027>\n\n--- Comment #19 from Sherry Zhang (<mailto:huizezhangsh@gmail.com|huizezhangsh@gmail.com>) ---\nCreated attachment 3457\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3457&amp;action=edit>\nfix the array version\n\nThe array print should now align with the matrix print in the example\n`print(array(1:1200, dim = c(3,400, 1)), max = 16)`.\n\nThere is also a test for this in `print-tests.R`:\n\n```\nprint(array(dim = c(2,2,1)), max = 1)\n, , 1\n\n     [,1]\n[1,]   NA\n\n [ reached 'max' \/ getOption(\"max.print\") -- omitted 1 row 1 column ]\n\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1740071356.055489",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "q\/5",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "*[Bug 15027] max.print is ignored for matrix  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "and",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " other array headers*\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=15027"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #19 from Sherry Zhang ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:huizezhangsh@gmail.com",
+                                "text": "huizezhangsh@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3457\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3457&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3457&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nfix the array version\n\nThe array print should now align with the matrix print in the example\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "print(array(1:1200, dim = c(3,400, 1)), max = 16)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nThere is also a test for this in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "print-tests.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "print(array(dim = c(2,2,1)), max = 1)\n, , 1\n\n     [,1]\n[1,]   NA\n\n [ reached 'max' \/ getOption(\"max.print\") -- omitted 1 row 1 column ]\n\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18796] tapply() fails to combine attributes correctly (difftime)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18796>\n\n--- Comment #4 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\n&gt; which necessarily drops classes.\n\nThe proposed patch avoids that by using `c()` instead of `unlist()`:\n\n<https:\/\/github.com\/r-devel\/r-svn\/pull\/183\/files>\n\nThe question is whether that's a substantially better default, or whether the\ncaller should do that on their own with `simplify=FALSE`.\n\n(I haven't added the patch here yet since I haven't given it enough testing)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1740071610.912539",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "SVLh",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18796] tapply() fails to combine attributes correctly (difftime)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18796"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "which necessarily drops classes."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe proposed patch avoids that by using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "c()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " instead of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "unlist()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/pull\/183\/files"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThe question is whether that's a substantially better default, or whether the\ncaller should do that on their own with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "simplify=FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n(I haven't added the patch here yet since I haven't given it enough testing)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18587] Allow packages to supply alternate communication backends for the `parallel` package*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18587>\n\nLuke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #21 from Luke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) ---\n(In reply to Charlie Gao from comment #19)\n&gt; I'm just checking in on this one to see whether the registration function\n&gt; and documentation are fine to be committed for R4.5.\n\nI have now committer the documentation changes to R-devel in r87768. Thanks for\nthe contributions.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1740081654.618449",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "dx2C",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18587] Allow packages to supply alternate communication backends for the ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "parallel",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " package",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18587"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nLuke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #21 from Luke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Charlie Gao from comment #19)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I'm just checking in on this one to see whether the registration function\nand documentation are fine to be committed for R4.5."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI have now committer the documentation changes to R-devel in r87768. Thanks for\nthe contributions."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18855] parseLatex() makes several errors in parsing*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18855>\n\n--- Comment #4 from Duncan Murdoch (<mailto:murdoch.duncan@gmail.com|murdoch.duncan@gmail.com>) ---\nCreated attachment 3458\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3458&amp;action=edit>\nStop parsing after \\end{document}\n\nThis fixes issue 6.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1740084291.033969",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "DJSa",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18855] parseLatex() makes several errors in parsing",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18855"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Duncan Murdoch ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:murdoch.duncan@gmail.com",
+                                "text": "murdoch.duncan@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3458\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3458&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3458&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nStop parsing after \\end{document}\n\nThis fixes issue 6."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 15027] max.print is ignored for matrix  *and* other array headers*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=15027>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|ASSIGNED                    |CLOSED\n\n--- Comment #20 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\n(In reply to Sherry Zhang from comment #19)\n&gt; Created attachment 3457   ...\n\nVery good!  Thank you, your speed is awesome!   \n==&gt; I'm closing the issue now as fixed.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1740084302.291669",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "6VhYu",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "*[Bug 15027] max.print is ignored for matrix  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "and",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " other array headers*\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=15027"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|ASSIGNED                    |CLOSED\n\n--- Comment #20 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Sherry Zhang from comment #19)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Created attachment 3457   ..."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nVery good!  Thank you, your speed is awesome!   \n==> I'm closing the issue now as fixed."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18862] New: parallel: Add type=\"RPSOCK\" for makeCluster() [parallelly::makeClusterPSOCK()]*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18862>\n\n            Bug ID: 18862\n           Summary: parallel: Add type=\"RPSOCK\" for makeCluster()\n                    [parallelly::makeClusterPSOCK()]\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:henrikb@braju.com|henrikb@braju.com>\n\nCreated attachment 3459\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3459&amp;action=edit>\nAdd support type = \"RPSOCK\"\n\nIn the same vein as PR#18587, where `type = \"MIRAI\"` was just I added, I'd like\nto add support for:\n\n```\ncl &lt;- parallel::makeCluster(n, type = \"RPSOCK\", ...)\n```\n\nwhich will set up a \"Rich\" PSOCK cluster using `parallelly::makeClusterPSOCK(n,\n...)`.\n\nThis is a two-line patch, analogue to the MIRAI patch.\n\n\nThis type of cluster is backward-compatible with the PSOCK cluster. The main\nbenefits are:\n\n* Non-privileged users can set up remote parallel workers over SSH (e.g. no\nneed set up port forwarding in firewalls, no need to know local or public IP\nnumber, etc.)\n* Supports `autoStop = TRUE`, to automatically tear down a cluster on garbage\ncollection\n* Supports checking if (locally and remotely) parallel workers are still alive\n* Supports restarting terminated workers\n* Supports killing rough (locally or remotely) parallel workers\n* Validates cluster on setup by collecting useful R process information from\nall nodes (workers) when launched. This information is presented by `print()`\nand in error messages to help troubleshooting\n* Prevents overuse of the host by protecting against launching more workers\nthan the host supports\n* Supports specifying R library paths for each worker on setup\n* Supports specifying environment variables on setup\n* Supports specifying custom startup R code and arguments on setup\n* `useXDR = FALSE` by default, which speeds up exports ~10-15%\n\n\nQuality and validation: The RPSOCK cluster has been in use for ~10 years,\npartially via the future framework, where it is the default parallelization\nmethod and has therefore gained a lot of CPU mileage and end-user testing. As a\nreference, the 'parallelly' package sees ~280,000 download\/month from the\n'0-Cloud' CRAN mirror alone. I consider it extremely well tested.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1740089702.357819",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "9kXpN",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18862] New: parallel: Add type=\"RPSOCK\" for makeCluster() [parallelly::makeClusterPSOCK()]",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18862"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18862\n           Summary: parallel: Add type=\"RPSOCK\" for makeCluster()\n                    [parallelly::makeClusterPSOCK()]\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:henrikb@braju.com",
+                                "text": "henrikb@braju.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3459\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3459&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3459&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nAdd support type = \"RPSOCK\"\n\nIn the same vein as PR#18587, where "
+                            },
+                            {
+                                "type": "text",
+                                "text": "type = \"MIRAI\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " was just I added, I'd like\nto add support for:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "cl <- parallel::makeCluster(n, type = \"RPSOCK\", ...)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nwhich will set up a \"Rich\" PSOCK cluster using `parallelly::makeClusterPSOCK(n,\n...)`.\n\nThis is a two-line patch, analogue to the MIRAI patch.\n\n\n\nThis type of cluster is backward-compatible with the PSOCK cluster. The main\nbenefits are:\n\n* Non-privileged users can set up remote parallel workers over SSH (e.g. no\nneed set up port forwarding in firewalls, no need to know local or public IP\nnumber, etc.)\n* Supports "
+                            },
+                            {
+                                "type": "text",
+                                "text": "autoStop = TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", to automatically tear down a cluster on garbage\ncollection\n* Supports checking if (locally and remotely) parallel workers are still alive\n* Supports restarting terminated workers\n* Supports killing rough (locally or remotely) parallel workers\n* Validates cluster on setup by collecting useful R process information from\nall nodes (workers) when launched. This information is presented by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "print()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nand in error messages to help troubleshooting\n* Prevents overuse of the host by protecting against launching more workers\nthan the host supports\n* Supports specifying R library paths for each worker on setup\n* Supports specifying environment variables on setup\n* Supports specifying custom startup R code and arguments on setup\n* "
+                            },
+                            {
+                                "type": "text",
+                                "text": "useXDR = FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " by default, which speeds up exports ~10-15%\n\n\n\nQuality and validation: The RPSOCK cluster has been in use for ~10 years,\npartially via the future framework, where it is the default parallelization\nmethod and has therefore gained a lot of CPU mileage and end-user testing. As a\nreference, the 'parallelly' package sees ~280,000 download\/month from the\n'0-Cloud' CRAN mirror alone. I consider it extremely well tested."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

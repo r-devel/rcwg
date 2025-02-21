@@ -1,0 +1,100 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18812] unz opens a non-blocking connection by default*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18812>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n                 CC|                            |tomas.kalibera@gmail.com\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #1 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nThanks for the report. I agree this is a bug.\n\nunz() opens only files and works in a blocking manner, similarly to gzfile()\nand other *file() connections for accessing data in compressed files. The R\nprocess will be blocked when these connections wait for data to be read on\ninput (from a file), and any user R code will have to wait for data to be\ndecompressed when reading.\n\nThis report shows that when reading from a file that doesn't end in a newline\n(so has an incomplete final line), one doesn't get any data.\n\n&gt; readLines(unz(\"hello.zip\", \"hello.txt\"))\ncharacter(0)\n\nWhat should happen, and happens now in R-devel, is:\n\n&gt; readLines(unz(\"hello.zip\", \"hello.txt\"))\n[1] \"hello\"\nWarning message:\nIn readLines(unz(\"hello.zip\", \"hello.txt\")) :\n  incomplete final line found on 'hello.zip:hello.txt'\n\nThe underlying problem is that internally the \"unz\" connection in R was by\nerror left flagged as non-blocking, and then readLines() would use a pushback\ninstead of returning a partial line with a warning. This was fixed by making\n\"unz\" connections flagged as blocking, which matches the behavior of gzfile()\nand other *file() connections for handling compressed files.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1736950899.501179",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "h\/iG",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18812] unz opens a non-blocking connection by default",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18812"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n                 CC|                            |tomas.kalibera@gmail.com\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #1 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for the report. I agree this is a bug.\n\nunz() opens only files and works in a blocking manner, similarly to gzfile()\nand other *file() connections for accessing data in compressed files. The R\nprocess will be blocked when these connections wait for data to be read on\ninput (from a file), and any user R code will have to wait for data to be\ndecompressed when reading.\n\nThis report shows that when reading from a file that doesn't end in a newline\n(so has an incomplete final line), one doesn't get any data.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "readLines(unz(\"hello.zip\", \"hello.txt\"))"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "character(0)\n\nWhat should happen, and happens now in R-devel, is:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "readLines(unz(\"hello.zip\", \"hello.txt\"))"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[1] \"hello\"\nWarning message:\nIn readLines(unz(\"hello.zip\", \"hello.txt\")) :\n  incomplete final line found on 'hello.zip:hello.txt'\n\nThe underlying problem is that internally the \"unz\" connection in R was by\nerror left flagged as non-blocking, and then readLines() would use a pushback\ninstead of returning a partial line with a warning. This was fixed by making\n\"unz\" connections flagged as blocking, which matches the behavior of gzfile()\nand other *file() connections for handling compressed files."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

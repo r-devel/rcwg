@@ -1,0 +1,520 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350>\n\nDirk Eddelbuettel (<mailto:edd@debian.org|edd@debian.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3425|0                           |1\n        is obsolete|                            |\n   Attachment #3426|0                           |1\n        is obsolete|                            |\n\n--- Comment #14 from Dirk Eddelbuettel (<mailto:edd@debian.org|edd@debian.org>) ---\nCreated attachment 3429\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3429&amp;action=edit>\nAdditional patch for #17350 covering give '%OS' format\n\nWe added a new microbug here.  This just came up in a Rcpp PR, as CI for Rcpp\nruns against R-devel (and it updates the container weekly).  \n\nThe bug is \n\n```\n----- FAILED[data]: test_date.R&lt;196--198&gt;\n call| expect_equal(Datetime_format(d, \"%Y\/%m\/%d %H:%M:%S\"), format(d, \n call| --&gt;    \"%Y\/%m\/%d %H:%M:%OS\"), info = \"Datetime.formating.given.format\")\n diff| Expected '2016-12-13 14:15:16.123456', got '2016\/12\/13 14:15:16.123456'\n info| Datetime.formating.given.format\n```\n\nHere `Datetime_format()` is a Rcpp-on-the-spot compiled function, it creates\nthe given datetime as requested:\n\n\n```\n&gt; Datetime_format(d, \"%Y\/%m\/%d %H:%M:%OS\")   \n[1] \"2016\/12\/13 14:15:16.123456\"\n&gt; format(d, \"%Y\/%m\/%d %H:%M:%OS\")           # ignore given format string\n[1] \"2016-12-13 14:15:16.123456\"\n&gt; format(d, \"%Y\/%m\/%d %H:%M:%OS6\")          # unless '%OS&lt;n&gt;' given\n[1] \"2016\/12\/13 14:15:16.123456\"\n&gt; \n```\n\nThis can be fixed with an additional case in the final format-building if\nstatement:\n\n```\nIndex: src\/library\/base\/R\/datetime.R\n===================================================================\n--- src\/library\/base\/R\/datetime.R       (revision 87369)\n+++ src\/library\/base\/R\/datetime.R       (working copy)\n@@ -395,10 +395,11 @@\n         } else np &lt;- 0L\n         ## need list `[` method here to get 1:3 ~ {sec, min, hour}:\n         times &lt;- unlist(`names&lt;-`(unclass(x)[1L:3L], NULL))[f0]\n-       format[f0] &lt;-\n-        if(all(times[is.finite(times)] == 0)) \"%Y-%m-%d\"\n-        else if(np == 0L) \"%Y-%m-%d %H:%M:%S\"\n-        else paste0(\"%Y-%m-%d %H:%M:%OS\", np)\n+        format[f0] &lt;-\n+            if(all(times[is.finite(times)] == 0)) \"%Y-%m-%d\"\n+            else if(np == 0L) \"%Y-%m-%d %H:%M:%S\"\n+            else if(grepl(\"%OS$\", format)) paste0(format, np)\n+            else paste0(\"%Y-%m-%d %H:%M:%OS\", np)\n     }\n     .Internal(format.POSIXlt(x, format, usetz))\n }\n```\n\nwhich I attached above.  Martin, can you take another look please?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732541578.329059",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "bRG",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nDirk Eddelbuettel ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:edd@debian.org",
+                                "text": "edd@debian.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3425|0                           |1\n        is obsolete|                            |\n   Attachment #3426|0                           |1\n        is obsolete|                            |\n\n--- Comment #14 from Dirk Eddelbuettel ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:edd@debian.org",
+                                "text": "edd@debian.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3429\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3429&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3429&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nAdditional patch for #17350 covering give '%OS' format\n\nWe added a new microbug here.  This just came up in a Rcpp PR, as CI for Rcpp\nruns against R-devel (and it updates the container weekly).  \n\nThe bug is \n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "----- FAILED[data]: test_date.R<196--198>\n call| expect_equal(Datetime_format(d, \"%Y\/%m\/%d %H:%M:%S\"), format(d, \n call| -->    \"%Y\/%m\/%d %H:%M:%OS\"), info = \"Datetime.formating.given.format\")\n diff| Expected '2016-12-13 14:15:16.123456', got '2016\/12\/13 14:15:16.123456'\n info| Datetime.formating.given.format\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nHere "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Datetime_format()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is a Rcpp-on-the-spot compiled function, it creates\nthe given datetime as requested:\n\n\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> Datetime_format(d, \"%Y\/%m\/%d %H:%M:%OS\")   \n[1] \"2016\/12\/13 14:15:16.123456\"\n> format(d, \"%Y\/%m\/%d %H:%M:%OS\")           # ignore given format string\n[1] \"2016-12-13 14:15:16.123456\"\n> format(d, \"%Y\/%m\/%d %H:%M:%OS6\")          # unless '%OS<n>' given\n[1] \"2016\/12\/13 14:15:16.123456\"\n> \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis can be fixed with an additional case in the final format-building if\nstatement:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/base\/R\/datetime.R\n===================================================================\n--- src\/library\/base\/R\/datetime.R       (revision 87369)\n+++ src\/library\/base\/R\/datetime.R       (working copy)\n@@ -395,10 +395,11 @@\n         } else np <- 0L\n         ## need list `[` method here to get 1:3 ~ {sec, min, hour}:\n         times <- unlist(`names<-`(unclass(x)[1L:3L], NULL))[f0]\n-       format[f0] <-\n-        if(all(times[is.finite(times)] == 0)) \"%Y-%m-%d\"\n-        else if(np == 0L) \"%Y-%m-%d %H:%M:%S\"\n-        else paste0(\"%Y-%m-%d %H:%M:%OS\", np)\n+        format[f0] <-\n+            if(all(times[is.finite(times)] == 0)) \"%Y-%m-%d\"\n+            else if(np == 0L) \"%Y-%m-%d %H:%M:%S\"\n+            else if(grepl(\"%OS$\", format)) paste0(format, np)\n+            else paste0(\"%Y-%m-%d %H:%M:%OS\", np)\n     }\n     .Internal(format.POSIXlt(x, format, usetz))\n }\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nwhich I attached above.  Martin, can you take another look please?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350>\n\n--- Comment #15 from Dirk Eddelbuettel (<mailto:edd@debian.org|edd@debian.org>) ---\nActually the lines\n\n+            else if(np == 0L) \"%Y-%m-%d %H:%M:%S\"\n+            else if(grepl(\"%OS$\", format)) paste0(format, np)\n\ncould possibly interact as well.  Maybe we want to assign the given format (if\nthe grepl is true) to a local variable and use that:\n\n```\ndfltfmt &lt;- if (grepl(\"%OS$\", format)) format else \"%Y-%m-%d %H:%M:%S\"\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732542693.589359",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "m3Sv",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #15 from Dirk Eddelbuettel ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:edd@debian.org",
+                                "text": "edd@debian.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nActually the lines\n\n+            else if(np == 0L) \"%Y-%m-%d %H:%M:%S\"\n+            else if(grepl(\"%OS$\", format)) paste0(format, np)\n\ncould possibly interact as well.  Maybe we want to assign the given format (if\nthe grepl is true) to a local variable and use that:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "dfltfmt <- if (grepl(\"%OS$\", format)) format else \"%Y-%m-%d %H:%M:%S\"\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|FIXED                       |---\n             Status|CLOSED                      |REOPENED\n\n--- Comment #16 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\n(In reply to Dirk Eddelbuettel from comment #14 and #15)\n\nActually, it is *worse*.\nNote that you never looked at cases where format was of length &gt; 1, notably in\nsituations such as\n```\nform &lt;- c(\"%Y-%m-%d\", \"\", \"%Y\/%m\/%d %H:%M:%OS\", \n          \"\", \"%H:%M:%OS\", \"%H:%M:%OS1\", %d. %m.%Y, %H:%M:%OS\")\n```\netc etc ... where I think both original (say R 4.4.2), nor any patch we've had\ntill now  would work correctly.\nThe `format[f0] &lt;- ..` has tried to somehow work along those lines.\n\nOTOH, I wonder if this was ever a good idea:\n\nThe whole *purpose* and concept of the `format()` generic has been to format\nnumeric-alike vectors **uniformly**  as opposed to, e.g.,  `as.character()`.\n\nI do wonder if we should not consider taking a long step back and\n**require** `format` to be simple string, i.e., of length one.\n\nWould that break code \"out there\" ??",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732553378.444629",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "V65",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|FIXED                       |---\n             Status|CLOSED                      |REOPENED\n\n--- Comment #16 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Dirk Eddelbuettel from comment #14 and #15)\n\nActually, it is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "worse",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\nNote that you never looked at cases where format was of length > 1, notably in\nsituations such as"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "form <- c(\"%Y-%m-%d\", \"\", \"%Y\/%m\/%d %H:%M:%OS\", \n          \"\", \"%H:%M:%OS\", \"%H:%M:%OS1\", %d. %m.%Y, %H:%M:%OS\")\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "etc etc ... where I think both original (say R 4.4.2), nor any patch we've had\ntill now  would work correctly.\nThe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format[f0] <- ..",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has tried to somehow work along those lines.\n\nOTOH, I wonder if this was ever a good idea:\n\nThe whole "
+                            },
+                            {
+                                "type": "text",
+                                "text": "purpose",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and concept of the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " generic has been to format\nnumeric-alike vectors **uniformly**  as opposed to, e.g.,  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.character()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nI do wonder if we should not consider taking a long step back and\n**require** "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to be simple string, i.e., of length one.\n\nWould that break code \"out there\" ??"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350>\n\n--- Comment #17 from Dirk Eddelbuettel (<mailto:edd@debian.org|edd@debian.org>) ---\nI noticed that and pointed it out to Heather: the current implementation is\n'doubly vectorized'.  Both the POSIXlt argument and the format string can be\nvectors. When both are given recycling is used.  Thats\n\nOverall, simplifcation generally seems fine to me, but it may break _some_ code\nout there as you surmise.  Time will tell. \n\nAs for the narrower bug discovered today, what we committed broke a test for\nRcpp, I have since changed that test in Rcpp to use a `%OS&lt;n&gt;` string instead\nso our tests under R-devel pass again.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732554275.743139",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "eNP0T",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #17 from Dirk Eddelbuettel ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:edd@debian.org",
+                                "text": "edd@debian.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI noticed that and pointed it out to Heather: the current implementation is\n'doubly vectorized'.  Both the POSIXlt argument and the format string can be\nvectors. When both are given recycling is used.  Thats\n\nOverall, simplifcation generally seems fine to me, but it may break "
+                            },
+                            {
+                                "type": "text",
+                                "text": "some",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " code\nout there as you surmise.  Time will tell. \n\nAs for the narrower bug discovered today, what we committed broke a test for\nRcpp, I have since changed that test in Rcpp to use a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "%OS<n>",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " string instead\nso our tests under R-devel pass again."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350>\n\n--- Comment #18 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\nShould the behaviour consistent between the default format and formats with\n\"%OS\"? As mentioned in Comment 6, that `%OS` not followed by digit on output\nuses exactly `getOption(\"digits.secs\")` or 0 digits, is as documented\npreviously. The case is handled in the C code.\n\nEven if such consistency is desired, if a format with \"%OS\" is specified,\nreplacing with `\"%Y-%m-$d\"` is obviously wrong. The test `grepl(\"%OS$\",\nformat)` is not enough because `%OS` is not necessarily at the end of the\nstring.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732555575.020949",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "aOkpr",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #18 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nShould the behaviour consistent between the default format and formats with\n\"%OS\"? As mentioned in Comment 6, that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "%OS",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " not followed by digit on output\nuses exactly "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getOption(\"digits.secs\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or 0 digits, is as documented\npreviously. The case is handled in the C code.\n\nEven if such consistency is desired, if a format with \"%OS\" is specified,\nreplacing with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"%Y-%m-$d\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is obviously wrong. The test `grepl(\"%OS$\",\nformat)` is not enough because "
+                            },
+                            {
+                                "type": "text",
+                                "text": "%OS",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is not necessarily at the end of the\nstring."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,572 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350>\n\n--- Comment #25 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nSorry, but I think you are wrong: It is perfect. \n`\"%OS&lt;n&gt;\"` will be obeyed strictly, *everything* else (as was discussed here\nand in the R contributor's GH issue I think), notably setting `digits` -- you\ncan do that directly for quite a few years now, see code below --\nis to behave the same as elsewhere in R: unnecessary trailing zeros are *NOT*\n\"allowed\".\n\nI think this is also visible in the updated (R-devel only) help page on\n`?strftime` aka `?format.POSIXlt`\nhere  <https:\/\/stat.ethz.ch\/R-manual\/R-devel\/library\/base\/html\/strptime.html>\n\nSee here\n```\nz6 &lt;- as.POSIXlt(         paste0(\"2009-08-03 12:01:59.\", c(\"0001\", \"101\",\n\"201\", \"123456\")))\nz5 &lt;- as.POSIXlt(         paste0(\"2009-08-03 12:01:59.\", c(\"0001\", \"10110\",\n\"201000\", \"301010\")))\nidentical( z5, as.POSIXlt(paste0(\"2009-08-03 12:01:59.\", c(\"0001\", \"1011\", \n\"201\",    \"30101\" ))) )\n\nformD &lt;- function(dt) t(cbind(sapply(setNames(1:6, paste(\"digits =\", 1:6)),\n                                   function(d) format(dt, digits = d)),\n                              OS6 = format(dt, format = \"%F %R:%OS6\")))\n\nformD(z5) |&gt; print(width = 120, quote = FALSE)\nformD(z6) |&gt; print(width = 120, quote = FALSE)\n```\nwhich gives\n\n```\n&gt; formD(z5) |&gt; print(width = 120, quote = FALSE)\n           [,1]                       [,2]                       [,3]          \n            [,4]\ndigits = 1 2009-08-03 12:01:59.0      2009-08-03 12:01:59.1      2009-08-03\n12:01:59.2      2009-08-03 12:01:59.3\ndigits = 2 2009-08-03 12:01:59.00     2009-08-03 12:01:59.10     2009-08-03\n12:01:59.20     2009-08-03 12:01:59.30\ndigits = 3 2009-08-03 12:01:59.000    2009-08-03 12:01:59.101    2009-08-03\n12:01:59.201    2009-08-03 12:01:59.301\ndigits = 4 2009-08-03 12:01:59.0001   2009-08-03 12:01:59.1011   2009-08-03\n12:01:59.2010   2009-08-03 12:01:59.3010\ndigits = 5 2009-08-03 12:01:59.00010  2009-08-03 12:01:59.10110  2009-08-03\n12:01:59.20100  2009-08-03 12:01:59.30101\ndigits = 6 2009-08-03 12:01:59.00010  2009-08-03 12:01:59.10110  2009-08-03\n12:01:59.20100  2009-08-03 12:01:59.30101\nOS6        2009-08-03 12:01:59.000100 2009-08-03 12:01:59.101100 2009-08-03\n12:01:59.201000 2009-08-03 12:01:59.301010\n\n&gt; formD(z6) |&gt; print(width = 120, quote = FALSE)\n           [,1]                       [,2]                       [,3]          \n            [,4]\ndigits = 1 2009-08-03 12:01:59.0      2009-08-03 12:01:59.1      2009-08-03\n12:01:59.2      2009-08-03 12:01:59.1\ndigits = 2 2009-08-03 12:01:59.00     2009-08-03 12:01:59.10     2009-08-03\n12:01:59.20     2009-08-03 12:01:59.12\ndigits = 3 2009-08-03 12:01:59.000    2009-08-03 12:01:59.101    2009-08-03\n12:01:59.201    2009-08-03 12:01:59.123\ndigits = 4 2009-08-03 12:01:59.0001   2009-08-03 12:01:59.1010   2009-08-03\n12:01:59.2010   2009-08-03 12:01:59.1234\ndigits = 5 2009-08-03 12:01:59.00010  2009-08-03 12:01:59.10100  2009-08-03\n12:01:59.20100  2009-08-03 12:01:59.12345\ndigits = 6 2009-08-03 12:01:59.000100 2009-08-03 12:01:59.101000 2009-08-03\n12:01:59.201000 2009-08-03 12:01:59.123456\nOS6        2009-08-03 12:01:59.000100 2009-08-03 12:01:59.101000 2009-08-03\n12:01:59.201000 2009-08-03 12:01:59.123456\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1733407965.077029",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Xz+",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #25 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nSorry, but I think you are wrong: It is perfect. \n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"%OS<n>\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " will be obeyed strictly, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "everything",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " else (as was discussed here\nand in the R contributor's GH issue I think), notably setting "
+                            },
+                            {
+                                "type": "text",
+                                "text": "digits",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " -- you\ncan do that directly for quite a few years now, see code below --\nis to behave the same as elsewhere in R: unnecessary trailing zeros are "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NOT",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\"allowed\".\n\nI think this is also visible in the updated (R-devel only) help page on\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "?strftime",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " aka "
+                            },
+                            {
+                                "type": "text",
+                                "text": "?format.POSIXlt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nhere  "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/R-manual\/R-devel\/library\/base\/html\/strptime.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSee here"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "z6 <- as.POSIXlt(         paste0(\"2009-08-03 12:01:59.\", c(\"0001\", \"101\",\n\"201\", \"123456\")))\nz5 <- as.POSIXlt(         paste0(\"2009-08-03 12:01:59.\", c(\"0001\", \"10110\",\n\"201000\", \"301010\")))\nidentical( z5, as.POSIXlt(paste0(\"2009-08-03 12:01:59.\", c(\"0001\", \"1011\", \n\"201\",    \"30101\" ))) )\n\nformD <- function(dt) t(cbind(sapply(setNames(1:6, paste(\"digits =\", 1:6)),\n                                   function(d) format(dt, digits = d)),\n                              OS6 = format(dt, format = \"%F %R:%OS6\")))\n\nformD(z5) |> print(width = 120, quote = FALSE)\nformD(z6) |> print(width = 120, quote = FALSE)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "which gives\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> formD(z5) |> print(width = 120, quote = FALSE)\n           [,1]                       [,2]                       [,3]          \n            [,4]\ndigits = 1 2009-08-03 12:01:59.0      2009-08-03 12:01:59.1      2009-08-03\n12:01:59.2      2009-08-03 12:01:59.3\ndigits = 2 2009-08-03 12:01:59.00     2009-08-03 12:01:59.10     2009-08-03\n12:01:59.20     2009-08-03 12:01:59.30\ndigits = 3 2009-08-03 12:01:59.000    2009-08-03 12:01:59.101    2009-08-03\n12:01:59.201    2009-08-03 12:01:59.301\ndigits = 4 2009-08-03 12:01:59.0001   2009-08-03 12:01:59.1011   2009-08-03\n12:01:59.2010   2009-08-03 12:01:59.3010\ndigits = 5 2009-08-03 12:01:59.00010  2009-08-03 12:01:59.10110  2009-08-03\n12:01:59.20100  2009-08-03 12:01:59.30101\ndigits = 6 2009-08-03 12:01:59.00010  2009-08-03 12:01:59.10110  2009-08-03\n12:01:59.20100  2009-08-03 12:01:59.30101\nOS6        2009-08-03 12:01:59.000100 2009-08-03 12:01:59.101100 2009-08-03\n12:01:59.201000 2009-08-03 12:01:59.301010\n\n> formD(z6) |> print(width = 120, quote = FALSE)\n           [,1]                       [,2]                       [,3]          \n            [,4]\ndigits = 1 2009-08-03 12:01:59.0      2009-08-03 12:01:59.1      2009-08-03\n12:01:59.2      2009-08-03 12:01:59.1\ndigits = 2 2009-08-03 12:01:59.00     2009-08-03 12:01:59.10     2009-08-03\n12:01:59.20     2009-08-03 12:01:59.12\ndigits = 3 2009-08-03 12:01:59.000    2009-08-03 12:01:59.101    2009-08-03\n12:01:59.201    2009-08-03 12:01:59.123\ndigits = 4 2009-08-03 12:01:59.0001   2009-08-03 12:01:59.1010   2009-08-03\n12:01:59.2010   2009-08-03 12:01:59.1234\ndigits = 5 2009-08-03 12:01:59.00010  2009-08-03 12:01:59.10100  2009-08-03\n12:01:59.20100  2009-08-03 12:01:59.12345\ndigits = 6 2009-08-03 12:01:59.000100 2009-08-03 12:01:59.101000 2009-08-03\n12:01:59.201000 2009-08-03 12:01:59.123456\nOS6        2009-08-03 12:01:59.000100 2009-08-03 12:01:59.101000 2009-08-03\n12:01:59.201000 2009-08-03 12:01:59.123456\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350>\n\n--- Comment #26 from Dirk Eddelbuettel (<mailto:edd@debian.org|edd@debian.org>) ---\nMartin,\n\nNeither one of us is a native speaker of English but that does not mean we need\nto use language as forceful as you employed in the last comment.  I _suggested_\nthat the behavior was not to my preference:  When I say 'six digits, please', I\nwant six digits and I have relied on options(digits.secs) for maybe fifteen\nyears.  I would actually change the docs and behaviour to allow for six digits,\nbut that uphill battle I am not going to fight.\n\nNow the case that really matters (and which you also show) is what happens to\nthe vector case i.e. for datetime column in a data.frame.  And that seems to\nbehave _if and only if you happen to have data that needs that precision_.  I\nsometimes use format() and friends to pretty print results, and there I do not\nwant digits to be chopped because R wants to be \"nice to me\" and compact it. So\nin those case I will have to switch to '%OS6'.  I can live with that.\n\nQuick example:\n\n```\n&gt; options(digits.secs=6)\n&gt; x &lt;- as.POSIXlt(trunc(Sys.time()) + c(0.500500, 0.5000500, 0.500050, 0.500005))\n&gt; x\n[1] \"2024-12-05 08:37:46.500499 CST\" \"2024-12-05 08:37:46.500050 CST\"\n\"2024-12-05 08:37:46.500050 CST\" \"2024-12-05 08:37:46.500005 CST\"\n&gt; x[2:3]     # less than digits.secs, which I find not so desirable\n[1] \"2024-12-05 08:37:46.50005 CST\" \"2024-12-05 08:37:46.50005 CST\"\n&gt; format(x[2:3], format=\"%F %R:%OS6\")   # alternative\n[1] \"2024-12-05 08:37:46.500050\" \"2024-12-05 08:37:46.500050\"\n&gt; \n```\n\nSo maybe that is as good as it gets here.  I could live with that.\n\nThanks to everybody who put considerable time (and code) into this.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1733409677.334089",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "z+PIJ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #26 from Dirk Eddelbuettel ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:edd@debian.org",
+                                "text": "edd@debian.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nMartin,\n\nNeither one of us is a native speaker of English but that does not mean we need\nto use language as forceful as you employed in the last comment.  I "
+                            },
+                            {
+                                "type": "text",
+                                "text": "suggested",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nthat the behavior was not to my preference:  When I say 'six digits, please', I\nwant six digits and I have relied on options(digits.secs) for maybe fifteen\nyears.  I would actually change the docs and behaviour to allow for six digits,\nbut that uphill battle I am not going to fight.\n\nNow the case that really matters (and which you also show) is what happens to\nthe vector case i.e. for datetime column in a data.frame.  And that seems to\nbehave "
+                            },
+                            {
+                                "type": "text",
+                                "text": "if and only if you happen to have data that needs that precision",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  I\nsometimes use format() and friends to pretty print results, and there I do not\nwant digits to be chopped because R wants to be \"nice to me\" and compact it. So\nin those case I will have to switch to '%OS6'.  I can live with that.\n\nQuick example:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> options(digits.secs=6)\n> x <- as.POSIXlt(trunc(Sys.time()) + c(0.500500, 0.5000500, 0.500050, 0.500005))\n> x\n[1] \"2024-12-05 08:37:46.500499 CST\" \"2024-12-05 08:37:46.500050 CST\"\n\"2024-12-05 08:37:46.500050 CST\" \"2024-12-05 08:37:46.500005 CST\"\n> x[2:3]     # less than digits.secs, which I find not so desirable\n[1] \"2024-12-05 08:37:46.50005 CST\" \"2024-12-05 08:37:46.50005 CST\"\n> format(x[2:3], format=\"%F %R:%OS6\")   # alternative\n[1] \"2024-12-05 08:37:46.500050\" \"2024-12-05 08:37:46.500050\"\n> \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSo maybe that is as good as it gets here.  I could live with that.\n\nThanks to everybody who put considerable time (and code) into this."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350>\n\n--- Comment #27 from Dirk Eddelbuettel (<mailto:edd@debian.org|edd@debian.org>) ---\nPS And sometimes it is nice to have the output compacted -- ie digits.secs=6\nbut all measurements only in milliseconds and consistenly saving three digits.\nThat is of course nice.\n\nWhat I dislike is asking for six and _sometimes_ getting four or five.  Oh\nwell.  As I said, the current situation is fine, and better than R-release.  So\nagain, a bug 'thanks all'.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1733409984.443099",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "LD+x",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #27 from Dirk Eddelbuettel ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:edd@debian.org",
+                                "text": "edd@debian.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nPS And sometimes it is nice to have the output compacted -- ie digits.secs=6\nbut all measurements only in milliseconds and consistenly saving three digits.\nThat is of course nice.\n\nWhat I dislike is asking for six and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "sometimes",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " getting four or five.  Oh\nwell.  As I said, the current situation is fine, and better than R-release.  So\nagain, a bug 'thanks all'."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350>\n\n--- Comment #28 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nI'm sorry, Dirk, I did not want to be unnecessarily forceful..\n\n&gt; What I dislike is asking for six and _sometimes_ getting four or five.  \n&gt; Oh well.\n\nThe good reason really is consistency within R (even within the R geneology;\nalready S and S+ \/ S-PLUS behaved like this):\nAs we know, `format()` is a generic function with several methods and most\nwidely used method is surely `format.default()` which internally treats its\nspecial cases, where the `\"numeric\"` case is almost surely the very most\nfrequently used.\nAnd there, it works the same: \nThere's a `digits` argument but that *never* leads to unnecessary trailing\nzeros (they are all eliminated at the `.Internal(format(.....))` C level.\nConsider this, derived from the previous examples:\n```\n&gt; ss &lt;- z5$sec\n&gt; s. &lt;- c(59.0001, 59.1011, 59.201, 59.30101)\n&gt; stopifnot(identical(ss, s.))\n&gt; format(ss, digits = 3) # here, the digits are *significant* digits\n[1] \"59.0\" \"59.1\" \"59.2\" \"59.3\"\n```\nNow, with a slightly generalized  `formD()` to adapt to **significant** digits,\n```\nformD &lt;- function(dt, dig = 1:6) \n    t(cbind(sapply(setNames(dig, paste(\"digits =\", dig)),\n                   function(d) format(dt, digits = d)),\n            OS6 = format(dt, format = \"%F %R:%OS6\")))\n```\nwe get\n```\n&gt; formD(ss, 2:9)[-9,]  |&gt; print(quote = FALSE)\n           [,1]     [,2]     [,3]     [,4]    \ndigits = 2 59       59       59       59      \ndigits = 3 59.0     59.1     59.2     59.3    \ndigits = 4 59.0     59.1     59.2     59.3    \ndigits = 5 59.000   59.101   59.201   59.301  \ndigits = 6 59.0001  59.1011  59.2010  59.3010 \ndigits = 7 59.00010 59.10110 59.20100 59.30101\ndigits = 8 59.00010 59.10110 59.20100 59.30101\ndigits = 9 59.00010 59.10110 59.20100 59.30101\n&gt; \n```\nit never shows more than 7 significant digits (5 after the decimal) because of\nunnecessary trailing zeros.\nYes, for numbers, we do have two alternatives, notably `formatC()` {by yours\ntruly}  and then {later in the R history} `sprintf()`.\n\nBut here, we *also* have an alternative: `format(.., format = \"........ %OS6\n...\")`\nbut the meaning of `digits` should really be R-internally consistent, i.e.,\nnever produce unnecessary trailing zeros.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1733419360.560559",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "0rj",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #28 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI'm sorry, Dirk, I did not want to be unnecessarily forceful..\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "What I dislike is asking for six and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "sometimes",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " getting four or five.  \nOh well."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe good reason really is consistency within R (even within the R geneology;\nalready S and S+ \/ S-PLUS behaved like this):\nAs we know, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is a generic function with several methods and most\nwidely used method is surely "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format.default()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " which internally treats its\nspecial cases, where the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"numeric\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " case is almost surely the very most\nfrequently used.\nAnd there, it works the same: \nThere's a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "digits",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " argument but that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "never",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " leads to unnecessary trailing\nzeros (they are all eliminated at the "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".Internal(format(.....))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " C level.\nConsider this, derived from the previous examples:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> ss <- z5$sec\n> s. <- c(59.0001, 59.1011, 59.201, 59.30101)\n> stopifnot(identical(ss, s.))\n> format(ss, digits = 3) # here, the digits are *significant* digits\n[1] \"59.0\" \"59.1\" \"59.2\" \"59.3\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Now, with a slightly generalized  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "formD()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to adapt to **significant** digits,"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "formD <- function(dt, dig = 1:6) \n    t(cbind(sapply(setNames(dig, paste(\"digits =\", dig)),\n                   function(d) format(dt, digits = d)),\n            OS6 = format(dt, format = \"%F %R:%OS6\")))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "we get"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> formD(ss, 2:9)[-9,]  |> print(quote = FALSE)\n           [,1]     [,2]     [,3]     [,4]    \ndigits = 2 59       59       59       59      \ndigits = 3 59.0     59.1     59.2     59.3    \ndigits = 4 59.0     59.1     59.2     59.3    \ndigits = 5 59.000   59.101   59.201   59.301  \ndigits = 6 59.0001  59.1011  59.2010  59.3010 \ndigits = 7 59.00010 59.10110 59.20100 59.30101\ndigits = 8 59.00010 59.10110 59.20100 59.30101\ndigits = 9 59.00010 59.10110 59.20100 59.30101\n> \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "it never shows more than 7 significant digits (5 after the decimal) because of\nunnecessary trailing zeros.\nYes, for numbers, we do have two alternatives, notably "
+                            },
+                            {
+                                "type": "text",
+                                "text": "formatC()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " {by yours\ntruly}  and then {later in the R history} "
+                            },
+                            {
+                                "type": "text",
+                                "text": "sprintf()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nBut here, we "
+                            },
+                            {
+                                "type": "text",
+                                "text": "also",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " have an alternative: `format(.., format = \"........ %OS6\n...\")`\nbut the meaning of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "digits",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " should really be R-internally consistent, i.e.,\nnever produce unnecessary trailing zeros."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

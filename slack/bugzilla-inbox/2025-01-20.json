@@ -1,0 +1,359 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18840] New: traceback() should display error location if known*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18840>\n\n            Bug ID: 18840\n           Summary: traceback() should display error location if known\n           Product: R\n           Version: R 4.4.x\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:murdoch.duncan@gmail.com|murdoch.duncan@gmail.com>\n\nCreated attachment 3439\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3439&amp;action=edit>\nPatch to fix issue\n\nAs discussed in this R-help thread: \n<https:\/\/stat.ethz.ch\/pipermail\/r-help\/2025-January\/480483.html>, traceback()\ndoesn't always display the location of the last error.\n\nThe example there was a script trying to run a nonexistent function.  The error\nmessage displays the location if show.error.locations is set, but the\ntraceback() doesn't show it, because no context was set up, so all that was\nshown was the next level up.  Here's the example script:\n\n```\nx &lt;- 1\ny &lt;- 2\nnofunction(\"something stupid I am doing!\")\nz &lt;- 4\n```\nand the traceback() after sourcing shows\n```\n&gt; traceback()\n4: eval(ei, envir)\n3: eval(ei, envir)\n2: withVisible(eval(ei, envir))\n1: source(\"~\/temp\/test.R\", echo = TRUE)\n```\n\nHowever, R knows the location of the problematic source line, so I propose\nsaving the srcref for the currently active line as an attribute of the\ntraceback object itself, and modifying traceback() to display it.  With the\nattached patch the display becomes\n```\n&gt; traceback()\n5: &lt;code at test.R#3&gt;\n4: eval(ei, envir)\n3: eval(ei, envir)\n2: withVisible(eval(ei, envir))\n1: source(\"~\/temp\/test.R\", echo = TRUE)\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737409401.351109",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "eZ7Xj",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18840] New: traceback() should display error location if known",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18840"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18840\n           Summary: traceback() should display error location if known\n           Product: R\n           Version: R 4.4.x\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:murdoch.duncan@gmail.com",
+                                "text": "murdoch.duncan@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3439\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3439&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3439&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch to fix issue\n\nAs discussed in this R-help thread: \n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-help\/2025-January\/480483.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": ", traceback()\ndoesn't always display the location of the last error.\n\nThe example there was a script trying to run a nonexistent function.  The error\nmessage displays the location if show.error.locations is set, but the\ntraceback() doesn't show it, because no context was set up, so all that was\nshown was the next level up.  Here's the example script:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "x <- 1\ny <- 2\nnofunction(\"something stupid I am doing!\")\nz <- 4\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "and the traceback() after sourcing shows"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> traceback()\n4: eval(ei, envir)\n3: eval(ei, envir)\n2: withVisible(eval(ei, envir))\n1: source(\"~\/temp\/test.R\", echo = TRUE)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nHowever, R knows the location of the problematic source line, so I propose\nsaving the srcref for the currently active line as an attribute of the\ntraceback object itself, and modifying traceback() to display it.  With the\nattached patch the display becomes"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> traceback()\n5: <code at test.R#3>\n4: eval(ei, envir)\n3: eval(ei, envir)\n2: withVisible(eval(ei, envir))\n1: source(\"~\/temp\/test.R\", echo = TRUE)\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18816] Checks and diffs for &lt;pkg&gt;\/demo\/*R*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18816>\n\nSebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |seb.meyer@fau.de\n\n--- Comment #5 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\n(In reply to Kurt Hornik from comment #3)\n&gt; Should be fixed now in the trunk with c87555\n\nIt looks like this relaxed check (allowing .Rout.save files)  *could* be ported\nto R-patched, so newly built packages containing .Rout.save files won't produce\na check warning in R-oldrel once R 4.5.0 is released?\n\nRegarding the `--test-dir=demo` trick: this runs demos *instead of* tests (and\nalso disrupts comparing example output against\n`tests\/Examples\/&lt;pkg&gt;-Ex.Rout.save`). I'd prefer an option to (occasionally)\nrun demos *in addition* to standard tests (similar to `--run-donttest`). Only\nin R-devel, there now (r8760[67]) is a new R CMD check option for this:\n\n     --run-demo        do run R scripts in 'demo' subdirectory\n\nNote that running demos as tests also checks for unstated dependencies in demo\nscripts. The environment variable `_R_CHECK_PACKAGES_USED_IN_DEMO_` can now be\nused to control that check; it can also be enabled without running the demos\n(and would NOTE &gt;100 CRAN packages). I guess (extra) packages used in demo\nscripts should ideally be reflected in the package dependencies (Suggests) even\nthough the standard check does not exercise the demos (so the inclusion would\nbe irrelevant for \"most\"-type revdep checks).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737412607.084739",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Z9+J",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "*[Bug 18816] Checks and diffs for <pkg>\/demo\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "R",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18816"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |seb.meyer@fau.de\n\n--- Comment #5 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Kurt Hornik from comment #3)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Should be fixed now in the trunk with c87555"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIt looks like this relaxed check (allowing .Rout.save files)  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "could",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " be ported\nto R-patched, so newly built packages containing .Rout.save files won't produce\na check warning in R-oldrel once R 4.5.0 is released?\n\nRegarding the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "--test-dir=demo",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " trick: this runs demos "
+                            },
+                            {
+                                "type": "text",
+                                "text": "instead of",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " tests (and\nalso disrupts comparing example output against\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "tests\/Examples\/<pkg>-Ex.Rout.save",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "). I'd prefer an option to (occasionally)\nrun demos "
+                            },
+                            {
+                                "type": "text",
+                                "text": "in addition",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to standard tests (similar to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "--run-donttest",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "). Only\nin R-devel, there now (r8760[67]) is a new R CMD check option for this:\n\n     --run-demo        do run R scripts in 'demo' subdirectory\n\nNote that running demos as tests also checks for unstated dependencies in demo\nscripts. The environment variable "
+                            },
+                            {
+                                "type": "text",
+                                "text": "_R_CHECK_PACKAGES_USED_IN_DEMO_",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " can now be\nused to control that check; it can also be enabled without running the demos\n(and would NOTE >100 CRAN packages). I guess (extra) packages used in demo\nscripts should ideally be reflected in the package dependencies (Suggests) even\nthough the standard check does not exercise the demos (so the inclusion would\nbe irrelevant for \"most\"-type revdep checks)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18840] traceback() should display error location if known*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18840>\n\nDuncan Murdoch (<mailto:murdoch.duncan@gmail.com|murdoch.duncan@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3439|0                           |1\n        is obsolete|                            |\n\n--- Comment #1 from Duncan Murdoch (<mailto:murdoch.duncan@gmail.com|murdoch.duncan@gmail.com>) ---\nCreated attachment 3440\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3440&amp;action=edit>\nPatch to fix issue\n\nSlightly simpler and safer code.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737418455.300499",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "sz+",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18840] traceback() should display error location if known",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18840"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nDuncan Murdoch ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:murdoch.duncan@gmail.com",
+                                "text": "murdoch.duncan@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3439|0                           |1\n        is obsolete|                            |\n\n--- Comment #1 from Duncan Murdoch ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:murdoch.duncan@gmail.com",
+                                "text": "murdoch.duncan@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3440\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3440&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3440&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch to fix issue\n\nSlightly simpler and safer code."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

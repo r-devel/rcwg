@@ -1,0 +1,170 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18835] audio encoder not working in ffmpeg*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18835>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #1 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nThanks for the report. The av tests fail because a WAV file converted to MP3\nends up having a much shorter duration, as reported by ffmpeg. One can\nreproduce simply using\n\nlibrary(av)\nav_audio_convert(\"t.wav\", \"t.mp3\")\nav_media_info(\"t.mp3\")$duration\n\nThe resulting MP3 file can be played and will have the original duration when\nplayed, but ffmpeg still reports something much smaller.\n\nThe problem can be reproduced without \"av\" and R on the command line using\nffmpeg utility, when using mp3_mf codec (even in Msys2 build of ffmpeg; also in\ncustom build of Rtools where the ffmpeg utility is included). This is not\nrelated to Rtools. I am checking upstream whether this is a bug in ffmpeg that\ncould be fixed. E.g. the length meta-data in the resulting MP3 file is correct\n(via mp3info), but the duration displayed by ffmpeg is wrong even using ffmpeg\nrunning on Linux. \n\nWhat is related to Rtools is that due to a typo in the build configuration, the\nmp3lame codec wasn't built, so ffmpeg only had the mp3_mf (mediafoundation)\ncodec for MP3, which was then used also by \"av\". This is now fixed in the\ndevelopment version of Rtools and av passes with that fix.\n\nRelated, to build with Msys2\/ucrt64 toolchain, av needs to query pkg-config for\nall libraries that are used by the R package, not just libavfilter. This\ndoesn't matter in Rtools where these are brought automatically due to static\nlinking, but is good for testing with other toolchains using dynamic linking. I\nended up adding: libavcodec libavformat libavutil libswresample.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737629021.288979",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "047i",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18835] audio encoder not working in ffmpeg",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18835"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #1 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for the report. The av tests fail because a WAV file converted to MP3\nends up having a much shorter duration, as reported by ffmpeg. One can\nreproduce simply using\n\nlibrary(av)\nav_audio_convert(\"t.wav\", \"t.mp3\")\nav_media_info(\"t.mp3\")$duration\n\nThe resulting MP3 file can be played and will have the original duration when\nplayed, but ffmpeg still reports something much smaller.\n\nThe problem can be reproduced without \"av\" and R on the command line using\nffmpeg utility, when using mp3_mf codec (even in Msys2 build of ffmpeg; also in\ncustom build of Rtools where the ffmpeg utility is included). This is not\nrelated to Rtools. I am checking upstream whether this is a bug in ffmpeg that\ncould be fixed. E.g. the length meta-data in the resulting MP3 file is correct\n(via mp3info), but the duration displayed by ffmpeg is wrong even using ffmpeg\nrunning on Linux. \n\nWhat is related to Rtools is that due to a typo in the build configuration, the\nmp3lame codec wasn't built, so ffmpeg only had the mp3_mf (mediafoundation)\ncodec for MP3, which was then used also by \"av\". This is now fixed in the\ndevelopment version of Rtools and av passes with that fix.\n\nRelated, to build with Msys2\/ucrt64 toolchain, av needs to query pkg-config for\nall libraries that are used by the R package, not just libavfilter. This\ndoesn't matter in Rtools where these are brought automatically due to static\nlinking, but is good for testing with other toolchains using dynamic linking. I\nended up adding: libavcodec libavformat libavutil libswresample."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18835] audio encoder not working in ffmpeg*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18835>\n\n--- Comment #2 from Jeroen Ooms (<mailto:jeroenooms@gmail.com|jeroenooms@gmail.com>) ---\nThank you for the detailed investigation. When the new version of Rtools is\nreleased I will try to start using its ffmpeg in 'av'. However I have to figure\nout how to do this conditionally such that the 'av' package also keeps working\non older versions of R\/Rtools. Perhaps I can do a minimum version check with\npkg-config.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737634541.815189",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "OMl0\/",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18835] audio encoder not working in ffmpeg",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18835"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Jeroen Ooms ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jeroenooms@gmail.com",
+                                "text": "jeroenooms@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you for the detailed investigation. When the new version of Rtools is\nreleased I will try to start using its ffmpeg in 'av'. However I have to figure\nout how to do this conditionally such that the 'av' package also keeps working\non older versions of R\/Rtools. Perhaps I can do a minimum version check with\npkg-config."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18835] audio encoder not working in ffmpeg*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18835>\n\n--- Comment #3 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\n(In reply to Jeroen Ooms from comment #2)\nCommenting only on the technical aspect of the test (not CRAN policy etc). I am\nafraid the version of libavcodec will be the same as in the previous versions\nof Rtools44. A bit of a hack, but one could test if pkg-config --libs\nlibavcodec includes mp3lame (as an approximative test that ffmpeg supports\nmp3lame, assuming it is the default mp3 codec).\n\nPerhaps one could even have a tiny C test that would actually query the library\nto see what is the first MP3 codec that would be used, and bail out from the\nbuild if the one from mediafoundation.\n\nIn principle, it may also turn out that one could apply a work-around for this\nsuspected ffmpeg bug and with that make the package usable even with the\nmediafoundation codec, but that would require input from ffmpeg developers\n(certainly I don't know the answer, but if it is just wrong computation of\nduration, maybe it could be fixed or ignored).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737637059.095169",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "f8Uq",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18835] audio encoder not working in ffmpeg",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18835"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Jeroen Ooms from comment #2)\nCommenting only on the technical aspect of the test (not CRAN policy etc). I am\nafraid the version of libavcodec will be the same as in the previous versions\nof Rtools44. A bit of a hack, but one could test if pkg-config --libs\nlibavcodec includes mp3lame (as an approximative test that ffmpeg supports\nmp3lame, assuming it is the default mp3 codec).\n\nPerhaps one could even have a tiny C test that would actually query the library\nto see what is the first MP3 codec that would be used, and bail out from the\nbuild if the one from mediafoundation.\n\nIn principle, it may also turn out that one could apply a work-around for this\nsuspected ffmpeg bug and with that make the package usable even with the\nmediafoundation codec, but that would require input from ffmpeg developers\n(certainly I don't know the answer, but if it is just wrong computation of\nduration, maybe it could be fixed or ignored)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

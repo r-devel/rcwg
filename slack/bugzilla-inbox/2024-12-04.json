@@ -1,0 +1,453 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350>\n\n--- Comment #22 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nIn svn rev 87419  I have committed another rehaul of `format.POSIXlt()` also\nwith new regression tests.\nThis needed (\"as always\") considerably more time than necessary, namely before\nI decided to disentangle the two cases  `format == \"\"` and\n`grepl(\"%OS..\",format)`,\nand put most of the common code in a nice auxiliary  `useDig()` function.\n\nI'd be happy for more testing by \"the audience\" so that we hopefully will close\nthis as fixed\n\"Real Soon Now\".",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1733313067.841499",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "L1VA",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #22 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nIn svn rev 87419  I have committed another rehaul of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format.POSIXlt()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " also\nwith new regression tests.\nThis needed (\"as always\") considerably more time than necessary, namely before\nI decided to disentangle the two cases  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format == \"\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "grepl(\"%OS..\",format)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\nand put most of the common code in a nice auxiliary  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "useDig()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " function.\n\nI'd be happy for more testing by \"the audience\" so that we hopefully will close\nthis as fixed\n\"Real Soon Now\"."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350>\n\n--- Comment #23 from Dirk Eddelbuettel (<mailto:edd@debian.org|edd@debian.org>) ---\nThanks for keeping the ball rolling, Martin.  \n\nThe following example is my opinion not quite right as there should be a\ndifference between selecting 5 or 6 digits.\n\n#### Code \n\n```\nz &lt;- as.POSIXlt(c(\"2009-08-03 12:01:59.000100\", \"2009-08-03 12:01:59.10110\",\n                  \"2009-08-03 12:01:59.201000\", \"2009-08-03 12:01:59.301010\"))\nfor (ds in seq(3L,6L)) {\n    options(digits.secs = ds)\n    print(format(z))\n}\n```\n\n#### Output\n\n```\nUsing 1 digits\n[1] \"2009-08-03 12:01:59.0\" \"2009-08-03 12:01:59.1\" \"2009-08-03 12:01:59.2\"\n\"2009-08-03 12:01:59.3\"\nUsing 2 digits\n[1] \"2009-08-03 12:01:59.00\" \"2009-08-03 12:01:59.10\" \"2009-08-03 12:01:59.20\"\n\"2009-08-03 12:01:59.30\"\nUsing 3 digits\n[1] \"2009-08-03 12:01:59.000\" \"2009-08-03 12:01:59.101\" \"2009-08-03\n12:01:59.201\" \"2009-08-03 12:01:59.301\"\nUsing 4 digits\n[1] \"2009-08-03 12:01:59.0001\" \"2009-08-03 12:01:59.1011\" \"2009-08-03\n12:01:59.2010\" \"2009-08-03 12:01:59.3010\"\nUsing 5 digits\n[1] \"2009-08-03 12:01:59.00010\" \"2009-08-03 12:01:59.10110\" \"2009-08-03\n12:01:59.20100\" \"2009-08-03 12:01:59.30101\"\nUsing 6 digits\n[1] \"2009-08-03 12:01:59.00010\" \"2009-08-03 12:01:59.10110\" \"2009-08-03\n12:01:59.20100\" \"2009-08-03 12:01:59.30101\"\n```\n\nThe lasst line ought to have six digits if I request six digits.  It only does\nwhen we use `%OS6`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1733318873.470949",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "r=\/Vr",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #23 from Dirk Eddelbuettel ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:edd@debian.org",
+                                "text": "edd@debian.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for keeping the ball rolling, Martin.  \n\nThe following example is my opinion not quite right as there should be a\ndifference between selecting 5 or 6 digits.\n\n#### Code \n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "z <- as.POSIXlt(c(\"2009-08-03 12:01:59.000100\", \"2009-08-03 12:01:59.10110\",\n                  \"2009-08-03 12:01:59.201000\", \"2009-08-03 12:01:59.301010\"))\nfor (ds in seq(3L,6L)) {\n    options(digits.secs = ds)\n    print(format(z))\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n#### Output\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Using 1 digits\n[1] \"2009-08-03 12:01:59.0\" \"2009-08-03 12:01:59.1\" \"2009-08-03 12:01:59.2\"\n\"2009-08-03 12:01:59.3\"\nUsing 2 digits\n[1] \"2009-08-03 12:01:59.00\" \"2009-08-03 12:01:59.10\" \"2009-08-03 12:01:59.20\"\n\"2009-08-03 12:01:59.30\"\nUsing 3 digits\n[1] \"2009-08-03 12:01:59.000\" \"2009-08-03 12:01:59.101\" \"2009-08-03\n12:01:59.201\" \"2009-08-03 12:01:59.301\"\nUsing 4 digits\n[1] \"2009-08-03 12:01:59.0001\" \"2009-08-03 12:01:59.1011\" \"2009-08-03\n12:01:59.2010\" \"2009-08-03 12:01:59.3010\"\nUsing 5 digits\n[1] \"2009-08-03 12:01:59.00010\" \"2009-08-03 12:01:59.10110\" \"2009-08-03\n12:01:59.20100\" \"2009-08-03 12:01:59.30101\"\nUsing 6 digits\n[1] \"2009-08-03 12:01:59.00010\" \"2009-08-03 12:01:59.10110\" \"2009-08-03\n12:01:59.20100\" \"2009-08-03 12:01:59.30101\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe lasst line ought to have six digits if I request six digits.  It only does\nwhen we use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "%OS6",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350>\n\n--- Comment #24 from Dirk Eddelbuettel (<mailto:edd@debian.org|edd@debian.org>) ---\nPS Sorry, my last comment posted a slightly earlier copy of the code I ran.\nHere is current version\n\n#### Code\n\n```\nz &lt;- as.POSIXlt(c(\"2009-08-03 12:01:59.000100\", \"2009-08-03 12:01:59.10110\",\n                  \"2009-08-03 12:01:59.201000\", \"2009-08-03 12:01:59.301010\"))\nfor (ds in seq(1L,6L)) {\n    cat(\"Using\", ds, \"digits\\n\")\n    options(digits.secs = ds)\n    print(format(z))\n}\nformat(z, format = \"%Y-%m-%d %H:%M:%OS6\")\n```\n\n#### Update Output\n\n```Using 1 digits\n[1] \"2009-08-03 12:01:59.0\" \"2009-08-03 12:01:59.1\" \"2009-08-03 12:01:59.2\"\n\"2009-08-03 12:01:59.3\"\nUsing 2 digits\n[1] \"2009-08-03 12:01:59.00\" \"2009-08-03 12:01:59.10\" \"2009-08-03 12:01:59.20\"\n\"2009-08-03 12:01:59.30\"\nUsing 3 digits\n[1] \"2009-08-03 12:01:59.000\" \"2009-08-03 12:01:59.101\" \"2009-08-03\n12:01:59.201\" \"2009-08-03 12:01:59.301\"\nUsing 4 digits\n[1] \"2009-08-03 12:01:59.0001\" \"2009-08-03 12:01:59.1011\" \"2009-08-03\n12:01:59.2010\" \"2009-08-03 12:01:59.3010\"\nUsing 5 digits\n[1] \"2009-08-03 12:01:59.00010\" \"2009-08-03 12:01:59.10110\" \"2009-08-03\n12:01:59.20100\" \"2009-08-03 12:01:59.30101\"\nUsing 6 digits\n[1] \"2009-08-03 12:01:59.00010\" \"2009-08-03 12:01:59.10110\" \"2009-08-03\n12:01:59.20100\" \"2009-08-03 12:01:59.30101\"\n[1] \"2009-08-03 12:01:59.000100\" \"2009-08-03 12:01:59.101100\" \"2009-08-03\n12:01:59.201000\" \"2009-08-03 12:01:59.301010\"\n```\n\nThe issue is unchanged though: the one-but-last output (using\n`options(digists.secs=6)`) is different from using `%OS6` which strikes me as\nnot quite right.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1733319045.374879",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "N=zE",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #24 from Dirk Eddelbuettel ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:edd@debian.org",
+                                "text": "edd@debian.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nPS Sorry, my last comment posted a slightly earlier copy of the code I ran.\nHere is current version\n\n#### Code\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "z <- as.POSIXlt(c(\"2009-08-03 12:01:59.000100\", \"2009-08-03 12:01:59.10110\",\n                  \"2009-08-03 12:01:59.201000\", \"2009-08-03 12:01:59.301010\"))\nfor (ds in seq(1L,6L)) {\n    cat(\"Using\", ds, \"digits\\n\")\n    options(digits.secs = ds)\n    print(format(z))\n}\nformat(z, format = \"%Y-%m-%d %H:%M:%OS6\")\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n#### Update Output\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Using 1 digits\n[1] \"2009-08-03 12:01:59.0\" \"2009-08-03 12:01:59.1\" \"2009-08-03 12:01:59.2\"\n\"2009-08-03 12:01:59.3\"\nUsing 2 digits\n[1] \"2009-08-03 12:01:59.00\" \"2009-08-03 12:01:59.10\" \"2009-08-03 12:01:59.20\"\n\"2009-08-03 12:01:59.30\"\nUsing 3 digits\n[1] \"2009-08-03 12:01:59.000\" \"2009-08-03 12:01:59.101\" \"2009-08-03\n12:01:59.201\" \"2009-08-03 12:01:59.301\"\nUsing 4 digits\n[1] \"2009-08-03 12:01:59.0001\" \"2009-08-03 12:01:59.1011\" \"2009-08-03\n12:01:59.2010\" \"2009-08-03 12:01:59.3010\"\nUsing 5 digits\n[1] \"2009-08-03 12:01:59.00010\" \"2009-08-03 12:01:59.10110\" \"2009-08-03\n12:01:59.20100\" \"2009-08-03 12:01:59.30101\"\nUsing 6 digits\n[1] \"2009-08-03 12:01:59.00010\" \"2009-08-03 12:01:59.10110\" \"2009-08-03\n12:01:59.20100\" \"2009-08-03 12:01:59.30101\"\n[1] \"2009-08-03 12:01:59.000100\" \"2009-08-03 12:01:59.101100\" \"2009-08-03\n12:01:59.201000\" \"2009-08-03 12:01:59.301010\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe issue is unchanged though: the one-but-last output (using\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "options(digists.secs=6)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") is different from using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "%OS6",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " which strikes me as\nnot quite right."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17169] Error in [.terms when there is an offset*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17169>\n\nSebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #7 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\n(In reply to Mikael Jagan from comment #4)\n&gt; This bug is {in the sense of `fromLast=TRUE` ... :-)} a duplicate of Bug\n&gt; 18565, which was fixed with r85581.\n\nThanks for seeing the prequel. :) That commit indeed implemented two of the\nthree suggestions at the end of my Comment 1.\n\n(In reply to Mikael Jagan from comment #5)\n&gt; Created attachment 3431\n&gt; document that 'dropx' is an index of attr(termobj, \"term.labels\")\n&gt; \n&gt; For completeness, we should follow Sebastian's suggestion in comment 1 and\n&gt; document more clearly *what* is indexed by `drop.terms` and `[.terms`.\n\nThank you! The documentation part is now also done in r87420, based on your\npatch.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1733352708.933639",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "+ABg",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17169] Error in [.terms when there is an offset",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17169"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #7 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Mikael Jagan from comment #4)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "This bug is {in the sense of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "fromLast=TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ... :-)} a duplicate of Bug\n18565, which was fixed with r85581."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThanks for seeing the prequel. :) That commit indeed implemented two of the\nthree suggestions at the end of my Comment 1.\n\n(In reply to Mikael Jagan from comment #5)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Created attachment 3431\ndocument that 'dropx' is an index of attr(termobj, \"term.labels\")\n\nFor completeness, we should follow Sebastian's suggestion in comment 1 and\ndocument more clearly "
+                            },
+                            {
+                                "type": "text",
+                                "text": "what",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is indexed by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "drop.terms",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "[.terms",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThank you! The documentation part is now also done in r87420, based on your\npatch."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

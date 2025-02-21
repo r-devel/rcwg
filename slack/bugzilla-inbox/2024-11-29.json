@@ -1,0 +1,747 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18828] isGeneric(f=) and isGeneric(f=, fdef=) behave inconsistently for primitive functions*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18828>\n\n--- Comment #2 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nMy patch for Bug 18369 may have confused this issue a bit.  In R-patched, the\nparagraph concerning primitive functions reads:\n\n&gt; The behavior of `isGeneric` and `getGeneric` for primitive functions is slightly different.  These functions don't exist as formal function objects (for efficiency and historical reasons), regardless of whether methods have been defined for them.  A call to 'isGeneric' tells you whether **methods** have been defined for this primitive function, anywhere in the current search list, or in the specified position 'where'.  In contrast, a call to 'getGeneric' will return what the generic for that function would be, even if no methods have been currently defined for it.\n\nIn R-devel, it now reads:\n\n&gt; The behavior of `isGeneric` and `getGeneric` for primitive functions is slightly different.  These functions don't exist as formal generic function objects (for efficiency and historical reasons), regardless of whether methods have been defined for them.  For a primitive function, `isGeneric` tests whether **non-default methods** have been defined, whereas `getGeneric` returns what the formal generic function object would be, even if no methods have been defined.\n\nI added the qualifier \"non-default\" so that the documentation would align with\nthe intention of the source code, which is reflected in the comments there. \nBut that was *before* I detected *this* bug which reveals that the\nimplementation does not consistently behave \"as intended\", i.e., does not\nconsistently consult the method table and distinguish between default and\nnon-default methods.\n\nHence it seems that there is an opportunity here to decide between two paths:\n\n* Eliminate from the paragraph the qualifier \"non-default\", which did not exist\nbefore.  Then have `isGeneric` behave as you suggested: `isGeneric(f)` tests\nwhether `getGeneric(f)` is non-`NULL`, without consulting the method table.\n* Keep the qualifier \"non-default\", respecting the intention of the original\nsource code.  Then have `isGeneric` consult the method table in all cases.\n\nIn my opinion, the first approach is both more intuitive and more useful,\nbecause then `isGeneric(f)` can then be used as a test of whether\n`setGeneric(f)` or `setMethod(f)` would create a new generic function object. \nThe second approach is confusing to me because the distinction between default\nand non-default methods seems arbitrary.\n\nAnother complication, relevant the above discussion but perhaps not affecting\nprimitive functions: Should `isGeneric` (gain an option to) consider implicit\ngeneric functions?  It is possible (e.g., for `f = \"qr.X\"`) that\n`getGeneric(f)` is `NULL` but `implicitGeneric(f)` is non-`NULL`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732911159.081849",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "l1rYu",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18828] isGeneric(f=) and isGeneric(f=, fdef=) behave inconsistently for primitive functions",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18828"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nMy patch for Bug 18369 may have confused this issue a bit.  In R-patched, the\nparagraph concerning primitive functions reads:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "The behavior of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for primitive functions is slightly different.  These functions don't exist as formal function objects (for efficiency and historical reasons), regardless of whether methods have been defined for them.  A call to 'isGeneric' tells you whether **methods** have been defined for this primitive function, anywhere in the current search list, or in the specified position 'where'.  In contrast, a call to 'getGeneric' will return what the generic for that function would be, even if no methods have been currently defined for it."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIn R-devel, it now reads:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "The behavior of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for primitive functions is slightly different.  These functions don't exist as formal generic function objects (for efficiency and historical reasons), regardless of whether methods have been defined for them.  For a primitive function, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " tests whether **non-default methods** have been defined, whereas "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " returns what the formal generic function object would be, even if no methods have been defined."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI added the qualifier \"non-default\" so that the documentation would align with\nthe intention of the source code, which is reflected in the comments there. \nBut that was "
+                            },
+                            {
+                                "type": "text",
+                                "text": "before",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " I detected "
+                            },
+                            {
+                                "type": "text",
+                                "text": "this",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " bug which reveals that the\nimplementation does not consistently behave \"as intended\", i.e., does not\nconsistently consult the method table and distinguish between default and\nnon-default methods.\n\nHence it seems that there is an opportunity here to decide between two paths:\n\n* Eliminate from the paragraph the qualifier \"non-default\", which did not exist\nbefore.  Then have "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " behave as you suggested: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric(f)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " tests\nwhether "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getGeneric(f)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is non-"
+                            },
+                            {
+                                "type": "text",
+                                "text": "NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", without consulting the method table.\n* Keep the qualifier \"non-default\", respecting the intention of the original\nsource code.  Then have "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " consult the method table in all cases.\n\nIn my opinion, the first approach is both more intuitive and more useful,\nbecause then "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric(f)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " can then be used as a test of whether\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "setGeneric(f)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "setMethod(f)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " would create a new generic function object. \nThe second approach is confusing to me because the distinction between default\nand non-default methods seems arbitrary.\n\nAnother complication, relevant the above discussion but perhaps not affecting\nprimitive functions: Should "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (gain an option to) consider implicit\ngeneric functions?  It is possible (e.g., for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "f = \"qr.X\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") that\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "getGeneric(f)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " but "
+                            },
+                            {
+                                "type": "text",
+                                "text": "implicitGeneric(f)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is non-"
+                            },
+                            {
+                                "type": "text",
+                                "text": "NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350>\n\n--- Comment #21 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\n(In reply to Martin Maechler from comment #16)\nI was surprised to learn that `length(format) &gt; 1` is actually supported. The\n`help(\"format.POSIXlt\")` says\n\n    format: a character string.\n\nbut then the Details indeed reveal\n\n    The usual vector re-cycling rules are applied to 'x' and 'format'\n    so the answer will be of length of the longer of these vectors.\n\nand this is from when date-time support was originally added in R 1.2.0.\n\nSo my gut feeling was that there must be code out there that uses that feature.\nI ran R CMD check with a patched R (that asserts that `format` is a string)\nacross 6400 CRAN\/BIOC packages and received confirmation: both\n`tsibble:::format.yearquarter()` and `scales::label_date_short()` construct an\nelementwise `format`, e.g.:\n\n```\nscales::label_date_short()(as.Date(\"2024-11-29\") + 0:1)\n## [1] \"29\\nNov\\n2024\" \"30\"\n```\n\nSo yes, a restriction to a single `format` string would break these packages,\nsome of their revdeps and probably also some scripts.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732912751.300719",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "oIfG",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17350] Print method for POSIXt incorrectly displays fractions of a second",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17350"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #21 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Martin Maechler from comment #16)\nI was surprised to learn that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length(format) > 1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is actually supported. The\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "help(\"format.POSIXlt\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " says\n\n    format: a character string.\n\nbut then the Details indeed reveal\n\n    The usual vector re-cycling rules are applied to 'x' and 'format'\n    so the answer will be of length of the longer of these vectors.\n\nand this is from when date-time support was originally added in R 1.2.0.\n\nSo my gut feeling was that there must be code out there that uses that feature.\nI ran R CMD check with a patched R (that asserts that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is a string)\nacross 6400 CRAN\/BIOC packages and received confirmation: both\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "tsibble:::format.yearquarter()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "scales::label_date_short()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " construct an\nelementwise "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", e.g.:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "scales::label_date_short()(as.Date(\"2024-11-29\") + 0:1)\n## [1] \"29\\nNov\\n2024\" \"30\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSo yes, a restriction to a single "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " string would break these packages,\nsome of their revdeps and probably also some scripts."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18800] Defining R_NO_REMAP_RMATH and calling Rf_*() results in compiler errors*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18800>\n\n--- Comment #2 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nCreated attachment 3430\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3430&amp;action=edit>\nuse entry point names (Rf_*) in function prototypes in Rmath.h.in\n\nThe patch is straightforward: use the `Rf_` prefix in the function prototypes,\njust as `Rinternals.h` does.  For users who **do not** define\n`R_NO_REMAP_RMATH`, there is no change.  For users who **do** define\n`R_NO_REMAP_RMATH`, the changes are:\n\n* that code using the prefixed names (`Rf_dpois`, etc.) can be compiled and\nlinked against R or Mathlib (before, it could not be compiled)\n* that code using the unprefixed names (`dpois`, etc.) cannot be compiled\n(before, it could be compiled but not linked against R or Mathlib)\n\nHence the patch conforms the header to the documentation and should not break\nany code out there.\n\nMy patched build passes `make check-all` (which is probably not meaningful),\nand attempting to compile and link the examples in my comment 0 now succeeds or\nfails as expected.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732917323.812319",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "+aVSL",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "*[Bug 18800] Defining R_NO_REMAP_RMATH and calling Rf_*() results in compiler errors*\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18800"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3430\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3430&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3430&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nuse entry point names (Rf_*) in function prototypes in Rmath.h.in\n\nThe patch is straightforward: use the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rf_",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " prefix in the function prototypes,\njust as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rinternals.h",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does.  For users who **do not** define\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_NO_REMAP_RMATH",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", there is no change.  For users who **do** define\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_NO_REMAP_RMATH",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", the changes are:\n\n* that code using the prefixed names ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rf_dpois",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", etc.) can be compiled and\nlinked against R or Mathlib (before, it could not be compiled)\n* that code using the unprefixed names ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "dpois",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", etc.) cannot be compiled\n(before, it could be compiled but not linked against R or Mathlib)\n\nHence the patch conforms the header to the documentation and should not break\nany code out there.\n\nMy patched build passes "
+                            },
+                            {
+                                "type": "text",
+                                "text": "make check-all",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (which is probably not meaningful),\nand attempting to compile and link the examples in my comment 0 now succeeds or\nfails as expected."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18830] New: remove crossprod, tcrossprod from methods:::.implicitTable*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18830>\n\n            Bug ID: 18830\n           Summary: remove crossprod, tcrossprod from\n                    methods:::.implicitTable\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: S4methods\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>\n\n```\nIndex: src\/library\/methods\/R\/makeBasicFunsList.R\n===================================================================\n--- src\/library\/methods\/R\/makeBasicFunsList.R   (revision 87406)\n+++ src\/library\/methods\/R\/makeBasicFunsList.R   (working copy)\n@@ -251,15 +251,6 @@\n     setGenericImplicit(\"rowMeans\", where, FALSE)\n     setGenericImplicit(\"rowSums\",  where, FALSE)\n\n-    setGeneric(\"crossprod\", function(x, y = NULL, ...)\nstandardGeneric(\"crossprod\"),\n-              useAsDefault = function(x, y = NULL, ...) base::crossprod(x, y),\n-              signature = c(\"x\", \"y\"), where = where)\n-    setGeneric(\"tcrossprod\", function(x, y = NULL, ...)\nstandardGeneric(\"tcrossprod\"),\n-              useAsDefault = function(x, y = NULL, ...) base::tcrossprod(x,\ny),\n-              signature = c(\"x\", \"y\"), where = where)\n-    setGenericImplicit(\"crossprod\",  where, FALSE)\n-    setGenericImplicit(\"tcrossprod\",  where, FALSE)\n-\n     setGeneric(\"sample\", function(x, size, replace = FALSE, prob = NULL, ...)\n                        standardGeneric(\"sample\"),\n               useAsDefault = function(x, size, replace = FALSE, prob = NULL,\n...)\n```\n\nSince `crossprod` and `tcrossprod` are (now) internally generic primitive\nfunctions, they get formal generic function objects from\n`methods:::.BasicFunsList`, no longer from `methods:::.implicitTable`.  The\nobjects are not identical, and the latter is no longer needed ...\n\n```\n&gt; methods:::.BasicFunsList[[\"crossprod\"]]\nstandardGeneric for \"crossprod\" defined from package \"base\"\n\nfunction (x, y = NULL, ...) \nstandardGeneric(\"crossprod\", .Primitive(\"crossprod\"))\n&lt;bytecode: 0x10701b420&gt;\n&lt;environment: 0x107015d50&gt;\nMethods may be defined for arguments: x, y\nUse  showMethods(&lt;pkg&gt;:::crossprod)  for currently available ones where &lt;pkg&gt;\ndoes not seem to be among the loadedNamespaces().\n&gt; methods:::.BasicFunsList[[\"crossprod\"]]@default\nfunction (x, y = NULL, ...)  .Primitive(\"crossprod\")\n&gt; methods:::.implicitTable[[\"crossprod\"]]\nstandardGeneric for \"crossprod\" defined from package \"base\"\n\nfunction (x, y = NULL, ...) \nstandardGeneric(\"crossprod\")\n&lt;bytecode: 0x107132e80&gt;\n&lt;environment: 0x1071289b8&gt;\nMethods may be defined for arguments: x, y\nUse  showMethods(&lt;pkg&gt;:::crossprod)  for currently available ones where &lt;pkg&gt;\ndoes not seem to be among the loadedNamespaces().\n&gt; methods:::.implicitTable[[\"crossprod\"]]@default\nMethod Definition (Class \"derivedDefaultMethod\"):\n\nfunction (x, y = NULL, ...) \nbase::crossprod(x, y)\n&lt;environment: 0x1070f6028&gt;\n\nSignatures:\n        x    \ntarget  \"ANY\"\ndefined \"ANY\"\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1732920181.006449",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "DBj",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18830] New: remove crossprod, tcrossprod from methods:::.implicitTable",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18830"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18830\n           Summary: remove crossprod, tcrossprod from\n                    methods:::.implicitTable\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: S4methods\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/methods\/R\/makeBasicFunsList.R\n===================================================================\n--- src\/library\/methods\/R\/makeBasicFunsList.R   (revision 87406)\n+++ src\/library\/methods\/R\/makeBasicFunsList.R   (working copy)\n@@ -251,15 +251,6 @@\n     setGenericImplicit(\"rowMeans\", where, FALSE)\n     setGenericImplicit(\"rowSums\",  where, FALSE)\n\n-    setGeneric(\"crossprod\", function(x, y = NULL, ...)\nstandardGeneric(\"crossprod\"),\n-              useAsDefault = function(x, y = NULL, ...) base::crossprod(x, y),\n-              signature = c(\"x\", \"y\"), where = where)\n-    setGeneric(\"tcrossprod\", function(x, y = NULL, ...)\nstandardGeneric(\"tcrossprod\"),\n-              useAsDefault = function(x, y = NULL, ...) base::tcrossprod(x,\ny),\n-              signature = c(\"x\", \"y\"), where = where)\n-    setGenericImplicit(\"crossprod\",  where, FALSE)\n-    setGenericImplicit(\"tcrossprod\",  where, FALSE)\n-\n     setGeneric(\"sample\", function(x, size, replace = FALSE, prob = NULL, ...)\n                        standardGeneric(\"sample\"),\n               useAsDefault = function(x, size, replace = FALSE, prob = NULL,\n...)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSince "
+                            },
+                            {
+                                "type": "text",
+                                "text": "crossprod",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tcrossprod",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " are (now) internally generic primitive\nfunctions, they get formal generic function objects from\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods:::.BasicFunsList",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", no longer from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods:::.implicitTable",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  The\nobjects are not identical, and the latter is no longer needed ...\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> methods:::.BasicFunsList[[\"crossprod\"]]\nstandardGeneric for \"crossprod\" defined from package \"base\"\n\nfunction (x, y = NULL, ...) \nstandardGeneric(\"crossprod\", .Primitive(\"crossprod\"))\n<bytecode: 0x10701b420>\n<environment: 0x107015d50>\nMethods may be defined for arguments: x, y\nUse  showMethods(<pkg>:::crossprod)  for currently available ones where <pkg>\ndoes not seem to be among the loadedNamespaces().\n> methods:::.BasicFunsList[[\"crossprod\"]]@default\nfunction (x, y = NULL, ...)  .Primitive(\"crossprod\")\n> methods:::.implicitTable[[\"crossprod\"]]\nstandardGeneric for \"crossprod\" defined from package \"base\"\n\nfunction (x, y = NULL, ...) \nstandardGeneric(\"crossprod\")\n<bytecode: 0x107132e80>\n<environment: 0x1071289b8>\nMethods may be defined for arguments: x, y\nUse  showMethods(<pkg>:::crossprod)  for currently available ones where <pkg>\ndoes not seem to be among the loadedNamespaces().\n> methods:::.implicitTable[[\"crossprod\"]]@default\nMethod Definition (Class \"derivedDefaultMethod\"):\n\nfunction (x, y = NULL, ...) \nbase::crossprod(x, y)\n<environment: 0x1070f6028>\n\nSignatures:\n        x    \ntarget  \"ANY\"\ndefined \"ANY\"\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,849 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18186] Any broken symlinks prevent R CMD build from running, even if .Rbuildignored.*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18186>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #2901|0                           |1\n        is obsolete|                            |\n\n--- Comment #3 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nCreated attachment 3449\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3449&amp;action=edit>\na tar compressed `symlinkPkg\/` directory w\/ broken link inside .\/R\/  (indeed,\n*not* the result of `R CMD build`, but straight tar)\n\nI've applied your patch to my version of R-devel. \n\n- after building, the resulting R-devel works indeed for your example\n`dummy.tar.gz` (attachment 2901) however it fails for the very slightly more\nsophisticated `symlinkPkg` which I am attaching now:\n```\n* checking for file ‘symlinkPkg\/DESCRIPTION’ ... OK\ncp: cannot stat 'R\/misc.R': No such file or directory\ncp: cannot stat 'R\/misc.R': No such file or directory\n ERROR\ncopying to build directory failed\nError in do_exit(1L) : .build_packages() exit status 1\n```\n\nThis may be because you had replaced  `setwd(dirname(pkgdir))`\nby `setwd(pkgdir)`  inspite of the comment above, ending with ` cd to parent of\ncopy`.\n\nBut there is a much bigger problem: If I try to use the patched R-devel to\nbuild Matrix from the source, you can get it via\n```\nsvn checkout --quiet <svn:\/\/svn.r-forge.r-project.org\/svnroot\/matrix\/pkg\/Matrix>\n```\nI get the following:\n```\nR-devel CMD build --no-resave-data  --compact-vignettes=both Matrix\n* checking for file ‘Matrix\/DESCRIPTION’ ... OK\ncp: will not overwrite just-created\n'\/tmp\/RtmpxeRAbk\/Rbuild2cbb094776b37d\/Matrix\/ChangeLog' with\n'inst\/doc\/SuiteSparse\/CAMD\/Doc\/ChangeLog'\ncp: will not overwrite just-created\n'\/tmp\/RtmpxeRAbk\/Rbuild2cbb094776b37d\/Matrix\/License.txt' with\n'inst\/doc\/SuiteSparse\/CAMD\/Doc\/License.txt'\ncp: will not overwrite just-created\n'\/tmp\/RtmpxeRAbk\/Rbuild2cbb094776b37d\/Matrix\/README.txt' with\n'inst\/doc\/SuiteSparse\/CAMD\/README.txt'\ncp: will not overwrite just-created\n'\/tmp\/RtmpxeRAbk\/Rbuild2cbb094776b37d\/Matrix\/ChangeLog' with\n'inst\/doc\/SuiteSparse\/CCOLAMD\/Doc\/ChangeLog'\n.........\n.........  (dozens more of such   cp: will not overwrite ...   messages)\n.........\ncp: will not overwrite just-created\n'\/tmp\/RtmpxeRAbk\/Rbuild2cbb094776b37d\/Matrix\/bind.R' with 'tests\/bind.R'\n ERROR\ncopying to build directory failed\n```\n\nSo I must revert my version of R-devel (undoing your patch) in order to use it\nproductively.\nI do understand that your patch uses a correct approach in principle, trying to\ncreate the logical vector  `excludes`  earlier and only then do copy only the\nnon-excluded files ...  and that's all fine.\nBut somewhere your new code must blunder in case the package directory\nstructure is relatively complicated (as e.g. with the Matrix package).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1739010455.223729",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "xZK+",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18186] Any broken symlinks prevent R CMD build from running, even if .Rbuildignored.",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18186"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #2901|0                           |1\n        is obsolete|                            |\n\n--- Comment #3 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3449\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3449&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3449&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\na tar compressed "
+                            },
+                            {
+                                "type": "text",
+                                "text": "symlinkPkg\/",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " directory w\/ broken link inside .\/R\/  (indeed,\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " the result of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R CMD build",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", but straight tar)\n\nI've applied your patch to my version of R-devel. \n\n- after building, the resulting R-devel works indeed for your example\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "dummy.tar.gz",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (attachment 2901) however it fails for the very slightly more\nsophisticated "
+                            },
+                            {
+                                "type": "text",
+                                "text": "symlinkPkg",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " which I am attaching now:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "* checking for file 'symlinkPkg\/DESCRIPTION' ... OK\ncp: cannot stat 'R\/misc.R': No such file or directory\ncp: cannot stat 'R\/misc.R': No such file or directory\n ERROR\ncopying to build directory failed\nError in do_exit(1L) : .build_packages() exit status 1\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis may be because you had replaced  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "setwd(dirname(pkgdir))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nby "
+                            },
+                            {
+                                "type": "text",
+                                "text": "setwd(pkgdir)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  inspite of the comment above, ending with ` cd to parent of\ncopy`.\n\nBut there is a much bigger problem: If I try to use the patched R-devel to\nbuild Matrix from the source, you can get it via"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "svn checkout --quiet "
+                            },
+                            {
+                                "type": "link",
+                                "url": "svn:\/\/svn.r-forge.r-project.org\/svnroot\/matrix\/pkg\/Matrix"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I get the following:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "R-devel CMD build --no-resave-data  --compact-vignettes=both Matrix\n* checking for file 'Matrix\/DESCRIPTION' ... OK\ncp: will not overwrite just-created\n'\/tmp\/RtmpxeRAbk\/Rbuild2cbb094776b37d\/Matrix\/ChangeLog' with\n'inst\/doc\/SuiteSparse\/CAMD\/Doc\/ChangeLog'\ncp: will not overwrite just-created\n'\/tmp\/RtmpxeRAbk\/Rbuild2cbb094776b37d\/Matrix\/License.txt' with\n'inst\/doc\/SuiteSparse\/CAMD\/Doc\/License.txt'\ncp: will not overwrite just-created\n'\/tmp\/RtmpxeRAbk\/Rbuild2cbb094776b37d\/Matrix\/README.txt' with\n'inst\/doc\/SuiteSparse\/CAMD\/README.txt'\ncp: will not overwrite just-created\n'\/tmp\/RtmpxeRAbk\/Rbuild2cbb094776b37d\/Matrix\/ChangeLog' with\n'inst\/doc\/SuiteSparse\/CCOLAMD\/Doc\/ChangeLog'\n.........\n.........  (dozens more of such   cp: will not overwrite ...   messages)\n.........\ncp: will not overwrite just-created\n'\/tmp\/RtmpxeRAbk\/Rbuild2cbb094776b37d\/Matrix\/bind.R' with 'tests\/bind.R'\n ERROR\ncopying to build directory failed\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSo I must revert my version of R-devel (undoing your patch) in order to use it\nproductively.\nI do understand that your patch uses a correct approach in principle, trying to\ncreate the logical vector  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "excludes",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  earlier and only then do copy only the\nnon-excluded files ...  and that's all fine.\nBut somewhere your new code must blunder in case the package directory\nstructure is relatively complicated (as e.g. with the Matrix package)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "reactions": [
+            {
+                "name": "eyes",
+                "users": [
+                    "U0655E66NSY"
+                ],
+                "count": 1
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18852] R CMD check does not check return value from <https:\/\/worldtimeapi.org> robustly enough*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18852>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |ASSIGNED\n     Ever confirmed|0                           |1\n\n--- Comment #1 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nThank you, Michael\n\nI agree that it seems necessary to make this more robust.\nI'm currently checking a variation of your patch (notably as I think your\n`success()` function should not return TRUE for 0 length or length 2.\nInstead I use\n```\nnotOK &lt;- function(t) length(t) != 1 || <http:\/\/is.na|is.na>(t)\n```\nand use  `notOK(now)`  instead of your  `!success(now)`\n\nIf that change works fine for me, I will commit it after the weekend or so.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1739035023.546889",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "bOp",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18852] R CMD check does not check return value from ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/worldtimeapi.org",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " robustly enough",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18852"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |ASSIGNED\n     Ever confirmed|0                           |1\n\n--- Comment #1 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you, Michael\n\nI agree that it seems necessary to make this more robust.\nI'm currently checking a variation of your patch (notably as I think your\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "success()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " function should not return TRUE for 0 length or length 2.\nInstead I use"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "notOK <- function(t) length(t) != 1 || "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(t)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "and use  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "notOK(now)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  instead of your  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "!success(now)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIf that change works fine for me, I will commit it after the weekend or so."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18854] New: libgit2 does not actually have ssh support*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18854>\n\n            Bug ID: 18854\n           Summary: libgit2 does not actually have ssh support\n           Product: Rtools\n           Version: 4.4\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Toolchain and libraries\n          Assignee: <mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>\n          Reporter: <mailto:jeroenooms@gmail.com|jeroenooms@gmail.com>\n\nThe <http:\/\/libgit2.mk|libgit2.mk> formula depends on libssh2, however it is not actually enabled.\nI think you need to build with `-DUSE_SSH=ON`. Right now we see:\n\n\n```\n&gt; system(\"pkg-config --libs-only-l libgit2\")\n-lgit2 -lrpcrt4 -lcrypt32 -lole32 -lws2_32 -lsecur32 -lwinhttp -lwsock32\n-lws2_32 -lpcre -lz\n```\n\nBeing able to clone over ssh is an imporatnt feature of libgit2, so\nunfortunately this makes the current build unusable. This also explains why\nusers of the git2r R package have complained about this for the past years,\ne.g.\n\n - <https:\/\/github.com\/ropensci\/git2r\/issues\/439>\n - <https:\/\/github.com\/ropensci\/git2r\/issues\/453>\n\nMaybe we should check for these things to prevent this from happening.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1739042600.178129",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "f5Aax",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18854] New: libgit2 does not actually have ssh support",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18854"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18854\n           Summary: libgit2 does not actually have ssh support\n           Product: Rtools\n           Version: 4.4\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Toolchain and libraries\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jeroenooms@gmail.com",
+                                "text": "jeroenooms@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThe "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/libgit2.mk",
+                                "text": "libgit2.mk"
+                            },
+                            {
+                                "type": "text",
+                                "text": " formula depends on libssh2, however it is not actually enabled.\nI think you need to build with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "-DUSE_SSH=ON",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". Right now we see:\n\n\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> system(\"pkg-config --libs-only-l libgit2\")\n-lgit2 -lrpcrt4 -lcrypt32 -lole32 -lws2_32 -lsecur32 -lwinhttp -lwsock32\n-lws2_32 -lpcre -lz\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nBeing able to clone over ssh is an imporatnt feature of libgit2, so\nunfortunately this makes the current build unusable. This also explains why\nusers of the git2r R package have complained about this for the past years,\ne.g.\n\n - "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/ropensci\/git2r\/issues\/439"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n - "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/ropensci\/git2r\/issues\/453"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMaybe we should check for these things to prevent this from happening."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18855] New: parseLatex() makes several errors in parsing*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18855>\n\n            Bug ID: 18855\n           Summary: parseLatex() makes several errors in parsing\n           Product: R\n           Version: R 4.4.x\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Misc\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:murdoch.duncan@gmail.com|murdoch.duncan@gmail.com>\n\nIn developing a package with an enhanced version of `tools::parseLatex()`, I\nhave discovered several issues\/bugs in the original one.\n\n1.  Some very short syntax errors cause a crash, e.g.\n```\nparseLatex(\"{\")\n```\n\n2. The error messages are hard to read (see all the examples below).\n\n3. An empty environment is signalled as a syntax error:\n```\n&gt; parseLatex(\"\\\\begin{foo}\\\\end{foo}\")\nError in parseLatex(\"\\\\begin{foo}\\\\end{foo}\") :  in \"\\begin{foo}\\end\"\nIn addition: Warning message:\nIn parseLatex(\"\\\\begin{foo}\\\\end{foo}\") :\n  \"\\\\begin{foo}\\\\end{foo}\":1: unexpected END '\\end'\n```\n\n4. Including balanced braces in a `\\Sexpr` expression generates a syntax \nerror:\n```\n&gt; parseLatex(\"\\\\Sexpr{ 1 + {1} }\")\nError in parseLatex(\"\\\\Sexpr{ 1 + {1} }\") :  in \"\\Sexpr{ 1 + {1} }\"\nIn addition: Warning message:\nIn parseLatex(\"\\\\Sexpr{ 1 + {1} }\") :\n  \"\\\\Sexpr{ 1 + {1} }\":1: unexpected '}'\n```\n\n5. Non-matching delimeters should generate a syntax error, but don't:\n```\n&gt; parseLatex(\"\\\\begin{foo} abc \\\\end{bar}\")\n\\begin{foo} abc \\end{foo}\n```\n\n6. Latex ignores any text after `\\end{document}`, but `parseLatex()` doesn't:\n```\n&gt; parseLatex(\"\\\\begin{document} \\\\end{document} \\\\begin\")\nError in parseLatex(\"\\\\begin{document} \\\\end{document} \\\\begin\") : \n   in \"\\begin{document} \\end{document} \\begi\"\nIn addition: Warning message:\nIn parseLatex(\"\\\\begin{document} \\\\end{document} \\\\begin\") :\n  \"\\\\begin{document} \\\\end{document} \\\\begin\":1: unexpected END_OF_INPUT\n'\\begin', expecting '{'\n```\n\n7. Definitions using `\\newcommand` etc. can generate syntax errors, e.g. all of\nthese do because the parser is looking for `\"\\\\end{eqnarray*}\"` within the\nbraces:\n```\nparseLatex(\"\\\\newenvironment{bea}{\\\\begin{eqnarray*}}{\\\\end{eqnarray*}}\")\nparseLatex(\"\\\\newcommand{\\\\bea}{\\\\begin{eqnarray*}}\")\nparseLatex(\"\\\\def\\\\bea{\\\\begin{eqnarray*}}\")\n```\n\nI'm preparing a patch to deal with 1, 3, 4 and 5.  Number 2 (the error\nmessages) needs a lot of work, so I won't include that in this fix.  I think 6\nand 7 are out of scope for this parser, but I could easily include a fix for 6\nif requested.  Fixing 7 is more work, but I could probably put something\ntogether if it's seen as important.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1739046098.629659",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "aXljU",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18855] New: parseLatex() makes several errors in parsing",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18855"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18855\n           Summary: parseLatex() makes several errors in parsing\n           Product: R\n           Version: R 4.4.x\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Misc\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:murdoch.duncan@gmail.com",
+                                "text": "murdoch.duncan@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIn developing a package with an enhanced version of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tools::parseLatex()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", I\nhave discovered several issues\/bugs in the original one.\n\n1.  Some very short syntax errors cause a crash, e.g."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "parseLatex(\"{\")\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n2. The error messages are hard to read (see all the examples below).\n\n3. An empty environment is signalled as a syntax error:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> parseLatex(\"\\\\begin{foo}\\\\end{foo}\")\nError in parseLatex(\"\\\\begin{foo}\\\\end{foo}\") :  in \"\\begin{foo}\\end\"\nIn addition: Warning message:\nIn parseLatex(\"\\\\begin{foo}\\\\end{foo}\") :\n  \"\\\\begin{foo}\\\\end{foo}\":1: unexpected END '\\end'\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n4. Including balanced braces in a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\\Sexpr",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " expression generates a syntax \nerror:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> parseLatex(\"\\\\Sexpr{ 1 + {1} }\")\nError in parseLatex(\"\\\\Sexpr{ 1 + {1} }\") :  in \"\\Sexpr{ 1 + {1} }\"\nIn addition: Warning message:\nIn parseLatex(\"\\\\Sexpr{ 1 + {1} }\") :\n  \"\\\\Sexpr{ 1 + {1} }\":1: unexpected '}'\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n5. Non-matching delimeters should generate a syntax error, but don't:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> parseLatex(\"\\\\begin{foo} abc \\\\end{bar}\")\n\\begin{foo} abc \\end{foo}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n6. Latex ignores any text after "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\\end{document}",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", but "
+                            },
+                            {
+                                "type": "text",
+                                "text": "parseLatex()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " doesn't:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> parseLatex(\"\\\\begin{document} \\\\end{document} \\\\begin\")\nError in parseLatex(\"\\\\begin{document} \\\\end{document} \\\\begin\") : \n   in \"\\begin{document} \\end{document} \\begi\"\nIn addition: Warning message:\nIn parseLatex(\"\\\\begin{document} \\\\end{document} \\\\begin\") :\n  \"\\\\begin{document} \\\\end{document} \\\\begin\":1: unexpected END_OF_INPUT\n'\\begin', expecting '{'\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n7. Definitions using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\\newcommand",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " etc. can generate syntax errors, e.g. all of\nthese do because the parser is looking for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"\\\\end{eqnarray*}\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " within the\nbraces:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "parseLatex(\"\\\\newenvironment{bea}{\\\\begin{eqnarray*}}{\\\\end{eqnarray*}}\")\nparseLatex(\"\\\\newcommand{\\\\bea}{\\\\begin{eqnarray*}}\")\nparseLatex(\"\\\\def\\\\bea{\\\\begin{eqnarray*}}\")\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI'm preparing a patch to deal with 1, 3, 4 and 5.  Number 2 (the error\nmessages) needs a lot of work, so I won't include that in this fix.  I think 6\nand 7 are out of scope for this parser, but I could easily include a fix for 6\nif requested.  Fixing 7 is more work, but I could probably put something\ntogether if it's seen as important."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18854] libgit2 does not actually have ssh support*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18854>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #1 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nYes, this is likely as you write, per libgit2 documentation, USE_SSH is off by\ndefault. And, yes, it could be the intention was to build the ssh support in,\ngiven the MXE dependency on libssh2, so it shouldn't be too hard persuading MXE\nmaintainers that ssh be enabled.\n\nIt would be best if you could report this upstream to MXE, and feel free to\nping me then when it is accepted so I merge it to Rtools sooner.\n\nOtherwise I don't see why this build would be \"unusable\", it just simply\ndoesn't support ssh. It is not a bug - but of course something that could be\nimproved.\n\nIt is the responsibility of the maintainer of the R package to diagnose\nreported issues, to figure out in this case a problem is that the package (or\nuser) expects a certain feature enabled in the library, and then report it.\n\nWhenever possible, even though perhaps not easily in this case, it helps when\nfeatures deemed important are exercised in the regression tests: then whoever\nworking on a new toolchain, or updating a toolchain, can tune things\naccordingly.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1739049664.012339",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "6FUw",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18854] libgit2 does not actually have ssh support",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18854"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #1 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nYes, this is likely as you write, per libgit2 documentation, USE_SSH is off by\ndefault. And, yes, it could be the intention was to build the ssh support in,\ngiven the MXE dependency on libssh2, so it shouldn't be too hard persuading MXE\nmaintainers that ssh be enabled.\n\nIt would be best if you could report this upstream to MXE, and feel free to\nping me then when it is accepted so I merge it to Rtools sooner.\n\nOtherwise I don't see why this build would be \"unusable\", it just simply\ndoesn't support ssh. It is not a bug - but of course something that could be\nimproved.\n\nIt is the responsibility of the maintainer of the R package to diagnose\nreported issues, to figure out in this case a problem is that the package (or\nuser) expects a certain feature enabled in the library, and then report it.\n\nWhenever possible, even though perhaps not easily in this case, it helps when\nfeatures deemed important are exercised in the regression tests: then whoever\nworking on a new toolchain, or updating a toolchain, can tune things\naccordingly."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18855] parseLatex() makes several errors in parsing*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18855>\n\n--- Comment #1 from Duncan Murdoch (<mailto:murdoch.duncan@gmail.com|murdoch.duncan@gmail.com>) ---\nCreated attachment 3450\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3450&amp;action=edit>\nFixes issues 1,3,4 and 5.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1739050825.557019",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Cj+24",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18855] parseLatex() makes several errors in parsing",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18855"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Duncan Murdoch ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:murdoch.duncan@gmail.com",
+                                "text": "murdoch.duncan@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3450\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3450&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3450&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nFixes issues 1,3,4 and 5."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,1792 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18841] options(show.error.locations = TRUE) sometimes fails*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18841>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n             Status|UNCONFIRMED                 |CONFIRMED\n                 CC|                            |tomas.kalibera@gmail.com\n\n--- Comment #3 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nThanks for spotting this problem in R_GetCurrentSrcref(). Clearly, it hasn't\nbeen updated to work with source reference tracking in the byte-code\ninterpreter, I must have forgotten about this function.\n\nFor reference, an easy way to see this without debugging is to run the example\nwith the byte-code interpreter disabled, that way the error message includes\n\"(from t.r#4)\", when the file is named t.r. This bug definitely should be fixed\n(I am less sure about the proposed extension and I would discuss that later\nseparately).\n\nBack to the bug, a quick comment first, the idea was one would use\nR_getCurrentSrcref() (lower-case \"g\") to obtain what used to be R_Srcref before\nsource reference support in the byte-code interpreter, rather than relying on\nthat there is already a context with the corresponding byte-code body (which it\nthough may be at the only place where R_GetCurrentSrcref() (upper-case G) is\nused.\n\nBut before actually fixing the function to handle the R_InBCInterpreter marker,\nI am wondering whether the function behavior shouldn't be changed.\n\nThe function is traversing and counting over all contexts, not just function\ncontexts. I think that other contexts that function contexts (CTXT_FUNCTION\nprobably | CTXT_BUILTIN) are the only ones that should be visible to the user.\nOther contexts, primarily CTXT_CCODE, should be only for private use inside\nbase R implementation and base R needs to be able to freely add them and remove\nthem as needed (e.g. for cleanup on a long jump). After all, one CTXT_CCODE is\npart of the error handling and is where the search currently starts in the\nexample. \n\nAlso, traversing over function contexts is something normally done in R at\nsimilar places, including Rf_printwhere (it is more than that: only counting\ncontexts with CTXT_FUNCTION|CTXT_BULTIN with a LANGSXP (so not null) call).\nAlso, for consistency, I think R_GetCurrentSrcref() (so show.error.locations,\nthis is where it is only used) should do the same.\n\nMoreover, to further match the concept of counting over function context, like\nin a \"normal stacktrace\" people might expect, I think one shouldn't skip calls\nwithout source references. Imagine that contexts are mixed between base R code\n(normally without source references, indeed including the base package) and\nuser code with source references. Some packages involved may have source\nreferences, some not. So the result may be rather arbitrary depending on which\ncontexts happen to have source references and which not. My preference would be\nto show the location only when the corresponding (by the specified count)\nelement of the stacktrace does have a source reference. After all, this example\nstarts in a context which has a source reference captured from a previous\ncontext, but that reference is nil, because base package (function stop)\nhappens not to have source references. (I understand we would have to think\nabout how to exclude the boring for the user like \"stop\" wrapper, if we go this\nway).\n\nThe only place where R_GetCurrentSrcref() is used is show.error.locations. My\nreading of the documentation (?options) is that as a user I would expect\ntraversing over the R stacktrace, by which I would understand something like\nR_printwhere(). So, I think changing the implementation along this way would be\nin-line with the documentation. \n\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737709336.968039",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "lrQz",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18841] options(show.error.locations = TRUE) sometimes fails",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18841"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n             Status|UNCONFIRMED                 |CONFIRMED\n                 CC|                            |tomas.kalibera@gmail.com\n\n--- Comment #3 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for spotting this problem in R_GetCurrentSrcref(). Clearly, it hasn't\nbeen updated to work with source reference tracking in the byte-code\ninterpreter, I must have forgotten about this function.\n\nFor reference, an easy way to see this without debugging is to run the example\nwith the byte-code interpreter disabled, that way the error message includes\n\"(from t.r#4)\", when the file is named t.r. This bug definitely should be fixed\n(I am less sure about the proposed extension and I would discuss that later\nseparately).\n\nBack to the bug, a quick comment first, the idea was one would use\nR_getCurrentSrcref() (lower-case \"g\") to obtain what used to be R_Srcref before\nsource reference support in the byte-code interpreter, rather than relying on\nthat there is already a context with the corresponding byte-code body (which it\nthough may be at the only place where R_GetCurrentSrcref() (upper-case G) is\nused.\n\nBut before actually fixing the function to handle the R_InBCInterpreter marker,\nI am wondering whether the function behavior shouldn't be changed.\n\nThe function is traversing and counting over all contexts, not just function\ncontexts. I think that other contexts that function contexts (CTXT_FUNCTION\nprobably | CTXT_BUILTIN) are the only ones that should be visible to the user.\nOther contexts, primarily CTXT_CCODE, should be only for private use inside\nbase R implementation and base R needs to be able to freely add them and remove\nthem as needed (e.g. for cleanup on a long jump). After all, one CTXT_CCODE is\npart of the error handling and is where the search currently starts in the\nexample. \n\nAlso, traversing over function contexts is something normally done in R at\nsimilar places, including Rf_printwhere (it is more than that: only counting\ncontexts with CTXT_FUNCTION|CTXT_BULTIN with a LANGSXP (so not null) call).\nAlso, for consistency, I think R_GetCurrentSrcref() (so show.error.locations,\nthis is where it is only used) should do the same.\n\nMoreover, to further match the concept of counting over function context, like\nin a \"normal stacktrace\" people might expect, I think one shouldn't skip calls\nwithout source references. Imagine that contexts are mixed between base R code\n(normally without source references, indeed including the base package) and\nuser code with source references. Some packages involved may have source\nreferences, some not. So the result may be rather arbitrary depending on which\ncontexts happen to have source references and which not. My preference would be\nto show the location only when the corresponding (by the specified count)\nelement of the stacktrace does have a source reference. After all, this example\nstarts in a context which has a source reference captured from a previous\ncontext, but that reference is nil, because base package (function stop)\nhappens not to have source references. (I understand we would have to think\nabout how to exclude the boring for the user like \"stop\" wrapper, if we go this\nway).\n\nThe only place where R_GetCurrentSrcref() is used is show.error.locations. My\nreading of the documentation (?options) is that as a user I would expect\ntraversing over the R stacktrace, by which I would understand something like\nR_printwhere(). So, I think changing the implementation along this way would be\nin-line with the documentation."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "Also, in principle, while the function is in the R API (available for\npackages), it is not used by any CRAN package (only one that automatically\ngenerates a representation of the R API, but doesn't actually use it). So I am\nthinking changing the behavior shouldn't affect any package, and perhaps we\ncould even remove it from the API to create more space for further\nimprovements.\n\nWhat do think?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737709336.991319",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "YwOb",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Also, in principle, while the function is in the R API (available for\npackages), it is not used by any CRAN package (only one that automatically\ngenerates a representation of the R API, but doesn't actually use it). So I am\nthinking changing the behavior shouldn't affect any package, and perhaps we\ncould even remove it from the API to create more space for further\nimprovements.\n\nWhat do think?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18841] options(show.error.locations = TRUE) sometimes fails*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18841>\n\n--- Comment #4 from Duncan Murdoch (<mailto:murdoch.duncan@gmail.com|murdoch.duncan@gmail.com>) ---\nI'm not sure I understand your proposed change.  Here is my understanding:\n\n - The context stack contains 3 kinds of things:  1, function entries with a\nsrcref, 2, function entries without a srcref (like the one for stop()), and 3,\nother internal ones that the user shouldn't know about.  I assume the last type\nnever has a srcref.\n\n - I think you are proposing that if the current srcref is requested when we\nare in a type 2 context, the search should stop and not say a location, it\nshouldn't \nsearch back through the call stack.\n\n - I think you are also proposing that if it is requested in a type 3 context\nwe should search back for the most recent type 1 or 2 context, because users\nshouldn't know about type 3.\n\nI'm fine with the second proposal, but not so sure about the first one.  You\nmentioned stop() as needing special treatment, all functions without srcrefs \nare similar.  For example, this code (in test.R):\n```\noptions(show.error.locations = TRUE)\n\n\nf &lt;- function() stop('this is an error')\nattributes(f) &lt;- NULL  # remove the srcref\n\ng &lt;- function() {\n\n  f()\n\n}\n\ng()\n```\nIn the example, f() doesn't have srcref information, but g() does.  In your\nproposal, the error will be reported as something like\n```\nError in f() : this is an error\n```\nand won't tell the user where that call came from.  I think it's more helpful\nto the user to see that the originating call (which is likely from their code,\nsince most packages don't have srcrefs) came from a particular line, e.g.\n\n```\nError in f() (from test.R#8) : this is an error\n```\n\nI used \"from test.R#8\" rather than \"at test.R#8\" because the message isn't\nclaiming the error happened there, but the error was triggered by code that was\nthere.\n\nSorry if I have misunderstood your proposal.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737716830.122629",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "XPFW",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18841] options(show.error.locations = TRUE) sometimes fails",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18841"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Duncan Murdoch ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:murdoch.duncan@gmail.com",
+                                "text": "murdoch.duncan@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI'm not sure I understand your proposed change.  Here is my understanding:\n\n - The context stack contains 3 kinds of things:  1, function entries with a\nsrcref, 2, function entries without a srcref (like the one for stop()), and 3,\nother internal ones that the user shouldn't know about.  I assume the last type\nnever has a srcref.\n\n - I think you are proposing that if the current srcref is requested when we\nare in a type 2 context, the search should stop and not say a location, it\nshouldn't \nsearch back through the call stack.\n\n - I think you are also proposing that if it is requested in a type 3 context\nwe should search back for the most recent type 1 or 2 context, because users\nshouldn't know about type 3.\n\nI'm fine with the second proposal, but not so sure about the first one.  You\nmentioned stop() as needing special treatment, all functions without srcrefs \nare similar.  For example, this code (in test.R):"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "options(show.error.locations = TRUE)\n\n\nf <- function() stop('this is an error')\nattributes(f) <- NULL  # remove the srcref\n\ng <- function() {\n\n  f()\n\n}\n\ng()\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "In the example, f() doesn't have srcref information, but g() does.  In your\nproposal, the error will be reported as something like"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Error in f() : this is an error\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "and won't tell the user where that call came from.  I think it's more helpful\nto the user to see that the originating call (which is likely from their code,\nsince most packages don't have srcrefs) came from a particular line, e.g.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Error in f() (from test.R#8) : this is an error\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI used \"from test.R#8\" rather than \"at test.R#8\" because the message isn't\nclaiming the error happened there, but the error was triggered by code that was\nthere.\n\nSorry if I have misunderstood your proposal."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18841] options(show.error.locations = TRUE) sometimes fails*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18841>\n\n--- Comment #5 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\n(In reply to Duncan Murdoch from comment #4)\n&gt; I'm not sure I understand your proposed change.  Here is my understanding:\n\nThanks for looking into this.\n&gt; \n&gt;  - The context stack contains 3 kinds of things:  1, function entries with a\n&gt; srcref, 2, function entries without a srcref (like the one for stop()), and\n&gt; 3, other internal ones that the user shouldn't know about.  I assume the\n&gt; last type never has a srcref.\n\nThe internal ones (e.g. CCODE) also include a srcref. The srcref field in the\ncontext is a sample of the global variable R_Srcref at the time of a call to\nbegincontext(). So, normally, if one has a function context and the function\ncreates an internal context, that internal context will have the same srcref as\nthe function. But, my understanding is that the current algorithm will count\nthis as two source references when interpreting the \"skip\" value. This is why I\nwould like to skip the internal contexts when counting.\n\n&gt;  - I think you are proposing that if the current srcref is requested when we\n&gt; are in a type 2 context, the search should stop and not say a location, it\n&gt; shouldn't \n&gt; search back through the call stack.\n\nYes. I am not thinking only about the use of show.error.locations = TRUE, but\nalso when the user gives a specific number that specifies location of which\nfunction on the stack to show. Searching back through the stack means that the\nfunction is giving a location for something else than it has been asked for. If\nwe said that the number talks only about context with a source reference, then\nit would make debugging less deterministic: think about that to learn more, the\nuser would compile some package with source references, and then the offsets\nwould suddenly mean something else.\n\n&gt;  - I think you are also proposing that if it is requested in a type 3\n&gt; context we should search back for the most recent type 1 or 2 context,\n&gt; because users shouldn't know about type 3.\n\nYes, though my formulation would be that I am proposing to disregard type 3\ncontexts when counting, because the user specified the number in terms of 1 or\n2 contexts (so, the requested type cannot be a type 3 context).\n\n&gt; \n&gt; I'm fine with the second proposal, but not so sure about the first one.  You\n&gt; mentioned stop() as needing special treatment, all functions without srcrefs \n&gt; are similar.  For example, this code (in test.R):\n&gt; ```\n&gt; options(show.error.locations = TRUE)\n&gt; \n&gt; \n&gt; f &lt;- function() stop('this is an error')\n&gt; attributes(f) &lt;- NULL  # remove the srcref\n&gt; \n&gt; g &lt;- function() {\n&gt;   \n&gt;   f()\n&gt; \n&gt; }\n&gt; \n&gt; g()\n&gt; ```\n&gt; In the example, f() doesn't have srcref information, but g() does.  In your\n&gt; proposal, the error will be reported as something like\n&gt; ```\n&gt; Error in f() : this is an error\n&gt; ```\n&gt; and won't tell the user where that call came from.  I think it's more\n&gt; helpful to the user to see that the originating call (which is likely from\n&gt; their code, since most packages don't have srcrefs) came from a particular\n&gt; line, e.g.\n&gt; \n&gt; ```\n&gt; Error in f() (from test.R#8) : this is an error\n&gt; ```\n&gt; \n&gt; I used \"from test.R#8\" rather than \"at test.R#8\" because the message isn't\n&gt; claiming the error happened there, but the error was triggered by code that\n&gt; was there.\n\nI see. I understand that the idea of the special handling of something like\nstop() is a bit complicated, and maybe better to avoid it completely (I was\nthinking something along the lines of excluding only the call to stop() from\nthe count, if it is on the stack, not other calls that have no source\nreferences; to hide from the user the fact that stop() is actually implemented\nin R and calls a C function). I think some other stack walking functions do a\nsimilar thing.\n\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737721556.677589",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Xfy4",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18841] options(show.error.locations = TRUE) sometimes fails",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18841"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Duncan Murdoch from comment #4)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I'm not sure I understand your proposed change.  Here is my understanding:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThanks for looking into this."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n - The context stack contains 3 kinds of things:  1, function entries with a\nsrcref, 2, function entries without a srcref (like the one for stop()), and\n3, other internal ones that the user shouldn't know about.  I assume the\nlast type never has a srcref."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe internal ones (e.g. CCODE) also include a srcref. The srcref field in the\ncontext is a sample of the global variable R_Srcref at the time of a call to\nbegincontext(). So, normally, if one has a function context and the function\ncreates an internal context, that internal context will have the same srcref as\nthe function. But, my understanding is that the current algorithm will count\nthis as two source references when interpreting the \"skip\" value. This is why I\nwould like to skip the internal contexts when counting.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " - I think you are proposing that if the current srcref is requested when we\nare in a type 2 context, the search should stop and not say a location, it\nshouldn't \nsearch back through the call stack."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nYes. I am not thinking only about the use of show.error.locations = TRUE, but\nalso when the user gives a specific number that specifies location of which\nfunction on the stack to show. Searching back through the stack means that the\nfunction is giving a location for something else than it has been asked for. If\nwe said that the number talks only about context with a source reference, then\nit would make debugging less deterministic: think about that to learn more, the\nuser would compile some package with source references, and then the offsets\nwould suddenly mean something else.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " - I think you are also proposing that if it is requested in a type 3\ncontext we should search back for the most recent type 1 or 2 context,\nbecause users shouldn't know about type 3."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nYes, though my formulation would be that I am proposing to disregard type 3\ncontexts when counting, because the user specified the number in terms of 1 or\n2 contexts (so, the requested type cannot be a type 3 context).\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nI'm fine with the second proposal, but not so sure about the first one.  You\nmentioned stop() as needing special treatment, all functions without srcrefs \nare similar.  For example, this code (in test.R):\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> options(show.error.locations = TRUE)\n> \n> \n> f <- function() stop('this is an error')\n> attributes(f) <- NULL  # remove the srcref\n> \n> g <- function() {\n>   \n>   f()\n> \n> }\n> \n> g()\n> "
+                            }
+                        ],
+                        "border": 1
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "In the example, f() doesn't have srcref information, but g() does.  In your\nproposal, the error will be reported as something like\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> Error in f() : this is an error\n> "
+                            }
+                        ],
+                        "border": 1
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "and won't tell the user where that call came from.  I think it's more\nhelpful to the user to see that the originating call (which is likely from\ntheir code, since most packages don't have srcrefs) came from a particular\nline, e.g.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> Error in f() (from test.R#8) : this is an error\n> "
+                            }
+                        ],
+                        "border": 1
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nI used \"from test.R#8\" rather than \"at test.R#8\" because the message isn't\nclaiming the error happened there, but the error was triggered by code that\nwas there."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI see. I understand that the idea of the special handling of something like\nstop() is a bit complicated, and maybe better to avoid it completely (I was\nthinking something along the lines of excluding only the call to stop() from\nthe count, if it is on the stack, not other calls that have no source\nreferences; to hide from the user the fact that stop() is actually implemented\nin R and calls a C function). I think some other stack walking functions do a\nsimilar thing."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "Re your point that \"test.R#8 is more useful\" in your example, yes, but in\nprinciple there could be many calls in the call stack before the error that\nhave no source references, and then the line information may be confusing.\n\nBut my strongest concern re skipping locations without source references is as\nI wrote above that it makes the indexing confusing. If say this optional\nfunctionality only allowed setting show.error.locations = TRUE which would mean\n\"give me the source reference, if any, that is closest to the error\", that\nwould be semantics I understand, but the combination with the indexing makes\nthis hard for me to understand.\n\n&gt; \n&gt; Sorry if I have misunderstood your proposal.\n\nSorry if I misunderstood your API. What was your idea of how and when users\nwould use show.error.locations with a number?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737721556.701549",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "fYyIT",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Re your point that \"test.R#8 is more useful\" in your example, yes, but in\nprinciple there could be many calls in the call stack before the error that\nhave no source references, and then the line information may be confusing.\n\nBut my strongest concern re skipping locations without source references is as\nI wrote above that it makes the indexing confusing. If say this optional\nfunctionality only allowed setting show.error.locations = TRUE which would mean\n\"give me the source reference, if any, that is closest to the error\", that\nwould be semantics I understand, but the combination with the indexing makes\nthis hard for me to understand.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nSorry if I have misunderstood your proposal."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSorry if I misunderstood your API. What was your idea of how and when users\nwould use show.error.locations with a number?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18841] options(show.error.locations = TRUE) sometimes fails*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18841>\n\n--- Comment #6 from Duncan Murdoch (<mailto:murdoch.duncan@gmail.com|murdoch.duncan@gmail.com>) ---\n\"What was your idea of how and when users would use show.error.locations with a\nnumber?\"\n\nI had completely forgotten about that possibility until I looked at it\nrecently, and I don't remember what my thinking was.  I can guess it was\nsomething like this:\n\n- I am developing a package and have enabled srcrefs in it.  I am seeing errors\nwith the package location reported, but I'd rather know about the calling\nlocation.\n\nNowadays if I had that problem I would look at traceback(), I wouldn't expect\nto be able to guess the skip value in advance, and re-running the code with a\ndifferent skip value would be less efficient than just looking at traceback().  \nThe only case where that might not be true is if I was catching the errors and\ncontinuing, but still wanted to report them.  That's a pretty obscure case.\n\nSo if I was redoing it today, I think I would simplify possible settings to\njust TRUE = \"top\", \"bottom\", or FALSE, or even just TRUE or FALSE.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737726733.811559",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "KY5",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18841] options(show.error.locations = TRUE) sometimes fails",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18841"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #6 from Duncan Murdoch ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:murdoch.duncan@gmail.com",
+                                "text": "murdoch.duncan@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n\"What was your idea of how and when users would use show.error.locations with a\nnumber?\"\n\nI had completely forgotten about that possibility until I looked at it\nrecently, and I don't remember what my thinking was.  I can guess it was\nsomething like this:\n\n- I am developing a package and have enabled srcrefs in it.  I am seeing errors\nwith the package location reported, but I'd rather know about the calling\nlocation.\n\nNowadays if I had that problem I would look at traceback(), I wouldn't expect\nto be able to guess the skip value in advance, and re-running the code with a\ndifferent skip value would be less efficient than just looking at traceback().  \nThe only case where that might not be true is if I was catching the errors and\ncontinuing, but still wanted to report them.  That's a pretty obscure case.\n\nSo if I was redoing it today, I think I would simplify possible settings to\njust TRUE = \"top\", \"bottom\", or FALSE, or even just TRUE or FALSE."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18841] options(show.error.locations = TRUE) sometimes fails*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18841>\n\n--- Comment #7 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\n(In reply to Duncan Murdoch from comment #6)\n\n&gt; Nowadays if I had that problem I would look at traceback(), I wouldn't\n&gt; expect to be able to guess the skip value in advance, and re-running the\n&gt; code with a different skip value would be less efficient than just looking\n&gt; at traceback().  \n\nThanks. And traceback() works on function contexts (CTXT_FUNCTION|CTXT_BUILTIN)\nregardless of whether they have source references or not - even those without\nsource references are displayed and are counted (and skipped in case skipping\nsome number of top frames is required).\n\n&gt; So if I was redoing it today, I think I would simplify possible settings to\n&gt; just TRUE = \"top\", \"bottom\", or FALSE, or even just TRUE or FALSE.\n\nThanks, yes, I meant to ask what \"bottom\" would be useful for. In the example\nin this PR, my traceback via options(error =function() traceback(3)), is:\n\nError in f() : an error\nCalls: source -&gt; withVisible -&gt; eval -&gt; eval -&gt; f\n6: stop(\"an error\") at tt.r#4\n5: f() at tt.r#6\n4: eval(ei, envir)\n3: eval(ei, envir)\n2: withVisible(eval(ei, envir))\n1: source(\"tt.r\", keep.source = TRUE)\n\nWith options(show.error.locations = TRUE) [byte-code interpreter disabled]:\n&gt; source(\"t.r\", keep.source=TRUE)\nError in f() (from t.r#4) : an error\n\nAnd with options(show.error.locations = \"bottom\") [byte-code interpreter\ndisabled]:\nError in f() (from tb.r#6) : an error\n\nwhere the test file is\n\n     1  options &lt; as-above &gt;\n     2  \n     3  f &lt;- function() {\n     4    stop(\"an error\")\n     5  }\n     6  f()\n\nso, well, I am not sure whether it could be useful to see the lowest source\nreference entry available on the stack (or possibly the source reference of the\nlowest function of the stack, if it had a source reference).\n\nNow, lets say we would simplify to just TRUE or FALSE (where FALSE is still the\ndefault). If we were to implement my approach of showing the source reference\nof the top function frame, if available (and nothing otherwise), we would get\nthe same thing as the first line of traceback(3). Then there would be little\npoint in having show.error.locations at all, as traceback() can already do it\nand gives more information. So with TRUE\/FALSE being the only options, if we\nwanted to keep the options, I agree it would make sense to stick to your\noriginal idea of printing the closest source reference to the error that is\navailable. It may be slightly expert-only option and I think hard to interpret\nin some cases, but then, it wouldn't be the default, so people can use it if\nthey want and ignore otherwise.\n\nWould you be ok with such a change (my understanding it is the last option you\nmentioned)? And if so, would you be interested in creating that patch (so\nincluding also the correct lookup of the source reference in the byte-code\ninterpreter)? I expect the search would start from R_Srcref (so now\ngetCurrentSrcref(), so from the global variable not necessarily a context). For\nreadability I think it would be good to look only at function contexts, in the\nsame way as in other traversal functions (sadly they are not all exactly the\nsame, but reducing the entropy always helps), but with the current\nimplementation it should have the same effect as simply looking at the closest\navailable srcref. The R_InBCInterpreter marker would be present even if the\nsource references are not available (but the context is in a byte-code\ninterpreter), as in your original patch.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737735770.381079",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "C14z2",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18841] options(show.error.locations = TRUE) sometimes fails",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18841"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #7 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Duncan Murdoch from comment #6)\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Nowadays if I had that problem I would look at traceback(), I wouldn't\nexpect to be able to guess the skip value in advance, and re-running the\ncode with a different skip value would be less efficient than just looking\nat traceback().  "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThanks. And traceback() works on function contexts (CTXT_FUNCTION|CTXT_BUILTIN)\nregardless of whether they have source references or not - even those without\nsource references are displayed and are counted (and skipped in case skipping\nsome number of top frames is required).\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "So if I was redoing it today, I think I would simplify possible settings to\njust TRUE = \"top\", \"bottom\", or FALSE, or even just TRUE or FALSE."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThanks, yes, I meant to ask what \"bottom\" would be useful for. In the example\nin this PR, my traceback via options(error =function() traceback(3)), is:\n\nError in f() : an error\nCalls: source -> withVisible -> eval -> eval -> f\n6: stop(\"an error\") at tt.r#4\n5: f() at tt.r#6\n4: eval(ei, envir)\n3: eval(ei, envir)\n2: withVisible(eval(ei, envir))\n1: source(\"tt.r\", keep.source = TRUE)\n\nWith options(show.error.locations = TRUE) [byte-code interpreter disabled]:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "source(\"t.r\", keep.source=TRUE)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Error in f() (from t.r#4) : an error\n\nAnd with options(show.error.locations = \"bottom\") [byte-code interpreter\ndisabled]:\nError in f() (from tb.r#6) : an error\n\nwhere the test file is\n\n     1  options < as-above >\n     2  \n     3  f <- function() {\n     4    stop(\"an error\")\n     5  }\n     6  f()\n\nso, well, I am not sure whether it could be useful to see the lowest source\nreference entry available on the stack (or possibly the source reference of the\nlowest function of the stack, if it had a source reference).\n\nNow, lets say we would simplify to just TRUE or FALSE (where FALSE is still the\ndefault). If we were to implement my approach of showing the source reference\nof the top function frame, if available (and nothing otherwise), we would get\nthe same thing as the first line of traceback(3). Then there would be little\npoint in having show.error.locations at all, as traceback() can already do it\nand gives more information. So with TRUE\/FALSE being the only options, if we\nwanted to keep the options, I agree it would make sense to stick to your\noriginal idea of printing the closest source reference to the error that is\navailable. It may be slightly expert-only option and I think hard to interpret\nin some cases, but then, it wouldn't be the default, so people can use it if\nthey want and ignore otherwise.\n\nWould you be ok with such a change (my understanding it is the last option you\nmentioned)? And if so, would you be interested in creating that patch (so\nincluding also the correct lookup of the source reference in the byte-code\ninterpreter)? I expect the search would start from R_Srcref (so now\ngetCurrentSrcref(), so from the global variable not necessarily a context). For\nreadability I think it would be good to look only at function contexts, in the\nsame way as in other traversal functions (sadly they are not all exactly the\nsame, but reducing the entropy always helps), but with the current\nimplementation it should have the same effect as simply looking at the closest\navailable srcref. The R_InBCInterpreter marker would be present even if the\nsource references are not available (but the context is in a byte-code\ninterpreter), as in your original patch."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18842] New: graphics::filled.contour() doesn't respect the \"col\" argument*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18842>\n\n            Bug ID: 18842\n           Summary: graphics::filled.contour() doesn't respect the \"col\"\n                    argument\n           Product: R\n           Version: R 4.4.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Graphics\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:andrey.anikin@lucs.lu.se|andrey.anikin@lucs.lu.se>\n\nCreated attachment 3444\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3444&amp;action=edit>\nProposed PRELIMINARY patch to filled.contour() - needs to be checked thoroughly\n\n## Problem\n\nFunction graphics::filled.contour() produces unexpected results when `col` is\nspecified (a vector of actual colors to use). Because `levels` default to\n`pretty(zlim, nlevels)` and `nlevels` are not dependent on the length of `col`,\n`col` vector is not respected, and specifying it explicitly leads to strange\nresults.\n\nA proposed patch (attached) is to add\n```\n  if (!missing(col) &amp; !is.null(col)) {\n    nlevels = length(col)\n    levels = seq(min(z, na.rm = TRUE), max(z, na.rm = TRUE), length.out =\nnlevels + 1)\n  }\n```\nbut this requires checking back-compatibility and the effect on dependencies.\nAlternatively, the documentation can be simply updated to explain that it's not\nenough to pass only `col`, but also `levels` and `nlevels`.\n\n```\nfilled.contour.mod = function (\n    x = seq(0, 1, length.out = nrow(z)), \n    y = seq(0, 1, length.out = ncol(z)), \n    z, xlim = range(x, finite = TRUE), \n    ylim = range(y, finite = TRUE), zlim = range(z, finite = TRUE), \n    levels = pretty(zlim, nlevels), nlevels = 20, \n    color.palette = function(n) hcl.colors(n, \"YlOrRd\", rev = TRUE), \n    col = color.palette(length(levels) - 1), \n    plot.title, plot.axes, key.title, key.axes, key.border = NULL, \n    asp = NA, xaxs = \"i\", yaxs = \"i\", las = 1, axes = TRUE, frame.plot = axes, \n    ...) \n{\n  if (missing(z)) {\n    if (!missing(x)) {\n      if (is.list(x)) {\n        z &lt;- x$z\n        y &lt;- x$y\n        x &lt;- x$x\n      }\n      else {\n        z &lt;- x\n        x &lt;- <http:\/\/seq.int|seq.int>(0, 1, length.out = nrow(z))\n      }\n    }\n    else stop(\"no 'z' matrix specified\")\n  }\n  else if (is.list(x)) {\n    y &lt;- x$y\n    x &lt;- x$x\n  }\n  if (!missing(col) &amp; !is.null(col)) {\n    nlevels = length(col)\n    ran_z = range(z, na.rm = TRUE, finite = TRUE)\n    levels = seq(ran_z[1], ran_z[2], length.out = nlevels + 1)\n  }\n  if (any(diff(x) &lt;= 0) || any(diff(y) &lt;= 0)) \n    stop(\"increasing 'x' and 'y' values expected\")\n  mar.orig &lt;- (par.orig &lt;- par(c(\"mar\", \"las\", \"mfrow\")))$mar\n  on.exit(par(par.orig))\n  w &lt;- (3 + mar.orig[2L]) * par(\"csi\") * 2.54\n  layout(matrix(c(2, 1), ncol = 2L), widths = c(1, lcm(w)))\n  par(las = las)\n  mar &lt;- mar.orig\n  mar[4L] &lt;- mar[2L]\n  mar[2L] &lt;- 1\n  par(mar = mar)\n  plot.new()\n  plot.window(xlim = c(0, 1), ylim = range(levels), xaxs = \"i\", \n              yaxs = \"i\")\n  rect(0, levels[-length(levels)], 1, levels[-1L], col = col, \n       border = key.border)\n  if (missing(key.axes)) {\n    if (axes) \n      axis(4)\n  }\n  else key.axes\n  box()\n  if (!missing(key.title)) \n    key.title\n  mar &lt;- mar.orig\n  mar[4L] &lt;- 1\n  par(mar = mar)\n  plot.new()\n  plot.window(xlim, ylim, \"\", xaxs = xaxs, yaxs = yaxs, asp = asp)\n  .filled.contour(x, y, z, levels, col)\n  if (missing(plot.axes)) {\n    if (axes) {\n      title(main = \"\", xlab = \"\", ylab = \"\")\n      Axis(x, side = 1)\n      Axis(y, side = 2)\n    }\n  }\n  else plot.axes\n  if (frame.plot) \n    box()\n  if (missing(plot.title)) \n    title(...)\n  else plot.title\n  invisible()\n}\n```\n\n\n## Example 1\n\n```\na = matrix(rnorm(100), nrow = 10)\nfilled.contour(a, col = rainbow(3))  # nlevels &gt; length(col), colors recycled\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737743590.316869",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "yI93X",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18842] New: graphics::filled.contour() doesn't respect the \"col\" argument",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18842"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18842\n           Summary: graphics::filled.contour() doesn't respect the \"col\"\n                    argument\n           Product: R\n           Version: R 4.4.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Graphics\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:andrey.anikin@lucs.lu.se",
+                                "text": "andrey.anikin@lucs.lu.se",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3444\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3444&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3444&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nProposed PRELIMINARY patch to filled.contour() - needs to be checked thoroughly\n\n## Problem\n\nFunction graphics::filled.contour() produces unexpected results when "
+                            },
+                            {
+                                "type": "text",
+                                "text": "col",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is\nspecified (a vector of actual colors to use). Because "
+                            },
+                            {
+                                "type": "text",
+                                "text": "levels",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " default to\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "pretty(zlim, nlevels)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nlevels",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " are not dependent on the length of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "col",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "col",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " vector is not respected, and specifying it explicitly leads to strange\nresults.\n\nA proposed patch (attached) is to add"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "  if (!missing(col) & !is.null(col)) {\n    nlevels = length(col)\n    levels = seq(min(z, na.rm = TRUE), max(z, na.rm = TRUE), length.out =\nnlevels + 1)\n  }\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "but this requires checking back-compatibility and the effect on dependencies.\nAlternatively, the documentation can be simply updated to explain that it's not\nenough to pass only "
+                            },
+                            {
+                                "type": "text",
+                                "text": "col",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", but also "
+                            },
+                            {
+                                "type": "text",
+                                "text": "levels",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nlevels",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "filled.contour.mod = function (\n    x = seq(0, 1, length.out = nrow(z)), \n    y = seq(0, 1, length.out = ncol(z)), \n    z, xlim = range(x, finite = TRUE), \n    ylim = range(y, finite = TRUE), zlim = range(z, finite = TRUE), \n    levels = pretty(zlim, nlevels), nlevels = 20, \n    color.palette = function(n) hcl.colors(n, \"YlOrRd\", rev = TRUE), \n    col = color.palette(length(levels) - 1), \n    plot.title, plot.axes, key.title, key.axes, key.border = NULL, \n    asp = NA, xaxs = \"i\", yaxs = \"i\", las = 1, axes = TRUE, frame.plot = axes, \n    ...) \n{\n  if (missing(z)) {\n    if (!missing(x)) {\n      if (is.list(x)) {\n        z <- x$z\n        y <- x$y\n        x <- x$x\n      }\n      else {\n        z <- x\n        x <- "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/seq.int",
+                                "text": "seq.int"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(0, 1, length.out = nrow(z))\n      }\n    }\n    else stop(\"no 'z' matrix specified\")\n  }\n  else if (is.list(x)) {\n    y <- x$y\n    x <- x$x\n  }\n  if (!missing(col) & !is.null(col)) {\n    nlevels = length(col)\n    ran_z = range(z, na.rm = TRUE, finite = TRUE)\n    levels = seq(ran_z[1], ran_z[2], length.out = nlevels + 1)\n  }\n  if (any(diff(x) <= 0) || any(diff(y) <= 0)) \n    stop(\"increasing 'x' and 'y' values expected\")\n  mar.orig <- (par.orig <- par(c(\"mar\", \"las\", \"mfrow\")))$mar\n  on.exit(par(par.orig))\n  w <- (3 + mar.orig[2L]) * par(\"csi\") * 2.54\n  layout(matrix(c(2, 1), ncol = 2L), widths = c(1, lcm(w)))\n  par(las = las)\n  mar <- mar.orig\n  mar[4L] <- mar[2L]\n  mar[2L] <- 1\n  par(mar = mar)\n  plot.new()\n  plot.window(xlim = c(0, 1), ylim = range(levels), xaxs = \"i\", \n              yaxs = \"i\")\n  rect(0, levels[-length(levels)], 1, levels[-1L], col = col, \n       border = key.border)\n  if (missing(key.axes)) {\n    if (axes) \n      axis(4)\n  }\n  else key.axes\n  box()\n  if (!missing(key.title)) \n    key.title\n  mar <- mar.orig\n  mar[4L] <- 1\n  par(mar = mar)\n  plot.new()\n  plot.window(xlim, ylim, \"\", xaxs = xaxs, yaxs = yaxs, asp = asp)\n  .filled.contour(x, y, z, levels, col)\n  if (missing(plot.axes)) {\n    if (axes) {\n      title(main = \"\", xlab = \"\", ylab = \"\")\n      Axis(x, side = 1)\n      Axis(y, side = 2)\n    }\n  }\n  else plot.axes\n  if (frame.plot) \n    box()\n  if (missing(plot.title)) \n    title(...)\n  else plot.title\n  invisible()\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n\n\n## Example 1\n\n```\na = matrix(rnorm(100), nrow = 10)\nfilled.contour(a, col = rainbow(3))  # nlevels > length(col), colors recycled"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "filled.contour.mod(a, col = rainbow(3))  # correct 3 colors used\n```\n\n## Example 2\n\n```\nb = matrix(rnorm(10000), nrow = 100)\nnlevels = 30\ncol = gray(seq(from = 1, to = 0, length = nlevels))\nfilled.contour(b, col = col)  # doesn't use the entire 0-1 gray scale\nfilled.contour(b, col = col, nlevels = nlevels)  # recycles colors\nfilled.contour.mod(b, col = col, nlevels = nlevels)  # correct\n```\n\nOr:\n\n```\nnlevels = 100\ncol = gray(seq(from = 1, to = 0, length = nlevels))\nfilled.contour(b, col = col)  # doesn't use the entire 0-1 gray scale\nfilled.contour(b, col = col, nlevels = nlevels)  # still doesn't use the entire\n0-1 gray scale\nfilled.contour.mod(b, col = col)  # correct\nfilled.contour.mod(b, col = col, nlevels = 1e6, levels = 1:100)  # also correct\n- nlevels and levels ignored if \"col\" is specified\n\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737743590.341389",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "IUHYM",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "filled.contour.mod(a, col = rainbow(3))  # correct 3 colors used"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n## Example 2\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "b = matrix(rnorm(10000), nrow = 100)\nnlevels = 30\ncol = gray(seq(from = 1, to = 0, length = nlevels))\nfilled.contour(b, col = col)  # doesn't use the entire 0-1 gray scale\nfilled.contour(b, col = col, nlevels = nlevels)  # recycles colors\nfilled.contour.mod(b, col = col, nlevels = nlevels)  # correct"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nOr:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "nlevels = 100\ncol = gray(seq(from = 1, to = 0, length = nlevels))\nfilled.contour(b, col = col)  # doesn't use the entire 0-1 gray scale\nfilled.contour(b, col = col, nlevels = nlevels)  # still doesn't use the entire\n0-1 gray scale\nfilled.contour.mod(b, col = col)  # correct\nfilled.contour.mod(b, col = col, nlevels = 1e6, levels = 1:100)  # also correct\n- nlevels and levels ignored if \"col\" is specified\n\n```"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18841] options(show.error.locations = TRUE) sometimes fails*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18841>\n\n--- Comment #8 from Duncan Murdoch (<mailto:murdoch.duncan@gmail.com|murdoch.duncan@gmail.com>) ---\nI'll give it a try.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737746523.338699",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "lyO",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18841] options(show.error.locations = TRUE) sometimes fails",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18841"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #8 from Duncan Murdoch ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:murdoch.duncan@gmail.com",
+                                "text": "murdoch.duncan@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI'll give it a try."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18843] New: `as.data.frame()` method for objects of class `\"lm\"` and `\"glm\"` [with patch]*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18843>\n\n            Bug ID: 18843\n           Summary: `as.data.frame()` method for objects of class `\"lm\"`\n                    and `\"glm\"` [with patch]\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Wishlist\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:Thomas.SOEIRO@ap-hm.fr|Thomas.SOEIRO@ap-hm.fr>\n\nFollowing [discussions on\nR-devel](<https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2025-January\/083769.html>), here\nis a proposal for adding `as.data.frame()` method for objects of class `\"lm\"`\nand `\"glm\"`.\n\nTo questions regarding the patch:\n\n- Are `row.names = NULL, optional = FALSE` needed [to match the arguments of\nthe\ngeneric](<https:\/\/cloud.r-project.org\/doc\/manuals\/r-devel\/R-exts.html#Generic-functions-and-methods>)?\n(this is not the case for e.g. `as.data.frame.table()`)\n- Should `<http:\/\/match.fun|match.fun>(transFUN)` be used instead of `stopifnot()`?\n\n```\ndiff --git a\/src\/library\/stats\/R\/lm.R b\/src\/library\/stats\/R\/lm.R\nindex 13a458797b..2ce6b16f6e 100644\n--- a\/src\/library\/stats\/R\/lm.R\n+++ b\/src\/library\/stats\/R\/lm.R\n@@ -982,3 +982,18 @@ labels.lm &lt;- function(object, ...)\n     asgn &lt;- object$assign[qr.lm(object)$pivot[1L:object$rank]]\n     tl[unique(asgn)]\n }\n+\n+as.data.frame.lm &lt;- function(x, ..., level = 0.95, transFUN = NULL)\n+{\n+  cf &lt;- x |&gt; summary() |&gt; coef()\n+  ci &lt;- confint(x, level = level)\n+  if(!is.null(transFUN)) {\n+    stopifnot(is.function(transFUN))\n+    cf[, \"Estimate\"] &lt;- transFUN(cf[, \"Estimate\"])\n+    ci &lt;- transFUN(ci)\n+  }\n+  df &lt;- data.frame(row.names(cf), cf, ci, row.names = NULL)\n+  names(df) &lt;- c(\"term\", \"estimate\", \"std.error\", \"statistic\", \"p.value\",\n+                 \"conf.low\", \"conf.high\")\n+  df\n+}\ndiff --git a\/src\/library\/stats\/man\/lm.Rd b\/src\/library\/stats\/man\/lm.Rd\nindex ff05afabff..b54373dff4 100644\n--- a\/src\/library\/stats\/man\/lm.Rd\n+++ b\/src\/library\/stats\/man\/lm.Rd\n@@ -21,6 +21,8 @@ lm(formula, data, subset, weights, na.action,\n    singular.ok = TRUE, contrasts = NULL, offset, \\dots)\n\n \\S3method{print}{lm}(x, digits = max(3L, getOption(\"digits\") - 3L), \\dots)\n+\n+\\S3method{as.data.frame}{lm}(x, ..., level = 0.95, transFUN = NULL)\n }\n \\arguments{\n   \\item{formula}{an object of class \\code{\"\\link{formula}\"} (or one that\n@@ -81,6 +83,10 @@ lm(formula, data, subset, weights, na.action,\n   \\item{digits}{the number of \\emph{significant} digits to be\n     passed to \\code{\\link{format}(\\link{coef}(x), .)} when\n     \\I{\\code{\\link{print}()}ing}.}\n+  %% as.data.frame.lm():\n+  \\item{level}{the confidence level required.}\n+  \\item{transFUN}{a function to transform \\code{estimate}, \\code{conf.low} and\n+    \\code{conf.high}.}\n }\n \\details{\n   Models for \\code{lm} are specified symbolically.  A typical model has\n@@ -168,6 +174,10 @@ lm(formula, data, subset, weights, na.action,\n   \\code{effects} and (unless not requested) \\code{qr} relating to the linear\n   fit, for use by extractor functions such as \\code{summary} and\n   \\code{\\link{effects}}.\n+\n+  \\code{as.data.frame} returns a data frame with statistics as provided by\n+  \\code{coef(summary(.))} and confidence intervals for model\n+  estimates.\n }\n \\section{Using time series}{\n   Considerable care is needed when using \\code{lm} with time series.\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737746803.556879",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "1z8a",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18843] New: ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.data.frame()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method for objects of class ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"lm\"",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"glm\"",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " [with patch]",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18843"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18843\n           Summary: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.data.frame()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method for objects of class "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"lm\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n                    and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"glm\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " [with patch]\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Wishlist\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Thomas.SOEIRO@ap-hm.fr",
+                                "text": "Thomas.SOEIRO@ap-hm.fr",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nFollowing [discussions on\nR-devel]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2025-January\/083769.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "), here\nis a proposal for adding "
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.data.frame()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method for objects of class "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"lm\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nand "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"glm\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nTo questions regarding the patch:\n\n- Are "
+                            },
+                            {
+                                "type": "text",
+                                "text": "row.names = NULL, optional = FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " needed [to match the arguments of\nthe\ngeneric]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/cloud.r-project.org\/doc\/manuals\/r-devel\/R-exts.html#Generic-functions-and-methods"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")?\n(this is not the case for e.g. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.data.frame.table()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n- Should "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/match.fun",
+                                "text": "match.fun",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "(transFUN)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " be used instead of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "stopifnot()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "?\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff --git a\/src\/library\/stats\/R\/lm.R b\/src\/library\/stats\/R\/lm.R\nindex 13a458797b..2ce6b16f6e 100644\n--- a\/src\/library\/stats\/R\/lm.R\n+++ b\/src\/library\/stats\/R\/lm.R\n@@ -982,3 +982,18 @@ labels.lm <- function(object, ...)\n     asgn <- object$assign[qr.lm(object)$pivot[1L:object$rank]]\n     tl[unique(asgn)]\n }\n+\n+as.data.frame.lm <- function(x, ..., level = 0.95, transFUN = NULL)\n+{\n+  cf <- x |> summary() |> coef()\n+  ci <- confint(x, level = level)\n+  if(!is.null(transFUN)) {\n+    stopifnot(is.function(transFUN))\n+    cf[, \"Estimate\"] <- transFUN(cf[, \"Estimate\"])\n+    ci <- transFUN(ci)\n+  }\n+  df <- data.frame(row.names(cf), cf, ci, row.names = NULL)\n+  names(df) <- c(\"term\", \"estimate\", \"std.error\", \"statistic\", \"p.value\",\n+                 \"conf.low\", \"conf.high\")\n+  df\n+}\ndiff --git a\/src\/library\/stats\/man\/lm.Rd b\/src\/library\/stats\/man\/lm.Rd\nindex ff05afabff..b54373dff4 100644\n--- a\/src\/library\/stats\/man\/lm.Rd\n+++ b\/src\/library\/stats\/man\/lm.Rd\n@@ -21,6 +21,8 @@ lm(formula, data, subset, weights, na.action,\n    singular.ok = TRUE, contrasts = NULL, offset, \\dots)\n\n \\S3method{print}{lm}(x, digits = max(3L, getOption(\"digits\") - 3L), \\dots)\n+\n+\\S3method{as.data.frame}{lm}(x, ..., level = 0.95, transFUN = NULL)\n }\n \\arguments{\n   \\item{formula}{an object of class \\code{\"\\link{formula}\"} (or one that\n@@ -81,6 +83,10 @@ lm(formula, data, subset, weights, na.action,\n   \\item{digits}{the number of \\emph{significant} digits to be\n     passed to \\code{\\link{format}(\\link{coef}(x), .)} when\n     \\I{\\code{\\link{print}()}ing}.}\n+  %% as.data.frame.lm():\n+  \\item{level}{the confidence level required.}\n+  \\item{transFUN}{a function to transform \\code{estimate}, \\code{conf.low} and\n+    \\code{conf.high}.}\n }\n \\details{\n   Models for \\code{lm} are specified symbolically.  A typical model has\n@@ -168,6 +174,10 @@ lm(formula, data, subset, weights, na.action,\n   \\code{effects} and (unless not requested) \\code{qr} relating to the linear\n   fit, for use by extractor functions such as \\code{summary} and\n   \\code{\\link{effects}}.\n+\n+  \\code{as.data.frame} returns a data frame with statistics as provided by\n+  \\code{coef(summary(.))} and confidence intervals for model\n+  estimates.\n }\n \\section{Using time series}{\n   Considerable care is needed when using \\code{lm} with time series.\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18843] `as.data.frame()` method for objects of class `\"lm\"` and `\"glm\"` [with patch]*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18843>\n\n--- Comment #1 from Thomas Soeiro (<mailto:Thomas.SOEIRO@ap-hm.fr|Thomas.SOEIRO@ap-hm.fr>) ---\nFor the record, here are some off-list comments from Duncan Murdoch:",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737746919.565319",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "7FR",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18843] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.data.frame()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method for objects of class ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"lm\"",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"glm\"",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " [with patch]",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18843"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Thomas Soeiro ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Thomas.SOEIRO@ap-hm.fr",
+                                "text": "Thomas.SOEIRO@ap-hm.fr",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nFor the record, here are some off-list comments from Duncan Murdoch:"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18844] New: summary(&lt;POSIXt&gt;)  prints and formats  wrongly*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18844>\n\n            Bug ID: 18844\n           Summary: summary(&lt;POSIXt&gt;)  prints and formats  wrongly\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: NEW\n          Severity: minor\n          Priority: P5\n         Component: I\/O\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>\n\nWhen thinking about  summary.difftime() {for R 4.5.0}, I came across this:\n\n```\n &gt; options(width = 107); (xt &lt;- .POSIXct(1737745992 + 2\/7) + 10000*(0:7))\n[1] \"2025-01-24 20:13:12 CET\" \"2025-01-24 22:59:52 CET\" \"2025-01-25 01:46:32\nCET\" \"2025-01-25 04:33:12 CET\"\n[5] \"2025-01-25 07:19:52 CET\" \"2025-01-25 10:06:32 CET\" \"2025-01-25 12:53:12\nCET\" \"2025-01-25 15:39:52 CET\"\n&gt; summary(xt)\n                      Min.                    1st Qu.                    \nMedian \n\"2025-01-24 20:13:12.2857\" \"2025-01-25 01:04:52.2857\" \"2025-01-25\n05:56:32.2857\" \n                      Mean                    3rd Qu.                      \nMax. \n\"2025-01-25 05:56:32.2857\" \"2025-01-25 10:48:12.2857\" \"2025-01-25\n15:39:52.2857\" \n&gt; \n```\nNote that the bug (of showing fractional seconds!) is only in `print()`ing the\nsummary  or also when `format()`ting the summary {not shown above}.\n\nOf course, I will fix this myself.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737747144.155759",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "kmW",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18844] New: summary(<POSIXt>)  prints and formats  wrongly",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18844"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18844\n           Summary: summary(<POSIXt>)  prints and formats  wrongly\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: NEW\n          Severity: minor\n          Priority: P5\n         Component: I\/O\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nWhen thinking about  summary.difftime() {for R 4.5.0}, I came across this:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " > options(width = 107); (xt <- .POSIXct(1737745992 + 2\/7) + 10000*(0:7))\n[1] \"2025-01-24 20:13:12 CET\" \"2025-01-24 22:59:52 CET\" \"2025-01-25 01:46:32\nCET\" \"2025-01-25 04:33:12 CET\"\n[5] \"2025-01-25 07:19:52 CET\" \"2025-01-25 10:06:32 CET\" \"2025-01-25 12:53:12\nCET\" \"2025-01-25 15:39:52 CET\"\n> summary(xt)\n                      Min.                    1st Qu.                    \nMedian \n\"2025-01-24 20:13:12.2857\" \"2025-01-25 01:04:52.2857\" \"2025-01-25\n05:56:32.2857\" \n                      Mean                    3rd Qu.                      \nMax. \n\"2025-01-25 05:56:32.2857\" \"2025-01-25 10:48:12.2857\" \"2025-01-25\n15:39:52.2857\" \n> \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Note that the bug (of showing fractional seconds!) is only in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "print()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "ing the\nsummary  or also when "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "ting the summary {not shown above}.\n\nOf course, I will fix this myself."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18843] `as.data.frame()` method for objects of class `\"lm\"` and `\"glm\"` [with patch]*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18843>\n\n--- Comment #2 from Thomas Soeiro (<mailto:Thomas.SOEIRO@ap-hm.fr|Thomas.SOEIRO@ap-hm.fr>) ---\nAnd two examples:\n\n```\nlm(breaks ~ wool + tension, warpbreaks) |&gt; as.data.frame()\n#          term   estimate std.error statistic      p.value  conf.low \nconf.high\n# 1 (Intercept)  39.277778  3.161783 12.422667 6.681866e-17  32.92715\n45.6284061\n# 2       woolB  -5.777778  3.161783 -1.827380 7.361367e-02 -12.12841 \n0.5728505\n# 3    tensionM -10.000000  3.872378 -2.582393 1.278683e-02 -17.77790\n-2.2221006\n# 4    tensionH -14.722222  3.872378 -3.801856 3.913842e-04 -22.50012\n-6.9443228\n\nglm(breaks &lt; 20 ~ wool + tension, data = warpbreaks) |&gt; as.data.frame(exp =\nTRUE)\n# Waiting for profiling to be done...\n#          term   estimate std.error statistic    p.value    conf.low conf.high\n# 1 (Intercept) 0.07407407 0.1226144 0.6041221 0.54849393 -0.16624575 0.3143939\n# 2       woolB 0.07407407 0.1226144 0.6041221 0.54849393 -0.16624575 0.3143939\n# 3    tensionM 0.22222222 0.1501714 1.4797909 0.14520270 -0.07210825 0.5165527\n# 4    tensionH 0.33333333 0.1501714 2.2196863 0.03100435  0.03900286 0.6276638\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737747161.299039",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "lk3f",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18843] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.data.frame()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method for objects of class ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"lm\"",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"glm\"",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " [with patch]",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18843"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Thomas Soeiro ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Thomas.SOEIRO@ap-hm.fr",
+                                "text": "Thomas.SOEIRO@ap-hm.fr",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nAnd two examples:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "lm(breaks ~ wool + tension, warpbreaks) |> as.data.frame()\n#          term   estimate std.error statistic      p.value  conf.low \nconf.high\n# 1 (Intercept)  39.277778  3.161783 12.422667 6.681866e-17  32.92715\n45.6284061\n# 2       woolB  -5.777778  3.161783 -1.827380 7.361367e-02 -12.12841 \n0.5728505\n# 3    tensionM -10.000000  3.872378 -2.582393 1.278683e-02 -17.77790\n-2.2221006\n# 4    tensionH -14.722222  3.872378 -3.801856 3.913842e-04 -22.50012\n-6.9443228\n\nglm(breaks < 20 ~ wool + tension, data = warpbreaks) |> as.data.frame(exp =\nTRUE)\n# Waiting for profiling to be done...\n#          term   estimate std.error statistic    p.value    conf.low conf.high\n# 1 (Intercept) 0.07407407 0.1226144 0.6041221 0.54849393 -0.16624575 0.3143939\n# 2       woolB 0.07407407 0.1226144 0.6041221 0.54849393 -0.16624575 0.3143939\n# 3    tensionM 0.22222222 0.1501714 1.4797909 0.14520270 -0.07210825 0.5165527\n# 4    tensionH 0.33333333 0.1501714 2.2196863 0.03100435  0.03900286 0.6276638\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18845] New: `[.table` simplistically setting class \"table\"*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18845>\n\n            Bug ID: 18845\n           Summary: `[.table` simplistically setting class \"table\"\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>\n\nThe code of `[.table`  is relatively simple.\nNotably, it sets the class of the result to `\"table\"` in some \"reasonable\ncontingency table situations.\n\nLook at the example from the `?table`  help page:\n```\n&gt; DF &lt;- as.data.frame(UCBAdmissions)\n&gt; class(tab &lt;- xtabs(Freq ~ ., DF))\n[1] \"xtabs\" \"table\"\n&gt; dim(tab)\n[1] 2 2 6\n```\nIf I omit e.g., the first 2x2 table, I've lost \"xtabs\" (but kept \"table\"),\nwhich seems undesirable (but probably still \"kind of okay\" in this case, as it\nat least prints fine):\n```\n&gt; class(tab[,, -1])\n[1] \"table\"\n```\n\nA more problematic consequence of the behaviour  is that \n`diff(summary(&lt;POSIXt&gt;))` is *not* a `\"difftime\"` object anymore, even if\n`summary(.)` stays a `POSIXt`  and  `diff(&lt;POSIXt&gt;)`  should give a\n`\"difftime\"` result with its dedicated careful `diff.POSIXt()` method.\n```\n&gt; xt &lt;- .POSIXct(1737745992 + 2\/7 + 10000 * (0:7))\n&gt; class(st &lt;- summary(xt))\n[1] \"summaryDefault\" \"table\"          \"POSIXct\"        \"POSIXt\"        \n&gt; (dst &lt;- diff(st))\n1st Qu.  Median    Mean 3rd Qu.    Max. \n  17500   17500       0   17500   17500 \n&gt; class(dst)\n[1] \"table\"\n&gt; \n\n```\n\nA fix is quite easy ... *but* chances are high that it has negative side\neffects, as the `table` class is probably used quite often  and other R code\nmay inadvertently (for the programmer) depend on the current  buggy behaviour.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1737754172.316749",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "aDBsZ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18845] New: ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "[.table",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " simplistically setting class \"table\"",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18845"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18845\n           Summary: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "[.table",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " simplistically setting class \"table\"\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThe code of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "[.table",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  is relatively simple.\nNotably, it sets the class of the result to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"table\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in some \"reasonable\ncontingency table situations.\n\nLook at the example from the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "?table",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  help page:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> DF <- as.data.frame(UCBAdmissions)\n> class(tab <- xtabs(Freq ~ ., DF))\n[1] \"xtabs\" \"table\"\n> dim(tab)\n[1] 2 2 6\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "If I omit e.g., the first 2x2 table, I've lost \"xtabs\" (but kept \"table\"),\nwhich seems undesirable (but probably still \"kind of okay\" in this case, as it\nat least prints fine):"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> class(tab[,, -1])\n[1] \"table\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nA more problematic consequence of the behaviour  is that \n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "diff(summary(<POSIXt>))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"difftime\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " object anymore, even if\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "summary(.)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " stays a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "POSIXt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  and  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "diff(<POSIXt>)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  should give a\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"difftime\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " result with its dedicated careful "
+                            },
+                            {
+                                "type": "text",
+                                "text": "diff.POSIXt()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> xt <- .POSIXct(1737745992 + 2\/7 + 10000 * (0:7))\n> class(st <- summary(xt))\n[1] \"summaryDefault\" \"table\"          \"POSIXct\"        \"POSIXt\"        \n> (dst <- diff(st))\n1st Qu.  Median    Mean 3rd Qu.    Max. \n  17500   17500       0   17500   17500 \n> class(dst)\n[1] \"table\"\n> \n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nA fix is quite easy ... "
+                            },
+                            {
+                                "type": "text",
+                                "text": "but",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " chances are high that it has negative side\neffects, as the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "table",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " class is probably used quite often  and other R code\nmay inadvertently (for the programmer) depend on the current  buggy behaviour."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,12 +1,18 @@
 # Data for next office hours ----------------------------------------------
 
-# Feb 6
-# Mar 13
+# Apr 10
+# May 8
+# June 12
+# July 10
+# Aug 14
+# Sep 11 - move to Sep 4, week before RSECon, note Gabe will be with me, possibly just do one?
+# Oct 9
 
-day <- 6
-month <- "February"
-emea <- "https://www.meetup.com/r-contributors/events/305790230/"
-amer <- "https://www.meetup.com/r-contributors/events/305506311/"
+
+day <- 13
+month <- "March"
+emea <- "https://www.meetup.com/r-contributors/events/306322148/"
+amer <- "https://www.meetup.com/r-contributors/events/305506314/"
 emea_zoom <- "https://us02web.zoom.us/j/88093117300?pwd=bFlTWENoY2U2bW40SHFLcWxxTHp5Zz09"
 amer_zoom <- "https://us02web.zoom.us/j/85668115902?pwd=Z0NtN3hMOGZmaU9EcWx1SWE2ZUwzUT09"
 
@@ -23,7 +29,7 @@ source("admin/R/social_post.R")
 # "office_hour_reminder" for twitter/mastodon/slack reminders
 post <- office_hour_post(month, day, c("10:00", "17:30"), # UTC times
                          c(emea, amer), c(emea_zoom, amer_zoom),
-                         venue = "rweekly",
+                         venue = "slack",
                          templates = "admin/posts/office_hour")
 
 # Email r-contribution-wg@r-project.org -----------------------------------
@@ -69,7 +75,7 @@ buffer_createpost(browser = browser,
                   venue = "mastodon")
 
 buffer_createpost(browser = browser,
-                  day = 29,
+                  day = 7,
                   month = NULL,
                   time = "17:30",
                   postcontent = post[[2]],

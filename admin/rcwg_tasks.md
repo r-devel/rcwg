@@ -76,9 +76,11 @@ Minutes of previous meetings: https://github.com/r-devel/rcwg/tree/main/team_min
     - Add to Forward Calendar from Zoom and edit description (RSVPs work better from main calender - at least Outlook and fastmail, RSVPs don't work to (public?) group calendar). DO NOT INVITE ANYONE YET ELSE THEY GET MULTIPLE INVITES!!
     - Copy event to Office Hours calendar for sharing via Teamup.
     - Add guests: r-contribution-wg@r-project.org on Forwards Calendar event. FOR ALL EVENTS!!
-4. [Automated] Add to contributor.r-project.org/events
+        TODO FOR APR 2025 ONWARDS
+4. Add reminder on personal calendaer one week before office hours to promote
+5. [Automated] Add to contributor.r-project.org/events
     - If need to force change refresh settings on Teamup
-5. Post on social media with help from scripts/office_hours.R
+6. Post on social media with help from scripts/office_hours.R
 
 ### Content for Forwards calendar
 

@@ -20,14 +20,42 @@ update_readme_dates(2, "March", 3, "Friday", "15:00", 2025)
 
 
 
-# Update RCWG -------------------------------------------------------------
+# Update RCWG contacts ---------------------------------------------------------
 
 ## RCWG have been sent invite to recurring meeting
 ## - maybe send from something other than work outlook so don't get links expanded
 
-## Send update for this event only by adding specific agenda items to Google
-## calendar invite.
+## Send update to contacts for this event only:
 
+# start Selenium server on my machine
+# using ~ rather than ${HOME} here does not work!
+# stick with standalone sever from http://selenium-release.storage.googleapis.com/index.html
+# if issues, reinstall geckodriver (and Java?)
+system("java -Dwebdriver.gecko.driver=${HOME}/Selenium/geckodriver \\
+       -jar ~/Selenium/selenium-server-standalone-3.9.1.jar -port 5556 \\
+       &>/dev/null &")
+
+# start firefox under remote control - this must work for the rest to work!
+browser <- remoteDriver(port = 5556)
+browser$open()
+
+# keyring::key_set("R-contribution-wg password") # opens dialog to enter password
+
+# get subscribers to email list
+rcwg_subscribers(browser = browser,
+                 page = "https://stat.ethz.ch/mailman/listinfo/r-contribution-wg",
+                 username = "ht@heatherturner.net",
+                 key = "R-contribution-wg password")
+
+browser$close()
+
+# stop server
+pid <- system2("lsof", "-t -i :5556", stdout = TRUE)
+system(paste("kill -1", pid))
+
+## - copy list of current subscribers, add to guest list on Google calendar event
+## (paste and enter for comma-separated list to be added in bulk)
+## - add specific agenda items to Google calendar invite.
 
 # Social media posts ------------------------------------------------------
 
@@ -37,14 +65,17 @@ source("admin/R/buffer_post.R")
 # auth_setup() # choose user token and login as RContributors on Mastodon
 
 # slack announcement
-month <- "February"
-day <- 18
-time <- "19:30" # UTC !!
+month <- "March"
+day <- 21
+time <- "15:00" # UTC !!
 weekday <- get_weekday(day, month, abbreviate = TRUE)
 agenda = c(
-"- Plans for R Dev Days (especially post useR! 2025)
-- Projects for Google Summer of Code/Season of Docs"
+"- Plans for R Dev Days
+ - Google Summer of Code projects
+ - Proposals for R Consortium projects
+ - Maintaining the glossary on Weblate"
 )
+zoom <- "https://us02web.zoom.us/j/83915338079?pwd=247q7Xbbpa7ZqlQ0bsDVUIFSyzcBWB.1"
 post <- social_post(weekday = weekday,
                     day = day,
                     month = month,
@@ -76,9 +107,9 @@ buffer_signin(browser = browser,
 # note posting day different from event day!
 # If NULL, will post this day, this month, next hour
 buffer_createpost(browser = browser,
-                  day = NULL,
+                  day = 17,
                   month = NULL,
-                  time = NULL, #UTC
+                  time = 15, #UTC
                   venue = "mastodon",
                   postcontent = post)
 

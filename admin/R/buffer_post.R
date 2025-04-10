@@ -84,7 +84,7 @@ buffer_createpost <- function(
 }
 
 sendChar <- function(elem, text){
-    text <- as.list(strsplit(text, "")[[1]])
+    text <- as.list(strsplit(text, "", useBytes = TRUE)[[1]])
     for (i in seq_along(text)){
         # emojis stop working if use new line
         if (text[i] == "\n") {

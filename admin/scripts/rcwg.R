@@ -15,10 +15,8 @@ source("admin/R/update_readme_dates.R")
 # times here are UK times!
 # second number is n'th 'day' of the month, e.g. `3, "Friday"` = 3rd Friday
 # !! Think I have inconsistency here: Slack message and Twitter/Mastodon were wrong last time
-update_readme_dates(1, "February", 3, "Tuesday", "19:30", 2025)
-update_readme_dates(2, "March", 3, "Friday", "15:00", 2025)
-
-
+update_readme_dates(1, "April", 3, "Tuesday", "19:30", 2025)
+update_readme_dates(2, "May", 3, "Friday", "15:00", 2025)
 
 # Update RCWG contacts ---------------------------------------------------------
 
@@ -26,6 +24,8 @@ update_readme_dates(2, "March", 3, "Friday", "15:00", 2025)
 ## - maybe send from something other than work outlook so don't get links expanded
 
 ## Send update to contacts for this event only:
+
+source("admin/R/r_contribution_wg_subscribers.R")
 
 # start Selenium server on my machine
 # using ~ rather than ${HOME} here does not work!
@@ -65,17 +65,17 @@ source("admin/R/buffer_post.R")
 # auth_setup() # choose user token and login as RContributors on Mastodon
 
 # slack announcement
-month <- "March"
-day <- 21
-time <- "15:00" # UTC !!
+month <- "April"
+day <- 15
+time <- "18:30" # UTC !!
 weekday <- get_weekday(day, month, abbreviate = TRUE)
 agenda = c(
 "- Plans for R Dev Days
  - Google Summer of Code projects
- - Proposals for R Consortium projects
- - Maintaining the glossary on Weblate"
+ - R Consortium projects
+ - Progress on translations"
 )
-zoom <- "https://us02web.zoom.us/j/83915338079?pwd=247q7Xbbpa7ZqlQ0bsDVUIFSyzcBWB.1"
+zoom <- "https://us02web.zoom.us/j/88612135282?pwd=ZzSjahkaTd0cC4XQjMOI5WzZnW4IZH.1"
 post <- social_post(weekday = weekday,
                     day = day,
                     month = month,
@@ -107,9 +107,9 @@ buffer_signin(browser = browser,
 # note posting day different from event day!
 # If NULL, will post this day, this month, next hour
 buffer_createpost(browser = browser,
-                  day = 17,
-                  month = NULL,
-                  time = 15, #UTC
+                  day = NULL, # number, day of month
+                  month = NULL, # month number
+                  time = NULL, # UTC
                   venue = "mastodon",
                   postcontent = post)
 

@@ -1,0 +1,119 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18186] Any broken symlinks prevent R CMD build from running, even if .Rbuildignored.*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18186>\n\n--- Comment #6 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nCreated attachment 3476\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3476&amp;action=edit>\nexclude files and directories before copying\n\nDear Martin,\n\nI think I found a relatively conservative approach that makes it possible to\nexclude files and directories with the same end result without relying on\ntemporary `tar` files. (Unless I misunderstood you and you are suggesting to\nbuild the package tarball straight from the source directory.)\n\nWhen a directory is excluded, its contents can be also excluded by testing for\n`startsWith(., paste0(directory, .Platform$file.sep))`.  Then the desired file\ntree can be constructed in a temporary directory in three steps: (1) create the\ndirectories that will contain the files, (2) populate them using\n`file.copy(source_paths, destination_paths, copy.mode = TRUE, copy.date =\nTRUE)`, (3) restore the directory modes and mtimes.\n\nThe `Matrix` package built this way survives `LANGUAGE=en R CMD check`, and R\nsurvives `LC_ALL=C.UTF-8 TZ=UTC make check-devel`. File and directory modes and\nmtimes are preserved (some are older than from an unpatched build of R).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1745338848.389949",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "qOfBZ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18186] Any broken symlinks prevent R CMD build from running, even if .Rbuildignored.",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18186"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #6 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3476\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3476&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3476&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nexclude files and directories before copying\n\nDear Martin,\n\nI think I found a relatively conservative approach that makes it possible to\nexclude files and directories with the same end result without relying on\ntemporary "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tar",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " files. (Unless I misunderstood you and you are suggesting to\nbuild the package tarball straight from the source directory.)\n\nWhen a directory is excluded, its contents can be also excluded by testing for\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "startsWith(., paste0(directory, .Platform$file.sep))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  Then the desired file\ntree can be constructed in a temporary directory in three steps: (1) create the\ndirectories that will contain the files, (2) populate them using\n`file.copy(source_paths, destination_paths, copy.mode = TRUE, copy.date =\nTRUE)`, (3) restore the directory modes and mtimes.\n\nThe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Matrix",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " package built this way survives "
+                            },
+                            {
+                                "type": "text",
+                                "text": "LANGUAGE=en R CMD check",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and R\nsurvives "
+                            },
+                            {
+                                "type": "text",
+                                "text": "LC_ALL=C.UTF-8 TZ=UTC make check-devel",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". File and directory modes and\nmtimes are preserved (some are older than from an unpatched build of R)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,230 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16727] [dpqr]nbinom(..., size = Inf) should behave like [dpqr]pois(...)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16727>\n\n--- Comment #5 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nWhereas most `size = Inf` problems seem fixed, there are more problems indeed,\nfor `size` _\"close to Inf\"_ i.e., `size` in the order of \n`M &lt;- .Machine$double.xmax` (which is 2^1024 on all current platforms, in the\nsense that `log2(M) == 1024`).\n\nNote that the problems for `qnbinom()` already show in `pnbinom()`, and also\nthere are similar problems for `dnbinom()`.\n\nAlso, fixing `dnbinom()` will be quite different than fixing `pnbinom()` (which\nhopefully will entail fixing its inverse, `qnbinom()` \"automatically\"),\nas indeed (as said on the help page),\n- `dnbinom()` builds on Catherine Loader's code (partly tweaked by R core), and\n- `pnbinom()` builds on `pbeta()` {which we know still has \"limits\" (accuracy\nproblems) in extreme ranges}.\n\nSome \"anecdotic\" (i.e. not yet systematic) examples:\n```\nprob &lt;- 0.999\nM &lt;- .Machine$double.xmax\nstr(x &lt;- M*2^seq(-4, 0, by = 1\/8))# M\/4 .... M\ncat(format(head(log2(x), 4)), \" .. \", format(tail(log2(x), 3)),\"\\n\")\n\n(dI &lt;- dnbinom(x, prob=prob, size = Inf)) ## all NaN  ------- FIXME\n(dM &lt;- dnbinom(x, prob=prob, size =  M )) ##  \"  \"\n(dM4&lt;- dnbinom(x, prob=prob, size =  M\/4))## 0 0 ... 0 NaN NaN NaN NaN\n(dM8&lt;- dnbinom(x, prob=prob, size =  M\/8))## 0 0 ... 0  0  0   NaN NaN\n#\n(p &lt;- pnbinom(x, prob=prob, size = Inf)) ## all NaN's\n\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1746011818.623089",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "JLbA",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16727] [dpqr]nbinom(..., size = Inf) should behave like [dpqr]pois(...)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16727"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nWhereas most "
+                            },
+                            {
+                                "type": "text",
+                                "text": "size = Inf",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " problems seem fixed, there are more problems indeed,\nfor "
+                            },
+                            {
+                                "type": "text",
+                                "text": "size",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"close to Inf\"",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " i.e., "
+                            },
+                            {
+                                "type": "text",
+                                "text": "size",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in the order of \n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "M <- .Machine$double.xmax",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (which is 2^1024 on all current platforms, in the\nsense that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "log2(M) == 1024",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\n\nNote that the problems for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "qnbinom()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " already show in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pnbinom()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and also\nthere are similar problems for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dnbinom()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nAlso, fixing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dnbinom()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " will be quite different than fixing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pnbinom()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (which\nhopefully will entail fixing its inverse, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "qnbinom()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " \"automatically\"),\nas indeed (as said on the help page),\n- "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dnbinom()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " builds on Catherine Loader's code (partly tweaked by R core), and\n- "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pnbinom()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " builds on "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pbeta()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " {which we know still has \"limits\" (accuracy\nproblems) in extreme ranges}.\n\nSome \"anecdotic\" (i.e. not yet systematic) examples:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "prob <- 0.999\nM <- .Machine$double.xmax\nstr(x <- M*2^seq(-4, 0, by = 1\/8))# M\/4 .... M\ncat(format(head(log2(x), 4)), \" .. \", format(tail(log2(x), 3)),\"\\n\")\n\n(dI <- dnbinom(x, prob=prob, size = Inf)) ## all NaN  ------- FIXME\n(dM <- dnbinom(x, prob=prob, size =  M )) ##  \"  \"\n(dM4<- dnbinom(x, prob=prob, size =  M\/4))## 0 0 ... 0 NaN NaN NaN NaN\n(dM8<- dnbinom(x, prob=prob, size =  M\/8))## 0 0 ... 0  0  0   NaN NaN\n#\n(p <- pnbinom(x, prob=prob, size = Inf)) ## all NaN's\n\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

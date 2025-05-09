@@ -1,0 +1,627 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18417] factanal returns useless SS loading values*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18417>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #22 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nThank you.  I've used your 2 patches but added a bit more;  \ne.g., `ifelse()` use is not very efficient, nor even shorter here.\nAlso, the list(...)[c(\"..\", \"..\")]  construction is never of length 0.\n\nFor those interested:  \nboth\n   diag(&lt;vec&gt;) %*% &lt;matrix&gt;    and\n   &lt;matrix&gt;  %*%  diag(&lt;vec&gt;\nare not very efficient compared to simple direct multiplication, notably also\nfor the case of  cov |---&gt; cor  computation  for which I wrote `cov2cor()` eons\nago,\nin order to keep the idioms on how to do the diagonal multiplications from both\nsides readily visible  (in the body of `cov2cor`.\n\nand so for larger matrices, the code can be further improved speedwise, OTOH,\nwith parallelizing BLAS etc, and in case we use only a few final dimensions it\nmay not be worth ..",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1742852918.738209",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "CaeB9",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18417] factanal returns useless SS loading values",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18417"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #22 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you.  I've used your 2 patches but added a bit more;  \ne.g., "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ifelse()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " use is not very efficient, nor even shorter here.\nAlso, the list(...)[c(\"..\", \"..\")]  construction is never of length 0.\n\nFor those interested:  \nboth\n   diag(<vec>) %*% <matrix>    and\n   <matrix>  %*%  diag(<vec>\nare not very efficient compared to simple direct multiplication, notably also\nfor the case of  cov |---> cor  computation  for which I wrote "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cov2cor()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " eons\nago,\nin order to keep the idioms on how to do the diagonal multiplications from both\nsides readily visible  (in the body of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cov2cor",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nand so for larger matrices, the code can be further improved speedwise, OTOH,\nwith parallelizing BLAS etc, and in case we use only a few final dimensions it\nmay not be worth .."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18691] clarification of NaN\/NA documentation*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18691>\n\nMikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jaganmn@mcmaster.ca\n\n--- Comment #1 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nCreated attachment 3468\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3468&amp;action=edit>\nredo of attachment 3323\n\nIt's helpful to mark patch files as such when you upload so that people can\nview the side-by-side diff in Bugzilla.  You can either check the box `Content\nType: [x] patch` or (less reliably) arrange for the MIME type to be\nauto-detected as `text\/x-diff` or `text\/x-patch` instead of `text\/plain`.  I am\nadding a new (identical in content) attachment to show the \"difference\".\n\nThe patch contains typos (such as `\\code{link{NaN}}`), adds lines with trailing\nwhitespace, and uses one space between sentences instead of two (preferred for\nplain text rendering).  Such accidents require additional attention from the\nreviewer and are better avoided by the submitter.\n\nA bigger issue is that the diff is quite large and that not all of the changes\nare obviously helpful.  I'll comment briefly and only on a subset of the\nchanges (because there are so many ...).\n\n----\n\n```\nIndex: src\/library\/base\/man\/NA.Rd\n===================================================================\n--- src\/library\/base\/man\/NA.Rd  (revision 88046)\n+++ src\/library\/base\/man\/NA.Rd  (working copy)\n@@ -25,7 +25,8 @@\n   other atomic vector types which support missing values: all of these\n   are \\link{reserved} words in the \\R language.\n\n-  The generic function \\code{<http:\/\/is.na|is.na>} indicates which elements are missing.\n+  The generic function \\code{<http:\/\/is.na|is.na>} indicates which elements are missing\n+  (\\code{NA}) or \\sQuote{Not a Number} (\\code{link{NaN}}). \n\n   The generic function \\code{<http:\/\/is.na|is.na>&lt;-} sets elements to \\code{NA}.\n\n```\n\nThis change seems to confuse the generic function and its internal default\nmethod.  I would say that the original text is a correct description of the\ngeneric function and that the specific behaviour of the internal default method\n(handling objects of type `double` or `complex`, for which the concept of `NaN`\nis actually meaningful) is already quite clear from `\\value{}`.\n\n```\n@@ -122,9 +123,12 @@\n   on how methods can be tuned to deal with missing values.\n }\n \\examples{\n-is.na(c(1, NA))        #&gt; FALSE  TRUE\n-<http:\/\/is.na|is.na>(paste(c(1, NA))) #&gt; FALSE FALSE\n<http:\/\/+is.na|+is.na>(c(1, NA, NA_real_, NaN))        #&gt; FALSE  TRUE  TRUE  TRUE\n<http:\/\/+is.na|+is.na>(paste(c(1, NA, NA_real_, NaN))) #&gt; FALSE FALSE FALSE FALSE\n\n+# When NaN should not be considered as missing value\n<http:\/\/+is.na|+is.na>(c(1, NA, NA_real_, NaN)) &amp; !is.nan(c(1, NA, NA_real_, NaN))\n+\n (xx &lt;- c(0:4))\n <http:\/\/is.na|is.na>(xx) &lt;- c(2, 4)\n xx                     #&gt; 0 NA  2 NA  4\n```\n\nThe four times repetition of `c(1, NA, NA_real_, NaN)` is not a practice that I\nwould advocate in examples, especially examples for topics as prominent as\n`NA`.\n\nSince `NA` is coerced by `c` to `NA_real_` and not actually \"seen\" by `<http:\/\/is.na|is.na>`,\nit is (to me) cognitively simpler to just use `c(1, NA, NaN)`.\n\nThe line `<http:\/\/is.na|is.na>(.) &amp; !is.nan(.)` seems redundant.  The value of `<http:\/\/is.na|is.na>(.)` is\nalready shown, and `is.nan` is documented under a different topic.\n\n```\nIndex: src\/library\/base\/man\/is.finite.Rd\n===================================================================\n--- src\/library\/base\/man\/is.finite.Rd   (revision 86216)\n+++ src\/library\/base\/man\/is.finite.Rd   (working copy)\n@@ -18,9 +18,10 @@\n   and not missing) or infinite.\n\n   \\code{Inf} and \\code{-Inf} are positive and negative infinity\n-  whereas \\code{NaN} means \\sQuote{Not a Number}.  (These apply to numeric\n-  values and real and imaginary parts of complex values but not to\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1742855649.134259",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "p14mt",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18691] clarification of NaN\/NA documentation",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18691"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jaganmn@mcmaster.ca\n\n--- Comment #1 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3468\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3468&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3468&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nredo of attachment 3323\n\nIt's helpful to mark patch files as such when you upload so that people can\nview the side-by-side diff in Bugzilla.  You can either check the box `Content\nType: [x] patch` or (less reliably) arrange for the MIME type to be\nauto-detected as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "text\/x-diff",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "text\/x-patch",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " instead of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "text\/plain",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  I am\nadding a new (identical in content) attachment to show the \"difference\".\n\nThe patch contains typos (such as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\\code{link{NaN}}",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), adds lines with trailing\nwhitespace, and uses one space between sentences instead of two (preferred for\nplain text rendering).  Such accidents require additional attention from the\nreviewer and are better avoided by the submitter.\n\nA bigger issue is that the diff is quite large and that not all of the changes\nare obviously helpful.  I'll comment briefly and only on a subset of the\nchanges (because there are so many ...).\n\n----\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/base\/man\/NA.Rd\n===================================================================\n--- src\/library\/base\/man\/NA.Rd  (revision 88046)\n+++ src\/library\/base\/man\/NA.Rd  (working copy)\n@@ -25,7 +25,8 @@\n   other atomic vector types which support missing values: all of these\n   are \\link{reserved} words in the \\R language.\n\n-  The generic function \\code{"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na"
+                            },
+                            {
+                                "type": "text",
+                                "text": "} indicates which elements are missing.\n+  The generic function \\code{"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na"
+                            },
+                            {
+                                "type": "text",
+                                "text": "} indicates which elements are missing\n+  (\\code{NA}) or \\sQuote{Not a Number} (\\code{link{NaN}}). \n\n   The generic function \\code{"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na"
+                            },
+                            {
+                                "type": "text",
+                                "text": "<-} sets elements to \\code{NA}.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis change seems to confuse the generic function and its internal default\nmethod.  I would say that the original text is a correct description of the\ngeneric function and that the specific behaviour of the internal default method\n(handling objects of type "
+                            },
+                            {
+                                "type": "text",
+                                "text": "double",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "complex",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", for which the concept of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NaN",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nis actually meaningful) is already quite clear from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\\value{}",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "@@ -122,9 +123,12 @@\n   on how methods can be tuned to deal with missing values.\n }\n \\examples{\n-is.na(c(1, NA))        #> FALSE  TRUE\n-"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(paste(c(1, NA))) #> FALSE FALSE\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/+is.na",
+                                "text": "+is.na",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "(c(1, NA, NA_real_, NaN))        #> FALSE  TRUE  TRUE  TRUE\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/+is.na",
+                                "text": "+is.na",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "(paste(c(1, NA, NA_real_, NaN))) #> FALSE FALSE FALSE FALSE\n\n+# When NaN should not be considered as missing value\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/+is.na",
+                                "text": "+is.na",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "(c(1, NA, NA_real_, NaN)) & !is.nan(c(1, NA, NA_real_, NaN))\n+\n (xx <- c(0:4))\n "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(xx) <- c(2, 4)\n xx                     #> 0 NA  2 NA  4\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe four times repetition of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "c(1, NA, NA_real_, NaN)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is not a practice that I\nwould advocate in examples, especially examples for topics as prominent as\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nSince "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is coerced by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA_real_",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and not actually \"seen\" by "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\nit is (to me) cognitively simpler to just use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "c(1, NA, NaN)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nThe line "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "(.) & !is.nan(.)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " seems redundant.  The value of "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "(.)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is\nalready shown, and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "is.nan",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is documented under a different topic.\n\n```\nIndex: src\/library\/base\/man\/is.finite.Rd\n===================================================================\n--- src\/library\/base\/man\/is.finite.Rd   (revision 86216)\n+++ src\/library\/base\/man\/is.finite.Rd   (working copy)\n@@ -18,9 +18,10 @@\n   and not missing) or infinite.\n\n   \\code{Inf} and \\code{-Inf} are positive and negative infinity\n-  whereas \\code{NaN} means \\sQuote{Not a Number}.  (These apply to numeric\n-  values and real and imaginary parts of complex values but not to"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "-  values of integer vectors.)  \\code{Inf} and \\code{NaN} (as well as\n+  whereas \\code{NaN} means \\sQuote{Not a Number}.  \\code{Inf} and\n+  \\code{NaN} are class of \\code{numeric} and type of \\code{double},\n+  and can be used in real and imaginary parts of complex values, but not\n+  as values in integer vectors. \\code{Inf} and \\code{NaN} (as well as\n   \\code{\\link{NA}}) are\n   \\link{reserved} words in the \\R language.\n }\n```\n\nThe patch removes from the original text the basic fact that `NaN` and `Inf`\ncan be used as numeric values.  The only \"new\" information is the type of `Inf`\nand `NaN`, so a more minimal change would be to just replace\n\n&gt; \\code{Inf} and \\code{NaN} (as well as \\code{\\link{NA}}) are \\link{reserved} words in the \\R language.\n\nwith\n\n&gt; \\code{Inf} and \\code{NaN} are numeric (of type \\code{\\link{double}}) constants of length 1.  Like \\code{\\link{NA}}, they are \\link{reserved} words in the \\R language.\n\nemulating the description of `NA` in `help(\"NA\")`.\n\n----\n\nTLDR: A more focused\/carefully produced patch, along with some justification of\nproposed changes, would really help here ...",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1742855649.155649",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "IjUC",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "-  values of integer vectors.)  \\code{Inf} and \\code{NaN} (as well as\n+  whereas \\code{NaN} means \\sQuote{Not a Number}.  \\code{Inf} and\n+  \\code{NaN} are class of \\code{numeric} and type of \\code{double},\n+  and can be used in real and imaginary parts of complex values, but not\n+  as values in integer vectors. \\code{Inf} and \\code{NaN} (as well as\n   \\code{\\link{NA}}) are\n   \\link{reserved} words in the \\R language.\n }\n```\n\nThe patch removes from the original text the basic fact that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NaN",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Inf",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ncan be used as numeric values.  The only \"new\" information is the type of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Inf",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nand "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NaN",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", so a more minimal change would be to just replace\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\\code{Inf} and \\code{NaN} (as well as \\code{\\link{NA}}) are \\link{reserved} words in the \\R language."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nwith\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\\code{Inf} and \\code{NaN} are numeric (of type \\code{\\link{double}}) constants of length 1.  Like \\code{\\link{NA}}, they are \\link{reserved} words in the \\R language."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nemulating the description of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "help(\"NA\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n----\n\nTLDR: A more focused\/carefully produced patch, along with some justification of\nproposed changes, would really help here ..."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

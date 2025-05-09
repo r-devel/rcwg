@@ -1,0 +1,239 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18875] New: NextMethod() duplicates positional arguments in the next method*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18875>\n\n            Bug ID: 18875\n           Summary: NextMethod() duplicates positional arguments in the\n                    next method\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>\n\nFollowing up from r-devel:\n\n<https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2025-March\/083913.html>\n\nHere's the reprex:\n\n```\nfoo &lt;- function(x, y, ...) {\n    cat(sprintf(\"foo        : x=%s, y=%s\\n\", x, y))\n    if (...length()) str(list(...))\n    UseMethod(\"foo\")\n}\n\nfoo.default &lt;- function(x, y = 0, ...) {\n    cat(sprintf(\"foo.default: x=%s, y=%s\\n\", x, y))\n    if (...length()) str(list(...))\n}\n\nfoo.C &lt;- function(x, y = 3, ...) {\n    cat(sprintf(\"foo.C      : x=%s, y=%s\\n\", x, y))\n    if (...length()) str(list(...))\n    NextMethod(x = x, y = y)\n}\n\nfoo(`class&lt;-`(1, 'C'), 2)\n```\n\nResult:\n\n```\nfoo        : x=1, y=2\nfoo.C      : x=1, y=2\nfoo.default: x=1, y=2\nList of 2\n $ : 'C' num 1\n $ : num 2\n```\n\nI.e., `foo.default` correctly wound up with `x=1` and `y=2`, but _also_ wound\nup with two arguments in `...`, namely (shallow?) duplicates of `x` and `y`.\n\nIn practice, this was the root of an extremely vexing bug whereby `...` got\npassed on to an S4 method in the next method, in turn generating some rather\ninscrutable bugs &amp; error logs.\n\nThis only affects calls where `x` and\/or `y` are provided positionally --\nproviding either\/both as a keyword argument saves them from winding up in\n`...`:\n\n```\nCC = 1L\nclass(CC) = 'C'\n\nfoo(CC, y=2)\n# foo        : x=1, y=2\n# foo.C      : x=1, y=2\n# foo.default: x=1, y=2\n# List of 1\n#  $ : 'C' int 1\n\nfoo(x=CC, 2)\n# foo        : x=1, y=2\n# foo.C      : x=1, y=2\n# foo.default: x=1, y=2\n# List of 1\n#  $ : num 2\n\nfoo(x=CC, y=2)\n# foo        : x=1, y=2\n# foo.C      : x=1, y=2\n# foo.default: x=1, y=2\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1742966199.011369",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "l6O",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18875] New: NextMethod() duplicates positional arguments in the next method",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18875"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18875\n           Summary: NextMethod() duplicates positional arguments in the\n                    next method\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nFollowing up from r-devel:\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2025-March\/083913.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nHere's the reprex:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "foo <- function(x, y, ...) {\n    cat(sprintf(\"foo        : x=%s, y=%s\\n\", x, y))\n    if (...length()) str(list(...))\n    UseMethod(\"foo\")\n}\n\nfoo.default <- function(x, y = 0, ...) {\n    cat(sprintf(\"foo.default: x=%s, y=%s\\n\", x, y))\n    if (...length()) str(list(...))\n}\n\nfoo.C <- function(x, y = 3, ...) {\n    cat(sprintf(\"foo.C      : x=%s, y=%s\\n\", x, y))\n    if (...length()) str(list(...))\n    NextMethod(x = x, y = y)\n}\n\nfoo(`class<-`(1, 'C'), 2)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nResult:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "foo        : x=1, y=2\nfoo.C      : x=1, y=2\nfoo.default: x=1, y=2\nList of 2\n $ : 'C' num 1\n $ : num 2\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI.e., "
+                            },
+                            {
+                                "type": "text",
+                                "text": "foo.default",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " correctly wound up with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x=1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "y=2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", but "
+                            },
+                            {
+                                "type": "text",
+                                "text": "also",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " wound\nup with two arguments in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "...",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", namely (shallow?) duplicates of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "y",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nIn practice, this was the root of an extremely vexing bug whereby "
+                            },
+                            {
+                                "type": "text",
+                                "text": "...",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " got\npassed on to an S4 method in the next method, in turn generating some rather\ninscrutable bugs & error logs.\n\nThis only affects calls where "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and\/or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "y",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " are provided positionally --\nproviding either\/both as a keyword argument saves them from winding up in\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "...",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "CC = 1L\nclass(CC) = 'C'\n\nfoo(CC, y=2)\n# foo        : x=1, y=2\n# foo.C      : x=1, y=2\n# foo.default: x=1, y=2\n# List of 1\n#  $ : 'C' int 1\n\nfoo(x=CC, 2)\n# foo        : x=1, y=2\n# foo.C      : x=1, y=2\n# foo.default: x=1, y=2\n# List of 1\n#  $ : num 2\n\nfoo(x=CC, y=2)\n# foo        : x=1, y=2\n# foo.C      : x=1, y=2\n# foo.default: x=1, y=2\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

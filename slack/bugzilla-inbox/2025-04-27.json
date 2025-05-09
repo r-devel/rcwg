@@ -1,0 +1,171 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18887] Wish: support for concatenated gzip archives in gzcon*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18887>\n\nIvan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3477|0                           |1\n        is obsolete|                            |\n\n--- Comment #1 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nCreated attachment 3478\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3478&amp;action=edit>\nNow reading short files, update ?connections\n\nIt turns out that `gzcon()` had a bug where reading from a file less than two\nbytes in size would return uninitialised stack contents:\n\n```\n: &gt; bar.txt\nR -q -s -e '\"bar.txt\" |&gt; file(\"rb\") |&gt; gzcon() |&gt; readLines(encoding=\"latin1\")'\n# [1] \"\\032T\"\n# Warning message:\n# In readLines(gzcon(file(\"bar.txt\", \"rb\")), encoding = \"latin1\") :\n#   incomplete final line found on 'gzcon(bar.txt)'\nR -q -s -e '\"bar.txt\" |&gt; file(\"rb\") |&gt; gzcon() |&gt; readLines(encoding=\"latin1\")'\n# [1] \"_\\022\"\n# Warning message:\n# In readLines(gzcon(file(\"bar.txt\", \"rb\")), encoding = \"latin1\") :\n#   incomplete final line found on 'gzcon(bar.txt)'\n```\n\n```\n==24238== Conditional jump or move depends on uninitialised value(s)\n\n==24238==  Uninitialised value was created by a stack allocation\n==24238==    at 0x1D0790: gzcon_open (connections.c:6167)\n```\n\nThe previous patch replaced it with a different bug, where\n`gzcon(allowNonCompressed = TRUE)` would refuse to read such files. The updated\npatch reads such short files correctly:\n\n```\n: &gt; bar.txt\nR -q -s -e '\"bar.txt\" |&gt; file(\"rb\") |&gt; gzcon() |&gt; readLines()'\n# character(0)\necho &gt; foo.txt\nR -q -s -e '\"foo.txt\" |&gt; file(\"rb\") |&gt; gzcon() |&gt; readLines()'\n# [1] \"\"\n```\n\nAdditionally, update the sentence in `?connections` to say that `gzcon` now\nworks with multiple streams too.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1745741008.026969",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Rr52",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18887] Wish: support for concatenated gzip archives in gzcon",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18887"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIvan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3477|0                           |1\n        is obsolete|                            |\n\n--- Comment #1 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3478\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3478&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3478&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nNow reading short files, update ?connections\n\nIt turns out that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "gzcon()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " had a bug where reading from a file less than two\nbytes in size would return uninitialised stack contents:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": ": > bar.txt\nR -q -s -e '\"bar.txt\" |> file(\"rb\") |> gzcon() |> readLines(encoding=\"latin1\")'\n# [1] \"\\032T\"\n# Warning message:\n# In readLines(gzcon(file(\"bar.txt\", \"rb\")), encoding = \"latin1\") :\n#   incomplete final line found on 'gzcon(bar.txt)'\nR -q -s -e '\"bar.txt\" |> file(\"rb\") |> gzcon() |> readLines(encoding=\"latin1\")'\n# [1] \"_\\022\"\n# Warning message:\n# In readLines(gzcon(file(\"bar.txt\", \"rb\")), encoding = \"latin1\") :\n#   incomplete final line found on 'gzcon(bar.txt)'\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "==24238== Conditional jump or move depends on uninitialised value(s)\n\n==24238==  Uninitialised value was created by a stack allocation\n==24238==    at 0x1D0790: gzcon_open (connections.c:6167)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe previous patch replaced it with a different bug, where\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "gzcon(allowNonCompressed = TRUE)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " would refuse to read such files. The updated\npatch reads such short files correctly:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": ": > bar.txt\nR -q -s -e '\"bar.txt\" |> file(\"rb\") |> gzcon() |> readLines()'\n# character(0)\necho > foo.txt\nR -q -s -e '\"foo.txt\" |> file(\"rb\") |> gzcon() |> readLines()'\n# [1] \"\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nAdditionally, update the sentence in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "?connections",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to say that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "gzcon",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " now\nworks with multiple streams too."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

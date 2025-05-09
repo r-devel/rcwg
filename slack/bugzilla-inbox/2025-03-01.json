@@ -1,0 +1,141 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18864] R-4.4.3 fails to build utils.dll due to missing \"-lzma\" on Cygwin*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18864>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tomas.kalibera@gmail.com\n\n--- Comment #1 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nBuilding R on cygwin is not regularly tested\/maintained - configure is only\nused on Unix systems. On Windows, R uses a custom mingw-w64 toolchain with\nseparate make files (and without configure), see\n<https:\/\/cran.r-project.org\/bin\/windows\/base\/howto-R-4.3.html>, so no POSIX\nfunctionality in addition to mingw-w64 is needed for R on Windows. What is your\nmotivation for building R on cygwin? How you exactly do that?\n\nIn practice, when using R one typically needs contributed packages outside of\nthe base R distribution, and many of those, including popular ones, will likely\nnot even build on cygwin or have some dependency that would not. Fixing R\nitself to build again on cygwin may be possible if needed, but it is not clear\nto me whether it is worth the effort.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1740830772.884079",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "M31W",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18864] R-4.4.3 fails to build utils.dll due to missing \"-lzma\" on Cygwin",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18864"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tomas.kalibera@gmail.com\n\n--- Comment #1 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nBuilding R on cygwin is not regularly tested\/maintained - configure is only\nused on Unix systems. On Windows, R uses a custom mingw-w64 toolchain with\nseparate make files (and without configure), see\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/cran.r-project.org\/bin\/windows\/base\/howto-R-4.3.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": ", so no POSIX\nfunctionality in addition to mingw-w64 is needed for R on Windows. What is your\nmotivation for building R on cygwin? How you exactly do that?\n\nIn practice, when using R one typically needs contributed packages outside of\nthe base R distribution, and many of those, including popular ones, will likely\nnot even build on cygwin or have some dependency that would not. Fixing R\nitself to build again on cygwin may be possible if needed, but it is not clear\nto me whether it is worth the effort."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18864] R-4.4.3 fails to build utils.dll due to missing \"-lzma\" on Cygwin*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18864>\n\n--- Comment #2 from Marco Atzeri (<mailto:marco.atzeri@gmail.com|marco.atzeri@gmail.com>) ---\nI am the Cygwin package maintainer for R and a lot of other Math and\nProgramming tool.  \n\n<https:\/\/repology.org\/maintainer\/marco.atzeri@cygwin>\n\nIt is more than 10 years that I am packaging R for Cygwin, so it builds on\nCygwin and works.  \n\n<https:\/\/sourceware.org\/pipermail\/cygwin-announce\/2012-June\/004563.html>\n\nFrom what I can see if a module requires an external library\na proper link command is defined on the Unix side, and this is enough for\nCygwin compilation.\n\n.\/modules\/internet\/Makefile.in:internet_la_LIBADD = $(CURL_LIBS) $(LIBR1)\n@INTERNET_LIBS@ @DYLIB_UNDEFINED_ALLOWED_FALSE@ $(LIBINTL)\n.\/modules\/internet\/Makefile.in: $(SHLIB_LINK) -o $@ $(OBJECTS)\n$(internet_la_LIBADD)\n\n.\/modules\/X11\/Makefile.in:      $(SHLIB_LINK) -o $@ $(OBJECTS)\n$(R_X11_la_LIBADD)\n.\/modules\/X11\/Makefile.in:      $(SHLIB_LINK) -o $@ $(DE_OBJECTS)\n$(R_de_la_LIBADD)\n\n.\/library\/grDevices\/src\/cairo\/Makefile.in:cairo_la_LIBADD = @BITMAP_LIBS@\n@CAIRO_LIBS@ $(LIBR) $(LIBM) @DYLIB_UNDEFINED_ALLOWED_FALSE@ $(LIBINTL)\n.\/library\/grDevices\/src\/cairo\/Makefile.in:      $(SHLIB_LINK) -o $@ $(OBJECTS)\n$(cairo_la_LIBADD)\n\nWith R-4.4.x \"utils\" now requires the lzma library but the proper link is\nmissing.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1740836028.439039",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "\/h6",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18864] R-4.4.3 fails to build utils.dll due to missing \"-lzma\" on Cygwin",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18864"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Marco Atzeri ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:marco.atzeri@gmail.com",
+                                "text": "marco.atzeri@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI am the Cygwin package maintainer for R and a lot of other Math and\nProgramming tool.  \n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/repology.org\/maintainer\/marco.atzeri@cygwin"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIt is more than 10 years that I am packaging R for Cygwin, so it builds on\nCygwin and works.  \n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/sourceware.org\/pipermail\/cygwin-announce\/2012-June\/004563.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nFrom what I can see if a module requires an external library\na proper link command is defined on the Unix side, and this is enough for\nCygwin compilation.\n\n.\/modules\/internet\/Makefile.in:internet_la_LIBADD = $(CURL_LIBS) $(LIBR1)\n@INTERNET_LIBS@ @DYLIB_UNDEFINED_ALLOWED_FALSE@ $(LIBINTL)\n.\/modules\/internet\/Makefile.in: $(SHLIB_LINK) -o $@ $(OBJECTS)\n$(internet_la_LIBADD)\n\n.\/modules\/X11\/Makefile.in:      $(SHLIB_LINK) -o $@ $(OBJECTS)\n$(R_X11_la_LIBADD)\n.\/modules\/X11\/Makefile.in:      $(SHLIB_LINK) -o $@ $(DE_OBJECTS)\n$(R_de_la_LIBADD)\n\n.\/library\/grDevices\/src\/cairo\/Makefile.in:cairo_la_LIBADD = @BITMAP_LIBS@\n@CAIRO_LIBS@ $(LIBR) $(LIBM) @DYLIB_UNDEFINED_ALLOWED_FALSE@ $(LIBINTL)\n.\/library\/grDevices\/src\/cairo\/Makefile.in:      $(SHLIB_LINK) -o $@ $(OBJECTS)\n$(cairo_la_LIBADD)\n\nWith R-4.4.x \"utils\" now requires the lzma library but the proper link is\nmissing."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

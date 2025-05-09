@@ -1,0 +1,218 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18868] New: 'reconcilePropertiesAndPrototype' fails to reconcile slot classes inherited from multiple superclasses*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18868>\n\n            Bug ID: 18868\n           Summary: 'reconcilePropertiesAndPrototype' fails to reconcile\n                    slot classes inherited from multiple superclasses\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: S4methods\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>\n\nHere, `reconcilePropertiesAndPrototype` (called from `setClass`) tests\n`extends(\"logical\", \"vector\")` and so does not complain:\n\n```\n&gt; setClass(\"A\", contains = \"VIRTUAL\", slots = c(x = \"logical\"))\n&gt; setClass(\"B\", contains = \"VIRTUAL\", slots = c(x = \"vector\"))\n&gt; setClass(\"AB\", contains = c(\"A\", \"B\"))\n&gt; showClass(\"AB\")\nClass \"AB\" [in \".GlobalEnv\"]\n\nSlots:\n\nName:        x\nClass: logical\n\nExtends: \"A\", \"B\"\n```\n\nHere, it tests `extends(\"vector\", \"logical\")` and fails unnecessarily:\n\n```\n&gt; setClass(\"BA\", contains = c(\"B\", \"A\"))\nError in reconcilePropertiesAndPrototype(name, slots, prototype, superClasses, \n: \n  Definition of slot 'x', in class \"BA\", as \"vector\" conflicts with definition,\ninherited from class \"A\", as \"logical\"\n```\n\nSurely in both cases it should rather check each of `extends(\"logical\",\n\"vector\")` and `extends(\"vector\", \"logical\")`, keeping the more specific class\n(in this case `\"logical\"`) if either is `TRUE` and failing if both are `FALSE`?\n Then the behaviour would be robust to the order of superclasses in `contains`.\n\nA work-around is to specify directly the reconciled slot class:\n\n```\n&gt; setClass(\"BA\", contains = c(\"B\", \"A\"), slots = c(x = \"logical\"))\n&gt; showClass(\"BA\")\nClass \"BA\" [in \".GlobalEnv\"]\n\nSlots:\n\nName:        x\nClass: logical\n\nExtends: \"B\", \"A\"\n```\n\nBut then one loses one of the conveniences of the inheritance mechanism.  I'm\nexploring a patch ...",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1741385196.095939",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "XNJs",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18868] New: 'reconcilePropertiesAndPrototype' fails to reconcile slot classes inherited from multiple superclasses",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18868"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18868\n           Summary: 'reconcilePropertiesAndPrototype' fails to reconcile\n                    slot classes inherited from multiple superclasses\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: S4methods\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nHere, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "reconcilePropertiesAndPrototype",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (called from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "setClass",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") tests\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "extends(\"logical\", \"vector\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and so does not complain:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> setClass(\"A\", contains = \"VIRTUAL\", slots = c(x = \"logical\"))\n> setClass(\"B\", contains = \"VIRTUAL\", slots = c(x = \"vector\"))\n> setClass(\"AB\", contains = c(\"A\", \"B\"))\n> showClass(\"AB\")\nClass \"AB\" [in \".GlobalEnv\"]\n\nSlots:\n\nName:        x\nClass: logical\n\nExtends: \"A\", \"B\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nHere, it tests "
+                            },
+                            {
+                                "type": "text",
+                                "text": "extends(\"vector\", \"logical\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and fails unnecessarily:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> setClass(\"BA\", contains = c(\"B\", \"A\"))\nError in reconcilePropertiesAndPrototype(name, slots, prototype, superClasses, \n: \n  Definition of slot 'x', in class \"BA\", as \"vector\" conflicts with definition,\ninherited from class \"A\", as \"logical\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSurely in both cases it should rather check each of `extends(\"logical\",\n\"vector\")` and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "extends(\"vector\", \"logical\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", keeping the more specific class\n(in this case "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"logical\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") if either is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and failing if both are "
+                            },
+                            {
+                                "type": "text",
+                                "text": "FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "?\n Then the behaviour would be robust to the order of superclasses in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "contains",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nA work-around is to specify directly the reconciled slot class:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> setClass(\"BA\", contains = c(\"B\", \"A\"), slots = c(x = \"logical\"))\n> showClass(\"BA\")\nClass \"BA\" [in \".GlobalEnv\"]\n\nSlots:\n\nName:        x\nClass: logical\n\nExtends: \"B\", \"A\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nBut then one loses one of the conveniences of the inheritance mechanism.  I'm\nexploring a patch ..."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,196 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18881] New: S4 bit is not always unset when removing class attribute*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18881>\n\n            Bug ID: 18881\n           Summary: S4 bit is not always unset when removing class\n                    attribute\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>\n\nThe R Internals manual says:\n\n&gt; It is currently unclear what should happen if the class attribute is removed from an S4 object, or if this should be allowed.\n\nBe that as it may, perhaps the behaviour should be consistent across the\nvarious ways of removing the class attribute.  Currently, it is not.  For an\n`OBJSXP`, we see:\n\n```\n&gt; bb &lt;- function(s) c(object = is.object(s), S4 = isS4(s))\n&gt; setClass(\"obj\", slots = c(. = \"logical\"))\n&gt; x &lt;- new(\"obj\")\n&gt; bb(x)\nobject     S4 \n  TRUE   TRUE \n&gt; bb(unclass(x))\nobject     S4 \n FALSE   TRUE \n&gt; bb(`class&lt;-`(x, NULL))\nobject     S4 \n FALSE  FALSE \nWarning message:\nIn bb(`class&lt;-`(x, NULL)) :\n  Setting class(x) to NULL;   result will no longer be an S4 object\n&gt; bb(`oldClass&lt;-`(x, NULL))\nobject     S4 \n FALSE  FALSE \n&gt; bb(`attr&lt;-`(x, \"class\", NULL))\nobject     S4 \n FALSE   TRUE \n&gt; bb(`attributes&lt;-`(x, NULL))\nobject     S4 \n FALSE  FALSE \n&gt; bb(`attributes&lt;-`(x, list(notclass = 0)))\nobject     S4 \n FALSE   TRUE\n```\n\nFor non-`OBJSXP`, we see the same:\n\n```\n&gt; bb &lt;- function(s) c(object = is.object(s), S4 = isS4(s))\n&gt; setClass(\"lgl\", contains = \"logical\")\n&gt; y &lt;- new(\"lgl\")\n&gt; bb(y)\nobject     S4 \n  TRUE   TRUE \n&gt; bb(unclass(y))\nobject     S4 \n FALSE   TRUE \n&gt; bb(`class&lt;-`(y, NULL))\nobject     S4 \n FALSE  FALSE \nWarning message:\nIn bb(`class&lt;-`(y, NULL)) :\n  Setting class(x) to NULL;   result will no longer be an S4 object\n&gt; bb(`oldClass&lt;-`(y, NULL))\nobject     S4 \n FALSE  FALSE \n&gt; bb(`attr&lt;-`(y, \"class\", NULL))\nobject     S4 \n FALSE   TRUE \n&gt; bb(`attributes&lt;-`(y, NULL))\nobject     S4 \n FALSE  FALSE \n&gt; bb(`attributes&lt;-`(y, list(notclass = 0)))\nobject     S4 \n FALSE   TRUE \n```\n\nIt seems that some logic could be added to `do_unclass`, `classgets`, and\n`do_attributesgets` and elsewhere if it is intended that a warning should\nalways be signalled (though since `attributes&lt;-` is used by\n`methods::getDataPart` to legitimately make an object \"not S4\", maybe that\nshould not warn ...).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1744085414.530149",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "tLi",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18881] New: S4 bit is not always unset when removing class attribute",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18881"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18881\n           Summary: S4 bit is not always unset when removing class\n                    attribute\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThe R Internals manual says:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "It is currently unclear what should happen if the class attribute is removed from an S4 object, or if this should be allowed."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nBe that as it may, perhaps the behaviour should be consistent across the\nvarious ways of removing the class attribute.  Currently, it is not.  For an\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "OBJSXP",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", we see:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> bb <- function(s) c(object = is.object(s), S4 = isS4(s))\n> setClass(\"obj\", slots = c(. = \"logical\"))\n> x <- new(\"obj\")\n> bb(x)\nobject     S4 \n  TRUE   TRUE \n> bb(unclass(x))\nobject     S4 \n FALSE   TRUE \n> bb(`class<-`(x, NULL))\nobject     S4 \n FALSE  FALSE \nWarning message:\nIn bb(`class<-`(x, NULL)) :\n  Setting class(x) to NULL;   result will no longer be an S4 object\n> bb(`oldClass<-`(x, NULL))\nobject     S4 \n FALSE  FALSE \n> bb(`attr<-`(x, \"class\", NULL))\nobject     S4 \n FALSE   TRUE \n> bb(`attributes<-`(x, NULL))\nobject     S4 \n FALSE  FALSE \n> bb(`attributes<-`(x, list(notclass = 0)))\nobject     S4 \n FALSE   TRUE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nFor non-"
+                            },
+                            {
+                                "type": "text",
+                                "text": "OBJSXP",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", we see the same:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> bb <- function(s) c(object = is.object(s), S4 = isS4(s))\n> setClass(\"lgl\", contains = \"logical\")\n> y <- new(\"lgl\")\n> bb(y)\nobject     S4 \n  TRUE   TRUE \n> bb(unclass(y))\nobject     S4 \n FALSE   TRUE \n> bb(`class<-`(y, NULL))\nobject     S4 \n FALSE  FALSE \nWarning message:\nIn bb(`class<-`(y, NULL)) :\n  Setting class(x) to NULL;   result will no longer be an S4 object\n> bb(`oldClass<-`(y, NULL))\nobject     S4 \n FALSE  FALSE \n> bb(`attr<-`(y, \"class\", NULL))\nobject     S4 \n FALSE   TRUE \n> bb(`attributes<-`(y, NULL))\nobject     S4 \n FALSE  FALSE \n> bb(`attributes<-`(y, list(notclass = 0)))\nobject     S4 \n FALSE   TRUE \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIt seems that some logic could be added to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_unclass",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "classgets",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_attributesgets",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and elsewhere if it is intended that a warning should\nalways be signalled (though since "
+                            },
+                            {
+                                "type": "text",
+                                "text": "attributes<-",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is used by\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods::getDataPart",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to legitimately make an object \"not S4\", maybe that\nshould not warn ...)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

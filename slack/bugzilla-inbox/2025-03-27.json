@@ -1,0 +1,716 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18876] New: Install packages on non-appendable file systems (e.g. databricks volumes)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18876>\n\n            Bug ID: 18876\n           Summary: Install packages on non-appendable file systems (e.g.\n                    databricks volumes)\n           Product: R\n           Version: R 4.5.x\n          Hardware: All\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Installation\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:sergioller@gmail.com|sergioller@gmail.com>\n\nCreated attachment 3470\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3470&amp;action=edit>\nPatch with docs\n\nI am working at a company, and we use R with databricks. We want to install\nsome packages on a distributed filesystem that is not fully POSIX compliant, as\nit does not support opening files in append mode. In C terms, `open(filename,\n\"a\")` gives an error. I guess other distributed file systems beyond the ones in\ndatabricks may have issues with append mode as well.\n\nR source package installation requires opening files in append mode, so the\ninstallation of such packages fails. Our current workaround is to install all\npackages on a local folder, and then copy\/move the folder to the distributed\nfile system.\n\nThe submitted patch allows sysadmins to define the R_LOCKDIR_PREFIX environment\nvariable, so the 00LOCK directory where the package is temporarily installed by\ninstall packages can be set to be created in a different file system.\n\nThis allows source package installations to succeed in those systems.\n\nThe main caveat of this patch, as pointed by Tomas Kalibera on\n<https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2025-March\/083925.html> is that the final\ncopy from the lockdir to the final destination is not atomic if the LOCK\ndirectory is on a different file system. This is an issue because in case of\nerror during the copy, the resulting library directory can be left in a\ncorrupted state.\n\nI have stated this caveat explicitly in the R Installation and admin manual,\nwhere the environment variable is documented.\n\nIn my opinion the robust approach would require improving the filesystem\ndriver, so the filesystem would offer \"append mode support\" and \"atomic\ndirectory operations\" (or in general POSIX compliance).\n\nStill, I believe that the patch has value, since it enables source package\ninstallation in those file systems, even if it is with limited error recovery\ncapabilities.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1743077713.884819",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "46gvu",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18876] New: Install packages on non-appendable file systems (e.g. databricks volumes)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18876"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18876\n           Summary: Install packages on non-appendable file systems (e.g.\n                    databricks volumes)\n           Product: R\n           Version: R 4.5.x\n          Hardware: All\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Installation\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:sergioller@gmail.com",
+                                "text": "sergioller@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3470\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3470&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3470&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch with docs\n\nI am working at a company, and we use R with databricks. We want to install\nsome packages on a distributed filesystem that is not fully POSIX compliant, as\nit does not support opening files in append mode. In C terms, `open(filename,\n\"a\")` gives an error. I guess other distributed file systems beyond the ones in\ndatabricks may have issues with append mode as well.\n\nR source package installation requires opening files in append mode, so the\ninstallation of such packages fails. Our current workaround is to install all\npackages on a local folder, and then copy\/move the folder to the distributed\nfile system.\n\nThe submitted patch allows sysadmins to define the R_LOCKDIR_PREFIX environment\nvariable, so the 00LOCK directory where the package is temporarily installed by\ninstall packages can be set to be created in a different file system.\n\nThis allows source package installations to succeed in those systems.\n\nThe main caveat of this patch, as pointed by Tomas Kalibera on\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2025-March\/083925.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": " is that the final\ncopy from the lockdir to the final destination is not atomic if the LOCK\ndirectory is on a different file system. This is an issue because in case of\nerror during the copy, the resulting library directory can be left in a\ncorrupted state.\n\nI have stated this caveat explicitly in the R Installation and admin manual,\nwhere the environment variable is documented.\n\nIn my opinion the robust approach would require improving the filesystem\ndriver, so the filesystem would offer \"append mode support\" and \"atomic\ndirectory operations\" (or in general POSIX compliance).\n\nStill, I believe that the patch has value, since it enables source package\ninstallation in those file systems, even if it is with limited error recovery\ncapabilities."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18876] Install packages on non-appendable file systems (e.g. databricks volumes)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18876>\n\n--- Comment #1 from Sergio Oller (<mailto:sergioller@gmail.com|sergioller@gmail.com>) ---\nCreated attachment 3471\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3471&amp;action=edit>\nSame patch, but with the news entry in r-devel.\n\nIt is best if the news entry is against R-devel, not R-4.5.0.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1743078403.457319",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ptj",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18876] Install packages on non-appendable file systems (e.g. databricks volumes)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18876"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Sergio Oller ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:sergioller@gmail.com",
+                                "text": "sergioller@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3471\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3471&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3471&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nSame patch, but with the news entry in r-devel.\n\nIt is best if the news entry is against R-devel, not R-4.5.0."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18877] New: README: Mention also R 4.0.0*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18877>\n\n            Bug ID: 18877\n           Summary: README: Mention also R 4.0.0\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: trivial\n          Priority: P5\n         Component: Documentation\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:henrikb@braju.com|henrikb@braju.com>\n\nCreated attachment 3472\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3472&amp;action=edit>\nAdd \"and 4.0.0 on April 24 2020\" to the README\n\nThe root README of the R Project says:\n\n&gt; R 1.0.0 was released on 29 February 2000 and 2.0.0 on 4 October 2004.\n&gt; R 3.0.0 came out on 3 April 2013.\n\nThe attached patch adds \"and 4.0.0 on April 24 2020.\"",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1743087549.975909",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "DdNu",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18877] New: README: Mention also R 4.0.0",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18877"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18877\n           Summary: README: Mention also R 4.0.0\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: trivial\n          Priority: P5\n         Component: Documentation\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:henrikb@braju.com",
+                                "text": "henrikb@braju.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3472\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3472&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3472&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nAdd \"and 4.0.0 on April 24 2020\" to the README\n\nThe root README of the R Project says:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "R 1.0.0 was released on 29 February 2000 and 2.0.0 on 4 October 2004.\nR 3.0.0 came out on 3 April 2013."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe attached patch adds \"and 4.0.0 on April 24 2020.\""
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 15654] WISH\/ROBUSTNESS: R CMD check for non-named '...' arguments to NextMethod()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=15654>\n\nMichael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |michaelchirico4@gmail.com\n\n--- Comment #2 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nI see a few hits for `NextMethod(...)` in the R sources:\n\n<https:\/\/github.com\/r-devel\/r-svn\/blob\/bd7ef3fe6344149674b521a06443e4847ad57dcd\/src\/library\/base\/demo\/is.things.R#L100>\n\n<https:\/\/github.com\/r-devel\/r-svn\/blob\/bd7ef3fe6344149674b521a06443e4847ad57dcd\/src\/library\/utils\/R\/str.R#L43-L44>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1743102875.625499",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "gDKP",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 15654] WISH\/ROBUSTNESS: R CMD check for non-named '...' arguments to NextMethod()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=15654"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMichael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |michaelchirico4@gmail.com\n\n--- Comment #2 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI see a few hits for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NextMethod(...)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in the R sources:\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/bd7ef3fe6344149674b521a06443e4847ad57dcd\/src\/library\/base\/demo\/is.things.R#L100"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/bd7ef3fe6344149674b521a06443e4847ad57dcd\/src\/library\/utils\/R\/str.R#L43-L44"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 15654] WISH\/ROBUSTNESS: R CMD check for non-named '...' arguments to NextMethod()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=15654>\n\nMikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jaganmn@mcmaster.ca\n\n--- Comment #3 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\n[TLDR: My feeling is that this PR can be closed with a very small patch to\n`UseMethod.Rd`, provided below.]\n\nI found my way here from R-devel:\n<https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2025-March\/083913.html>\n\nFrom my point of view, there *are* uses for the current behaviour of\n`NextMethod` which allows its \"formal\" argument `...` to be matched by unnamed\n\"actual\" arguments.  Consider a class `A` defined informally as a numeric\nvector holding a second numeric vector as an attribute named `extra`.  The\nauthor of the class decides that\n\n```\nSummary(x, ..., na.rm = y)\n```\n\nshould behave as\n\n```\nSummary(as.numeric(x), ..., na.rm = y, attr(x, \"extra\"))\n```\n\nfor `x` inheriting from `A`.  So they do:\n\n```\n&gt; Summary.A &lt;- function(x, ..., na.rm = FALSE) NextMethod(, , attr(x, \"extra\"))\n&gt; x &lt;- structure(c(2, 2), extra = 4, class = \"A\")\n&gt; prod(x)\n[1] 16\n```\n\nAnd that seems reasonable enough to me.  I'd not want to prevent or discourage\npeople from doing such things.\n\nAre these \"misusers\" of `NextMethod` reading the *official* documentation?  I\ntend to agree with Simon's position that it is already documented how arguments\nmatching `...` are handled:\n<https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2012-October\/065017.html>\n\n`RShowDoc(\"R-lang\")`:\n\n&gt; Values in the `...` argument are used to modify the arguments of the next method.\n\n`help(\"NextMethod\")`:\n\n&gt; Normally `NextMethod` is used with only one argument, `generic`, but if further arguments are supplied these modify the call to the next method.\n&gt;\n&gt; ...\n&gt;\n&gt; Any named arguments matched to `...` are handled specially: they either replace existing arguments of the same name or are appended to the argument list.\n\nSo maybe just a very small patch to `UseMethod.Rd` to say explicitly what\nhappens to *unnamed* arguments matched to `...`?\n\n```\nIndex: src\/library\/base\/man\/UseMethod.Rd\n===================================================================\n--- src\/library\/base\/man\/UseMethod.Rd   (revision 88064)\n+++ src\/library\/base\/man\/UseMethod.Rd   (working copy)\n@@ -109,7 +109,8 @@\n   method.  If no new arguments are supplied, the arguments will be the\n   same in number, order and name as those to the current method but\n   their values will be promises to evaluate their name in the current\n-  method and environment.  Any named arguments matched to \\code{\\dots}\n+  method and environment.  Unnamed arguments matched to \\code{\\dots} are\n+  appended to the argument list.  Named arguments matched to \\code{\\dots}\n   are handled specially: they either replace existing arguments of the\n   same name or are appended to the argument list.  They are passed on as\n   the promise that was supplied as an argument to the current\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1743123286.267709",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "+\/gg5",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 15654] WISH\/ROBUSTNESS: R CMD check for non-named '...' arguments to NextMethod()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=15654"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jaganmn@mcmaster.ca\n\n--- Comment #3 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n[TLDR: My feeling is that this PR can be closed with a very small patch to\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "UseMethod.Rd",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", provided below.]\n\nI found my way here from R-devel:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2025-March\/083913.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nFrom my point of view, there "
+                            },
+                            {
+                                "type": "text",
+                                "text": "are",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " uses for the current behaviour of\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "NextMethod",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " which allows its \"formal\" argument "
+                            },
+                            {
+                                "type": "text",
+                                "text": "...",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to be matched by unnamed\n\"actual\" arguments.  Consider a class "
+                            },
+                            {
+                                "type": "text",
+                                "text": "A",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " defined informally as a numeric\nvector holding a second numeric vector as an attribute named "
+                            },
+                            {
+                                "type": "text",
+                                "text": "extra",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  The\nauthor of the class decides that\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Summary(x, ..., na.rm = y)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nshould behave as\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Summary(as.numeric(x), ..., na.rm = y, attr(x, \"extra\"))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nfor "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " inheriting from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "A",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  So they do:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> Summary.A <- function(x, ..., na.rm = FALSE) NextMethod(, , attr(x, \"extra\"))\n> x <- structure(c(2, 2), extra = 4, class = \"A\")\n> prod(x)\n[1] 16\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nAnd that seems reasonable enough to me.  I'd not want to prevent or discourage\npeople from doing such things.\n\nAre these \"misusers\" of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NextMethod",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " reading the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "official",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " documentation?  I\ntend to agree with Simon's position that it is already documented how arguments\nmatching "
+                            },
+                            {
+                                "type": "text",
+                                "text": "...",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " are handled:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2012-October\/065017.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "RShowDoc(\"R-lang\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Values in the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "...",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " argument are used to modify the arguments of the next method."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "help(\"NextMethod\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Normally "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NextMethod",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is used with only one argument, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "generic",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", but if further arguments are supplied these modify the call to the next method.\n\n...\n\nAny named arguments matched to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "...",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " are handled specially: they either replace existing arguments of the same name or are appended to the argument list."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSo maybe just a very small patch to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "UseMethod.Rd",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to say explicitly what\nhappens to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "unnamed",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " arguments matched to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "...",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "?\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/base\/man\/UseMethod.Rd\n===================================================================\n--- src\/library\/base\/man\/UseMethod.Rd   (revision 88064)\n+++ src\/library\/base\/man\/UseMethod.Rd   (working copy)\n@@ -109,7 +109,8 @@\n   method.  If no new arguments are supplied, the arguments will be the\n   same in number, order and name as those to the current method but\n   their values will be promises to evaluate their name in the current\n-  method and environment.  Any named arguments matched to \\code{\\dots}\n+  method and environment.  Unnamed arguments matched to \\code{\\dots} are\n+  appended to the argument list.  Named arguments matched to \\code{\\dots}\n   are handled specially: they either replace existing arguments of the\n   same name or are appended to the argument list.  They are passed on as\n   the promise that was supplied as an argument to the current\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

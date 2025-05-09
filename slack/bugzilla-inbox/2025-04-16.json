@@ -1,0 +1,279 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18882] Opening stdin as non-blocking causes terminal output to be truncated*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18882>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tomas.kalibera@gmail.com\n\n--- Comment #1 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nI can reproduce this on Linux (with slightly different numbers). Technically,\nwhat happens, is that by turning \"f\" to non-blocking mode, not only the\nstandard input, but also the standard output and standard error output are put\nto non-blocking mode. By reading \/proc\/self\/fd\/*, I see that descriptors 0,1,2\nand 4 (the newly opened one) are all pointing to the same device, in my case\n\/dev\/pts\/7. The standard output being non-blocking probably causes the loss of\noutput from the program.\n\nR doesn't do anything special here and I don't think this behavior is related\nspecifically to R. \n\nSee e.g.\n<https:\/\/stackoverflow.com\/questions\/23865898\/when-non-blocking-i-o-is-turned-on-for-stdout-is-it-correct-for-the-os-to-turn>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1744812684.591719",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "+Xkk",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18882] Opening stdin as non-blocking causes terminal output to be truncated",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18882"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tomas.kalibera@gmail.com\n\n--- Comment #1 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI can reproduce this on Linux (with slightly different numbers). Technically,\nwhat happens, is that by turning \"f\" to non-blocking mode, not only the\nstandard input, but also the standard output and standard error output are put\nto non-blocking mode. By reading \/proc\/self\/fd\/*, I see that descriptors 0,1,2\nand 4 (the newly opened one) are all pointing to the same device, in my case\n\/dev\/pts\/7. The standard output being non-blocking probably causes the loss of\noutput from the program.\n\nR doesn't do anything special here and I don't think this behavior is related\nspecifically to R. \n\nSee e.g.\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stackoverflow.com\/questions\/23865898\/when-non-blocking-i-o-is-turned-on-for-stdout-is-it-correct-for-the-os-to-turn"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18882] Opening stdin as non-blocking causes terminal output to be truncated*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18882>\n\n--- Comment #2 from Winston Chang (<mailto:winston@stdout.org|winston@stdout.org>) ---\nJust as a note, I tried `flush(stdout())` but it had no effect.\n\nIn that SO thread, someone noted that \"stdin and stdout are different file\ndescriptors if the process is inside a pipeline! Try `echo hello | .\/fd-text`\n\nAnd indeed if I do this, the output is correct:\n\n\n```\necho hello | test.R\n```\n\n\nBut is there another way to get the correct output, staying within the R code?\n\n\nI also found these related references:\n\n-\n<https:\/\/stackoverflow.com\/questions\/19485751\/linux-c-why-fcntl-act-on-stdin-will-also-affect-on-stdout-and-stderr>\n-\n<https:\/\/users.rust-lang.org\/t\/failed-printing-to-stdout-when-stdin-is-non-blocking-ffi\/80484\/5>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1744821285.629819",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "0yM",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18882] Opening stdin as non-blocking causes terminal output to be truncated",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18882"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Winston Chang ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:winston@stdout.org",
+                                "text": "winston@stdout.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nJust as a note, I tried "
+                            },
+                            {
+                                "type": "text",
+                                "text": "flush(stdout())",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " but it had no effect.\n\nIn that SO thread, someone noted that \"stdin and stdout are different file\ndescriptors if the process is inside a pipeline! Try "
+                            },
+                            {
+                                "type": "text",
+                                "text": "echo hello | .\/fd-text",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nAnd indeed if I do this, the output is correct:\n\n\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "echo hello | test.R\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n\n\nBut is there another way to get the correct output, staying within the R code?\n\n\n\nI also found these related references:\n\n-\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stackoverflow.com\/questions\/19485751\/linux-c-why-fcntl-act-on-stdin-will-also-affect-on-stdout-and-stderr"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n-\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/users.rust-lang.org\/t\/failed-printing-to-stdout-when-stdin-is-non-blocking-ffi\/80484\/5"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18882] Opening stdin as non-blocking causes terminal output to be truncated*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18882>\n\n--- Comment #4 from Winston Chang (<mailto:winston@stdout.org|winston@stdout.org>) ---\nThe R script is being used as a proxy for a MCP (Model Context Protocol)\nserver, for communicating with an LLM.\n\nWhen the MCP client process starts (like the Claude desktop app), it will start\nup the proxy process, and talk to it via stdin and stdout. This is all\naccording to the MCP specification, and is not within my control.\n\nThen the proxy process will connect to an existing R process using a different\ntype of communication channel (which is not important here) and forward\nmessages back and forth.\n\nI actually don't know if this problem will happen when stdin\/stdout are\nconnected to another process, as opposed to a terminal. If not, then it won't\nbe a problem for my use case in practice. But either way, it does make testing\nand debugging a bit more challenging.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1744833153.849379",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "mQph\/",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18882] Opening stdin as non-blocking causes terminal output to be truncated",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18882"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Winston Chang ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:winston@stdout.org",
+                                "text": "winston@stdout.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe R script is being used as a proxy for a MCP (Model Context Protocol)\nserver, for communicating with an LLM.\n\nWhen the MCP client process starts (like the Claude desktop app), it will start\nup the proxy process, and talk to it via stdin and stdout. This is all\naccording to the MCP specification, and is not within my control.\n\nThen the proxy process will connect to an existing R process using a different\ntype of communication channel (which is not important here) and forward\nmessages back and forth.\n\nI actually don't know if this problem will happen when stdin\/stdout are\nconnected to another process, as opposed to a terminal. If not, then it won't\nbe a problem for my use case in practice. But either way, it does make testing\nand debugging a bit more challenging."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18882] Opening stdin as non-blocking causes terminal output to be truncated*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18882>\n\n--- Comment #5 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\n(In reply to Winston Chang from comment #4)\nI think these problems will not appear when the stdin and stdout of the R\nprocess are pipes to another process (the MCP client in this case). You may run\ninto some problems, but those will be different problems, and hopefully closer\nto the real ones you would have in the real setup. For manual debugging,\nperhaps you could use fifos (named pipes) if you are on Unix. You could\nredirect stdin and stdout from\/to the fifos. And then use e.g. cat to type\ncommands into one of the ends (in another terminal) and another cat command to\nprint responses (in yet another terminal).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1744834037.507519",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "EhP",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18882] Opening stdin as non-blocking causes terminal output to be truncated",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18882"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Winston Chang from comment #4)\nI think these problems will not appear when the stdin and stdout of the R\nprocess are pipes to another process (the MCP client in this case). You may run\ninto some problems, but those will be different problems, and hopefully closer\nto the real ones you would have in the real setup. For manual debugging,\nperhaps you could use fifos (named pipes) if you are on Unix. You could\nredirect stdin and stdout from\/to the fifos. And then use e.g. cat to type\ncommands into one of the ends (in another terminal) and another cat command to\nprint responses (in yet another terminal)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

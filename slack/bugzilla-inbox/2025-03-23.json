@@ -1,0 +1,400 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18874] New: Nested grid viewports with null produce incorrect grob rendering on small windows*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18874>\n\n            Bug ID: 18874\n           Summary: Nested grid viewports with null produce incorrect grob\n                    rendering on small windows\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Graphics\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:nasinski.maciej@gmail.com|nasinski.maciej@gmail.com>\n\nCreated attachment 3467\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3467&amp;action=edit>\nImage for minimal pure-grid example for small and big window\n\n## Component\n\n**grid**\n\n## OS\n\nTested on macOS, Windows, and Linux.\nTested on a few R versions.\n\n## Description\n\n### Overview\n\nWhen nesting grid layouts using viewports with mixed unit types (`\"null\"`\n(possibly npc too) and fixed units like `\"cm\"` or `\"inch\"`), grobs render\nincorrectly—flip orientation or disappear—when the graphical device window is\nresized to small dimensions. This issue initially arose when embedding\n`ggplot2` plots converted to grobs (`ggplotGrob`) within nested grid viewports.\n\n### Steps to Reproduce\n\nUse the following minimal pure-grid example code in R:\n\n```r\nlibrary(grid)\n\nobject &lt;-\n  grobTree(\n    linesGrob(\n      vp = viewport(layout.pos.row = 1, layout.pos.col = 1)\n    ),\n    vp = viewport(\n      layout = grid.layout(\n        nrow = 2,\n        ncol = 1,\n        heights = unit.c(\n          unit(1, \"null\"),\n          unit(1, \"inch\")\n        ),\n        widths = unit(1, \"null\")\n      )\n    )\n  )\n\n# Simpler scenario (behaves correctly):\ngrid.newpage()\nobject |&gt; grid.draw()\n\n# Problematic scenario with nested viewport:\ngrid.newpage()\ngrobTree(\n  grobTree(\n    object,\n    vp = viewport(layout.pos.row = 2, layout.pos.col = 1:3)\n  ),\n  vp = viewport(\n    layout = grid.layout(\n      nrow = 3,\n      ncol = 3,\n      heights = unit(c(5, 1, 5), c(\"cm\", \"null\", \"cm\"))\n    )\n  )\n) |&gt; grid.draw()\n\n# Resize the graphical device window:\n# - For larger sizes, the line is upward (correct).\n# - For smaller sizes, the line incorrectly flips downward or disappears\nentirely.\n```\n\n### Actual Results\n\nWhen resizing the graphical device window to smaller dimensions, the grob\nincorrectly flips downward or disappears entirely. \nLayout computations seem to internally generate \"negative dimensions\", causing\nthis incorrect rendering.\n\n### Expected Results\n\nThe grob should remain consistently oriented and visible, regardless of window\nsize. \nNested viewports and layouts should correctly handle smaller window sizes\nwithout producing \"negative dimensions\".\n\n### Build Date &amp; Hardware\n\n- R version 4.4.2 (2024-10-31)\n- Tested on:\n  - macOS Sequoia 15.1.1 (Apple Silicon and Intel)\n  - Windows 11 (x86_64)\n  - Linux (Ubuntu 22.04, x86_64)\n\n### Additional Builds and Platforms\n\nConsistently reproducible across multiple platforms (macOS, Windows, Linux) and\nR versions.\n\n### Additional Information\n\nThe issue was originally observed when embedding a ggplot2 object converted via\n`ggplotGrob` into nested grid layouts:\n\n```r\nlibrary(grid)\nlibrary(ggplot2)\n\ngrid.newpage()\n\nobject &lt;- ggplotGrob(ggplot(mtcars, aes(mpg, wt)) + geom_line())\n\ngrobTree(\n  children = grobTree(\n    object,\n    vp = viewport(layout.pos.row = 2, layout.pos.col = 1:3)\n  ),\n  vp = viewport(\n    layout = grid.layout(\n      nrow = 3,\n      ncol = 3,\n      heights = unit(c(5, 1, 5), c(\"cm\", \"null\", \"cm\"))\n    )\n  )\n) |&gt; grid.draw()\n```\n\nResizing the device to smaller dimensions produces distorted or disappeared\nplots, highlighting the issue's practical significance.\n\nI identified a temporary workaround by using `unit.pmax` and `editGrob` to\navoid the viewport dimensions problem:\n\n```r\neditGrob(\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1742750476.526959",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Y9OD",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18874] New: Nested grid viewports with null produce incorrect grob rendering on small windows",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18874"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18874\n           Summary: Nested grid viewports with null produce incorrect grob\n                    rendering on small windows\n           Product: R\n           Version: R 4.4.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Graphics\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:nasinski.maciej@gmail.com",
+                                "text": "nasinski.maciej@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3467\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3467&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3467&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nImage for minimal pure-grid example for small and big window\n\n## Component\n\n**grid**\n\n## OS\n\nTested on macOS, Windows, and Linux.\nTested on a few R versions.\n\n## Description\n\n### Overview\n\nWhen nesting grid layouts using viewports with mixed unit types ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"null\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n(possibly npc too) and fixed units like "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"cm\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"inch\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), grobs render\nincorrectly—flip orientation or disappear—when the graphical device window is\nresized to small dimensions. This issue initially arose when embedding\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "ggplot2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " plots converted to grobs ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "ggplotGrob",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") within nested grid viewports.\n\n### Steps to Reproduce\n\nUse the following minimal pure-grid example code in R:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "r\nlibrary(grid)\n\nobject <-\n  grobTree(\n    linesGrob(\n      vp = viewport(layout.pos.row = 1, layout.pos.col = 1)\n    ),\n    vp = viewport(\n      layout = grid.layout(\n        nrow = 2,\n        ncol = 1,\n        heights = unit.c(\n          unit(1, \"null\"),\n          unit(1, \"inch\")\n        ),\n        widths = unit(1, \"null\")\n      )\n    )\n  )\n\n# Simpler scenario (behaves correctly):\ngrid.newpage()\nobject |> grid.draw()\n\n# Problematic scenario with nested viewport:\ngrid.newpage()\ngrobTree(\n  grobTree(\n    object,\n    vp = viewport(layout.pos.row = 2, layout.pos.col = 1:3)\n  ),\n  vp = viewport(\n    layout = grid.layout(\n      nrow = 3,\n      ncol = 3,\n      heights = unit(c(5, 1, 5), c(\"cm\", \"null\", \"cm\"))\n    )\n  )\n) |> grid.draw()\n\n# Resize the graphical device window:\n# - For larger sizes, the line is upward (correct).\n# - For smaller sizes, the line incorrectly flips downward or disappears\nentirely.\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n### Actual Results\n\nWhen resizing the graphical device window to smaller dimensions, the grob\nincorrectly flips downward or disappears entirely. \nLayout computations seem to internally generate \"negative dimensions\", causing\nthis incorrect rendering.\n\n### Expected Results\n\nThe grob should remain consistently oriented and visible, regardless of window\nsize. \nNested viewports and layouts should correctly handle smaller window sizes\nwithout producing \"negative dimensions\".\n\n### Build Date & Hardware\n\n- R version 4.4.2 (2024-10-31)\n- Tested on:\n  - macOS Sequoia 15.1.1 (Apple Silicon and Intel)\n  - Windows 11 (x86_64)\n  - Linux (Ubuntu 22.04, x86_64)\n\n### Additional Builds and Platforms\n\nConsistently reproducible across multiple platforms (macOS, Windows, Linux) and\nR versions.\n\n### Additional Information\n\nThe issue was originally observed when embedding a ggplot2 object converted via\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "ggplotGrob",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " into nested grid layouts:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "r\nlibrary(grid)\nlibrary(ggplot2)\n\ngrid.newpage()\n\nobject <- ggplotGrob(ggplot(mtcars, aes(mpg, wt)) + geom_line())\n\ngrobTree(\n  children = grobTree(\n    object,\n    vp = viewport(layout.pos.row = 2, layout.pos.col = 1:3)\n  ),\n  vp = viewport(\n    layout = grid.layout(\n      nrow = 3,\n      ncol = 3,\n      heights = unit(c(5, 1, 5), c(\"cm\", \"null\", \"cm\"))\n    )\n  )\n) |> grid.draw()\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nResizing the device to smaller dimensions produces distorted or disappeared\nplots, highlighting the issue's practical significance.\n\nI identified a temporary workaround by using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "unit.pmax",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "editGrob",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to\navoid the viewport dimensions problem:\n\n```r\neditGrob("
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "  object, \n  vp = viewport(\n    width = unit.pmax(unit(1, \"npc\"), unit(5, \"cm\")), \n    height = unit.pmax(unit(1, \"npc\"), unit(5, \"cm\"))\n  )\n)\n```\n\nThis workaround prevents the dimensions problem scenario but does not resolve\nthe root cause.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1742750476.546289",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "j8V",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "object, \n  vp = viewport(\n    width = unit.pmax(unit(1, \"npc\"), unit(5, \"cm\")), \n    height = unit.pmax(unit(1, \"npc\"), unit(5, \"cm\"))\n  )\n)\n```\n\nThis workaround prevents the dimensions problem scenario but does not resolve\nthe root cause."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18873] handling of ... has unexpected behavior in R 4.4*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18873>\n\nMikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jaganmn@mcmaster.ca\n\n--- Comment #5 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nTo Martin's point, you can use `missing(..n)` ...\n\n```\n&gt; fn &lt;- function(...) c(missing(..1), missing(..2), missing(..3))\n&gt; fn(0, )\n[1] FALSE  TRUE  TRUE\n```\n\nbut not `missing(...elt(n))`, as the argument of `missing` must be a symbol ...\n\n```\n&gt; fn &lt;- function(n, ...) missing(...elt(n))\n&gt; fn(1L, 0, )\nError in missing(...elt(n)) : invalid use of 'missing'\n```\n\n\"Experts\" will think to use `delayedAssign` or another trick, but I can't\nimagine a use case.  In the first place, dropping missing arguments matching\n`...` in order to operate only on the non-missing arguments matching `...` does\nnot seem very idiomatic.\n\n```\n&gt; c(0, )\nError in c(0, ) : argument 2 is empty\n&gt; cbind(0, )\nError in cbind(0, ) : argument is missing, with no default\n&gt; sum(0, )\nError in sum(0, ) : argument 2 is empty\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1742766023.900019",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "SU3FL",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18873] handling of ... has unexpected behavior in R 4.4",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18873"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jaganmn@mcmaster.ca\n\n--- Comment #5 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nTo Martin's point, you can use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "missing(..n)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ...\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> fn <- function(...) c(missing(..1), missing(..2), missing(..3))\n> fn(0, )\n[1] FALSE  TRUE  TRUE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nbut not "
+                            },
+                            {
+                                "type": "text",
+                                "text": "missing(...elt(n))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", as the argument of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "missing",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " must be a symbol ...\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> fn <- function(n, ...) missing(...elt(n))\n> fn(1L, 0, )\nError in missing(...elt(n)) : invalid use of 'missing'\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n\"Experts\" will think to use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "delayedAssign",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or another trick, but I can't\nimagine a use case.  In the first place, dropping missing arguments matching\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "...",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in order to operate only on the non-missing arguments matching "
+                            },
+                            {
+                                "type": "text",
+                                "text": "...",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does\nnot seem very idiomatic.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> c(0, )\nError in c(0, ) : argument 2 is empty\n> cbind(0, )\nError in cbind(0, ) : argument is missing, with no default\n> sum(0, )\nError in sum(0, ) : argument 2 is empty\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

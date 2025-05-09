@@ -1,0 +1,317 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18879] New: Windows file.access is failing on dual protocol network drive*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18879>\n\n            Bug ID: 18879\n           Summary: Windows file.access is failing on dual protocol\n                    network drive\n           Product: R\n           Version: R 4.4.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: critical\n          Priority: P5\n         Component: Windows GUI \/ Window specific\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:malte.stein@cytel.com|malte.stein@cytel.com>\n\nWe are using a dual protocol drive (SMB+NFS), and security is controlled in\nUnix style. But we are facing issues with file.access when using Windows R on\ndual protocol drives. Mode is 777, but file.access(path=XX,1) is saying not\nexecutable:\n\n\n&gt; <http:\/\/file.info|file.info>(\"Y:\/Test_folder\")\nsize isdir mode               mtime               ctime               atime exe\nY:\/Test_folder    0  TRUE  777 2025-04-02 13:51:51 2025-04-02 13:51:51\n2025-04-02 13:51:51  no\n&gt; file.access(\"Y:\/Test_folder\", 1)\nY:\/Test_folder \n            -1\n\n\nSame testing from Linux R on same dual drive is working as expected. \n\nI did a root cause analysis on it:\n\nIt is coming from the winAccessW functions of base R version:\n<https:\/\/github.com\/SurajGupta\/r-source\/blob\/a28e609e72ed7c47f6ddfbb86c85279a0750f0b7\/src\/gnuwin32\/extra.c#L654> \nIt is using the GetFileSecurityW function from windows.h.\n\nTherefore, R is not able to check the security descriptor on the dual drive\nfolders. R assuming every file on dual drive as not executable, which is\ncausing issues (e.g., in detecting installed R packages in library). Files or\nfolder will get from file.access(path=\"XX\", mode=1) the result -1  (= no\nexecution access), even if the detected mode bits are 777 from <http:\/\/file.info|file.info>().\n\nThe issue was already discussed with renv team, which requested me to raise\nhere a bug: <https:\/\/github.com\/rstudio\/renv\/issues\/2058#issuecomment-2573934091>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1743603243.315529",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Eug",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18879] New: Windows file.access is failing on dual protocol network drive",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18879"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18879\n           Summary: Windows file.access is failing on dual protocol\n                    network drive\n           Product: R\n           Version: R 4.4.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: critical\n          Priority: P5\n         Component: Windows GUI \/ Window specific\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:malte.stein@cytel.com",
+                                "text": "malte.stein@cytel.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nWe are using a dual protocol drive (SMB+NFS), and security is controlled in\nUnix style. But we are facing issues with file.access when using Windows R on\ndual protocol drives. Mode is 777, but file.access(path=XX,1) is saying not\nexecutable:\n\n\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "link",
+                                "url": "http:\/\/file.info",
+                                "text": "file.info"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(\"Y:\/Test_folder\")"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "size isdir mode               mtime               ctime               atime exe\nY:\/Test_folder    0  TRUE  777 2025-04-02 13:51:51 2025-04-02 13:51:51\n2025-04-02 13:51:51  no"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "file.access(\"Y:\/Test_folder\", 1)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Y:\/Test_folder \n            -1\n\n\n\nSame testing from Linux R on same dual drive is working as expected. \n\nI did a root cause analysis on it:\n\nIt is coming from the winAccessW functions of base R version:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/SurajGupta\/r-source\/blob\/a28e609e72ed7c47f6ddfbb86c85279a0750f0b7\/src\/gnuwin32\/extra.c#L654"
+                            },
+                            {
+                                "type": "text",
+                                "text": " \nIt is using the GetFileSecurityW function from windows.h.\n\nTherefore, R is not able to check the security descriptor on the dual drive\nfolders. R assuming every file on dual drive as not executable, which is\ncausing issues (e.g., in detecting installed R packages in library). Files or\nfolder will get from file.access(path=\"XX\", mode=1) the result -1  (= no\nexecution access), even if the detected mode bits are 777 from "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/file.info",
+                                "text": "file.info"
+                            },
+                            {
+                                "type": "text",
+                                "text": "().\n\nThe issue was already discussed with renv team, which requested me to raise\nhere a bug: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/rstudio\/renv\/issues\/2058#issuecomment-2573934091"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18879] Windows file.access is failing on dual protocol network drive*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18879>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tomas.kalibera@gmail.com\n\n--- Comment #1 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\n(In reply to Malte Stein from comment #0)\n&gt; We are using a dual protocol drive (SMB+NFS), and security is controlled in\n&gt; Unix style. But we are facing issues with file.access when using Windows R\n&gt; on dual protocol drives. Mode is 777, but file.access(path=XX,1) is saying\n&gt; not executable:\n&gt; \n&gt; \n&gt; &gt; <http:\/\/file.info|file.info>(\"Y:\/Test_folder\")\n&gt; size isdir mode               mtime               ctime               atime\n&gt; exe\n&gt; Y:\/Test_folder    0  TRUE  <tel:7772025-04-02|777 2025-04-02> 13:51:51 2025-04-02 13:51:51\n&gt; 2025-04-02 13:51:51  no\n&gt; &gt; file.access(\"Y:\/Test_folder\", 1)\n&gt; Y:\/Test_folder \n&gt;             -1\n&gt; \n&gt; \n&gt; Same testing from Linux R on same dual drive is working as expected. \n&gt; \n&gt; I did a root cause analysis on it:\n&gt; \n&gt; It is coming from the winAccessW functions of base R version:\n&gt; <https:\/\/github.com\/SurajGupta\/r-source\/blob\/>\n&gt; a28e609e72ed7c47f6ddfbb86c85279a0750f0b7\/src\/gnuwin32\/extra.c#L654 \n&gt; It is using the GetFileSecurityW function from windows.h.\n&gt; \n&gt; Therefore, R is not able to check the security descriptor on the dual drive\n&gt; folders. \n\nAre you saying that winAccessW() returns -1 as a result of an error from\nGetFileSecurityW()? Could you check what is actually the error from\nGetFileSecurityW() and why is it returned?\n\n\n&gt; R assuming every file on dual drive as not executable, which is\n&gt; causing issues (e.g., in detecting installed R packages in library). Files\n&gt; or folder will get from file.access(path=\"XX\", mode=1) the result -1  (= no\n&gt; execution access), even if the detected mode bits are 777 from <http:\/\/file.info|file.info>().\n&gt; \n&gt; The issue was already discussed with renv team, which requested me to raise\n&gt; here a bug:\n&gt; <https:\/\/github.com\/rstudio\/renv\/issues\/2058#issuecomment-2573934091>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1743605063.406579",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "CXoEv",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18879] Windows file.access is failing on dual protocol network drive",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18879"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tomas.kalibera@gmail.com\n\n--- Comment #1 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Malte Stein from comment #0)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "We are using a dual protocol drive (SMB+NFS), and security is controlled in\nUnix style. But we are facing issues with file.access when using Windows R\non dual protocol drives. Mode is 777, but file.access(path=XX,1) is saying\nnot executable:\n\n\n> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/file.info",
+                                "text": "file.info"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(\"Y:\/Test_folder\")\nsize isdir mode               mtime               ctime               atime\nexe\nY:\/Test_folder    0  TRUE  "
+                            },
+                            {
+                                "type": "link",
+                                "url": "tel:7772025-04-02",
+                                "text": "777 2025-04-02"
+                            },
+                            {
+                                "type": "text",
+                                "text": " 13:51:51 2025-04-02 13:51:51\n2025-04-02 13:51:51  no\n> file.access(\"Y:\/Test_folder\", 1)\nY:\/Test_folder \n            -1\n\n\nSame testing from Linux R on same dual drive is working as expected. \n\nI did a root cause analysis on it:\n\nIt is coming from the winAccessW functions of base R version:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/SurajGupta\/r-source\/blob\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\na28e609e72ed7c47f6ddfbb86c85279a0750f0b7\/src\/gnuwin32\/extra.c#L654 \nIt is using the GetFileSecurityW function from windows.h.\n\nTherefore, R is not able to check the security descriptor on the dual drive\nfolders. "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nAre you saying that winAccessW() returns -1 as a result of an error from\nGetFileSecurityW()? Could you check what is actually the error from\nGetFileSecurityW() and why is it returned?\n\n\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "R assuming every file on dual drive as not executable, which is\ncausing issues (e.g., in detecting installed R packages in library). Files\nor folder will get from file.access(path=\"XX\", mode=1) the result -1  (= no\nexecution access), even if the detected mode bits are 777 from "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/file.info",
+                                "text": "file.info"
+                            },
+                            {
+                                "type": "text",
+                                "text": "().\n\nThe issue was already discussed with renv team, which requested me to raise\nhere a bug:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/rstudio\/renv\/issues\/2058#issuecomment-2573934091"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18879] Windows file.access is failing on dual protocol network drive*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18879>\n\n--- Comment #2 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nThough, note that there are no executable bits in files on Windows.\n<http:\/\/file.info|file.info>()$mode returns what it gets from _wstati64(), which in turn sets the\nexecute bit in the result based on file extension. file.access() does more - R\nfirst checks itself for executable extensions and rules out not having one.\nThen, it checks whether the current user has permissions to execute that file,\nso checks the ACLs. So, if say a Linux file systems is exported to Windows, it\nis probably not realistic to expect that the execute bits on the individual\nfiles can be propagated.\n\nSo perhaps the code in R could be improved not to rely on file.access(), e.g.\nwhen \ndetecting packages. Could you provide a minimal reproducible example of how to\ntrigger the problems you are seeing?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1743609750.887569",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "KcI",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18879] Windows file.access is failing on dual protocol network drive",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18879"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThough, note that there are no executable bits in files on Windows.\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/file.info",
+                                "text": "file.info"
+                            },
+                            {
+                                "type": "text",
+                                "text": "()$mode returns what it gets from _wstati64(), which in turn sets the\nexecute bit in the result based on file extension. file.access() does more - R\nfirst checks itself for executable extensions and rules out not having one.\nThen, it checks whether the current user has permissions to execute that file,\nso checks the ACLs. So, if say a Linux file systems is exported to Windows, it\nis probably not realistic to expect that the execute bits on the individual\nfiles can be propagated.\n\nSo perhaps the code in R could be improved not to rely on file.access(), e.g.\nwhen \ndetecting packages. Could you provide a minimal reproducible example of how to\ntrigger the problems you are seeing?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

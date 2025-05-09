@@ -1,0 +1,285 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18867] New: Hard-to-understand R CMD check NOTE arising from Maintainer change*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18867>\n\n            Bug ID: 18867\n           Summary: Hard-to-understand R CMD check NOTE arising from\n                    Maintainer change\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Misc\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>\n\nCreated attachment 3466\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3466&amp;action=edit>\nPoint out maintainership exception in NOTE\n\nI just took over Maintainer-ship of a package, which caused one revdep to start\nthrowing a `NOTE`:\n\n&gt;   Unexported object imported by a ':::' call: `bit:::R_bit_as_hi`\n&gt;     See the note in ``?`:::` `` about the use of this operator.\n\n<https:\/\/github.com\/truecluster\/ff\/issues\/16>\n\nIt took really quite more time than I care to admit to understand the issue --\n`git bisect` showed the trivial DESCRIPTION edit here to be the root cause:\n\n<https:\/\/github.com\/r-lib\/bit\/commit\/6f78eebdcfbbc8e1f28b8b25c2a4c145dc4365c2>\n\nOnly by poring over the QC.R source did I finally understand the trivial answer\n-- `R CMD check` has a carve-out for allowing `:::` to be used by packages with\nthe same maintainer.\n\nI propose this patch which should make debugging easier for these rare cases.\n\n---\n\nPS, the internationalization here is strange:\n\n - Only one part is marked for translation `\"Unexported objects imported by\n':::' calls:\"` but there are several other strings, meaning the user will get a\nBabel string if run in another language:\n\n    ```\n    LANGUAGE=de Rscript -e \"tools:::.check_packages_used(dir='..\/ff')\"\n    # Nicht exportiertes Objekt durch einen ':::' Aufruf importiert:\n'bit:::R_bit_as_hi'\n    #   See the note in ?`:::` about the use of this operator. \n    ```\n\n - It appears to be scrupulously avoiding `ngettext()` for what is clearly a\npluralized string (I already reported this: Bug #18478)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1741251635.125889",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "CzyD0",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18867] New: Hard-to-understand R CMD check NOTE arising from Maintainer change",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18867"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18867\n           Summary: Hard-to-understand R CMD check NOTE arising from\n                    Maintainer change\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Misc\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3466\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3466&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3466&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPoint out maintainership exception in NOTE\n\nI just took over Maintainer-ship of a package, which caused one revdep to start\nthrowing a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NOTE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "  Unexported object imported by a ':::' call: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "bit:::R_bit_as_hi",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n    See the note in ``?"
+                            },
+                            {
+                                "type": "text",
+                                "text": ":::",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " `` about the use of this operator."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/truecluster\/ff\/issues\/16"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIt took really quite more time than I care to admit to understand the issue --\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "git bisect",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " showed the trivial DESCRIPTION edit here to be the root cause:\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-lib\/bit\/commit\/6f78eebdcfbbc8e1f28b8b25c2a4c145dc4365c2"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nOnly by poring over the QC.R source did I finally understand the trivial answer\n-- "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R CMD check",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has a carve-out for allowing "
+                            },
+                            {
+                                "type": "text",
+                                "text": ":::",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to be used by packages with\nthe same maintainer.\n\nI propose this patch which should make debugging easier for these rare cases.\n\n---\n\nPS, the internationalization here is strange:\n\n - Only one part is marked for translation `\"Unexported objects imported by\n':::' calls:\"` but there are several other strings, meaning the user will get a\nBabel string if run in another language:\n\n    "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "    LANGUAGE=de Rscript -e \"tools:::.check_packages_used(dir='..\/ff')\"\n    # Nicht exportiertes Objekt durch einen ':::' Aufruf importiert:\n'bit:::R_bit_as_hi'\n    #   See the note in ?`:::` about the use of this operator. \n    "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n - It appears to be scrupulously avoiding "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ngettext()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for what is clearly a\npluralized string (I already reported this: Bug #18478)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18663] Add 'contrib' modules to opencv*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18663>\n\n--- Comment #5 from Jeroen Ooms (<mailto:jeroenooms@gmail.com|jeroenooms@gmail.com>) ---\nThe new version of opencv 0.5.0 that uses this is now on CRAN.\n\nFor reference, instead of `${R_TOOLS_SOFT}` we use\n\n```\n$(shell pkg-config opencv4 --variable=prefix)\n```\n\nThis makes the code portable and we can use it on e.g. anaconda or msys2.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1741296147.994179",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "hPEF",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18663] Add 'contrib' modules to opencv",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18663"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Jeroen Ooms ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jeroenooms@gmail.com",
+                                "text": "jeroenooms@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe new version of opencv 0.5.0 that uses this is now on CRAN.\n\nFor reference, instead of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "${R_TOOLS_SOFT}",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " we use\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$(shell pkg-config opencv4 --variable=prefix)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis makes the code portable and we can use it on e.g. anaconda or msys2."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

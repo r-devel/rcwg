@@ -4,19 +4,20 @@ source("admin/R/update_readme_dates.R")
 
 ### 2025 dates
 # Fri 15:00 UK
-# Jan 24 (moved from Jan 17), Mar 21, May 16, Jul 17, Sep 26 (moved from Sep 19 due to posit::conf),
+# May 16, Jul 17, Sep 26 (moved from Sep 19 due to posit::conf),
 # Nov 21 (May need to change time to AU/UK friendlyish time)
 #
 # Tues 19:30 UK:
-# Feb 18, Apr 15, Jan 17, Aug 19 (may skip, but see who signs up),
+# Jun 17, Aug 19 (may skip, but see who signs up),
 # Oct 21, (May need to change time to AU/US friendlyish time)
 # Dec 16, (May need to change time to NZ/US friendlyish time)
 
 # times here are UK times!
 # second number is n'th 'day' of the month, e.g. `3, "Friday"` = 3rd Friday
 # !! Think I have inconsistency here: Slack message and Twitter/Mastodon were wrong last time
-update_readme_dates(1, "April", 3, "Tuesday", "19:30", 2025)
-update_readme_dates(2, "May", 3, "Friday", "15:00", 2025)
+update_readme_dates(1, "May", 3, "Friday", "15:00", 2025)
+update_readme_dates(2, "June", 3, "Tuesday", "19:30", 2025)
+
 
 # Update RCWG contacts ---------------------------------------------------------
 
@@ -65,17 +66,16 @@ source("admin/R/buffer_post.R")
 # auth_setup() # choose user token and login as RContributors on Mastodon
 
 # slack announcement
-month <- "April"
-day <- 15
-time <- "18:30" # UTC !!
+month <- "May"
+day <- 16
+time <- "14:00" # UTC !!
 weekday <- get_weekday(day, month, abbreviate = TRUE)
 agenda = c(
-"- Plans for R Dev Days
- - Google Summer of Code projects
- - R Consortium projects
- - Progress on translations"
+"- Plans for upcoming R Dev Days
+ - Welcome to GSoC contributors
+ - Outcome of proposals to R Consortium"
 )
-zoom <- "https://us02web.zoom.us/j/88612135282?pwd=ZzSjahkaTd0cC4XQjMOI5WzZnW4IZH.1"
+zoom <- "https://us02web.zoom.us/j/83915338079?pwd=247q7Xbbpa7ZqlQ0bsDVUIFSyzcBWB.1"
 post <- social_post(weekday = weekday,
                     day = day,
                     month = month,

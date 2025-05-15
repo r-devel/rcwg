@@ -53,13 +53,13 @@ Open Terminal.app to run the shell commands in the instructions below:
     Add one of the following commands to the profile, selecting the one
     that matches your architecture:
 
-    ``` sh
-    # Intel
+    **Intel**
+    ```sh 
     export PATH="/opt/R/x86_64/bin:\${PATH}"
     ```
 
+    **Apple Silicon (M1, M2, ...)**
     ``` sh
-    # Apple Silicon (M1, M2, ...)
     export PATH="/opt/R/arm64/bin:\${PATH}"
     ```
 
@@ -263,13 +263,13 @@ run the following commands within Terminal.app:
 
 3.  Define the `LOCAL` environment variable to match your architecture
 
+    **Intel**
     ``` sh
-    # Intel
     export LOCAL=/opt/R/x86_64 
     ```
 
+    **Apple Silicon (M1, M2, ...)**
     ``` sh
-    # Apple Silicon (e.g. M1)
     export LOCAL=/opt/R/arm64  
     ```
 
@@ -297,6 +297,7 @@ run the following commands within Terminal.app:
     FFLAGS="-g -O2 -mmacosx-version-min=11.0"
     FCFLAGS="-g -O2 -mmacosx-version-min=11.0"
     LDFLAGS="-L$LOCAL/lib -L/opt/gfortran/lib"
+    MAIN_LDFLAGS="-Wl,-headerpad_max_install_names"
     CPPFLAGS="-isystem $LOCAL/include -I$LOCAL/include"
     EOF
     ```
@@ -313,7 +314,10 @@ run the following commands within Terminal.app:
     better debugging experience; `-mmacos-version-min` corrected \[?\]
     to `-mmacosx-version-min`;
     `LDFLAGS="-L$LOCAL/lib -L/opt/gfortran/lib"` added so that liblzma
-    (in `$LOCAL/lib`) and gfortran libraries can be found. CPPFLAGS
+    (in `$LOCAL/lib`) and gfortran libraries can be found; 
+    `MAIN_LDFLAGS="-Wl,-headerpad_max_install_names"` added so that the binary
+    bin/exec/R is link-editable by install_name_tool during make install
+    (avoiding problems with long path `/Library/Frameworks/...`). CPPFLAGS
     modified for Apple Silicon to link to the headers for liblzma.
 
     </details>
@@ -335,7 +339,7 @@ run the following commands within Terminal.app:
 
     </details>
 
-4.  Configure the R installation with `--enable-R-framework` to prepare
+5.  Configure the R installation with `--enable-R-framework` to prepare
     for installation as an App and `--disable-java` to skip configuring
     Java, which may not be installed. Use `FW_VERSION` to set the
     version name as “R-devel”:
@@ -391,12 +395,12 @@ run the following commands within Terminal.app:
 
     </details>
 
-7.  Install the built version of R and reset permissions on the R
-    framework folder to include the new directories.
+7.  Reset permissions on the R framework folder to include the new directories
+    and install the built version of R:
 
     ``` sh
-    make install
     sudo chown -R $USER /Library/Frameworks/R.framework/
+    make install
     ```
 
     The built version of R will now be your default version of R, which

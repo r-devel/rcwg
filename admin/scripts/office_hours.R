@@ -1,7 +1,5 @@
 # Data for next office hours ----------------------------------------------
 
-# Apr 10
-# May 8
 # June 12
 # July 10
 # Aug 14
@@ -9,12 +7,12 @@
 # Oct 9
 
 
-day <- 13
-month <- "March"
-emea <- "https://www.meetup.com/r-contributors/events/306322148/"
-amer <- "https://www.meetup.com/r-contributors/events/305506314/"
-emea_zoom <- "https://us02web.zoom.us/j/88093117300?pwd=bFlTWENoY2U2bW40SHFLcWxxTHp5Zz09"
-amer_zoom <- "https://us02web.zoom.us/j/85668115902?pwd=Z0NtN3hMOGZmaU9EcWx1SWE2ZUwzUT09"
+day <- 12
+month <- "June"
+emea <- "https://www.meetup.com/r-contributors/events/307999752/"
+amer <- "https://www.meetup.com/r-contributors/events/308005408/"
+emea_zoom <- ""
+amer_zoom <- ""
 
 # ensure office hour annouced on meetup (see rcwg_tasks.md)
 

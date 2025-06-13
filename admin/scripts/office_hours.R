@@ -11,8 +11,8 @@ day <- 12
 month <- "June"
 emea <- "https://www.meetup.com/r-contributors/events/307999752/"
 amer <- "https://www.meetup.com/r-contributors/events/308005408/"
-emea_zoom <- ""
-amer_zoom <- ""
+emea_zoom <- "https://us02web.zoom.us/j/86872140379?pwd=Dx3XGa4jFibEDOMW8k1GuC0zcaBrw0.1"
+amer_zoom <- "https://us02web.zoom.us/j/83913220856?pwd=hkBMRbH72eXz8zNEYiQB3LzOXETrGZ.1"
 
 # ensure office hour annouced on meetup (see rcwg_tasks.md)
 
@@ -24,13 +24,15 @@ source("admin/R/social_post.R")
 
 # venues: email, slack, R weekly
 # use "office_hour" for main post,
-# "office_hour_reminder" for twitter/mastodon/slack reminders
+# "office_hour_reminder" for mastodon/slack reminders
 post <- office_hour_post(month, day, c("10:00", "17:30"), # UTC times
                          c(emea, amer), c(emea_zoom, amer_zoom),
-                         venue = "slack",
+                         venue = "email",
                          templates = "admin/posts/office_hour")
 
 # Email r-contribution-wg@r-project.org -----------------------------------
+
+# Send from personal account - make plain text and optionally use scheduled send
 
 # Mastodon via Buffer ------------------------------------
 
@@ -66,14 +68,14 @@ buffer_signin(browser = browser,
 # note posting day will usually be different from event day!
 # If NULL, will post this day, this month, next hour (UTC times)
 buffer_createpost(browser = browser,
-                  day = NULL, # day number of month, e.g. 10
+                  day = 9, # day number of month, e.g. 10
                   month = NULL,
-                  time = NULL, # 24 hour clock, e.g. "09:00"
+                  time = "10:00", # 24 hour clock, e.g. "09:00"
                   postcontent = post[[1]],
                   venue = "mastodon")
 
 buffer_createpost(browser = browser,
-                  day = 7,
+                  day = 9,
                   month = NULL,
                   time = "17:30",
                   postcontent = post[[2]],
@@ -152,8 +154,8 @@ linkedin_createevent(browser = browser,
                      alttext = "Three people laughing together, as they sit around a table with laptops, notebooks and drinks.",
                      eventtype = "^External event link",
                      name = "R Contributor Office Hour (AMER)",
-                     #tz = "(UTC-07:00) Pacific Time (US and Canada)", # during summer
-                     tz = "(UTC-08:00) Pacific Time (US and Canada), Tijuana",
+                     tz = "(UTC-07:00) Pacific Time (US and Canada)", # during summer
+                     #tz = "(UTC-08:00) Pacific Time (US and Canada), Tijuana",
                      startday = day,
                      startmonth = month,
                      starttime = "09:30",

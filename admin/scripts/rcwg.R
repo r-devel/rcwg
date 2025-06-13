@@ -4,7 +4,7 @@ source("admin/R/update_readme_dates.R")
 
 ### 2025 dates
 # Fri 15:00 UK
-# May 16, Jul 17, Sep 26 (moved from Sep 19 due to posit::conf),
+# Jul 18, Sep 26 (moved from Sep 19 due to posit::conf),
 # Nov 21 (May need to change time to AU/UK friendlyish time)
 #
 # Tues 19:30 UK:
@@ -15,8 +15,8 @@ source("admin/R/update_readme_dates.R")
 # times here are UK times!
 # second number is n'th 'day' of the month, e.g. `3, "Friday"` = 3rd Friday
 # !! Think I have inconsistency here: Slack message and Twitter/Mastodon were wrong last time
-update_readme_dates(1, "May", 3, "Friday", "15:00", 2025)
-update_readme_dates(2, "June", 3, "Tuesday", "19:30", 2025)
+update_readme_dates(1, "June", 3, "Tuesday", "19:30", 2025)
+update_readme_dates(2, "July", 3, "Friday", "15:00", 2025)
 
 
 # Update RCWG contacts ---------------------------------------------------------
@@ -56,7 +56,7 @@ system(paste("kill -1", pid))
 
 ## - copy list of current subscribers, add to guest list on Google calendar event
 ## (paste and enter for comma-separated list to be added in bulk)
-## - add specific agenda items to Google calendar invite.
+## - add specific agenda items to Google calendar invite (RCWG calendar)
 
 # Social media posts ------------------------------------------------------
 
@@ -66,16 +66,17 @@ source("admin/R/buffer_post.R")
 # auth_setup() # choose user token and login as RContributors on Mastodon
 
 # slack announcement
-month <- "May"
-day <- 16
-time <- "14:00" # UTC !!
+month <- "June"
+day <- 17
+time <- "18:30" # UTC !!
 weekday <- get_weekday(day, month, abbreviate = TRUE)
 agenda = c(
-"- Plans for upcoming R Dev Days
- - Welcome to GSoC contributors
- - Outcome of proposals to R Consortium"
+" - Report back on R Dev Day @ Rencontres R
+ - Intros/updates from GSoC participants
+ - Progress on translations
+ - News from Office Hours and C Study Group"
 )
-zoom <- "https://us02web.zoom.us/j/83915338079?pwd=247q7Xbbpa7ZqlQ0bsDVUIFSyzcBWB.1"
+zoom <- "https://us02web.zoom.us/j/88612135282?pwd=ZzSjahkaTd0cC4XQjMOI5WzZnW4IZH.1"
 post <- social_post(weekday = weekday,
                     day = day,
                     month = month,

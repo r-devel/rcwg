@@ -1,16 +1,15 @@
 # Data for next office hours ----------------------------------------------
 
-# June 12
 # July 10
 # Aug 14
 # Sep 11 - move to Sep 4, week before RSECon, note Gabe will be with me, possibly just do one?
 # Oct 9
 
 
-day <- 12
-month <- "June"
-emea <- "https://www.meetup.com/r-contributors/events/307999752/"
-amer <- "https://www.meetup.com/r-contributors/events/308005408/"
+day <- 10
+month <- "July"
+emea <- "https://www.meetup.com/r-contributors/events/308410637"
+amer <- "https://www.meetup.com/r-contributors/events/bdrjqtyhckbnb"
 emea_zoom <- "https://us02web.zoom.us/j/86872140379?pwd=Dx3XGa4jFibEDOMW8k1GuC0zcaBrw0.1"
 amer_zoom <- "https://us02web.zoom.us/j/83913220856?pwd=hkBMRbH72eXz8zNEYiQB3LzOXETrGZ.1"
 
@@ -27,12 +26,14 @@ source("admin/R/social_post.R")
 # "office_hour_reminder" for mastodon/slack reminders
 post <- office_hour_post(month, day, c("10:00", "17:30"), # UTC times
                          c(emea, amer), c(emea_zoom, amer_zoom),
-                         venue = "email",
+                         venue = "",
                          templates = "admin/posts/office_hour")
 
 # Email r-contribution-wg@r-project.org -----------------------------------
 
-# Send from personal account - make plain text and optionally use scheduled send
+## Send from forwards account as that is where calendar event is
+## Make plain text (3 dots menu bottom of compose window)
+## Optionally use scheduled send
 
 # Mastodon via Buffer ------------------------------------
 
@@ -68,14 +69,14 @@ buffer_signin(browser = browser,
 # note posting day will usually be different from event day!
 # If NULL, will post this day, this month, next hour (UTC times)
 buffer_createpost(browser = browser,
-                  day = 9, # day number of month, e.g. 10
+                  day = NULL, # day number of month, e.g. 10
                   month = NULL,
-                  time = "10:00", # 24 hour clock, e.g. "09:00"
+                  time = NULL, # 24 hour clock, e.g. "09:00"
                   postcontent = post[[1]],
                   venue = "mastodon")
 
 buffer_createpost(browser = browser,
-                  day = 9,
+                  day = 4,
                   month = NULL,
                   time = "17:30",
                   postcontent = post[[2]],

@@ -44,19 +44,19 @@ buffer_createpost <- function(
     # all (mastodon, twitter and linked-in page) pre-selected by default
 
     if (!"mastodon" %in% venue) {
-        elem <- browser$findElement(using = 'name',
-                                    "mastodon-profile-button")
+        elem <- browser$findElement(using = 'xpath',
+                                    "//button[@aria-label='mastodon channel (selected)']")
         elem$clickElement()
     }
 
     if (!"twitter" %in% venue) {
-        elem <- browser$findElement(using = 'name',
-                                    "twitter-profile-button")
+        elem <- browser$findElement(using = 'xpath',
+                                    "//button[@aria-label='twitter channel (selected)']")
         elem$clickElement()
     }
 
-    elem <- browser$findElement(using = 'name',
-                                "linkedin-profile-button")
+    elem <- browser$findElement(using = 'xpath',
+                                "//button[@aria-label='linkedin channel (selected)']")
     elem$clickElement()
 
     elem <- browser$findElement(using = 'xpath',

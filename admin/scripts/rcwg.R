@@ -57,6 +57,7 @@ system(paste("kill -1", pid))
 ## - copy list of current subscribers, add to guest list on Google calendar event
 ## (use one on R Contribution Working Group Calendar, so it shows as this when email)
 ## (paste and enter for comma-separated list to be added in bulk)
+## - turn off option for people to see full guest list
 ## - add specific agenda items to Google calendar invite (RCWG calendar)
 
 # Social media posts ------------------------------------------------------

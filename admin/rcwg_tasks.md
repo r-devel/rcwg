@@ -73,11 +73,12 @@ Minutes of previous meetings: https://github.com/r-devel/rcwg/tree/main/team_min
     - Don't integrate Zoom - for a recurring event it created a duplicated zoom meeting, on the wrong day, that does not recur!
     - Don't announce till one week before (only announces one event at a time in any case)
 3. Add to Forwards Calendars
-    - Add to Forward Calendar from Zoom and edit description (RSVPs work better from main calender - at least Outlook and fastmail, RSVPs don't work to (public?) group calendar). DO NOT INVITE ANYONE YET ELSE THEY GET MULTIPLE INVITES!!
+    - Add to Forwards Office Hours calendar and invite facilitators directly
+   [ - Add to Forward Calendar from Zoom and edit description (RSVPs work better from main calender - at least Outlook and fastmail, RSVPs don't work to (public?) group calendar). DO NOT INVITE ANYONE YET ELSE THEY GET MULTIPLE INVITES!!
     - Copy event to Office Hours calendar for sharing via Teamup.
     - Add guests: r-contribution-wg@r-project.org on Forwards Calendar event. FOR ALL EVENTS!!
-        TODO FOR APR 2025 ONWARDS
-4. Add reminder on personal calendaer one week before office hours to promote
+        TODO FOR APR 2025 ONWARDS]
+4. Add reminder on personal calendar one week before office hours to promote
 5. [Automated] Add to contributor.r-project.org/events
     - If need to force change refresh settings on Teamup
 6. Post on social media with help from scripts/office_hours.R

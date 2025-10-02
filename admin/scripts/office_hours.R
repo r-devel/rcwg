@@ -1,16 +1,24 @@
 # Data for next office hours ----------------------------------------------
 
-# Aug 14
-# Sep 11 - move to Sep 4, week before RSECon, note Gabe will be with me, possibly just do one?
-# Oct 9
+# UTC times
+# Tues Oct 14 9am and 16:30pm (EMEA | AMER)
+# Thurs Nov 13 10am and 17:30pm (EMEA/APAC Melbourne: 8pm Thurs Nov 13 | AMER / Hamilton 13:30pm Thurs Nov 13, usual winter time)
+# Thurs Dec 11 03:30am, 10am, 8pm (APAC Auckland: 4:30pm Thurs Nov 13 | EMEA UK Thurs 10am | AMER Auckland: Fri 9am)
 
+# January: back to winter times?
 
-day <- 14
-month <- "August"
-emea <- "https://www.meetup.com/r-contributors/events/308410638"
-amer <- "https://www.meetup.com/r-contributors/events/310128716"
-emea_zoom <- "https://us02web.zoom.us/j/86872140379?pwd=Dx3XGa4jFibEDOMW8k1GuC0zcaBrw0.1"
-amer_zoom <- "https://us02web.zoom.us/j/83913220856?pwd=hkBMRbH72eXz8zNEYiQB3LzOXETrGZ.1"
+day <- 14 # day number
+month <- "October"
+
+meetup <- c(emea = "https://www.meetup.com/r-contributors/events/308410639/",
+            amer = "https://www.meetup.com/r-contributors/events/311125443/")
+
+zoom <- c(emea = "https://us02web.zoom.us/j/86872140379?pwd=Dx3XGa4jFibEDOMW8k1GuC0zcaBrw0.1",
+          amer = "https://us02web.zoom.us/j/83913220856?pwd=hkBMRbH72eXz8zNEYiQB3LzOXETrGZ.1")
+
+utc_times <- c("09:00", "16:30")
+
+## will need to adapt functions for separate EMEA/APAC meetings!
 
 # Ensure office hour announced on meetup (see rcwg_tasks.md) --------------
 
@@ -52,6 +60,9 @@ system(paste("kill -1", pid))
 ## - turn off option for people to see full guest list
 ## - add note about why they are being sent calendar invite and how to unsubscribe
 
+You are being invited as a subscriber to the R-Contribution-WG mailing list, please visit
+https://stat.ethz.ch/mailman/listinfo/r-contribution-wg if you wish to unsubscribe.
+
 # Social media posts ------------------------------------------------------
 
 source("admin/R/social_post.R")
@@ -61,8 +72,8 @@ source("admin/R/social_post.R")
 # venues: (email), slack, (R weekly - if know R core member coming)
 # use "office_hour" for main post,
 # "office_hour_reminder" for mastodon/slack reminders
-post <- office_hour_post(month, day, c("10:00", "17:30"), # UTC times
-                         c(emea, amer), c(emea_zoom, amer_zoom),
+post <- office_hour_post(month, day, utc_times,
+                         meetup, zoom,
                          venue = "slack",
                          templates = "admin/posts/office_hour")
 
@@ -71,8 +82,8 @@ post <- office_hour_post(month, day, c("10:00", "17:30"), # UTC times
 # Also Bluesky by bridging. No longer post on Twitter.
 # This could replaced by rtoot now, but won't schedule in advance
 
-post <- office_hour_post(month, day, c("09:00", "16:30"), # UTC times
-                         c(emea, amer), c(emea_zoom, amer_zoom),
+post <- office_hour_post(month, day, utc_times,
+                         meetup, zoom,
                          venue = "mastodon",
                          templates = "admin/posts/office_hour")
 
@@ -99,6 +110,7 @@ buffer_signin(browser = browser,
 
 # note posting day will usually be different from event day!
 # If NULL, will post this day, this month, next hour (UTC times)
+# must be on Publish tab
 buffer_createpost(browser = browser,
                   day = NULL, # day number of month, e.g. 10
                   month = NULL,

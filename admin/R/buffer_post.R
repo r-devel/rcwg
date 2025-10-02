@@ -69,7 +69,11 @@ buffer_createpost <- function(
                                 "//div[@role='button']")
     elem[[length(elem)]]$clickElement()
 
-    elem <- browser$findElement(using = "id", "SCHEDULE_POST")
+    elem <- browser$findElement(using = 'xpath',
+                                "//span[text()='Next Available']")
+    elem$clickElement()
+    elem <- browser$findElement(using = 'xpath',
+                                "//p[text()='Set Date and Time']")
     elem$clickElement()
 
     # select dates and times
@@ -79,7 +83,11 @@ buffer_createpost <- function(
     selectTime(time)
 
     elem <- browser$findElement(using = 'xpath',
-                                "//button[text()='Schedule']")
+                                "//button[text()='Apply']")
+    elem$clickElement()
+
+    elem <- browser$findElement(using = 'xpath',
+                                "//button[text()='Schedule Post']")
     elem$clickElement()
 }
 
@@ -96,14 +104,14 @@ sendChar <- function(elem, text){
 }
 
 selectDate <- function(daynum = 1, addmonth = 0){
-    # get left and right arrow buttons
-    xpath <- "//div[@class='DayPicker-wrapper']//div//div//button[@type='button']"
-    elem <- browser$findElements(using = 'xpath', xpath)
     # click right arrow button add month times
-    for (i in seq_len(addmonth)) elem[[2]]$clickElement()
+    elem <- browser$findElement(using = 'xpath',
+                                "//button[@aria-label='Go to the Next Month']")
+    # click right arrow button add month times
+    for (i in seq_len(addmonth)) elem$clickElement()
 
     # pick day
-    xpath <- paste0("//div[text()='", as.numeric(daynum), "']")
+    xpath <- paste0("//button[text()='", as.numeric(daynum), "']")
     elem <- browser$findElement(using = 'xpath', xpath)
     elem$clickElement()
 }
@@ -113,18 +121,20 @@ selectTime <- function(time = "9:30"){
     date <- as.POSIXct(paste(Sys.Date(), time), tz = "UTC")
     date <- lubridate::with_tz(date, "Europe/London")
 
-    hour <- paste0("//option[text()='", format(date, "%I"), "']")
-    elem <- browser$findElements(using = "xpath", hour)[[1]]
-    elem$clickElement()
+    # hour
+    elem <- browser$findElement(using = "xpath",
+                                "//div[@aria-label='hour, Time selector']")
+    elem$sendKeysToElement(list(format(date, "%I")))
 
-    # small fudge: works as long as min not valid hour (1:12)
-    min <- paste0("//option[text()='", format(date, "%M"), "']")
-    elem <- browser$findElement(using = "xpath", min)
-    elem$clickElement()
+    # minute
+    elem <- browser$findElement(using = "xpath",
+                                "//div[@aria-label='minute, Time selector']")
+    elem$sendKeysToElement(list(format(date, "%M")))
 
-    am_pm <- paste0("//option[text()='", format(date, "%p"), "']")
-    elem <- browser$findElement(using = "xpath", am_pm)
-    elem$clickElement()
+    # am/pm
+    elem <- browser$findElement(using = "xpath",
+                                "//div[@aria-label='AM/PM, Time selector']")
+    elem$sendKeysToElement(list(format(date, "%p")))
 }
 
 

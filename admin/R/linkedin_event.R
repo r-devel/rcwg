@@ -131,6 +131,7 @@ linkedin_createevent <- function(
 selectDate <- function(daynum = 1, addmonth = 0, type = "start"){
     aria <- sprintf("[aria-label='Select %s date']", type)
     elem <- browser$findElement(using = 'css', aria)
+    Sys.sleep(1) # pause to ensure calendar opens
     elem$clickElement()
 
     # move to correct month

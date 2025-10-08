@@ -1,6 +1,6 @@
 Installing R from Source on macOS
 ================
-2024-02-01
+2025-10-08
 
 ## Prerequisites
 
@@ -32,6 +32,7 @@ Open Terminal.app to run the shell commands in the instructions below:
     ```
 
     <details>
+
     <summary>
 
     <i>Details…</i>
@@ -53,14 +54,14 @@ Open Terminal.app to run the shell commands in the instructions below:
     Add one of the following commands to the profile, selecting the one
     that matches your architecture:
 
-    **Intel**
-    ```sh 
-    export PATH="/opt/R/x86_64/bin:\${PATH}"
+    ``` sh
+    # Intel
+    export PATH="/opt/R/x86_64/bin:${PATH}"
     ```
 
-    **Apple Silicon (M1, M2, ...)**
     ``` sh
-    export PATH="/opt/R/arm64/bin:\${PATH}"
+    # Apple Silicon (M1, M2, ...)
+    export PATH="/opt/R/arm64/bin:${PATH}"
     ```
 
     This will add the `/opt/R/*/bin` directory to your `PATH` variable
@@ -68,6 +69,7 @@ Open Terminal.app to run the shell commands in the instructions below:
     with `install.libs` can be found.
 
     <details>
+
     <summary>
 
     <i>Note if using RStudio terminal, or using Terminal.app on macOS \<
@@ -110,6 +112,7 @@ within R:
     ```
 
     <details>
+
     <summary>
 
     <i>Troubleshooting…</i>
@@ -170,39 +173,58 @@ For the remaining instructions, code should be run within Terminal.app
     here as they provide an easy way to switch R versions.
 
 <details>
+
 <summary>
+
 <i>Detail on selected prerequisites…</i>
 </summary>
+
 The following prerequisites have been installed by the above
 instructions:
 <ul>
+
 <li>
+
 jpeg, libpng, pkgconfig, tiff and zlib-system-stub from r-base-dev.
 </li>
+
 <li>
+
 Objective C compiler from xcode command line tools.
 </li>
+
 <li>
+
 Tcl/Tk and texinfo from standard installation of R binary.
 </li>
+
 </ul>
+
 The following optional prerequisites have been skipped as they are
 unlikely to be needed by R contributors
 <ul>
+
 <li>
+
 readline5. Apple’s editline is sufficient. Can install with
 `install.libs("readline5")`.
 </li>
+
 <li>
+
 Cairo/Pango. Can install both with `install.libs("pango")`.
 </li>
+
 <li>
+
 Java. See [Java subsection in R-admin macOS
 instructions](https://cran.r-project.org/doc/manuals/r-patched/R-admin.html#Java-_0028macOS_0029)
 to add Java support. You may have installed Java to use a Java-using R
 package.
 </li>
+
 </ul>
+
 </details>
 
 ## Build R
@@ -221,9 +243,12 @@ This will retrieve the source code for the development version of R
 (`r-devel`).
 
 <details>
+
 <summary>
+
 <i>Alternatively create an RStudio SVN project…</i>
 </summary>
+
 You may prefer to create an RStudio project from the SVN repository. Set
 `https://svn.r-project.org/R/trunk/` as the Repository URL; set
 `R-devel` as the project directory name and create the project as a
@@ -231,10 +256,14 @@ subdirectory of `/Users/<username>/svn` (or adapt the definition of
 `TOP_SRCDIR` to match where you create the project). This will create an
 SVN pane in RStudio where you can track changes.
 </details>
+
 <details>
+
 <summary>
+
 <i>Alternatively checkout a fork of the r-svn GitHub repo…</i>
 </summary>
+
 You may prefer to use a fork of the
 <a href="https://github.com/r-devel/r-svn">r-svn GitHub repo</a>. Set
 the <code>TOP_SRCDIR</code> environment variable to the directory where
@@ -263,13 +292,13 @@ run the following commands within Terminal.app:
 
 3.  Define the `LOCAL` environment variable to match your architecture
 
-    **Intel**
     ``` sh
+    # Intel
     export LOCAL=/opt/R/x86_64 
     ```
 
-    **Apple Silicon (M1, M2, ...)**
     ``` sh
+    # Apple Silicon (e.g. M1)
     export LOCAL=/opt/R/arm64  
     ```
 
@@ -288,8 +317,7 @@ run the following commands within Terminal.app:
     EOF
     ```
 
-    If you are on Apple Silicon, also run the following to add some more
-    configuration flags
+    Add the additional configuration flags if you are on Apple Silicon:
 
     ``` sh
     cat << EOF >> config.site
@@ -297,12 +325,12 @@ run the following commands within Terminal.app:
     FFLAGS="-g -O2 -mmacosx-version-min=11.0"
     FCFLAGS="-g -O2 -mmacosx-version-min=11.0"
     LDFLAGS="-L$LOCAL/lib -L/opt/gfortran/lib"
-    MAIN_LDFLAGS="-Wl,-headerpad_max_install_names"
     CPPFLAGS="-isystem $LOCAL/include -I$LOCAL/include"
     EOF
     ```
 
     <details>
+
     <summary>
 
     <i>Details…</i>
@@ -314,14 +342,13 @@ run the following commands within Terminal.app:
     better debugging experience; `-mmacos-version-min` corrected \[?\]
     to `-mmacosx-version-min`;
     `LDFLAGS="-L$LOCAL/lib -L/opt/gfortran/lib"` added so that liblzma
-    (in `$LOCAL/lib`) and gfortran libraries can be found; 
-    `MAIN_LDFLAGS="-Wl,-headerpad_max_install_names"` added so that the binary
-    bin/exec/R is link-editable by install_name_tool during make install
-    (avoiding problems with long path `/Library/Frameworks/...`). CPPFLAGS
+    (in `$LOCAL/lib`) and gfortran libraries can be found. CPPFLAGS
     modified for Apple Silicon to link to the headers for liblzma.
 
     </details>
+
     <details>
+
     <summary>
 
     <i>Extra step if you are using the r-svn GitHub mirror…</i>
@@ -331,15 +358,13 @@ run the following commands within Terminal.app:
     You will need to update the Makefile template to infer the SVN
     revision number from the git mirror. Run the following line of code
     to replace an `svn` command in the template with a shell script that
-    will infer the SVN revision number: <br>
-    
-    ``` sh
-    sed -i.bak "s|\$(GIT) svn info|$TOP_SRCDIR/.github/scripts/svn-info.sh|" "$TOP_SRCDIR/Makefile.in"
-    ```
+    will infer the SVN revision number: <br> <code> sed -i.bak
+    "s\|\\\$(GIT) svn info\|\$TOP_SRCDIR/.github/scripts/svn-info.sh\|"
+    "\$TOP_SRCDIR/Makefile.in" </code>
 
     </details>
 
-5.  Configure the R installation with `--enable-R-framework` to prepare
+4.  Configure the R installation with `--enable-R-framework` to prepare
     for installation as an App and `--disable-java` to skip configuring
     Java, which may not be installed. Use `FW_VERSION` to set the
     version name as “R-devel”:
@@ -349,6 +374,7 @@ run the following commands within Terminal.app:
     ```
 
     <details>
+
     <summary>
 
     <i>Multiple versions of R-devel…</i>
@@ -385,6 +411,7 @@ run the following commands within Terminal.app:
     described next.
 
     <details>
+
     <summary>
 
     <i>Note if you are using RStudio terminal…</i>
@@ -395,12 +422,12 @@ run the following commands within Terminal.app:
 
     </details>
 
-7.  Reset permissions on the R framework folder to include the new directories
-    and install the built version of R:
+7.  Install the built version of R and reset permissions on the R
+    framework folder to include the new directories.
 
     ``` sh
-    sudo chown -R $USER /Library/Frameworks/R.framework/
     make install
+    sudo chown -R $USER /Library/Frameworks/R.framework/
     ```
 
     The built version of R will now be your default version of R, which

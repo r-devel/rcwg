@@ -2,15 +2,16 @@
 
 source("admin/R/update_readme_dates.R")
 
-### 2025 dates
+### Usual times
 # Fri 15:00 UK
-# Jul 18, Sep 19,
-# Nov 21 (May need to change time to AU/UK friendlyish time)
-#
-# Tues 19:30 UK:
-# Aug 19 (may skip, but see who signs up),
-# Oct 21, (May need to change time to AU/US friendlyish time)
-# Dec 16, (May need to change time to NZ/US friendlyish time)
+# Tue 19:30 UK
+
+### 2025 dates
+
+# Tues
+# Oct 21 (UTC 18:30)
+# Nov 18/19 (UTC 19:30; Melbourne 19 Dec 06:30 am [Auckland 08:30pm, San Fran 11:30pm, Hamilton 3:30pm, Copenhagen 8:30pm])
+# Dec 18/19 (UTC 19:30; Auckland 19 December 08:30am)
 
 # times here are UK times!
 # second number is n'th 'day' of the month, e.g. `3, "Friday"` = 3rd Friday

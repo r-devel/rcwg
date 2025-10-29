@@ -16,8 +16,9 @@ source("admin/R/update_readme_dates.R")
 # times here are UK times!
 # second number is n'th 'day' of the month, e.g. `3, "Friday"` = 3rd Friday
 # !! Think I have inconsistency here: Slack message and Twitter/Mastodon were wrong last time
-update_readme_dates(1, "August", 3, "Tuesday", "19:30", 2025)
-update_readme_dates(2, "September", 3, "Friday", "15:00", 2025)
+update_readme_dates(1, "October", 3, "Tuesday", "19:30", 2025)
+update_readme_dates(2, "November", 3, "Tuesday", "19:30", 2025)
+#update_readme_dates(2, "December", 3, "Thursday", "19:30", 2025)
 
 
 # Update RCWG contacts ---------------------------------------------------------
@@ -69,14 +70,14 @@ source("admin/R/buffer_post.R")
 # auth_setup() # choose user token and login as RContributors on Mastodon
 
 # slack announcement
-month <- "August"
-day <- 19
+month <- "October"
+day <- 21
 time <- "18:30" # UTC !!
 weekday <- get_weekday(day, month, abbreviate = TRUE)
 agenda = c(
-" - Report back on R Dev Day @ useR! 2025
- - Upcoming R Dev Days
- - Priorities for longer term initiatives"
+" - R Dev Days past/upcoming
+ - Good practices on R-devel repos
+ - Birdaro training mid-way report"
 )
 zoom <- "https://us02web.zoom.us/j/88612135282?pwd=ZzSjahkaTd0cC4XQjMOI5WzZnW4IZH.1"
 post <- social_post(weekday = weekday,
@@ -112,7 +113,7 @@ buffer_signin(browser = browser,
 buffer_createpost(browser = browser,
                   day = NULL, # number, day of month
                   month = NULL, # month number
-                  time = NULL, # UTC
+                  time = "18:30", # UTC
                   venue = "mastodon",
                   postcontent = post)
 

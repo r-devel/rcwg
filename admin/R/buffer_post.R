@@ -64,11 +64,6 @@ buffer_createpost <- function(
 
     sendChar(elem, postcontent)
 
-    # fragile (which number element to click?) - clicking on drop down arrow
-    elem <- browser$findElements(using = 'xpath',
-                                "//div[@role='button']")
-    elem[[length(elem)]]$clickElement()
-
     elem <- browser$findElement(using = 'xpath',
                                 "//span[text()='Next Available']")
     elem$clickElement()
@@ -83,7 +78,7 @@ buffer_createpost <- function(
     selectTime(time)
 
     elem <- browser$findElement(using = 'xpath',
-                                "//button[text()='Apply']")
+                                "//button[text()='Done']")
     elem$clickElement()
 
     elem <- browser$findElement(using = 'xpath',

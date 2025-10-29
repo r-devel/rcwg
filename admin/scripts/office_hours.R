@@ -1,7 +1,7 @@
 # Data for next office hours ----------------------------------------------
 
 # UTC times
-# Tues Oct 14 9am and 16:30pm (EMEA | AMER)
+# Invite Michael!!
 # Thurs Nov 13 10am and 17:30pm (EMEA/APAC Perth: 5pm, Melbourne: 9pm Thurs Nov 13 | AMER PDT 9:30, Hamilton 13:30pm Thurs Nov 13, usual winter time)
 # Thurs Dec 11 03:30am, 10am, 8pm (APAC UTC 3:30 am, IST 9am, Jakarta 10:30am, Auckland: 4:30pm  Thurs Nov 13 | EMEA UK Thurs 10am | AMER PDT: 12pm, UK: 8pm, Auckland: Fri 9am)
 

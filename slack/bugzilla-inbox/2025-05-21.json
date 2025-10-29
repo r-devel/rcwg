@@ -1,0 +1,601 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18896] readRDS silently returns NULL on malformed RDS*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18896>\n\nIvan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #3 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nLet's try parsing the file manually.\n\n```\n% zcat params.rds | hd\ngzip: params.rds: unexpected end of file\n00000000  58 0a 00 00 00 03 00 04  04 03 00 03 05 00 00 00  |X...............|\n00000010  00 0e 41 4f fe e6 0e fe  e6 0e fe e6 0e fe e6 0e  |..AO............|\n00000020  fe e6 0e fe e6 0e fe e6  0e fe e6 0e fe e6 0e fe  |................|\n00000030  e6 0e fe e6 0e fe e6 0e  fe 86 34 2d 31 39 36 38  |..........4-1968|\n00000040  0e fe e6 0e 0e fe e6 05  40 86 34 2d 31 39 36 38  |........@.4-1968|\n*\n00000140  0e fe e6 0e 0e fe e6 05  40 86 50 d1              |........@.P.|\n0000014c\n```\n\nThe `58 0a` (`X\\n`) header is followed by version numbers: `00 00 00 03` to\nsignify this as version-3 serialized data stream, `00 04 04 03` saying that\nR-4.4.3 wrote this file, `00 03 05 00` saying that R &gt;= 3.5.0 is needed to\nparse it. So far so good.\n\nVersion-3 format requires these numbers to be followed by the name of the\nnative encoding, first the length, then the text. `00 00 00 0e` says that the\nencoding name takes 14 bytes, and these bytes are... `41 4f fe e6 0e fe e6 0e\nfe e6 0e fe e6 0e`, which doesn't look like a valid encoding name. If we tried\nto decode any text, we would fail, but we don't reach that code path. Normally,\nit's something like `00 00 00 05 55 54 46 2d 38` (`&lt;5&gt;UTF-8`). `infoRDS()`\nagrees so far:\n\n```\n$version\n[1] 3\n\n$writer_version\n[1] \"4.4.3\"\n\n$min_reader_version\n[1] \"3.5.0\"\n\n$format\n[1] \"xdr\"\n\n$native_encoding\n[1] \"AO\\xfe\\xe6\\016\\xfe\\xe6\\016\\xfe\\xe6\\016\\xfe\\xe6\\016\"\n```\n\nAt this point we're at offset `0x20` and we're done with the header. Time to\nunserialize one value from the stream. For that, we read one 4-byte integer\nfrom the stream, `fe e6 0e fe`, and find out the type of the value from it,\nwhich happens to be `0xfe`, or `NILVALUE_SXP`. It turns out we're done! As far\nas R is concerned, this is an almost valid representation of a `NULL`, if you\ndon't count the exotic name of the native encoding, the flags accompanying the\nvalue, or the trailing garbage.\n\nWould you recommend that R verifies being at the end of file and warning about\ntrailing data otherwise? Or to validate the name of the encoding before\nencountering strings in the data stream?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1747820035.595729",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "CUXy",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18896] readRDS silently returns NULL on malformed RDS",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18896"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIvan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #3 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nLet's try parsing the file manually.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "% zcat params.rds | hd\ngzip: params.rds: unexpected end of file\n00000000  58 0a 00 00 00 03 00 04  04 03 00 03 05 00 00 00  |X...............|\n00000010  00 0e 41 4f fe e6 0e fe  e6 0e fe e6 0e fe e6 0e  |..AO............|\n00000020  fe e6 0e fe e6 0e fe e6  0e fe e6 0e fe e6 0e fe  |................|\n00000030  e6 0e fe e6 0e fe e6 0e  fe 86 34 2d 31 39 36 38  |..........4-1968|\n00000040  0e fe e6 0e 0e fe e6 05  40 86 34 2d 31 39 36 38  |........@.4-1968|\n*\n00000140  0e fe e6 0e 0e fe e6 05  40 86 50 d1              |........@.P.|\n0000014c\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "58 0a",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "X\\n",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") header is followed by version numbers: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "00 00 00 03",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to\nsignify this as version-3 serialized data stream, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "00 04 04 03",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " saying that\nR-4.4.3 wrote this file, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "00 03 05 00",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " saying that R >= 3.5.0 is needed to\nparse it. So far so good.\n\nVersion-3 format requires these numbers to be followed by the name of the\nnative encoding, first the length, then the text. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "00 00 00 0e",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " says that the\nencoding name takes 14 bytes, and these bytes are... `41 4f fe e6 0e fe e6 0e\nfe e6 0e fe e6 0e`, which doesn't look like a valid encoding name. If we tried\nto decode any text, we would fail, but we don't reach that code path. Normally,\nit's something like "
+                            },
+                            {
+                                "type": "text",
+                                "text": "00 00 00 05 55 54 46 2d 38",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "<5>UTF-8",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "). "
+                            },
+                            {
+                                "type": "text",
+                                "text": "infoRDS()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nagrees so far:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$version\n[1] 3\n\n$writer_version\n[1] \"4.4.3\"\n\n$min_reader_version\n[1] \"3.5.0\"\n\n$format\n[1] \"xdr\"\n\n$native_encoding\n[1] \"AO\\xfe\\xe6\\016\\xfe\\xe6\\016\\xfe\\xe6\\016\\xfe\\xe6\\016\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nAt this point we're at offset "
+                            },
+                            {
+                                "type": "text",
+                                "text": "0x20",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and we're done with the header. Time to\nunserialize one value from the stream. For that, we read one 4-byte integer\nfrom the stream, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "fe e6 0e fe",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and find out the type of the value from it,\nwhich happens to be "
+                            },
+                            {
+                                "type": "text",
+                                "text": "0xfe",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NILVALUE_SXP",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". It turns out we're done! As far\nas R is concerned, this is an almost valid representation of a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", if you\ndon't count the exotic name of the native encoding, the flags accompanying the\nvalue, or the trailing garbage.\n\nWould you recommend that R verifies being at the end of file and warning about\ntrailing data otherwise? Or to validate the name of the encoding before\nencountering strings in the data stream?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18896] readRDS silently returns NULL on malformed RDS*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18896>\n\nKarine Even-Mendoza (<mailto:karine.even_mendoza@kcl.ac.uk|karine.even_mendoza@kcl.ac.uk>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |karine.even_mendoza@kcl.ac.\n                   |                            |uk\n\n--- Comment #4 from Karine Even-Mendoza (<mailto:karine.even_mendoza@kcl.ac.uk|karine.even_mendoza@kcl.ac.uk>) ---\nI did some further investigation with the gdb debugger.\n\nThe error is related to readRDS() silently returning NULL on malformed input\ninstead of returning an error \"invalid or incomplete compressed data\" (or\nsimilar).\n\nI checked the documentation, but it does not discuss error handling at all, and\nno protection (try-catch or if checks) is part of the examples:\n<https:\/\/stat.ethz.ch\/R-manual\/R-devel\/library\/base\/html\/readRDS.html>. \n\nI ran a debugger. Due to the file being corrupted, it assumes it is a gz file\nand takes the if branch here:\n<https:\/\/github.com\/wch\/r-source\/blob\/trunk\/src\/library\/base\/R\/serialize.R#L51>.\n\nIt is likely a missing case here:\n<https:\/\/github.com\/wch\/r-source\/blob\/trunk\/src\/main\/serialize.c#L1871;> this is\na large (huge) case-switch nested blocks, so at that point I did not go any\nfurther into which case exactly is missing. \n\nFrom the last location (just before entering the case-switch), there is\nprobably a missing case handling. As a result, readRDS() ends up returning\nR_NilValue (NULL) from corrupted input, but without encountering case\nNILVALUE_SXP: return R_NilValue; case. There is likely a silent fallback and\nshould raise an error.\n\nDue to the loading of libraries in R, the case-switch code is called 27 times\nbefore it calls the read function for the corrupted data file.\n\nThe example in the minimal code returned the following output in 4.5.0 version:\n```\nuser42@node0:~\/bug15$ .\/..\/R-4.5.0\/bin\/Rscript minimal_test.r \n&gt;&gt; This fails silently, but should returns an error! \nFile size (bytes): 52 \n1F 8B 08 00 00 00 00 00 00 03 8B E0 62 60 60 60 66 60 61 61 66 60 66 05 32 19\nF8 1C FD FF 3D E3 23 8C DA 4C 74 0D 2D CD 2C 40 22 40 CC EA 30 E2 F9 01 17 55 \nNULL\n\n\n&gt;&gt; This returns an error! (expected behaviour)Error in readRDS(f) : error reading from connection\nIn addition: Warning message:\nIn readRDS(f) : invalid or incomplete compressed data\nExecution halted\n```\nThat is, the error was raised on the corrupted file for the first case, but not\nfor the second case. Both files seem to be corrupted.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1747820671.171499",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Xh=0C",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18896] readRDS silently returns NULL on malformed RDS",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18896"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nKarine Even-Mendoza ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:karine.even_mendoza@kcl.ac.uk",
+                                "text": "karine.even_mendoza@kcl.ac.uk",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |karine.even_mendoza@kcl.ac.\n                   |                            |uk\n\n--- Comment #4 from Karine Even-Mendoza ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:karine.even_mendoza@kcl.ac.uk",
+                                "text": "karine.even_mendoza@kcl.ac.uk",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI did some further investigation with the gdb debugger.\n\nThe error is related to readRDS() silently returning NULL on malformed input\ninstead of returning an error \"invalid or incomplete compressed data\" (or\nsimilar).\n\nI checked the documentation, but it does not discuss error handling at all, and\nno protection (try-catch or if checks) is part of the examples:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/R-manual\/R-devel\/library\/base\/html\/readRDS.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": ". \n\nI ran a debugger. Due to the file being corrupted, it assumes it is a gz file\nand takes the if branch here:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/wch\/r-source\/blob\/trunk\/src\/library\/base\/R\/serialize.R#L51"
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nIt is likely a missing case here:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/wch\/r-source\/blob\/trunk\/src\/main\/serialize.c#L1871;"
+                            },
+                            {
+                                "type": "text",
+                                "text": " this is\na large (huge) case-switch nested blocks, so at that point I did not go any\nfurther into which case exactly is missing. \n\nFrom the last location (just before entering the case-switch), there is\nprobably a missing case handling. As a result, readRDS() ends up returning\nR_NilValue (NULL) from corrupted input, but without encountering case\nNILVALUE_SXP: return R_NilValue; case. There is likely a silent fallback and\nshould raise an error.\n\nDue to the loading of libraries in R, the case-switch code is called 27 times\nbefore it calls the read function for the corrupted data file.\n\nThe example in the minimal code returned the following output in 4.5.0 version:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "user42@node0:~\/bug15$ .\/..\/R-4.5.0\/bin\/Rscript minimal_test.r \n>> This fails silently, but should returns an error! \nFile size (bytes): 52 \n1F 8B 08 00 00 00 00 00 00 03 8B E0 62 60 60 60 66 60 61 61 66 60 66 05 32 19\nF8 1C FD FF 3D E3 23 8C DA 4C 74 0D 2D CD 2C 40 22 40 CC EA 30 E2 F9 01 17 55 \nNULL\n\n\n>> This returns an error! (expected behaviour)Error in readRDS(f) : error reading from connection\nIn addition: Warning message:\nIn readRDS(f) : invalid or incomplete compressed data\nExecution halted\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "That is, the error was raised on the corrupted file for the first case, but not\nfor the second case. Both files seem to be corrupted."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18896] readRDS silently returns NULL on malformed RDS*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18896>\n\n--- Comment #5 from Karine Even-Mendoza (<mailto:karine.even_mendoza@kcl.ac.uk|karine.even_mendoza@kcl.ac.uk>) ---\n&gt;&gt; Would you recommend that R verifies being at the end of file and warning about trailing data otherwise? Or to validate the name of the encoding before encountering strings in the data stream?\n\nI think it is likely requiring adding another case to the case-switch to\nproperly return an error, like it in the first case: \"In readRDS(f) : invalid\nor incomplete compressed data \\nExecution halted\".\n\nYour solution works for this case, but it is not a bulletproof as the behaviour\nof the large case-switch allows skipping a default case that raises an error\n(if none of the cases matched).\n\nNot sure if it is even possible to debug these huge nested case-switch blocks,\nif not, then at least catching this specific error is good already.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1747821085.402729",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "1wEJ1",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18896] readRDS silently returns NULL on malformed RDS",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18896"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Karine Even-Mendoza ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:karine.even_mendoza@kcl.ac.uk",
+                                "text": "karine.even_mendoza@kcl.ac.uk",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> Would you recommend that R verifies being at the end of file and warning about trailing data otherwise? Or to validate the name of the encoding before encountering strings in the data stream?"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI think it is likely requiring adding another case to the case-switch to\nproperly return an error, like it in the first case: \"In readRDS(f) : invalid\nor incomplete compressed data \\nExecution halted\".\n\nYour solution works for this case, but it is not a bulletproof as the behaviour\nof the large case-switch allows skipping a default case that raises an error\n(if none of the cases matched).\n\nNot sure if it is even possible to debug these huge nested case-switch blocks,\nif not, then at least catching this specific error is good already."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18896] readRDS silently returns NULL on malformed RDS*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18896>\n\n--- Comment #6 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nSince the number at offset `0x20` in the decompressed stream (before the\ntruncation is encountered) signifies a `NILSXP`, the `case NILVALUE_SXP:     \nreturn R_NilValue;` is encountered during parsing, which is why a `NULL` is\nreturned early. This can also be observed using a debugger:\n\n\n```\n(gdb) b 1883\nBreakpoint 1 at 0x55555573cbd0: file ..\/..\/..\/src\/main\/serialize.c, line 1883.\n(gdb) c\nContinuing.\n\n&gt; readRDS('params.rds')\n\nBreakpoint 1, ReadItem_Recursive (flags=-18477314,\n    ref_table=ref_table@entry=0x555558978d28,\n    stream=stream@entry=0x7fffffffb800) at ..\/..\/..\/src\/main\/serialize.c:1883\n1883        case NILVALUE_SXP:      return R_NilValue;\n```\n\nThere's a `default:` case below, at line 1964, which finally handles unknown\ntype codes at line 2090.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1747821843.569089",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Q8h6",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18896] readRDS silently returns NULL on malformed RDS",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18896"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #6 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nSince the number at offset "
+                            },
+                            {
+                                "type": "text",
+                                "text": "0x20",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in the decompressed stream (before the\ntruncation is encountered) signifies a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NILSXP",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", the `case NILVALUE_SXP:     \nreturn R_NilValue;"
+                            },
+                            {
+                                "type": "text",
+                                "text": " is encountered during parsing, which is why a ",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "NULL` is\nreturned early. This can also be observed using a debugger:\n\n\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "(gdb) b 1883\nBreakpoint 1 at 0x55555573cbd0: file ..\/..\/..\/src\/main\/serialize.c, line 1883.\n(gdb) c\nContinuing.\n\n> readRDS('params.rds')\n\nBreakpoint 1, ReadItem_Recursive (flags=-18477314,\n    ref_table=ref_table@entry=0x555558978d28,\n    stream=stream@entry=0x7fffffffb800) at ..\/..\/..\/src\/main\/serialize.c:1883\n1883        case NILVALUE_SXP:      return R_NilValue;\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThere's a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "default:",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " case below, at line 1964, which finally handles unknown\ntype codes at line 2090."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18896] readRDS silently returns NULL on malformed RDS*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18896>\n\n--- Comment #7 from Karine Even-Mendoza (<mailto:karine.even_mendoza@kcl.ac.uk|karine.even_mendoza@kcl.ac.uk>) ---\nI see, thanks for checking it deeper. So in that case, checking that there's\nindeed nothing beyond the null encoding will solve the issue.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1747824611.316299",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "RbFn",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18896] readRDS silently returns NULL on malformed RDS",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18896"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #7 from Karine Even-Mendoza ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:karine.even_mendoza@kcl.ac.uk",
+                                "text": "karine.even_mendoza@kcl.ac.uk",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI see, thanks for checking it deeper. So in that case, checking that there's\nindeed nothing beyond the null encoding will solve the issue."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

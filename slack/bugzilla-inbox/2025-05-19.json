@@ -1,0 +1,630 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18896] New: readRDS silently returns NULL on malformed RDS*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18896>\n\n            Bug ID: 18896\n           Summary: readRDS silently returns NULL on malformed RDS\n           Product: R\n           Version: R 4.5.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:aidan.dakhama@kcl.ac.uk|aidan.dakhama@kcl.ac.uk>\n\nit returns `NULL` without any warning or error. However, other corrupted inputs\nthrow the expected error.\n\nThe following is the R script used:\n```\ncat(\"&gt;&gt; This fails silently, but should return an error!\\n\")\nfile_path &lt;- \"params.rds\"\nfile_size &lt;- <http:\/\/file.info|file.info>(file_path)$size\ncat(\"File size (bytes):\", file_size, \"\\n\")\n\ndump_entire_file &lt;- function(f) {\n  b &lt;- readBin(f, \"raw\", <http:\/\/file.info|file.info>(f)$size)\n  cat(paste(sprintf(\"%02X\", as.integer(b)), collapse = \" \"), \"\\n\")\n}\n\n# Dump the hex of the file\ndump_entire_file(file_path)\n\n# Read it - this is where NULL is returned without an error\nparameters &lt;- readRDS(file_path)\nprint(parameters)\n\n# Now a comparison - corrupted file with forced error\ncat(\"\\n\\n&gt;&gt; This returns an error! (expected behaviour)\\n\")\nf &lt;- tempfile()\nwriteBin(as.raw(c(0x1F, 0x8B, rep(0x00, 50))), f)\nreadRDS(f) \n```\n\nAnd the following command can be used to create the `params.rds` file:\n```\necho -n -e\n'\\x1F\\x8B\\x08\\x00\\x00\\x00\\x00\\x00\\x00\\x03\\x8B\\xE0\\x62\\x60\\x60\\x60\\x66\\x60\\x61\\x61\\x66\\x60\\x66\\x05\\x32\\x19\\xF8\\x1C\\xFD\\xFF\\x3D\\xE3\\x23\\x8C\\xDA\\x4C\\x74\\x0D\\x2D\\xCD\\x2C\\x40\\x22\\x40\\xCC\\xEA\\x30\\xE2\\xF9\\x01\\x17\\x55'\n&gt; params.rds\n```\n\nThe following is an example output from this:\n```\n&gt; Rscript minimal_test.r\n\n&gt;&gt; This fails silently, but should return an error!\nFile size (bytes): 52 \n1F 8B 08 00 00 00 00 00 00 03 8B E0 62 60 60 60 66 60 61 61 66 60 66 05 32 19\nF8 1C FD FF 3D E3 23 8C DA 4C 74 0D 2D CD 2C 40 22 40 CC EA 30 E2 F9 01 17 55 \nNULL\n\n\n&gt;&gt; This returns an error! (expected behaviour)\nError in readRDS(f) : error reading from connection\nIn addition: Warning message:\nIn readRDS(f) : invalid or incomplete compressed data\nExecution halted\n```\n\nThis was on `4.5.0`:\n```\nplatform       x86_64-pc-linux-gnu         \narch           x86_64                      \nos             linux-gnu                   \nsystem         x86_64, linux-gnu           \nstatus                                     \nmajor          4                           \nminor          5.0                         \nyear           2025                        \nmonth          04                          \nday            11                          \nsvn rev        88135                       \nlanguage       R                           \nversion.string R version 4.5.0 (2025-04-11)\nnickname       How About a Twenty-Six\n```\n\nBut was also reproduced in `4.4.2 (2024-10-31)`\n\nIt appears to come from `ReadItem_Recursive` in `serialize.c` incorrectly\nsetting the result to `R_NilValue` without having matched `NILVALUE_SXP`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1747661838.279239",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ckmp",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18896] New: readRDS silently returns NULL on malformed RDS",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18896"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18896\n           Summary: readRDS silently returns NULL on malformed RDS\n           Product: R\n           Version: R 4.5.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:aidan.dakhama@kcl.ac.uk",
+                                "text": "aidan.dakhama@kcl.ac.uk",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nit returns "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " without any warning or error. However, other corrupted inputs\nthrow the expected error.\n\nThe following is the R script used:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "cat(\">> This fails silently, but should return an error!\\n\")\nfile_path <- \"params.rds\"\nfile_size <- "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/file.info",
+                                "text": "file.info"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(file_path)$size\ncat(\"File size (bytes):\", file_size, \"\\n\")\n\ndump_entire_file <- function(f) {\n  b <- readBin(f, \"raw\", "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/file.info",
+                                "text": "file.info"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(f)$size)\n  cat(paste(sprintf(\"%02X\", as.integer(b)), collapse = \" \"), \"\\n\")\n}\n\n# Dump the hex of the file\ndump_entire_file(file_path)\n\n# Read it - this is where NULL is returned without an error\nparameters <- readRDS(file_path)\nprint(parameters)\n\n# Now a comparison - corrupted file with forced error\ncat(\"\\n\\n>> This returns an error! (expected behaviour)\\n\")\nf <- tempfile()\nwriteBin(as.raw(c(0x1F, 0x8B, rep(0x00, 50))), f)\nreadRDS(f) \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nAnd the following command can be used to create the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "params.rds",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " file:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "echo -n -e\n'\\x1F\\x8B\\x08\\x00\\x00\\x00\\x00\\x00\\x00\\x03\\x8B\\xE0\\x62\\x60\\x60\\x60\\x66\\x60\\x61\\x61\\x66\\x60\\x66\\x05\\x32\\x19\\xF8\\x1C\\xFD\\xFF\\x3D\\xE3\\x23\\x8C\\xDA\\x4C\\x74\\x0D\\x2D\\xCD\\x2C\\x40\\x22\\x40\\xCC\\xEA\\x30\\xE2\\xF9\\x01\\x17\\x55'\n> params.rds\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe following is an example output from this:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> Rscript minimal_test.r\n\n>> This fails silently, but should return an error!\nFile size (bytes): 52 \n1F 8B 08 00 00 00 00 00 00 03 8B E0 62 60 60 60 66 60 61 61 66 60 66 05 32 19\nF8 1C FD FF 3D E3 23 8C DA 4C 74 0D 2D CD 2C 40 22 40 CC EA 30 E2 F9 01 17 55 \nNULL\n\n\n>> This returns an error! (expected behaviour)\nError in readRDS(f) : error reading from connection\nIn addition: Warning message:\nIn readRDS(f) : invalid or incomplete compressed data\nExecution halted\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis was on "
+                            },
+                            {
+                                "type": "text",
+                                "text": "4.5.0",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "platform       x86_64-pc-linux-gnu         \narch           x86_64                      \nos             linux-gnu                   \nsystem         x86_64, linux-gnu           \nstatus                                     \nmajor          4                           \nminor          5.0                         \nyear           2025                        \nmonth          04                          \nday            11                          \nsvn rev        88135                       \nlanguage       R                           \nversion.string R version 4.5.0 (2025-04-11)\nnickname       How About a Twenty-Six\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nBut was also reproduced in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "4.4.2 (2024-10-31)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIt appears to come from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ReadItem_Recursive",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "serialize.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " incorrectly\nsetting the result to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_NilValue",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " without having matched "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NILVALUE_SXP",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18896] readRDS silently returns NULL on malformed RDS*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18896>\n\n--- Comment #1 from Aidan Dakhama (<mailto:aidan.dakhama@kcl.ac.uk|aidan.dakhama@kcl.ac.uk>) ---\nCreated attachment 3483\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3483&amp;action=edit>\nInput file used for the minimised code",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1747664650.652049",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "xnS=",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18896] readRDS silently returns NULL on malformed RDS",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18896"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Aidan Dakhama ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:aidan.dakhama@kcl.ac.uk",
+                                "text": "aidan.dakhama@kcl.ac.uk",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3483\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3483&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3483&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nInput file used for the minimised code"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18896] readRDS silently returns NULL on malformed RDS*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18896>\n\n--- Comment #2 from Aidan Dakhama (<mailto:aidan.dakhama@kcl.ac.uk|aidan.dakhama@kcl.ac.uk>) ---\nFor further clarification, this occurs 27 iterations into the\n`ReadItem_Recursive` function here:\n<https:\/\/github.com\/wch\/r-source\/blob\/trunk\/src\/main\/serialize.c#L1871>, after\nthe file is assumed a gz file:\n<https:\/\/github.com\/wch\/r-source\/blob\/trunk\/src\/library\/base\/R\/serialize.R#L51>.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1747665648.996999",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "0FKP4",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18896] readRDS silently returns NULL on malformed RDS",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18896"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Aidan Dakhama ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:aidan.dakhama@kcl.ac.uk",
+                                "text": "aidan.dakhama@kcl.ac.uk",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nFor further clarification, this occurs 27 iterations into the\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "ReadItem_Recursive",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " function here:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/wch\/r-source\/blob\/trunk\/src\/main\/serialize.c#L1871"
+                            },
+                            {
+                                "type": "text",
+                                "text": ", after\nthe file is assumed a gz file:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/wch\/r-source\/blob\/trunk\/src\/library\/base\/R\/serialize.R#L51"
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18885] browser() handles `if (TRUE)` strangely*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18885>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n             Status|UNCONFIRMED                 |CONFIRMED\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #3 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nThank you all, notably Ivan for trying a patch  which makes a lot of sense\nI think even leading to nicer code (than considering `R_BrowserLastCommand`) ..\nunless we are overlooking something...  (Duncan ?)\n\nIndeed, I've had the nagging feeling that I've encountered the problem myself,\nbut *not* just with `if(TRUE) ...` but always with `if(.)` - like branches in\nthe function I've been debugging, and so, such encounters have always reminded\nme of\nBug 15770 indeed (thank you, Ivan!).\n\nOTOH, I do notice that ESS (Emacs Speaks Statistics) seems to try to outsmart \/\nworkaround some of the browser() behaviour in this case, and it seems I cannot\neven use ESS to reproduce the bug &amp; fix exactly...  but in a regular (Emacs)\nshell both bug and bug fix show nicely.\n\nIf I only apply your patch, main.c compilation gives (false positive!) warning\n```\n..\/..\/..\/R\/src\/main\/main.c: In function 'Rf_ReplIteration':\n..\/..\/..\/R\/src\/main\/main.c:278:40: warning: 'browsevalue' may be used\nuninitialized [-Wmaybe-uninitialized]\n  278 |         if (browselevel &amp;&amp; browsevalue &lt; 0)\n      |                            ~~~~~~~~~~~~^~~\n..\/..\/..\/R\/src\/main\/main.c:201:12: note: 'browsevalue' was declared here\n  201 |     int c, browsevalue;\n      |            ^~~~~~~~~~~\n```\nwhich we can easily avoid by setting a dummy at declaration.\nAdditionally, I'm wrapping the whole `switch(..)`  `case &lt;...&gt;:` with an `{ ..\n}`\nmove the declarations inside that case.\n[*NO* need for an updated patch, unless someone sees another problem]",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1747671048.649189",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Fyh",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18885] browser() handles ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "if (TRUE)",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " strangely",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18885"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n             Status|UNCONFIRMED                 |CONFIRMED\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #3 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you all, notably Ivan for trying a patch  which makes a lot of sense\nI think even leading to nicer code (than considering "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_BrowserLastCommand",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ..\nunless we are overlooking something...  (Duncan ?)\n\nIndeed, I've had the nagging feeling that I've encountered the problem myself,\nbut "
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " just with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "if(TRUE) ...",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " but always with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "if(.)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " - like branches in\nthe function I've been debugging, and so, such encounters have always reminded\nme of\nBug 15770 indeed (thank you, Ivan!).\n\nOTOH, I do notice that ESS (Emacs Speaks Statistics) seems to try to outsmart \/\nworkaround some of the browser() behaviour in this case, and it seems I cannot\neven use ESS to reproduce the bug & fix exactly...  but in a regular (Emacs)\nshell both bug and bug fix show nicely.\n\nIf I only apply your patch, main.c compilation gives (false positive!) warning"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "..\/..\/..\/R\/src\/main\/main.c: In function 'Rf_ReplIteration':\n..\/..\/..\/R\/src\/main\/main.c:278:40: warning: 'browsevalue' may be used\nuninitialized [-Wmaybe-uninitialized]\n  278 |         if (browselevel && browsevalue < 0)\n      |                            ~~~~~~~~~~~~^~~\n..\/..\/..\/R\/src\/main\/main.c:201:12: note: 'browsevalue' was declared here\n  201 |     int c, browsevalue;\n      |            ^~~~~~~~~~~\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "which we can easily avoid by setting a dummy at declaration.\nAdditionally, I'm wrapping the whole "
+                            },
+                            {
+                                "type": "text",
+                                "text": "switch(..)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "case <...>:",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " with an `{ ..\n}`\nmove the declarations inside that case.\n["
+                            },
+                            {
+                                "type": "text",
+                                "text": "NO",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " need for an updated patch, unless someone sees another problem]"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18885] browser() handles `if (TRUE)` strangely*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18885>\n\n--- Comment #4 from Duncan Murdoch (<mailto:murdoch.duncan@gmail.com|murdoch.duncan@gmail.com>) ---\nIt appears to fix the examples I saw, as well as the one I reported.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1747672312.216989",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "EQop",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18885] browser() handles ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "if (TRUE)",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " strangely",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18885"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Duncan Murdoch ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:murdoch.duncan@gmail.com",
+                                "text": "murdoch.duncan@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nIt appears to fix the examples I saw, as well as the one I reported."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

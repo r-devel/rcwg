@@ -1,0 +1,165 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18521] Two tests from reg-tests-1d.R fail on Darwin ppc32 (long double and small ranges related)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18521>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |CONFIRMED\n\n--- Comment #4 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nThank you, for the report, on pretty unusual platform.\nMikko's comment was particularly useful, noting that `eps.correction = 2` has\nbeen a typo, and actually with bad consequences: \nAs I had the same typo in my private more extended tests, I never properly\nchecked the code branch for (the proper) `eps.correct = 2`  and once we did\n(Tomas K brought it to my attention), it revealed a bad \"thinko\"\nfor the boundary case of using `pretty()` with subnormal numbers, e.g.,\n`pretty(c(0, 1e-322), eps.extend = 2)`  which produces a sequence, not at all\n\"pretty\" of length more than a million ... \n\nI've fixed that bug, replacing relatively short but non trivial code by even\nmore careful one;  committed to R-devel in svn rev 88880  and to be backported\nto the R 4.5.* series.\nIn addition, in svn rev 88881, I've also added a `chkDots(...)` call to\n`pretty.default()` which would have called the typo.. which was undetected and\nhiding the bug for so many years  (well,  `pretty()` for subnormal numbers had\nnever fully \"worked\" at all, neither for numbers very close to 1.8e308, i.e.,\n`.Machine$double.xmax` (in absolute value), \nbut I hoped to have \"finally finished\" improving the situation in early summer\n2021 when I last tweaked that..\n\nLast but not least:  The tests in `tests\/reg-tests-1d.R` on this topic may\nstill be too narrow for all possible platforms.\nI'd be happy to adapt them if people send me \/ here the results they get on\ntheir platform (not just the error message!).\nFor that reason, I keep this open, and ask you to re-try after getting the\nlatest version (not yet in released R).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1758971555.734549",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "SyvG",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18521] Two tests from reg-tests-1d.R fail on Darwin ppc32 (long double and small ranges related)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18521"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |CONFIRMED\n\n--- Comment #4 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you, for the report, on pretty unusual platform.\nMikko's comment was particularly useful, noting that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "eps.correction = 2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has\nbeen a typo, and actually with bad consequences: \nAs I had the same typo in my private more extended tests, I never properly\nchecked the code branch for (the proper) "
+                            },
+                            {
+                                "type": "text",
+                                "text": "eps.correct = 2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  and once we did\n(Tomas K brought it to my attention), it revealed a bad \"thinko\"\nfor the boundary case of using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pretty()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " with subnormal numbers, e.g.,\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "pretty(c(0, 1e-322), eps.extend = 2)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  which produces a sequence, not at all\n\"pretty\" of length more than a million ... \n\nI've fixed that bug, replacing relatively short but non trivial code by even\nmore careful one;  committed to R-devel in svn rev 88880  and to be backported\nto the R 4.5.* series.\nIn addition, in svn rev 88881, I've also added a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "chkDots(...)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " call to\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "pretty.default()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " which would have called the typo.. which was undetected and\nhiding the bug for so many years  (well,  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pretty()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for subnormal numbers had\nnever fully \"worked\" at all, neither for numbers very close to 1.8e308, i.e.,\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": ".Machine$double.xmax",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (in absolute value), \nbut I hoped to have \"finally finished\" improving the situation in early summer\n2021 when I last tweaked that..\n\nLast but not least:  The tests in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tests\/reg-tests-1d.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " on this topic may\nstill be too narrow for all possible platforms.\nI'd be happy to adapt them if people send me \/ here the results they get on\ntheir platform (not just the error message!).\nFor that reason, I keep this open, and ask you to re-try after getting the\nlatest version (not yet in released R)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

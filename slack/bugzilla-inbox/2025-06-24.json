@@ -1,0 +1,318 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18878] writeLines() for 1gb+ strings*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18878>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tomas.kalibera@gmail.com\n         Resolution|---                         |FIXED\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #2 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nThanks for the report. Yes, this is a bug in trio, the library used on Windows\nfor standard I\/O, which has been incorporated into R sources. \n\nTrioOutStreamStringDynamic() does not check the error status from\ntrio_xstring_append_char() when adding characters. So, what happens, is that\nonce the required amount of memory cannot be allocated,\ntrio_xstring_append_char() keeps failing, the output characters are being\ndropped, but allocation is attempted at each character, so it takes long\ncompared to when allocation succeeds (and doubles the buffer size). The primary\nproblem is hence that the characters get silently dropped.\n\nNow fixed in R-devel, when printing a string fails due to allocation error, one\ngets an error, e.g.\n\nError in writeLines(x, \"tmp.txt\") :\n  Error writing to connection:  Not enough space\n\nThanks for discovering this bug, but nevertheless particularly if there are\nperformance issues in some real application this report is based on, it might\nbe worth re-considering the data structures and algorithms (so, not using\nstrings). R-pkg-devel mailing list is a forum suitable for asking suggestions,\nif desired. String operations are not tuned for such long strings. And, while\nin this case it was due to a bug, some operations on strings in some cases may\nbe subject to (intended) truncation.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1750758182.644809",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "V6IB",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18878] writeLines() for 1gb+ strings",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18878"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tomas.kalibera@gmail.com\n         Resolution|---                         |FIXED\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #2 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for the report. Yes, this is a bug in trio, the library used on Windows\nfor standard I\/O, which has been incorporated into R sources. \n\nTrioOutStreamStringDynamic() does not check the error status from\ntrio_xstring_append_char() when adding characters. So, what happens, is that\nonce the required amount of memory cannot be allocated,\ntrio_xstring_append_char() keeps failing, the output characters are being\ndropped, but allocation is attempted at each character, so it takes long\ncompared to when allocation succeeds (and doubles the buffer size). The primary\nproblem is hence that the characters get silently dropped.\n\nNow fixed in R-devel, when printing a string fails due to allocation error, one\ngets an error, e.g.\n\nError in writeLines(x, \"tmp.txt\") :\n  Error writing to connection:  Not enough space\n\nThanks for discovering this bug, but nevertheless particularly if there are\nperformance issues in some real application this report is based on, it might\nbe worth re-considering the data structures and algorithms (so, not using\nstrings). R-pkg-devel mailing list is a forum suitable for asking suggestions,\nif desired. String operations are not tuned for such long strings. And, while\nin this case it was due to a bug, some operations on strings in some cases may\nbe subject to (intended) truncation."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18878] writeLines() for 1gb+ strings*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18878>\n\n--- Comment #3 from Davor Josipovic (<mailto:davorj@live.com|davorj@live.com>) ---\nThank you for the follow-up. Unfortunately I do have some minor objections.\n\n(In reply to Tomas Kalibera from comment #2)\nError \"not enough space\" sounds very confusing to me, as if there is not enough\nspace on target *disk*.\n\nBesides, what does \"allocation\" mean in this case? I think it is just a hard\nlimit, and has nothing to do with physical or virtual memory? So why not state\nthat in the error message, possibly even with a link to this bug report.\n\nOn the other hand, it if was related to *physical* memory, then this could\ncause processes to fail randomly in situations when limited *physical* memory\nis available (and when there is still enough virtual memory available). \n\nAnd what would happen if this becomes fixed in trio at some point? Will R still\nenforce this limitation? Would a temporary workaround not be a better solution?\nSomething in the line of the following:\n\n```\nwriteLines2 &lt;- function(text, con = stdout(), sep = \"\\n\", ...) {\n\n  if (!is.character(text)) stop(\"can only write character objects\")\n  if (is.character(con)) {\n    con &lt;- file(con, \"w\")\n    on.exit(close(con))\n  }\n\n  n.max &lt;- 2^22 # max writable chunk size\n\n  for (t in seq_along(text)) {\n    txt &lt;- text[t]\n    n &lt;- nchar(txt)\n\n    if (n &lt;= n.max) {\n      base::writeLines(text = txt, con = con, sep = sep, ...)\n      next()\n    }\n\n    for (i in 1:ceiling(n \/ n.max)) {\n      start &lt;- 1 + (i - 1) * n.max\n      end &lt;- min(i * n.max, n)\n      xx &lt;- substr(txt, start = start, stop = end)\n      base::writeLines(text = xx, con = con, sep = \"\", ...)\n    }\n\n    base::writeLines(text = \"\", con = con, sep = sep, ...)\n  }\n\n  0L\n}\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1750775025.425819",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "m=bY",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18878] writeLines() for 1gb+ strings",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18878"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Davor Josipovic ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:davorj@live.com",
+                                "text": "davorj@live.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you for the follow-up. Unfortunately I do have some minor objections.\n\n(In reply to Tomas Kalibera from comment #2)\nError \"not enough space\" sounds very confusing to me, as if there is not enough\nspace on target "
+                            },
+                            {
+                                "type": "text",
+                                "text": "disk",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nBesides, what does \"allocation\" mean in this case? I think it is just a hard\nlimit, and has nothing to do with physical or virtual memory? So why not state\nthat in the error message, possibly even with a link to this bug report.\n\nOn the other hand, it if was related to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "physical",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " memory, then this could\ncause processes to fail randomly in situations when limited "
+                            },
+                            {
+                                "type": "text",
+                                "text": "physical",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " memory\nis available (and when there is still enough virtual memory available). \n\nAnd what would happen if this becomes fixed in trio at some point? Will R still\nenforce this limitation? Would a temporary workaround not be a better solution?\nSomething in the line of the following:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "writeLines2 <- function(text, con = stdout(), sep = \"\\n\", ...) {\n\n  if (!is.character(text)) stop(\"can only write character objects\")\n  if (is.character(con)) {\n    con <- file(con, \"w\")\n    on.exit(close(con))\n  }\n\n  n.max <- 2^22 # max writable chunk size\n\n  for (t in seq_along(text)) {\n    txt <- text[t]\n    n <- nchar(txt)\n\n    if (n <= n.max) {\n      base::writeLines(text = txt, con = con, sep = sep, ...)\n      next()\n    }\n\n    for (i in 1:ceiling(n \/ n.max)) {\n      start <- 1 + (i - 1) * n.max\n      end <- min(i * n.max, n)\n      xx <- substr(txt, start = start, stop = end)\n      base::writeLines(text = xx, con = con, sep = \"\", ...)\n    }\n\n    base::writeLines(text = \"\", con = con, sep = sep, ...)\n  }\n\n  0L\n}\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18878] writeLines() for 1gb+ strings*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18878>\n\n--- Comment #4 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\n(In reply to Davor Josipovic from comment #3)\n&gt; Thank you for the follow-up. Unfortunately I do have some minor objections.\n&gt; \n&gt; (In reply to Tomas Kalibera from comment #2)\n&gt; &gt; Now fixed in R-devel, when printing a string fails due to allocation error,\n&gt; &gt; one gets an error, e.g.\n&gt; &gt; \n&gt; &gt; Error in writeLines(x, \"tmp.txt\") :\n&gt; &gt;   Error writing to connection:  Not enough space\n&gt; \n&gt; Error \"not enough space\" sounds very confusing to me, as if there is not\n&gt; enough space on target *disk*.\n&gt;\n&gt; \n&gt; Besides, what does \"allocation\" mean in this case? I think it is just a hard\n&gt; limit, and has nothing to do with physical or virtual memory? So why not\n&gt; state that in the error message, possibly even with a link to this bug\n&gt; report.\n&gt; \n&gt; On the other hand, it if was related to *physical* memory, then this could\n&gt; cause processes to fail randomly in situations when limited *physical*\n&gt; memory is available (and when there is still enough virtual memory\n&gt; available). \n\nThis is a standard error message when some OS function runs out of memory on\nWindows. It is up to the operating system (or its C library) how it converts\nthe underlying error code to English. On Windows, it is \"Not enough space\" (and\nthe same wording is in the current version of POSIX), on Linux, it is \"Cannot\nallocate memory\". I am sympathetic the former may seem confusing to some, but R\nrespects and will respect the error messages provided by the system.\n\n&gt; And what would happen if this becomes fixed in trio at some point? Will R\n&gt; still enforce this limitation?\n\nTrio is long unmaintained upstream, so in this case this problem is not\nexpected to happen. In principle, of course, any code incorporated into R needs\nto be synced time to time with the upstream version. In case of Trio, it is\nlikely it will be dropped in the future and R will rely on UCRT.\n\n&gt; Would a temporary workaround not be a better\n&gt; solution? Something in the line of the following:\n\nNo, see the comment by Ivan Krylov above. The buffering while printing in trio\nis done to support correct displaying of multi-byte characters. Printing by\nparts would break it again, and that is much more important than printing lines\nof text longer than what fits in memory. \n\n&gt; \n&gt; ```\n&gt; writeLines2 &lt;- function(text, con = stdout(), sep = \"\\n\", ...) {\n&gt; \n&gt;   if (!is.character(text)) stop(\"can only write character objects\")\n&gt;   if (is.character(con)) {\n&gt;     con &lt;- file(con, \"w\")\n&gt;     on.exit(close(con))\n&gt;   }\n&gt;   \n&gt;   n.max &lt;- 2^22 # max writable chunk size\n&gt;     \n&gt;   for (t in seq_along(text)) {\n&gt;     txt &lt;- text[t]\n&gt;     n &lt;- nchar(txt)\n&gt;     \n&gt;     if (n &lt;= n.max) {\n&gt;       base::writeLines(text = txt, con = con, sep = sep, ...)\n&gt;       next()\n&gt;     }\n&gt;     \n&gt;     for (i in 1:ceiling(n \/ n.max)) {\n&gt;       start &lt;- 1 + (i - 1) * n.max\n&gt;       end &lt;- min(i * n.max, n)\n&gt;       xx &lt;- substr(txt, start = start, stop = end)\n&gt;       base::writeLines(text = xx, con = con, sep = \"\", ...)\n&gt;     }\n&gt;     \n&gt;     base::writeLines(text = \"\", con = con, sep = sep, ...)\n&gt;   }\n&gt; \n&gt;   0L\n&gt; }\n&gt; ```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1750781698.204549",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "j+\/LK",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18878] writeLines() for 1gb+ strings",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18878"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Davor Josipovic from comment #3)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Thank you for the follow-up. Unfortunately I do have some minor objections.\n\n(In reply to Tomas Kalibera from comment #2)\n> Now fixed in R-devel, when printing a string fails due to allocation error,\n> one gets an error, e.g.\n> \n> Error in writeLines(x, \"tmp.txt\") :\n>   Error writing to connection:  Not enough space\n\nError \"not enough space\" sounds very confusing to me, as if there is not\nenough space on target "
+                            },
+                            {
+                                "type": "text",
+                                "text": "disk",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n\nBesides, what does \"allocation\" mean in this case? I think it is just a hard\nlimit, and has nothing to do with physical or virtual memory? So why not\nstate that in the error message, possibly even with a link to this bug\nreport.\n\nOn the other hand, it if was related to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "physical",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " memory, then this could\ncause processes to fail randomly in situations when limited "
+                            },
+                            {
+                                "type": "text",
+                                "text": "physical",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nmemory is available (and when there is still enough virtual memory\navailable). "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis is a standard error message when some OS function runs out of memory on\nWindows. It is up to the operating system (or its C library) how it converts\nthe underlying error code to English. On Windows, it is \"Not enough space\" (and\nthe same wording is in the current version of POSIX), on Linux, it is \"Cannot\nallocate memory\". I am sympathetic the former may seem confusing to some, but R\nrespects and will respect the error messages provided by the system.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "And what would happen if this becomes fixed in trio at some point? Will R\nstill enforce this limitation?"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nTrio is long unmaintained upstream, so in this case this problem is not\nexpected to happen. In principle, of course, any code incorporated into R needs\nto be synced time to time with the upstream version. In case of Trio, it is\nlikely it will be dropped in the future and R will rely on UCRT.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Would a temporary workaround not be a better\nsolution? Something in the line of the following:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nNo, see the comment by Ivan Krylov above. The buffering while printing in trio\nis done to support correct displaying of multi-byte characters. Printing by\nparts would break it again, and that is much more important than printing lines\nof text longer than what fits in memory. \n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> writeLines2 <- function(text, con = stdout(), sep = \"\\n\", ...) {\n> \n>   if (!is.character(text)) stop(\"can only write character objects\")\n>   if (is.character(con)) {\n>     con <- file(con, \"w\")\n>     on.exit(close(con))\n>   }\n>   \n>   n.max <- 2^22 # max writable chunk size\n>     \n>   for (t in seq_along(text)) {\n>     txt <- text[t]\n>     n <- nchar(txt)\n>     \n>     if (n <= n.max) {\n>       base::writeLines(text = txt, con = con, sep = sep, ...)\n>       next()\n>     }\n>     \n>     for (i in 1:ceiling(n \/ n.max)) {\n>       start <- 1 + (i - 1) * n.max\n>       end <- min(i * n.max, n)\n>       xx <- substr(txt, start = start, stop = end)\n>       base::writeLines(text = xx, con = con, sep = \"\", ...)\n>     }\n>     \n>     base::writeLines(text = \"\", con = con, sep = sep, ...)\n>   }\n> \n>   0L\n> }\n> "
+                            }
+                        ],
+                        "border": 1
+                    }
+                ]
+            }
+        ]
+    }
+]

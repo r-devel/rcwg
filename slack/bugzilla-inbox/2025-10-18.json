@@ -1,0 +1,310 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18959] New: undoc(dir=) differs from undoc(package=)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18959>\n\n            Bug ID: 18959\n           Summary: undoc(dir=) differs from undoc(package=)\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Misc\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>\n\nUsing {diffobj} as an example: <https:\/\/github.com\/brodieG\/diffobj\/issues\/165>\n\n```\nlibrary(tools)\n# NB: diffobj@19c1742bc9798db9cd4ac35ccff3f503b50fceaa\nstr(undoc(dir = \"diffobj\"))\n# List of 4\n#  $ code objects: chr(0) \n#  $ data sets   : chr(0) \n#  $ S4 classes  : chr [1:2] \"StyleFunsAnsi\" \"GuideLines\"\n#  $ S4 methods  : chr(0) \n#  - attr(*, \"class\")= chr \"undoc\"\n\nstr(undoc(package = \"diffobj\"))\n# List of 4\n#  $ code objects: chr(0) \n#  $ data sets   : chr(0) \n#  $ S4 classes  : chr(0) \n#  $ S4 methods  : chr(0) \n#  - attr(*, \"class\")= chr \"undoc\"\n```\n\nI'm still investigating why the difference, but it's certainly undocumented.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1760809064.412929",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "LlsGv",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18959] New: undoc(dir=) differs from undoc(package=)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18959"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18959\n           Summary: undoc(dir=) differs from undoc(package=)\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Misc\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nUsing {diffobj} as an example: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/brodieG\/diffobj\/issues\/165"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "library(tools)\n# NB: diffobj@19c1742bc9798db9cd4ac35ccff3f503b50fceaa\nstr(undoc(dir = \"diffobj\"))\n# List of 4\n#  $ code objects: chr(0) \n#  $ data sets   : chr(0) \n#  $ S4 classes  : chr [1:2] \"StyleFunsAnsi\" \"GuideLines\"\n#  $ S4 methods  : chr(0) \n#  - attr(*, \"class\")= chr \"undoc\"\n\nstr(undoc(package = \"diffobj\"))\n# List of 4\n#  $ code objects: chr(0) \n#  $ data sets   : chr(0) \n#  $ S4 classes  : chr(0) \n#  $ S4 methods  : chr(0) \n#  - attr(*, \"class\")= chr \"undoc\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI'm still investigating why the difference, but it's certainly undocumented."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18959] undoc(dir=) differs from undoc(package=)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18959>\n\n--- Comment #1 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nSo basically it looks like `dir=` expects unexported classes to be documented:\n\n```\nlibrary(diffobj)\n\"StyleFunsAnsi\" %in% methods::getClasses(\"package:diffobj\")\n# [1] FALSE\n\"StyleFunsAnsi\" %in% methods::getClasses(asNamespace(\"diffobj\"))\n# [1] TRUE\n```\n\nI am but an S4 novice but it looks like the `dir=` version is incorrect, I'm\njust not sure if it's possible to make the two agree.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1760825033.872699",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "aPb",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18959] undoc(dir=) differs from undoc(package=)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18959"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nSo basically it looks like "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dir=",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " expects unexported classes to be documented:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "library(diffobj)\n\"StyleFunsAnsi\" %in% methods::getClasses(\"package:diffobj\")\n# [1] FALSE\n\"StyleFunsAnsi\" %in% methods::getClasses(asNamespace(\"diffobj\"))\n# [1] TRUE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI am but an S4 novice but it looks like the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dir=",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " version is incorrect, I'm\njust not sure if it's possible to make the two agree."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18959] undoc(dir=) differs from undoc(package=)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18959>\n\n--- Comment #2 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nThere's a little more to be said here, since `undoc()` only found two issues\nbut there are many more unexported classes in {diffobj}\n\n```\nlibrary(diffobj)\nexported_classes &lt;- getClasses(\"package:diffobj\")\nall_classes &lt;- getClasses(asNamespace(\"diffobj\"))\n\nprivate_classes &lt;- setdiff(all_classes, exported_classes)\nlength(private_classes)\n# [1] 20\n```\n\nSo what sets `StyleFunsAnsi` and `GuideLines` apart from, e.g. `Dark` or\n`Gutter`?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1760825998.609019",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "nC8LZ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18959] undoc(dir=) differs from undoc(package=)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18959"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThere's a little more to be said here, since "
+                            },
+                            {
+                                "type": "text",
+                                "text": "undoc()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " only found two issues\nbut there are many more unexported classes in {diffobj}\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "library(diffobj)\nexported_classes <- getClasses(\"package:diffobj\")\nall_classes <- getClasses(asNamespace(\"diffobj\"))\n\nprivate_classes <- setdiff(all_classes, exported_classes)\nlength(private_classes)\n# [1] 20\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSo what sets "
+                            },
+                            {
+                                "type": "text",
+                                "text": "StyleFunsAnsi",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "GuideLines",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " apart from, e.g. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Dark",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "Gutter",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

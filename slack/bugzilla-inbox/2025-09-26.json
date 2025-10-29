@@ -1,0 +1,611 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18949] New: When neither %R_USER% nor %HOME% is set, path.expand('~') may return ANSI instead of UTF-8*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18949>\n\n            Bug ID: 18949\n           Summary: When neither %R_USER% nor %HOME% is set,\n                    path.expand('~') may return ANSI instead of UTF-8\n           Product: R\n           Version: R 4.5.x\n          Hardware: All\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Startup\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:ikrylov@disroot.org|ikrylov@disroot.org>\n\nCreated attachment 3549\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3549&amp;action=edit>\nSuggested fix\n\nPreviously reported by OneDrive users (e.g.\n[1](<https:\/\/stat.ethz.ch\/pipermail\/r-help\/2024-March\/479033.html>)), but not\nlimited to OneDrive (e.g.\n[2](<https:\/\/stat.ethz.ch\/pipermail\/r-help\/2025-September\/481246.html>)). In\norder to reproduce the bug, a non-ASCII home directory path is needed, together\nwith `%HOME%` being unset (it is set by default in the Rtools terminal).\n\n```\n$ gdb --args \/c\/R-svn\/bin\/x64\/Rscript.exe -e 'path.expand(\"~\")'\n(gdb) unset environment HOME\n(gdb) b getRUser\n```\n\nSince the environment variables are unset, the first branch is not taken, but\nthe second one is:\n\n```\n63          if ((p = getenv(\"R_USER\")) || (p = getenv(\"HOME\"))) {\n64              RUser = (char *)malloc(strlen(p) + 1);\n65              if (RUser)\n66                  strcpy(RUser, p);\n67          } else if ((RUser = ShellGetPersonalDirectory())) {\n```\n\n```\n(gdb) until 67\nShellGetPersonalDirectory () at shext.c:34\n34          if (SHGetKnownFolderPath(&amp;FOLDERID_Documents, KF_FLAG_CREATE, NULL,\n```\n\nThe return value from `SHGetKnownFolderPath` is correct, but then it's\nconverted to ANSI:\n\n```\n41                      wcstombs(result, wpath, needed + 1);\n(gdb) n\n(gdb) p wpath\n$1 = 0x4420690 L\"C:\\\\Users\\\\Felhaszn\\xc3\\xa1l\\xc3\\xb3\\\\Documents\"\n(gdb) p result\n$2 = 0x441e1d0 \"C:\\\\Users\\\\Felhaszn\\341l\\363\\\\Documents\"\n```\n\nI think that `wcstombs` is not converting to UTF-8 because the locale has not\nyet been initialised at this point:\n\n```\n(gdb) p (char*)setlocale(0,0)\n$4 = 0x4418144 \"C\"\n```\n\n`WideCharToMultiByte` seems to do the right thing without requiring the locale\nto be initialised. Home I'm not missing anything else.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1758888372.548799",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "U=+vW",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18949] New: When neither %R_USER% nor %HOME% is set, path.expand('~') may return ANSI instead of UTF-8",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18949"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18949\n           Summary: When neither %R_USER% nor %HOME% is set,\n                    path.expand('~') may return ANSI instead of UTF-8\n           Product: R\n           Version: R 4.5.x\n          Hardware: All\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Startup\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3549\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3549&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3549&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nSuggested fix\n\nPreviously reported by OneDrive users (e.g.\n[1]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-help\/2024-March\/479033.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")), but not\nlimited to OneDrive (e.g.\n[2]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-help\/2025-September\/481246.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")). In\norder to reproduce the bug, a non-ASCII home directory path is needed, together\nwith "
+                            },
+                            {
+                                "type": "text",
+                                "text": "%HOME%",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " being unset (it is set by default in the Rtools terminal).\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$ gdb --args \/c\/R-svn\/bin\/x64\/Rscript.exe -e 'path.expand(\"~\")'\n(gdb) unset environment HOME\n(gdb) b getRUser\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSince the environment variables are unset, the first branch is not taken, but\nthe second one is:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "63          if ((p = getenv(\"R_USER\")) || (p = getenv(\"HOME\"))) {\n64              RUser = (char *)malloc(strlen(p) + 1);\n65              if (RUser)\n66                  strcpy(RUser, p);\n67          } else if ((RUser = ShellGetPersonalDirectory())) {\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "(gdb) until 67\nShellGetPersonalDirectory () at shext.c:34\n34          if (SHGetKnownFolderPath(&FOLDERID_Documents, KF_FLAG_CREATE, NULL,\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe return value from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "SHGetKnownFolderPath",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is correct, but then it's\nconverted to ANSI:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "41                      wcstombs(result, wpath, needed + 1);\n(gdb) n\n(gdb) p wpath\n$1 = 0x4420690 L\"C:\\\\Users\\\\Felhaszn\\xc3\\xa1l\\xc3\\xb3\\\\Documents\"\n(gdb) p result\n$2 = 0x441e1d0 \"C:\\\\Users\\\\Felhaszn\\341l\\363\\\\Documents\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI think that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "wcstombs",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is not converting to UTF-8 because the locale has not\nyet been initialised at this point:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "(gdb) p (char*)setlocale(0,0)\n$4 = 0x4418144 \"C\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "WideCharToMultiByte",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " seems to do the right thing without requiring the locale\nto be initialised. Home I'm not missing anything else."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18950] New: CMake recipe GdalConfig is faulty*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18950>\n\n            Bug ID: 18950\n           Summary: CMake recipe GdalConfig is faulty\n           Product: Rtools\n           Version: 4.5\n          Hardware: All\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Toolchain and libraries\n          Assignee: <mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>\n          Reporter: <mailto:caiohamamura@gmail.com|caiohamamura@gmail.com>\n\nI am trying to create a CMake project dependent on GDAL. But it turns out that\nthe `GDALConfig.cmake` is not working, because there are some msys2 relative\npaths. Some of them are wrong even if the relative path was resolved.\n\n```\n[ 50%] Building C object CMakeFiles\/simple_gdal.dir\/main.c.obj\nmake[2]: *** No rule to process the target\n'\/usr\/lib\/mxe\/usr\/lib\/gcc\/x86_64-w64-mingw32.static.posix\/14.2.0\/libgomp.a',\nwhich is needed by 'simple_gdal.exe'.  Stop.\nmake[1]: *** [CMakeFiles\/Makefile2:83: CMakeFiles\/simple_gdal.dir\/all] Error 2\nmake: *** [Makefile:136: all] Error 2\n```\n\nHere `libgomp.a` is not being found, because even if it were to use the\nrelative path it should be:\n\n```\n\/usr\/lib\/mxe\/usr\/x86_64-w64-mingw32.static.posix\/lib\/gcc\/x86_64-w64-mingw32.static.posix\/14.2.0\/libgomp.a\n```\n\nNot:\n\n```\n\/usr\/lib\/mxe\/usr\/lib\/gcc\/x86_64-w64-mingw32.static.posix\/14.2.0\/libgomp.a\n```\n\nI can confirm that the path is hardcoded in line 73 of GDAL-targets.cmake. But\neven if I fix that, the Rtools environment won't let me use the relative path. \n\nUsing the absolute path works, but then another problem arises with\n`hdf5_hl.a`:\n\n```\nC:\\rtools45\\x86_64-w64-mingw32.static.posix\\bin\/ld.exe: cannot find\n\/usr\/lib\/mxe\/usr\/x86_64-w64-mingw32.static.posix\/lib\/libhdf5_hl.a: No such file\nor directory\n```\n\nIt is using the relative path here. I couldn't find the way to fix that though.\nBut if I fix the `@CMakeFiles\/simple_gdal.dir\/linkLibs.rsp` manually to use the\nabsolute path it compiles successfully.\n\n\n# Steps to reproduce\n\n### main.c\n```\n#include \"gdal.h\"\n#include &lt;stdio.h&gt;\n\nint main() {\n    GDALAllRegister();  \/\/ just call something from GDAL\n    printf(\"GDAL test program compiled and linked successfully.\\n\");\n    return 0;\n}\n```\n\n### CMakeLists.txt\n```\ncmake_minimum_required(VERSION 3.24)\nproject(simple_gdal C CXX)\n\nfind_package(GDAL CONFIG REQUIRED)\n\nadd_executable(simple_gdal main.c)\n\ntarget_link_libraries(simple_gdal PRIVATE GDAL::GDAL)\n```\n\n### Bash commands\n```\ncmake -B build &amp;&amp; cmake --build build -v\n```\n\n# PS\n\nIf I use the msys2 provided gdal I can compile with no problem:\n\n```\npacman -S ucrt64\/mingw-w64-ucrt-x86_64-gdal\nrm -rf build;cmake -B build -DCMAKE_PREFIX_PATH=\/ucrt64 &amp;&amp; cmake --build build\n-v\n```\n\nIts actually even better, because the configure phase will be a lot faster.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1758891097.385359",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "LkJp",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18950] New: CMake recipe GdalConfig is faulty",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18950"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18950\n           Summary: CMake recipe GdalConfig is faulty\n           Product: Rtools\n           Version: 4.5\n          Hardware: All\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Toolchain and libraries\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:caiohamamura@gmail.com",
+                                "text": "caiohamamura@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nI am trying to create a CMake project dependent on GDAL. But it turns out that\nthe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "GDALConfig.cmake",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is not working, because there are some msys2 relative\npaths. Some of them are wrong even if the relative path was resolved.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[ 50%] Building C object CMakeFiles\/simple_gdal.dir\/main.c.obj\nmake[2]: *** No rule to process the target\n'\/usr\/lib\/mxe\/usr\/lib\/gcc\/x86_64-w64-mingw32.static.posix\/14.2.0\/libgomp.a',\nwhich is needed by 'simple_gdal.exe'.  Stop.\nmake[1]: *** [CMakeFiles\/Makefile2:83: CMakeFiles\/simple_gdal.dir\/all] Error 2\nmake: *** [Makefile:136: all] Error 2\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nHere "
+                            },
+                            {
+                                "type": "text",
+                                "text": "libgomp.a",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is not being found, because even if it were to use the\nrelative path it should be:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\/usr\/lib\/mxe\/usr\/x86_64-w64-mingw32.static.posix\/lib\/gcc\/x86_64-w64-mingw32.static.posix\/14.2.0\/libgomp.a\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nNot:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\/usr\/lib\/mxe\/usr\/lib\/gcc\/x86_64-w64-mingw32.static.posix\/14.2.0\/libgomp.a\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI can confirm that the path is hardcoded in line 73 of GDAL-targets.cmake. But\neven if I fix that, the Rtools environment won't let me use the relative path. \n\nUsing the absolute path works, but then another problem arises with\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "hdf5_hl.a",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "C:\\rtools45\\x86_64-w64-mingw32.static.posix\\bin\/ld.exe: cannot find\n\/usr\/lib\/mxe\/usr\/x86_64-w64-mingw32.static.posix\/lib\/libhdf5_hl.a: No such file\nor directory\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIt is using the relative path here. I couldn't find the way to fix that though.\nBut if I fix the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "@CMakeFiles\/simple_gdal.dir\/linkLibs.rsp",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " manually to use the\nabsolute path it compiles successfully.\n\n\n\n# Steps to reproduce\n\n### main.c"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "#include \"gdal.h\"\n#include <stdio.h>\n\nint main() {\n    GDALAllRegister();  \/\/ just call something from GDAL\n    printf(\"GDAL test program compiled and linked successfully.\\n\");\n    return 0;\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n### CMakeLists.txt"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "cmake_minimum_required(VERSION 3.24)\nproject(simple_gdal C CXX)\n\nfind_package(GDAL CONFIG REQUIRED)\n\nadd_executable(simple_gdal main.c)\n\ntarget_link_libraries(simple_gdal PRIVATE GDAL::GDAL)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n### Bash commands"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "cmake -B build && cmake --build build -v\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n# PS\n\nIf I use the msys2 provided gdal I can compile with no problem:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "pacman -S ucrt64\/mingw-w64-ucrt-x86_64-gdal\nrm -rf build;cmake -B build -DCMAKE_PREFIX_PATH=\/ucrt64 && cmake --build build\n-v\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIts actually even better, because the configure phase will be a lot faster."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18950] CMake recipe GdalConfig is faulty*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18950>\n\n--- Comment #1 from Caio Hamamura (<mailto:caiohamamura@gmail.com|caiohamamura@gmail.com>) ---\nI forgot to mention that if I use `pkg-config` it does work successfully:\n\n```\nfind_package(PkgConfig REQUIRED)\npkg_check_modules(GDAL IMPORTED_TARGET gdal)\n\nadd_executable(simple_gdal main.c)\n\ntarget_link_libraries(simple_gdal PRIVATE PkgConfig::GDAL)\n```\n\nBut since the `find_package(&lt;pkgname&gt; CONFIG)` is the standard modern CMake way\nto link to libraries (and that in many other environments the faulty one will\nbe `pkg-config`) it would be better if we could fix that one since it does not\nseem to be hard, since the default packages provided by MSYS2, I also tried\n`vcpkg` and it only works with `find_package(GDAL CONFIG)` it will fail with\n`pkg_check_modules`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1758891910.978209",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "D1W",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18950] CMake recipe GdalConfig is faulty",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18950"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Caio Hamamura ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:caiohamamura@gmail.com",
+                                "text": "caiohamamura@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI forgot to mention that if I use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pkg-config",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " it does work successfully:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "find_package(PkgConfig REQUIRED)\npkg_check_modules(GDAL IMPORTED_TARGET gdal)\n\nadd_executable(simple_gdal main.c)\n\ntarget_link_libraries(simple_gdal PRIVATE PkgConfig::GDAL)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nBut since the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "find_package(<pkgname> CONFIG)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is the standard modern CMake way\nto link to libraries (and that in many other environments the faulty one will\nbe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pkg-config",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") it would be better if we could fix that one since it does not\nseem to be hard, since the default packages provided by MSYS2, I also tried\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "vcpkg",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and it only works with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "find_package(GDAL CONFIG)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " it will fail with\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "pkg_check_modules",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,353 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18926] New: Improve documentation and error messages for rep()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18926>\n\n            Bug ID: 18926\n           Summary: Improve documentation and error messages for rep()\n           Product: R\n           Version: R 4.5.x\n          Hardware: Other\n                OS: macOS\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Documentation\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:ella.kaye@gmail.com|ella.kaye@gmail.com>\n\nThere are cases where `rep()` produces misleading error messages when both\n`times` and `each` are specified. For example, here the code runs fine:\n\n```\nrep(1:3, times = 1:3)\n#&gt; [1] 1 2 2 3 3 3\n```\n\nBut here we get an error:\n\n```\nrep(1:3, times = 1:3, each = 2)\n#&gt; Error in rep(1:3, times = 1:3, each = 2): invalid 'times' argument\n```\n\nThe problem isn't the `times` argument *per se* (see first example!) - it is\nthe interaction of `times` and `each`.\n\nThe Arguments section of the documentation doesn't help. The note for `times`\nspecifies that it must be either length 1 or length `length(x)`. In fact, it\nneeds to be `length(x) * each`. This is explained in the Details section of\n`?rep`, but Martin Maechler agrees that both the documentation and the error\nmessage could be improved and would be happy to review such a patch. Heather\nTurner and I discussed this with him at the R Contributor Office Hour on\n2025-07-10, see [the meeting\nnotes](<https:\/\/developer.r-project.org\/etherpad\/p\/office-hour-EMEA-APAC>).\n\nFor the error message, the function to edit is `do_rep`:\n<https:\/\/github.com\/r-devel\/r-svn\/blob\/26a286cf9bfd29e69202a6200b720d727fde137a\/src\/main\/seq.c#L633>\n\nAt first review, the relevant section of the code appears to start around line\n[731](<https:\/\/github.com\/r-devel\/r-svn\/blob\/26a286cf9bfd29e69202a6200b720d727fde137a\/src\/main\/seq.c#L731>),\nbut a more detailed reading of the function is required to ensure exactly which\nof the seven calls to `errorcall(call, _(\"invalid '%s' argument\"), \"times\");`\nneed changing (there are cases when it really is only the `times` argument that\nis invalid). We'll need to carefully check all cases.\n\nNote that `rep()` is a primitive function. Any patch should:\n\n- only do extra work once we know there is an error\n- minimise translation by reusing the same error message (if needed more than\nonce)\n- make error message a translatable string by using `_(\"string\")`\n- should *not* introduce any white space changes \n\nWe should also check for all combinations of specifying `times`, `length.out`\nand `each` to see if there are other situations where the error messages and\/or\ndocumentation could be improved.\n\nThis has already been [raised as an\nissue](<https:\/\/github.com\/r-devel\/r-dev-day\/issues\/96>) for an R Dev Day.\nRaising it on bugzilla for completeness.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1753773749.247919",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "NCLIO",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18926] New: Improve documentation and error messages for rep()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18926"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18926\n           Summary: Improve documentation and error messages for rep()\n           Product: R\n           Version: R 4.5.x\n          Hardware: Other\n                OS: macOS\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Documentation\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ella.kaye@gmail.com",
+                                "text": "ella.kaye@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThere are cases where "
+                            },
+                            {
+                                "type": "text",
+                                "text": "rep()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " produces misleading error messages when both\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "times",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "each",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " are specified. For example, here the code runs fine:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "rep(1:3, times = 1:3)\n#> [1] 1 2 2 3 3 3\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nBut here we get an error:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "rep(1:3, times = 1:3, each = 2)\n#> Error in rep(1:3, times = 1:3, each = 2): invalid 'times' argument\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe problem isn't the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "times",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " argument "
+                            },
+                            {
+                                "type": "text",
+                                "text": "per se",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (see first example!) - it is\nthe interaction of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "times",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "each",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nThe Arguments section of the documentation doesn't help. The note for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "times",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nspecifies that it must be either length 1 or length "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length(x)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". In fact, it\nneeds to be "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length(x) * each",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". This is explained in the Details section of\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "?rep",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", but Martin Maechler agrees that both the documentation and the error\nmessage could be improved and would be happy to review such a patch. Heather\nTurner and I discussed this with him at the R Contributor Office Hour on\n2025-07-10, see [the meeting\nnotes]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/developer.r-project.org\/etherpad\/p\/office-hour-EMEA-APAC"
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\n\nFor the error message, the function to edit is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_rep",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/26a286cf9bfd29e69202a6200b720d727fde137a\/src\/main\/seq.c#L633"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nAt first review, the relevant section of the code appears to start around line\n[731]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/26a286cf9bfd29e69202a6200b720d727fde137a\/src\/main\/seq.c#L731"
+                            },
+                            {
+                                "type": "text",
+                                "text": "),\nbut a more detailed reading of the function is required to ensure exactly which\nof the seven calls to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "errorcall(call, _(\"invalid '%s' argument\"), \"times\");",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nneed changing (there are cases when it really is only the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "times",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " argument that\nis invalid). We'll need to carefully check all cases.\n\nNote that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "rep()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is a primitive function. Any patch should:\n\n- only do extra work once we know there is an error\n- minimise translation by reusing the same error message (if needed more than\nonce)\n- make error message a translatable string by using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "_(\"string\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n- should "
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " introduce any white space changes \n\nWe should also check for all combinations of specifying "
+                            },
+                            {
+                                "type": "text",
+                                "text": "times",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length.out",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nand "
+                            },
+                            {
+                                "type": "text",
+                                "text": "each",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to see if there are other situations where the error messages and\/or\ndocumentation could be improved.\n\nThis has already been [raised as an\nissue]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-dev-day\/issues\/96"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") for an R Dev Day.\nRaising it on bugzilla for completeness."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

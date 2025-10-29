@@ -1,0 +1,322 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18681] [.POSIXlt sets \"balanced\" attribute wrongly*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18681>\n\n--- Comment #9 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nPinging in case a fix here should go into R 4.5.2 along with the other\ndate-time ones.  The issue at hand is still as described in comment 4 (also 5,\n6).  There is one proposal there, but I think that a better one is the\nfollowing:\n\n```\nIndex: src\/library\/base\/R\/datetime.R\n===================================================================\n--- src\/library\/base\/R\/datetime.R       (revision 88918)\n+++ src\/library\/base\/R\/datetime.R       (working copy)\n@@ -1302,7 +1302,7 @@\n         if(mj) # x[i]\n             `attr&lt;-`(.POSIXlt(lapply(unCfillPOSIXlt(x), `[`, i, drop = drop),\n                               attr(x, \"tzone\"), oldClass(x)),\n-                     \"balanced\", if(isTRUE(attr(x, \"balanced\"))) TRUE else NA)\n+                     \"balanced\", if(isTRUE(attr(x, \"balanced\")) &amp;&amp;\n!anyNA(seq_along(x)[i])) TRUE else NA)\n         else # x[i,j]\n             unCfillPOSIXlt(x)[[j]][i]\n     }\n```\n\nHence: return balanced if and only if `x` is balanced and the subscript is not\nout-of-bounds.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1760520549.709909",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "byk",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18681] [.POSIXlt sets \"balanced\" attribute wrongly",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18681"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #9 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nPinging in case a fix here should go into R 4.5.2 along with the other\ndate-time ones.  The issue at hand is still as described in comment 4 (also 5,\n6).  There is one proposal there, but I think that a better one is the\nfollowing:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/base\/R\/datetime.R\n===================================================================\n--- src\/library\/base\/R\/datetime.R       (revision 88918)\n+++ src\/library\/base\/R\/datetime.R       (working copy)\n@@ -1302,7 +1302,7 @@\n         if(mj) # x[i]\n             `attr<-`(.POSIXlt(lapply(unCfillPOSIXlt(x), `[`, i, drop = drop),\n                               attr(x, \"tzone\"), oldClass(x)),\n-                     \"balanced\", if(isTRUE(attr(x, \"balanced\"))) TRUE else NA)\n+                     \"balanced\", if(isTRUE(attr(x, \"balanced\")) &&\n!anyNA(seq_along(x)[i])) TRUE else NA)\n         else # x[i,j]\n             unCfillPOSIXlt(x)[[j]][i]\n     }\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nHence: return balanced if and only if "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is balanced and the subscript is not\nout-of-bounds."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18681] [.POSIXlt sets \"balanced\" attribute wrongly*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18681>\n\n--- Comment #10 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\n(In reply to Mikael Jagan from comment #9)\nThank you!  ... seems to make sense to me,\n\nand the same change(you did above for `[.POSIXlt&lt;-` would also apply to\n`[[.POSIXlt&lt;-` (about 200 lines further down), no?\n\nI assume you have a minimal repr.ex  to show what the change fixes?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1760525790.862249",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Zij",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18681] [.POSIXlt sets \"balanced\" attribute wrongly",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18681"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #10 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Mikael Jagan from comment #9)\nThank you!  ... seems to make sense to me,\n\nand the same change(you did above for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "[.POSIXlt<-",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " would also apply to\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "[[.POSIXlt<-",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (about 200 lines further down), no?\n\nI assume you have a minimal repr.ex  to show what the change fixes?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18681] [.POSIXlt sets \"balanced\" attribute wrongly*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18681>\n\n--- Comment #11 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\n(In reply to Martin Maechler from comment #10)\n&gt; and the same change(you did above for `[.POSIXlt&lt;-` would also apply to\n&gt; `[[.POSIXlt&lt;-` (about 200 lines further down), no?\n\nNo, because `[[` already tests (internally) that the subscript is not\nout-of-bounds and signals a `subscriptOutOfBoundsError` in that case.  An\nadditional test in `[[.POSIXlt` would be redundant.\n\n&gt; I assume you have a minimal repr.ex  to show what the change fixes?\n\nYes, basically following our discussion:\n\n```\nstr(unclass(x &lt;- as.POSIXlt(.POSIXct(0, tz = \"UTC\"))))\nstr(unclass(x2 &lt;- x[2L])) # out-of-bounds subscript\nstr(unclass(x2b &lt;- balancePOSIXlt(x2)))\nstopifnot(identical(attr(x2, \"balanced\"), NA), # attribute was TRUE\n          identical(attr(x2b, \"balanced\"), TRUE),\n          !is.na(x2b$isdst), # balanced =&gt; not NA\n          !<http:\/\/is.na|is.na>(x2b$zone)) # ditto\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1760527171.605459",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "S1HS",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18681] [.POSIXlt sets \"balanced\" attribute wrongly",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18681"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #11 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Martin Maechler from comment #10)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "and the same change(you did above for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "[.POSIXlt<-",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " would also apply to\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "[[.POSIXlt<-",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (about 200 lines further down), no?"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nNo, because "
+                            },
+                            {
+                                "type": "text",
+                                "text": "[[",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " already tests (internally) that the subscript is not\nout-of-bounds and signals a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "subscriptOutOfBoundsError",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in that case.  An\nadditional test in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "[[.POSIXlt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " would be redundant.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I assume you have a minimal repr.ex  to show what the change fixes?"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nYes, basically following our discussion:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "str(unclass(x <- as.POSIXlt(.POSIXct(0, tz = \"UTC\"))))\nstr(unclass(x2 <- x[2L])) # out-of-bounds subscript\nstr(unclass(x2b <- balancePOSIXlt(x2)))\nstopifnot(identical(attr(x2, \"balanced\"), NA), # attribute was TRUE\n          identical(attr(x2b, \"balanced\"), TRUE),\n          !is.na(x2b$isdst), # balanced => not NA\n          !"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(x2b$zone)) # ditto\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

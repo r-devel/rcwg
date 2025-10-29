@@ -1,0 +1,721 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 15654] WISH\/ROBUSTNESS: R CMD check for non-named '...' arguments to NextMethod()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=15654>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|NEW                         |CLOSED\n                 CC|                            |tomas.kalibera@gmail.com\n         Resolution|---                         |Works as documented\n\n--- Comment #4 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nThis works as documented and hence probably as intended, and the behavior\ndoesn't seem obviously broken to me. Arguments to NextMethod (other than\ngeneric and object), can be used to modify the call by patching arguments (via\nname matching, so using a name) or by appending new arguments (named or\nunnamed). I've added a note suggested by Mikael to the documentation to make it\nexplicit that unnamed arguments are also appended to the end of the argument\nlist, but I think it already implied from the previous version of the\ndocumentation.\n\nOne could easily argue that the feature of adding new arguments could be\nuseful, Mikael provided one example here.\n\nSuggesting to change a core language functionality based on speculation that\ncertain use is always an error is something that cannot be accepted. The\nminimum would be to actually turn this into error, test on all CRAN and\nBioconductor packages, debug all the cases that will be broken by it and\nanalyze them case-by-case. One could then report all the issues to the package\nmaintainers and propose to fixes in their packages, and that part could be\nuseful. But, even if all packages broken by this change were in fact due to an\nerror in the package, the case for change would still be rather weak - the\ncurrent, documented behavior, could in principle be useful and be legitimately\nused by other code, not in the two repositories. The language, and even more so\nits core part as the S3 system behavior, should be as stable as possible -\nunlikely people would want to use a language that changes all the time.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1758102922.657809",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "J91J",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 15654] WISH\/ROBUSTNESS: R CMD check for non-named '...' arguments to NextMethod()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=15654"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|NEW                         |CLOSED\n                 CC|                            |tomas.kalibera@gmail.com\n         Resolution|---                         |Works as documented\n\n--- Comment #4 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThis works as documented and hence probably as intended, and the behavior\ndoesn't seem obviously broken to me. Arguments to NextMethod (other than\ngeneric and object), can be used to modify the call by patching arguments (via\nname matching, so using a name) or by appending new arguments (named or\nunnamed). I've added a note suggested by Mikael to the documentation to make it\nexplicit that unnamed arguments are also appended to the end of the argument\nlist, but I think it already implied from the previous version of the\ndocumentation.\n\nOne could easily argue that the feature of adding new arguments could be\nuseful, Mikael provided one example here.\n\nSuggesting to change a core language functionality based on speculation that\ncertain use is always an error is something that cannot be accepted. The\nminimum would be to actually turn this into error, test on all CRAN and\nBioconductor packages, debug all the cases that will be broken by it and\nanalyze them case-by-case. One could then report all the issues to the package\nmaintainers and propose to fixes in their packages, and that part could be\nuseful. But, even if all packages broken by this change were in fact due to an\nerror in the package, the case for change would still be rather weak - the\ncurrent, documented behavior, could in principle be useful and be legitimately\nused by other code, not in the two repositories. The language, and even more so\nits core part as the S3 system behavior, should be as stable as possible -\nunlikely people would want to use a language that changes all the time."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18875] NextMethod() duplicates positional arguments in the next method*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18875>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |Works as documented\n                 CC|                            |tomas.kalibera@gmail.com\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #3 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nThe behavior of how extra arguments passed to NextMethod() can be used to patch\nthe call is as documented, is not obviously wrong, and could in principle be\nuseful. From my reading of the documentation, it is intentional. I've made this\nmore explicit in the documentation, see Bug 15654 for more, but it implied from\nthe documentation even before that.\n\nIf you have a question how to solve a specific problem in a package (involving\nS3\/NetxMethod), I would recommend you take it back to the mailing list.\n\nStill, I don't see a reason to pass arguments like \"x=x\" to NextMethod(). I\nassume you wanted modify the value of the corresponding argument in the call,\nso e.g. do something like \"x = x + 1\"? If that is the case, and if you\nunderstandably wanted to make this work regardless of whether \"x\" was passed\npositionally or by name, you can do\n\nfoo.C &lt;- function(x, y = 3, ...) {\n    x &lt;- x + 1\n    NextMethod()\n}\n\nThis works by design and is documented as well.\n\nAs a meta comment, while I don't see and R bug here, the NextMethod() behavior\nand argument patching is something not commonly seen in other programming\nlanguages, and is rather complicated. Defensively, I would avoid using such\nfeatures when easily possible, in the interest of maintainability.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1758105779.915989",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Jazk",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18875] NextMethod() duplicates positional arguments in the next method",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18875"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |Works as documented\n                 CC|                            |tomas.kalibera@gmail.com\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #3 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe behavior of how extra arguments passed to NextMethod() can be used to patch\nthe call is as documented, is not obviously wrong, and could in principle be\nuseful. From my reading of the documentation, it is intentional. I've made this\nmore explicit in the documentation, see Bug 15654 for more, but it implied from\nthe documentation even before that.\n\nIf you have a question how to solve a specific problem in a package (involving\nS3\/NetxMethod), I would recommend you take it back to the mailing list.\n\nStill, I don't see a reason to pass arguments like \"x=x\" to NextMethod(). I\nassume you wanted modify the value of the corresponding argument in the call,\nso e.g. do something like \"x = x + 1\"? If that is the case, and if you\nunderstandably wanted to make this work regardless of whether \"x\" was passed\npositionally or by name, you can do\n\nfoo.C <- function(x, y = 3, ...) {\n    x <- x + 1\n    NextMethod()\n}\n\nThis works by design and is documented as well.\n\nAs a meta comment, while I don't see and R bug here, the NextMethod() behavior\nand argument patching is something not commonly seen in other programming\nlanguages, and is rather complicated. Defensively, I would avoid using such\nfeatures when easily possible, in the interest of maintainability."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18762] Making R internals more ALTREP friendly: copyVector()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18762>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n           Severity|normal                      |enhancement\n                 CC|                            |tomas.kalibera@gmail.com\n         Resolution|---                         |FIXED\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #1 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nThanks, in R-devel. I have extended the patch to deal with \"const\"-related\nwarnings.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1758113785.509289",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "I0Cb",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18762] Making R internals more ALTREP friendly: copyVector()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18762"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n           Severity|normal                      |enhancement\n                 CC|                            |tomas.kalibera@gmail.com\n         Resolution|---                         |FIXED\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #1 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks, in R-devel. I have extended the patch to deal with \"const\"-related\nwarnings."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18851] could default argument for 'last' in substring() be changed?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18851>\n\n--- Comment #17 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nThank you! I appreciate your help getting this patch over the finish line.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1758115710.401749",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "YpdW",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18851] could default argument for 'last' in substring() be changed?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18851"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #17 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you! I appreciate your help getting this patch over the finish line."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18843] `as.data.frame()` method for objects of class `\"lm\"` and `\"glm\"` [with patch]*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18843>\n\n--- Comment #8 from Thomas Soeiro (<mailto:Thomas.SOEIRO@ap-hm.fr|Thomas.SOEIRO@ap-hm.fr>) ---\nIn response to comment 6:\n\n&gt; Well, we can already do\n```\nlm(breaks ~ wool * tension, warpbreaks) |&gt; summary() |&gt; coefficients() |&gt;\nas.data.frame()\n```\n\nThis does not return confidence intervals (as expected with `coefficients()`):\n```\n                Estimate Std. Error   t value     Pr(&gt;|t|)\n(Intercept)     44.55556   3.646761 12.217842 2.425903e-16\nwoolB          -16.33333   5.157299 -3.167032 2.676803e-03\ntensionM       -20.55556   5.157299 -3.985721 2.280796e-04\ntensionH       -20.00000   5.157299 -3.877999 3.199282e-04\nwoolB:tensionM  21.11111   7.293523  2.894501 5.698287e-03\nwoolB:tensionH  10.55556   7.293523  1.447251 1.543266e-01\n```\n\nMy main point is to provide a helper to collect model statistics in a data\nframe (i.e. estimates *and* confidence interval, along with the statistics\nreturned by `summary()`, as requested by other r-core members). This is useful\ne.g. for exporting model statistics or plotting. Currently we need something\nlike:\n\n```\nfit &lt;- lm(breaks ~ wool * tension, warpbreaks)\n\ncf &lt;- fit |&gt; summary() |&gt; coef()\nci &lt;- confint(fit)\ndf &lt;- data.frame(row.names(cf), cf, ci, row.names = NULL)\nnames(df) &lt;- c(\"term\", \"estimate\", \"std.error\", \"statistic\", \"p.value\",\n\"conf.low\", \"conf.high\")\ndf\n#             term  estimate std.error statistic      p.value   conf.low \nconf.high\n# 1    (Intercept)  44.55556  3.646761 12.217842 2.425903e-16  37.223250 \n51.887861\n# 2          woolB -16.33333  5.157299 -3.167032 2.676803e-03 -26.702779 \n-5.963888\n# 3       tensionM -20.55556  5.157299 -3.985721 2.280796e-04 -30.925001\n-10.186110\n# 4       tensionH -20.00000  5.157299 -3.877999 3.199282e-04 -30.369445 \n-9.630555\n# 5 woolB:tensionM  21.11111  7.293523  2.894501 5.698287e-03   6.446501 \n35.775721\n# 6 woolB:tensionH  10.55556  7.293523  1.447251 1.543266e-01  -4.109055 \n25.220166\n```\n\nI understand that `as.data.frame()` methods may not be the best way. Here is an\nattempt to summarise what has been discussed:\n\n| interface | pros | cons |\n| - | - | - |\n| `as.data.frame(lm(.))` | short | not explicit (see comment 4) |\n| `as.data.frame(summary(lm(.)))` or `summary(lm(.), data.frame = TRUE)` | more\nexplicit ? | `summary.lm()` does not return confidence intervals, so returning\nit in the data frame is counterintuitive |\n| `collect_stats(lm(.))` | short and can be explicit if function name is good\nenough | ? |",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1758115726.247049",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "NimWd",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18843] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.data.frame()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method for objects of class ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"lm\"",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"glm\"",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " [with patch]",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18843"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #8 from Thomas Soeiro ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Thomas.SOEIRO@ap-hm.fr",
+                                "text": "Thomas.SOEIRO@ap-hm.fr",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nIn response to comment 6:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Well, we can already do"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "lm(breaks ~ wool * tension, warpbreaks) |> summary() |> coefficients() |>\nas.data.frame()\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis does not return confidence intervals (as expected with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "coefficients()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "):"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "                Estimate Std. Error   t value     Pr(>|t|)\n(Intercept)     44.55556   3.646761 12.217842 2.425903e-16\nwoolB          -16.33333   5.157299 -3.167032 2.676803e-03\ntensionM       -20.55556   5.157299 -3.985721 2.280796e-04\ntensionH       -20.00000   5.157299 -3.877999 3.199282e-04\nwoolB:tensionM  21.11111   7.293523  2.894501 5.698287e-03\nwoolB:tensionH  10.55556   7.293523  1.447251 1.543266e-01\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nMy main point is to provide a helper to collect model statistics in a data\nframe (i.e. estimates "
+                            },
+                            {
+                                "type": "text",
+                                "text": "and",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " confidence interval, along with the statistics\nreturned by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "summary()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", as requested by other r-core members). This is useful\ne.g. for exporting model statistics or plotting. Currently we need something\nlike:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "fit <- lm(breaks ~ wool * tension, warpbreaks)\n\ncf <- fit |> summary() |> coef()\nci <- confint(fit)\ndf <- data.frame(row.names(cf), cf, ci, row.names = NULL)\nnames(df) <- c(\"term\", \"estimate\", \"std.error\", \"statistic\", \"p.value\",\n\"conf.low\", \"conf.high\")\ndf\n#             term  estimate std.error statistic      p.value   conf.low \nconf.high\n# 1    (Intercept)  44.55556  3.646761 12.217842 2.425903e-16  37.223250 \n51.887861\n# 2          woolB -16.33333  5.157299 -3.167032 2.676803e-03 -26.702779 \n-5.963888\n# 3       tensionM -20.55556  5.157299 -3.985721 2.280796e-04 -30.925001\n-10.186110\n# 4       tensionH -20.00000  5.157299 -3.877999 3.199282e-04 -30.369445 \n-9.630555\n# 5 woolB:tensionM  21.11111  7.293523  2.894501 5.698287e-03   6.446501 \n35.775721\n# 6 woolB:tensionH  10.55556  7.293523  1.447251 1.543266e-01  -4.109055 \n25.220166\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI understand that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.data.frame()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " methods may not be the best way. Here is an\nattempt to summarise what has been discussed:\n\n| interface | pros | cons |\n| - | - | - |\n| "
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.data.frame(lm(.))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | short | not explicit (see comment 4) |\n| "
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.data.frame(summary(lm(.)))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "summary(lm(.), data.frame = TRUE)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | more\nexplicit ? | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "summary.lm()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does not return confidence intervals, so returning\nit in the data frame is counterintuitive |\n| "
+                            },
+                            {
+                                "type": "text",
+                                "text": "collect_stats(lm(.))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | short and can be explicit if function name is good\nenough | ? |"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 15676] Syntax highlighting changes depending on scroll position in editor*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=15676>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tomas.kalibera@gmail.com\n\n--- Comment #2 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nI can reproduce the reported behavior in R 4.5.1 (R.app 1.82).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1758121788.732409",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "jdy",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 15676] Syntax highlighting changes depending on scroll position in editor",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=15676"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tomas.kalibera@gmail.com\n\n--- Comment #2 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI can reproduce the reported behavior in R 4.5.1 (R.app 1.82)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18550] ignore 'nonS3methods' when reexported*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18550>\n\nSebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n                 CC|                            |seb.meyer@fau.de\n         Resolution|---                         |FIXED\n            Summary|Please accept a patch to    |ignore 'nonS3methods' when\n                   |classify a reexported       |reexported\n                   |function as non-S3-method   |\n\n--- Comment #10 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\n`tools::checkS3methods()` has been extensively rewritten in r83941 (R &gt;= 4.3.0)\n\"to look for generics in the right place, and also find possible issues with\nGEN.CLS matches.\" The new code to determine\n`methods_not_registered_with_exported_generic` only considers methods in the\npackage's own namespace (`functions_in_code`) and thus no longer matches and\nNOTEs imported \"apparent S3 methods\". With R 4.2.3, `tools::checkS3methods`\nwould output\n```\nFound the following apparent S3 methods exported but not registered:\n  as.mcmc.list\n```\nfor a package that reexports both `as.mcmc` and `as.mcmc.list` from 'coda'. I\nverified that this no longer happens in R &gt;= 4.3.0 (which also needs\nenvironment variable `_R_CHECK_S3_METHODS_SHOW_POSSIBLE_ISSUES_` set to a true\nvalue to enable the check).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1758137081.533369",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Vwk",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18550] ignore 'nonS3methods' when reexported",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18550"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n                 CC|                            |seb.meyer@fau.de\n         Resolution|---                         |FIXED\n            Summary|Please accept a patch to    |ignore 'nonS3methods' when\n                   |classify a reexported       |reexported\n                   |function as non-S3-method   |\n\n--- Comment #10 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "tools::checkS3methods()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has been extensively rewritten in r83941 (R >= 4.3.0)\n\"to look for generics in the right place, and also find possible issues with\nGEN.CLS matches.\" The new code to determine\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods_not_registered_with_exported_generic",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " only considers methods in the\npackage's own namespace ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "functions_in_code",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") and thus no longer matches and\nNOTEs imported \"apparent S3 methods\". With R 4.2.3, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tools::checkS3methods",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nwould output"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Found the following apparent S3 methods exported but not registered:\n  as.mcmc.list\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "for a package that reexports both "
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.mcmc",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.mcmc.list",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " from 'coda'. I\nverified that this no longer happens in R >= 4.3.0 (which also needs\nenvironment variable "
+                            },
+                            {
+                                "type": "text",
+                                "text": "_R_CHECK_S3_METHODS_SHOW_POSSIBLE_ISSUES_",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " set to a true\nvalue to enable the check)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

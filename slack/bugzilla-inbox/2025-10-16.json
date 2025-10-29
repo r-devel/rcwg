@@ -1,0 +1,569 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18950] CMake recipe GdalConfig is faulty*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18950>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #2 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nThanks for the report. I've fixed this in a development version of Rtools, the\ncmake files are patched to avoid full paths. To appear in the upcoming Rtools45\nupdate.\n\nThe paths you found are not relative, they are absolute (but indeed, still\nwrong). In addition to the problem you found in GDAL-targets.cmake, there was a\nproblem in the NetCDF targets file as well, that brought in the full path to\nhdf5_hl.a. Thanks for providing a reproducible example that made this easier to\ndebug.\n\nI've also added patching of other cmake targets files that included the wrong\npaths (both \"valid\" full msys2 paths, which however don't work with cmake, as\nwell as full path not valid after Rtools is installed).\n\nI've not tried to trace this up to the original place where the incorrect paths\nare generated, I can't allocate time for that, and in the cases when I tried\nthis in the past, it actually was quite hard. If you have the energy to trace\nthat and propose fixes to the upstream projects, that would of course be highly\nappreciated.\n\nA broader context is that pre-compiled libraries, which are part of Rtools, are\ncross-compiled using (slightly modified) MXE on Linux. Therefore, paths also in\ncmake files are absolute paths on that Unix system. Cmake has documented\napproaches how to create paths that are relocatable, and when that is used\ncorrectly, absolute paths are re-computed\/re-adjusted on the target system.\nSome software doesn't do this or doesn't do this correctly or doesn't do this\nfor all libraries correctly (and probably it is not tested).\n\nAnother difference from Msys2 is that MXE\/Rtools use static libraries. Again,\nexternal software is sometimes not maintained well for static libraries. It may\nnot be necessarily related to the problems reported here, but it might be, as\nthere are more dependencies to compute when using static libraries, and other\ncmake code paths may be taken.\n\nSo it is not surprising that some cmake files don't work in MXE\/Rtools but work\nin Msys2.\n\nPkg-config files have similar problems and are also being fixed when building\nRtools. But they are more tested as it is the primary way of finding\nconfiguration in MXE itself (yet, again, not exclusive, some software uses\ncmake).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1760607882.357189",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "sz9uP",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18950] CMake recipe GdalConfig is faulty",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18950"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #2 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for the report. I've fixed this in a development version of Rtools, the\ncmake files are patched to avoid full paths. To appear in the upcoming Rtools45\nupdate.\n\nThe paths you found are not relative, they are absolute (but indeed, still\nwrong). In addition to the problem you found in GDAL-targets.cmake, there was a\nproblem in the NetCDF targets file as well, that brought in the full path to\nhdf5_hl.a. Thanks for providing a reproducible example that made this easier to\ndebug.\n\nI've also added patching of other cmake targets files that included the wrong\npaths (both \"valid\" full msys2 paths, which however don't work with cmake, as\nwell as full path not valid after Rtools is installed).\n\nI've not tried to trace this up to the original place where the incorrect paths\nare generated, I can't allocate time for that, and in the cases when I tried\nthis in the past, it actually was quite hard. If you have the energy to trace\nthat and propose fixes to the upstream projects, that would of course be highly\nappreciated.\n\nA broader context is that pre-compiled libraries, which are part of Rtools, are\ncross-compiled using (slightly modified) MXE on Linux. Therefore, paths also in\ncmake files are absolute paths on that Unix system. Cmake has documented\napproaches how to create paths that are relocatable, and when that is used\ncorrectly, absolute paths are re-computed\/re-adjusted on the target system.\nSome software doesn't do this or doesn't do this correctly or doesn't do this\nfor all libraries correctly (and probably it is not tested).\n\nAnother difference from Msys2 is that MXE\/Rtools use static libraries. Again,\nexternal software is sometimes not maintained well for static libraries. It may\nnot be necessarily related to the problems reported here, but it might be, as\nthere are more dependencies to compute when using static libraries, and other\ncmake code paths may be taken.\n\nSo it is not surprising that some cmake files don't work in MXE\/Rtools but work\nin Msys2.\n\nPkg-config files have similar problems and are also being fixed when building\nRtools. But they are more tested as it is the primary way of finding\nconfiguration in MXE itself (yet, again, not exclusive, some software uses\ncmake)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17839] `R_GetCurrentEnv()` always returns the base namespace*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17839>\n\n--- Comment #8 from Luke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) ---\nI have changed `R_GetCurrentEnv` in r88921 to use the closure environment of\nthe top closure call on the context stack, or `R_GlobalEnv` if there is none.\nFor now I have marked this function as in the experimental API, but I am still\nnot convinced that it is necessary or worth the maintenance effort, so it might\nget removed.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1760628559.761769",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "C\/0vV",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17839] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_GetCurrentEnv()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " always returns the base namespace",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17839"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #8 from Luke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI have changed "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_GetCurrentEnv",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in r88921 to use the closure environment of\nthe top closure call on the context stack, or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_GlobalEnv",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " if there is none.\nFor now I have marked this function as in the experimental API, but I am still\nnot convinced that it is necessary or worth the maintenance effort, so it might\nget removed."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17839] `R_GetCurrentEnv()` always returns the base namespace*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17839>\n\nLuke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n         Resolution|---                         |FIXED",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1760628585.043599",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "lMvn7",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17839] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_GetCurrentEnv()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " always returns the base namespace",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17839"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nLuke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n         Resolution|---                         |FIXED"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18681] [.POSIXlt sets \"balanced\" attribute wrongly*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18681>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|REOPENED                    |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #12 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nIndeed.  There *is* another similar case, in the `length&lt;-` method, the case\nwhere the object is made longer, fortunately revealed by our own tests.\nHence, I've fixed that analogously.\n\nThis now seems fine to me, and hence I've committed the (updated!) patch and\ntests to R-devel in  svn 88923.\n\n(Depending on CRAN feedback, it may go into the pre-releases of R 4.5.2 ..)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1760639926.058109",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "QZ4u",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18681] [.POSIXlt sets \"balanced\" attribute wrongly",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18681"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|REOPENED                    |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #12 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nIndeed.  There "
+                            },
+                            {
+                                "type": "text",
+                                "text": "is",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " another similar case, in the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length<-",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method, the case\nwhere the object is made longer, fortunately revealed by our own tests.\nHence, I've fixed that analogously.\n\nThis now seems fine to me, and hence I've committed the (updated!) patch and\ntests to R-devel in  svn 88923.\n\n(Depending on CRAN feedback, it may go into the pre-releases of R 4.5.2 ..)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18958] New: 'methods_message' component of 'check_packages_used' internal class should be character(), not \"\", when empty*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18958>\n\n            Bug ID: 18958\n           Summary: 'methods_message' component of 'check_packages_used'\n                    internal class should be character(), not \"\", when\n                    empty\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Misc\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1760646344.638689",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "YiMO",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18958] New: 'methods_message' component of 'check_packages_used' internal class should be character(), not \"\", when empty",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18958"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18958\n           Summary: 'methods_message' component of 'check_packages_used'\n                    internal class should be character(), not \"\", when\n                    empty\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Misc\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18958] 'methods_message' component of 'check_packages_used' internal class should be character(), not \"\", when empty*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18958>\n\n--- Comment #1 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nCreated attachment 3557\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3557&amp;action=edit>\nChange methods-message to character(), not \"\"\n\n(hit submit by mistake on the original issue)\n\nA minor thing, but using `\"\"` instead of `character()` prevents us from doing\nnice code like\n\n```\n...\n\nreport &lt;- .check_packages_used(...)\nif (!any(lengths(report)) {\n  return(...)\n}\n...\n```\n\nWe can see that in the patch -- in `format.check_packages_used`, all the other\ncomponents use an `if (xx &lt;- length(x$...))` check whereas we have `if\n(nzchar(x$methods_message))`. (in fact, we could simplify a bit further and\ndrop the `if()` since `c(..., character())` will just drop the empty input, but\nI left it as is to keep the parallel structure).\n\nPS for purely internal, minor things like this, I'm still not sure the\npreferred way to report among (1) discuss first on r-devel [way too high\nbarrier for an internal change IMO] (2) file on Bugzilla [might give the\nimpression this is a \"bug\" when strictly speaking nothing's \"broken\"] (3) reach\nout to a single R-core member responsible for recent changes in this part of\nthe code [I think it's best to avoid that except for highly-specific work in\none member's core area of expertise]",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1760646726.718309",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "aqSfP",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18958] 'methods_message' component of 'check_packages_used' internal class should be character(), not \"\", when empty",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18958"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3557\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3557&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3557&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nChange methods-message to character(), not \"\"\n\n(hit submit by mistake on the original issue)\n\nA minor thing, but using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " instead of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "character()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " prevents us from doing\nnice code like\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "...\n\nreport <- .check_packages_used(...)\nif (!any(lengths(report)) {\n  return(...)\n}\n...\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWe can see that in the patch -- in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format.check_packages_used",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", all the other\ncomponents use an "
+                            },
+                            {
+                                "type": "text",
+                                "text": "if (xx <- length(x$...))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " check whereas we have `if\n(nzchar(x$methods_message))`. (in fact, we could simplify a bit further and\ndrop the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "if()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " since "
+                            },
+                            {
+                                "type": "text",
+                                "text": "c(..., character())",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " will just drop the empty input, but\nI left it as is to keep the parallel structure).\n\nPS for purely internal, minor things like this, I'm still not sure the\npreferred way to report among (1) discuss first on r-devel [way too high\nbarrier for an internal change IMO] (2) file on Bugzilla [might give the\nimpression this is a \"bug\" when strictly speaking nothing's \"broken\"] (3) reach\nout to a single R-core member responsible for recent changes in this part of\nthe code [I think it's best to avoid that except for highly-specific work in\none member's core area of expertise]"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18955] cairo library update 1.16 -&gt; 1.18 seems to break font embedding into PDF (R 4.3 -&gt; 4.4 transition)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18955>\n\n--- Comment #9 from Paul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) ---\nGood news and bad news.  Though both depend on your point of view.\n\nThe \"bad\" news is that I fail to get Ubuntu Condensed embedding via cairo_pdf()\non Windows (R 4.5.1, cairo 1.18.4)\n\nThe \"good\" news is that I can get embedding via cairo_pdf() by using different\nfonts, in my case Algerian and Agency FB.\n\nThat does not really explain the problem, but it does point the finger back at\nthe font and\/or font installation.\n\nHave you tried with other fonts?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1760650261.671459",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "OlBy",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18955] cairo library update 1.16 -> 1.18 seems to break font embedding into PDF (R 4.3 -> 4.4 transition)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18955"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #9 from Paul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nGood news and bad news.  Though both depend on your point of view.\n\nThe \"bad\" news is that I fail to get Ubuntu Condensed embedding via cairo_pdf()\non Windows (R 4.5.1, cairo 1.18.4)\n\nThe \"good\" news is that I can get embedding via cairo_pdf() by using different\nfonts, in my case Algerian and Agency FB.\n\nThat does not really explain the problem, but it does point the finger back at\nthe font and\/or font installation.\n\nHave you tried with other fonts?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

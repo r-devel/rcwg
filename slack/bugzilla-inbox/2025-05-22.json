@@ -1,0 +1,563 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 7084] text(x, y, labels) - recycling problems and RFC*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=7084>\n\nElla Kaye (<mailto:ella.kaye@gmail.com|ella.kaye@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ella.kaye@gmail.com\n\n--- Comment #10 from Ella Kaye (<mailto:ella.kaye@gmail.com|ella.kaye@gmail.com>) ---\nCreated attachment 3484\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3484&amp;action=edit>\npatch to truncate labels\n\nThis patch truncates `labels` to `max(length(x), length(y))`, as proposed\nabove, and gives a warning. \n\nWe did not need a separate case if `length(labels) &lt; n` - this was already the\nbehaviour.\n\nWe do not truncate `labels` if it is an expression - otherwise this caused a\ntest failure for an example in plotmath (in grDevices).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1747909008.900749",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "1RfLT",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 7084] text(x, y, labels) - recycling problems and RFC",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=7084"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nElla Kaye ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ella.kaye@gmail.com",
+                                "text": "ella.kaye@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ella.kaye@gmail.com\n\n--- Comment #10 from Ella Kaye ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ella.kaye@gmail.com",
+                                "text": "ella.kaye@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3484\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3484&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3484&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\npatch to truncate labels\n\nThis patch truncates "
+                            },
+                            {
+                                "type": "text",
+                                "text": "labels",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "max(length(x), length(y))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", as proposed\nabove, and gives a warning. \n\nWe did not need a separate case if "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length(labels) < n",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " - this was already the\nbehaviour.\n\nWe do not truncate "
+                            },
+                            {
+                                "type": "text",
+                                "text": "labels",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " if it is an expression - otherwise this caused a\ntest failure for an example in plotmath (in grDevices)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18058] lm(..., subset=...) producing incorrect model matrix*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18058>\n\nBarthelemy Tanguy (<mailto:tanguy.barthelemy@insee.fr|tanguy.barthelemy@insee.fr>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tanguy.barthelemy@insee.fr\n\n--- Comment #4 from Barthelemy Tanguy (<mailto:tanguy.barthelemy@insee.fr|tanguy.barthelemy@insee.fr>) ---\nCreated attachment 3485\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3485&amp;action=edit>\nUpdate documentation of `lm` (issue 18058)\n\nYes, you're right, the documentation misses some explanation about the use of\nthe `subset` argument.\n\nHere is another example with the functions `sqtr` and `mean`:\n\n```\n# Creating a simple example\nset.seed(123)\nDF10 &lt;- data.frame(\n    y = rnorm(10),\n    x1 = sample(10)\n)\nDF9 &lt;- DF10[-10, ]\nsubset_vect &lt;- c(rep(T, 9), F)\n\n# Example 1 - sqrt returns a vector with same length as x\nmod1 &lt;- lm(\n    y ~ I(x1 - sqrt(x1)),\n    DF10,\n    subset = subset_vect\n)\nmod1$coefficients\n#&gt;      (Intercept) I(x1 - sqrt(x1)) \n#&gt;        1.2162377       -0.3194782\nmod2 &lt;- lm(\n    y ~ I(x1 - sqrt(x1)),\n    DF9\n)\nmod2$coefficients\n#&gt;      (Intercept) I(x1 - sqrt(x1)) \n#&gt;        1.2162377       -0.3194782\n\n# Expect same results\nidentical(mod1$coefficients, mod2$coefficients)\n#&gt; [1] TRUE\n\n# Example 2 - mean returns a single value based on the whole data\nmod3 &lt;- lm(\n    y ~ I(x1 - mean(x1)),\n    DF10,\n    subset = subset_vect\n)\nmod3$coefficients\n#&gt;      (Intercept) I(x1 - mean(x1)) \n#&gt;        0.1740099       -0.2494471\nmod4 &lt;- lm(\n    y ~ I(x1 - mean(x1)),\n    DF9\n)\nmod4$coefficients\n#&gt;      (Intercept) I(x1 - mean(x1)) \n#&gt;        0.1324354       -0.2494471\n\n# Expect same results\nidentical(mod3$coefficients, mod4$coefficients)\n#&gt; [1] FALSE\n```\n\nThe differences arise because `mean()` returns a single value, based on the\nfull data before subset is applied. In the case of square-root, a vector of\nsame length as `x` is returned and then the subset happens.\n\n\nWe provide a patch :\n<https:\/\/patch-diff.githubusercontent.com\/raw\/r-devel\/r-svn\/pull\/201.patch>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1747909536.249429",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "DalI",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18058] lm(..., subset=...) producing incorrect model matrix",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18058"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nBarthelemy Tanguy ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tanguy.barthelemy@insee.fr",
+                                "text": "tanguy.barthelemy@insee.fr"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tanguy.barthelemy@insee.fr\n\n--- Comment #4 from Barthelemy Tanguy ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tanguy.barthelemy@insee.fr",
+                                "text": "tanguy.barthelemy@insee.fr"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3485\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3485&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3485&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nUpdate documentation of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lm",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (issue 18058)\n\nYes, you're right, the documentation misses some explanation about the use of\nthe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "subset",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " argument.\n\nHere is another example with the functions "
+                            },
+                            {
+                                "type": "text",
+                                "text": "sqtr",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mean",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# Creating a simple example\nset.seed(123)\nDF10 <- data.frame(\n    y = rnorm(10),\n    x1 = sample(10)\n)\nDF9 <- DF10[-10, ]\nsubset_vect <- c(rep(T, 9), F)\n\n# Example 1 - sqrt returns a vector with same length as x\nmod1 <- lm(\n    y ~ I(x1 - sqrt(x1)),\n    DF10,\n    subset = subset_vect\n)\nmod1$coefficients\n#>      (Intercept) I(x1 - sqrt(x1)) \n#>        1.2162377       -0.3194782\nmod2 <- lm(\n    y ~ I(x1 - sqrt(x1)),\n    DF9\n)\nmod2$coefficients\n#>      (Intercept) I(x1 - sqrt(x1)) \n#>        1.2162377       -0.3194782\n\n# Expect same results\nidentical(mod1$coefficients, mod2$coefficients)\n#> [1] TRUE\n\n# Example 2 - mean returns a single value based on the whole data\nmod3 <- lm(\n    y ~ I(x1 - mean(x1)),\n    DF10,\n    subset = subset_vect\n)\nmod3$coefficients\n#>      (Intercept) I(x1 - mean(x1)) \n#>        0.1740099       -0.2494471\nmod4 <- lm(\n    y ~ I(x1 - mean(x1)),\n    DF9\n)\nmod4$coefficients\n#>      (Intercept) I(x1 - mean(x1)) \n#>        0.1324354       -0.2494471\n\n# Expect same results\nidentical(mod3$coefficients, mod4$coefficients)\n#> [1] FALSE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe differences arise because "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mean()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " returns a single value, based on the\nfull data before subset is applied. In the case of square-root, a vector of\nsame length as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is returned and then the subset happens.\n\n\n\nWe provide a patch :\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/patch-diff.githubusercontent.com\/raw\/r-devel\/r-svn\/pull\/201.patch"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 7084] text(x, y, labels) - recycling problems and RFC*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=7084>\n\n--- Comment #11 from Ella Kaye (<mailto:ella.kaye@gmail.com|ella.kaye@gmail.com>) ---\nCreated attachment 3486\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3486&amp;action=edit>\n(fixed) patch to truncate labels\n\n(fixed) patch to truncate labels\n\n(the patch.diff file linked to comment #10 introduced an error)\n\nThis patch truncates `labels` to `max(length(x), length(y))`, as proposed in\ncomment #8, and gives a warning.\n\nWe did not need a separate case if `length(labels) &lt; n` - this was already the\nbehaviour.\n\nWe do not truncate labels if it is an expression - otherwise this caused a test\nfailure for an example in plotmath (in grDevices).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1747911480.388029",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "+s5Kx",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 7084] text(x, y, labels) - recycling problems and RFC",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=7084"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #11 from Ella Kaye ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ella.kaye@gmail.com",
+                                "text": "ella.kaye@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3486\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3486&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3486&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n(fixed) patch to truncate labels\n\n(fixed) patch to truncate labels\n\n(the patch.diff file linked to comment #10 introduced an error)\n\nThis patch truncates "
+                            },
+                            {
+                                "type": "text",
+                                "text": "labels",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "max(length(x), length(y))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", as proposed in\ncomment #8, and gives a warning.\n\nWe did not need a separate case if "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length(labels) < n",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " - this was already the\nbehaviour.\n\nWe do not truncate labels if it is an expression - otherwise this caused a test\nfailure for an example in plotmath (in grDevices)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18897] New: hatvalues for class \"nls\"*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18897>\n\n            Bug ID: 18897\n           Summary: hatvalues for class \"nls\"\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: enhancement\n          Priority: P5\n         Component: Wishlist\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:patrice.kiener@inmodelia.com|patrice.kiener@inmodelia.com>\n\nCreated attachment 3487\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3487&amp;action=edit>\nInitial patch for hatvalues.nls\n\nCurrently, there is no hatvalues for nonlinear model of class 'nls'.\nDuring RR2025 R Dev Day, we developed one patch to the nls.R file.\nWe started from the gslnls:::hatvalues.gsl_nls (chol2inv) function and we\nbenchmarked it against the india:::hatvalues.nls (svd) function and one\nfunction provided by <https:\/\/stackoverflow.com\/a\/41759799> (QR). \nThe gslnls:::hatvalues.gsl_nls, which uses chol2inv(), was the fastest\nalgorithm by a factor of 2 to 4 on both small and large datasets. We went with\nthis code but have not tested its robustness. We then tested it against the\nfirst examples of the nls function (DNase) and had to insert a stop when the\nmodel comes from nls(algorithm=\"plinear\") as this plinear algorithm generates a\nconflict of dimension between object$m$Rmat() and object$m$gradient().  \nThe proposed code for these hatvalues is expected to run on\nstats::optim(method=\"BFGS\"), minpack.lm::nlsLM and gslnls::gsl_nls as they\nprovide models of class 'nls'.\nA reference paper for this method is:\nLeverage and Superleverage in Nonlinear Regression, Roy T. St. Laurent and R.\nDennis Cook, Journal of the American Statistical Association, Vol. 87, No. 420\n(Dec., 1992), pp. 985-990. <https:\/\/doi.org\/10.2307\/2290635>\n\nI am happy to improve the code, documentation or test, as you suggest.\nThank you.\nPatrice Kiener + Heather Turner @ R Dev Day 2025-05-22 in Mons",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1747927533.868579",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "n3T",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18897] New: hatvalues for class \"nls\"",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18897"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18897\n           Summary: hatvalues for class \"nls\"\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: enhancement\n          Priority: P5\n         Component: Wishlist\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:patrice.kiener@inmodelia.com",
+                                "text": "patrice.kiener@inmodelia.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3487\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3487&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3487&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nInitial patch for hatvalues.nls\n\nCurrently, there is no hatvalues for nonlinear model of class 'nls'.\nDuring RR2025 R Dev Day, we developed one patch to the nls.R file.\nWe started from the gslnls:::hatvalues.gsl_nls (chol2inv) function and we\nbenchmarked it against the india:::hatvalues.nls (svd) function and one\nfunction provided by "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stackoverflow.com\/a\/41759799"
+                            },
+                            {
+                                "type": "text",
+                                "text": " (QR). \nThe gslnls:::hatvalues.gsl_nls, which uses chol2inv(), was the fastest\nalgorithm by a factor of 2 to 4 on both small and large datasets. We went with\nthis code but have not tested its robustness. We then tested it against the\nfirst examples of the nls function (DNase) and had to insert a stop when the\nmodel comes from nls(algorithm=\"plinear\") as this plinear algorithm generates a\nconflict of dimension between object$m$Rmat() and object$m$gradient().  \nThe proposed code for these hatvalues is expected to run on\nstats::optim(method=\"BFGS\"), minpack.lm::nlsLM and gslnls::gsl_nls as they\nprovide models of class 'nls'.\nA reference paper for this method is:\nLeverage and Superleverage in Nonlinear Regression, Roy T. St. Laurent and R.\nDennis Cook, Journal of the American Statistical Association, Vol. 87, No. 420\n(Dec., 1992), pp. 985-990. "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/doi.org\/10.2307\/2290635"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nI am happy to improve the code, documentation or test, as you suggest.\nThank you.\nPatrice Kiener + Heather Turner @ R Dev Day 2025-05-22 in Mons"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 7084] text(x, y, labels) - recycling problems and RFC*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=7084>\n\nPaul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |paul@stat.auckland.ac.nz\n\n--- Comment #12 from Paul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) ---\nThanks for the patch.\n\nFor consistency, it would be nice if expressions were included as well.\n\nOne approach that might work is ...\n\n```\nif (is.language(labels)) {\n    labels &lt;- as.expression(labels)\n}\n```\n\n... which should hopefully produce a `labels` that returns a sensible\n`length()` in this context (and can be subsetted sensibly in this context). \nAlthough someone with greater expertise in R language objects might want to\ncorrect that hypothesis.\n\nThere is also the ever-present risk of breaking existing code, so any graphical\nregression testing (e.g., with 'gdiff') would be welcome, at least of\n'grDevices', 'graphics', and 'grid' package examples.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1747964493.042989",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "+TMj",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 7084] text(x, y, labels) - recycling problems and RFC",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=7084"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nPaul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |paul@stat.auckland.ac.nz\n\n--- Comment #12 from Paul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for the patch.\n\nFor consistency, it would be nice if expressions were included as well.\n\nOne approach that might work is ...\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "if (is.language(labels)) {\n    labels <- as.expression(labels)\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n... which should hopefully produce a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "labels",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " that returns a sensible\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "length()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in this context (and can be subsetted sensibly in this context). \nAlthough someone with greater expertise in R language objects might want to\ncorrect that hypothesis.\n\nThere is also the ever-present risk of breaking existing code, so any graphical\nregression testing (e.g., with 'gdiff') would be welcome, at least of\n'grDevices', 'graphics', and 'grid' package examples."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

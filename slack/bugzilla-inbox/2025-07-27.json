@@ -1,0 +1,376 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18923] Unstable behaviour of density() with small bandwidths*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18923>\n\nPeter Dalgaard (<mailto:pd.mes@cbs.dk|pd.mes@cbs.dk>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |pd.mes@cbs.dk\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #1 from Peter Dalgaard (<mailto:pd.mes@cbs.dk|pd.mes@cbs.dk>) ---\nYes. I think this is related not so much to the FFT, but to the granularity of\nthe grid that we represent the kernel on.\n\nIf you look at density.default, probably most clearly in the rectangular\nkernel, but similar in other kernels, you see\n\n    kords &lt;- <http:\/\/seq.int|seq.int>(0, (if (old.coords) 2 else (2L * n - 1)\/(n - \n        1)) * (up - lo), length.out = 2L * n)\n    kords[(n + 2):(2 * n)] &lt;- -kords[n:2]\n    kords &lt;- switch(kernel, gaussian = dnorm(kords, sd = bw), \n        rectangular = {\n            a &lt;- bw * sqrt(3)\n            ifelse(abs(kords) &lt; a, 0.5\/a, 0)\n            ....\n\nwhich for small enough a will be zero except at the point where kords==0\n(before the switch()). The value there is 0.5\/a, i.e. below a certain\nbandwidth, you are de facto convolving with different multiples of the same\nkernel.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1753614798.694479",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "5=cu",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18923] Unstable behaviour of density() with small bandwidths",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18923"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nPeter Dalgaard ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:pd.mes@cbs.dk",
+                                "text": "pd.mes@cbs.dk"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |pd.mes@cbs.dk\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #1 from Peter Dalgaard ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:pd.mes@cbs.dk",
+                                "text": "pd.mes@cbs.dk"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nYes. I think this is related not so much to the FFT, but to the granularity of\nthe grid that we represent the kernel on.\n\nIf you look at density.default, probably most clearly in the rectangular\nkernel, but similar in other kernels, you see\n\n    kords <- "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/seq.int",
+                                "text": "seq.int"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(0, (if (old.coords) 2 else (2L * n - 1)\/(n - \n        1)) * (up - lo), length.out = 2L * n)\n    kords[(n + 2):(2 * n)] <- -kords[n:2]\n    kords <- switch(kernel, gaussian = dnorm(kords, sd = bw), \n        rectangular = {\n            a <- bw * sqrt(3)\n            ifelse(abs(kords) < a, 0.5\/a, 0)\n            ....\n\nwhich for small enough a will be zero except at the point where kords==0\n(before the switch()). The value there is 0.5\/a, i.e. below a certain\nbandwidth, you are de facto convolving with different multiples of the same\nkernel."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18916] Clarify that pnorm, pt, etc, are cumulative distribution functions*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18916>\n\nSebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #2 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\nThe Value sections said\n\n    'd...' gives the density,\n    'p...' gives the distribution function,\n    'q...' gives the quantile function\n\nwhich I changed (c88459) to\n\n    'd...' gives the density,\n    'p...' is the cumulative distribution function,\n    'q...' is the quantile function\n\nFurthermore, where the d-argument 'log' and the p\/q-argument 'log.p' were\ndocumented together for continuous distributions, I tweaked \"probabilities p\nare given as log(p)\" to \"probabilities\/densities are given as logarithms\".",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1753617276.080769",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "bQWK",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18916] Clarify that pnorm, pt, etc, are cumulative distribution functions",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18916"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #2 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe Value sections said\n\n    'd...' gives the density,\n    'p...' gives the distribution function,\n    'q...' gives the quantile function\n\nwhich I changed (c88459) to\n\n    'd...' gives the density,\n    'p...' is the cumulative distribution function,\n    'q...' is the quantile function\n\nFurthermore, where the d-argument 'log' and the p\/q-argument 'log.p' were\ndocumented together for continuous distributions, I tweaked \"probabilities p\nare given as log(p)\" to \"probabilities\/densities are given as logarithms\"."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18924] Short-hand lambda ('\\(') probably shouldn't parse with an interceding comment*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18924>\n\nSimon Urbanek (<mailto:simon.urbanek@r-project.org|simon.urbanek@r-project.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |simon.urbanek@r-project.org\n\n--- Comment #1 from Simon Urbanek (<mailto:simon.urbanek@r-project.org|simon.urbanek@r-project.org>) ---\nI don't see why not since `\\` is just a shorthand for `function` (see\n`quote(\\()0)`), thus the above is the equivalent of perfectly legal\n\n```\nfoo &lt;- function ## my function does something\n         (x) x\n```\n\nIt's not how anyone would write it (I hope), but that's the consequence of\nallowing white spaces before `()`. \"Fixing\" that by disallowing whitespaces\nwould mean that you'd have write `if(x)` instead of `if (x)` ;) and I don't\nthink we want to get into forcing specific whitespace requirements ...",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1753682424.864719",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "8rDB",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18924] Short-hand lambda ('\\(') probably shouldn't parse with an interceding comment",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18924"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSimon Urbanek ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:simon.urbanek@r-project.org",
+                                "text": "simon.urbanek@r-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |simon.urbanek@r-project.org\n\n--- Comment #1 from Simon Urbanek ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:simon.urbanek@r-project.org",
+                                "text": "simon.urbanek@r-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI don't see why not since "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\\",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is just a shorthand for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "function",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (see\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "quote(\\()0)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), thus the above is the equivalent of perfectly legal\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "foo <- function ## my function does something\n         (x) x\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIt's not how anyone would write it (I hope), but that's the consequence of\nallowing white spaces before "
+                            },
+                            {
+                                "type": "text",
+                                "text": "()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". \"Fixing\" that by disallowing whitespaces\nwould mean that you'd have write "
+                            },
+                            {
+                                "type": "text",
+                                "text": "if(x)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " instead of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "if (x)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ;) and I don't\nthink we want to get into forcing specific whitespace requirements ..."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18924] Short-hand lambda ('\\(') probably shouldn't parse with an interceding comment*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18924>\n\n--- Comment #2 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nThe difference is the `&lt;-` is not required for the `function` case:\n\n```\n# parses:\nfunction # comment\n(x) x\n\n# doesn't:\n\\ # comment\n(x) x\n# unexpected end of line in \"\\ #comment\"\n```\n\nIt's the inconsistency that led me to file the bug -- if it's resolved by\nenhancing the parser not to fail in the above, that's also fine, and probably\nthe easier route.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1753685567.351919",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Bs4i",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18924] Short-hand lambda ('\\(') probably shouldn't parse with an interceding comment",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18924"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe difference is the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "<-",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is not required for the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "function",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " case:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# parses:\nfunction # comment\n(x) x\n\n# doesn't:\n\\ # comment\n(x) x\n# unexpected end of line in \"\\ #comment\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIt's the inconsistency that led me to file the bug -- if it's resolved by\nenhancing the parser not to fail in the above, that's also fine, and probably\nthe easier route."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

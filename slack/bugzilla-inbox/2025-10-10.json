@@ -1,0 +1,271 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16750] Treat character as factor in summary.default*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16750>\n\nSebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |seb.meyer@fau.de\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #4 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\nThe (valid!) wish of a more useful `summary()` for character vectors was raised\nmultiple times in the past and I have put this on my agenda. Here are my\ntakeaways from recent \"offline\" discussions at an ['R Dev\nDay'](<https:\/\/github.com\/r-devel\/r-dev-day\/issues\/117>) and then with some\nR-core members:\n\n- Do *not* simply dispatch to `summary.factor()` by default because it should\nremain clear from a standard data-frame summary which variables are \"only\"\ncharacter vectors. Instead, add an argument `character.method = c(\"default\",\n\"factor\")` so the use of `summary(factor(.))` for character input can be\nrequested if desired.\n\n- The special value `character.method = NULL` would be used as a\nback-compatibility option to get the old (generic) summary.\n\n- In the \"default\" case the summary should include the vector length together\nwith the number of unique elements (\"factor-likeness\") as well as the range of\nthe string lengths. Counts of empty and missing strings are also relevant\n(often there will be only one of these, either \"\" or NA). The total number of\nreported characteristics should not exceed 7 so it fits well into the tabular\ndata-frame summary.\n\n- The NA count should be named consistently with the other summary types.\nCurrently that would be \"NA's\" but it is intended to fix Bug 18948 jointly with\nthis character enhancement to avoid multiple changes in outputs.\n\nHere is a prototype for the \"default\" variant, here named `summary.character`\nfor convenient experimenting in the data-frame context:\n\n```\nsummary.character &lt;- function (object, ...)\n{\n    ncs &lt;- nchar(object)\n    nna &lt;- sum(<http:\/\/is.na|is.na>(object))\n    value &lt;- c(\n        ## Mode         = \"character\",\n        Length       = length(object),\n        N.unique     = length(unique(object)),      # includes NA!\n        N.empty      = sum(ncs == 0, na.rm = TRUE),\n        Min.nchar    = min(ncs, na.rm = TRUE),\n        ## Median.nchar = median(ncs, na.rm = TRUE),\n        Max.nchar    = max(ncs, na.rm = TRUE),\n        \"NA's\"       = if (nna &gt; 0) nna             # -&gt; \"NAs\" (PR#18948)\n    )\n    class(value) &lt;- c(\"summaryDefault\", \"table\")\n    value\n}\n\ndf &lt;- penguins_raw[c(\"Sample Number\", \"Island\", \"Comments\")]\ndf$Comments2 &lt;- replace(df$Comments, 321, \"\") # an empty string\ndf$Island.f &lt;- factor(df$Island)\nsummary(df)\n#&gt;  Sample Number          Island         Comments       Comments2       \nIsland.f  \n#&gt;  Min.   :  1.00   Length   :344   Length   :344   Length   :344   Biscoe  \n:168  \n#&gt;  1st Qu.: 29.00   N.unique :  3   N.unique : 11   N.unique : 12   Dream   \n:124  \n#&gt;  Median : 58.00   N.empty  :  0   N.empty  :  0   N.empty  :  1   Torgersen:\n52  \n#&gt;  Mean   : 63.15   Min.nchar:  5   Min.nchar: 18   Min.nchar:  0              \n#&gt;  3rd Qu.: 95.25   Max.nchar:  9   Max.nchar: 68   Max.nchar: 68              \n#&gt;  Max.   :152.00                   NA's     :290   NA's     :289              \n\ntxt &lt;- readLines(file.path(R.home(\"doc\"), \"COPYING\"))\nsummary(txt)\n#&gt;    Length  N.unique   N.empty Min.nchar Max.nchar \n#&gt;       339       281        58         0        77 \n```\n\nI'm mostly happy with this. A few observations:\n\n1. Omitting an initial `Mode=\"character\"` element has the advantages that the\nsummary is purely numeric, begins with \"Length\" as in current R, and in\n`summary.data.frame` needs less horizontal space (and gets automatically\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1760117634.693289",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "TTs0",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16750] Treat character as factor in summary.default",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16750"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |seb.meyer@fau.de\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #4 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe (valid!) wish of a more useful "
+                            },
+                            {
+                                "type": "text",
+                                "text": "summary()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for character vectors was raised\nmultiple times in the past and I have put this on my agenda. Here are my\ntakeaways from recent \"offline\" discussions at an ['R Dev\nDay']("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-dev-day\/issues\/117"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") and then with some\nR-core members:\n\n- Do "
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " simply dispatch to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "summary.factor()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " by default because it should\nremain clear from a standard data-frame summary which variables are \"only\"\ncharacter vectors. Instead, add an argument `character.method = c(\"default\",\n\"factor\")` so the use of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "summary(factor(.))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for character input can be\nrequested if desired.\n\n- The special value "
+                            },
+                            {
+                                "type": "text",
+                                "text": "character.method = NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " would be used as a\nback-compatibility option to get the old (generic) summary.\n\n- In the \"default\" case the summary should include the vector length together\nwith the number of unique elements (\"factor-likeness\") as well as the range of\nthe string lengths. Counts of empty and missing strings are also relevant\n(often there will be only one of these, either \"\" or NA). The total number of\nreported characteristics should not exceed 7 so it fits well into the tabular\ndata-frame summary.\n\n- The NA count should be named consistently with the other summary types.\nCurrently that would be \"NA's\" but it is intended to fix Bug 18948 jointly with\nthis character enhancement to avoid multiple changes in outputs.\n\nHere is a prototype for the \"default\" variant, here named "
+                            },
+                            {
+                                "type": "text",
+                                "text": "summary.character",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nfor convenient experimenting in the data-frame context:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "summary.character <- function (object, ...)\n{\n    ncs <- nchar(object)\n    nna <- sum("
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(object))\n    value <- c(\n        ## Mode         = \"character\",\n        Length       = length(object),\n        N.unique     = length(unique(object)),      # includes NA!\n        N.empty      = sum(ncs == 0, na.rm = TRUE),\n        Min.nchar    = min(ncs, na.rm = TRUE),\n        ## Median.nchar = median(ncs, na.rm = TRUE),\n        Max.nchar    = max(ncs, na.rm = TRUE),\n        \"NA's\"       = if (nna > 0) nna             # -> \"NAs\" (PR#18948)\n    )\n    class(value) <- c(\"summaryDefault\", \"table\")\n    value\n}\n\ndf <- penguins_raw[c(\"Sample Number\", \"Island\", \"Comments\")]\ndf$Comments2 <- replace(df$Comments, 321, \"\") # an empty string\ndf$Island.f <- factor(df$Island)\nsummary(df)\n#>  Sample Number          Island         Comments       Comments2       \nIsland.f  \n#>  Min.   :  1.00   Length   :344   Length   :344   Length   :344   Biscoe  \n:168  \n#>  1st Qu.: 29.00   N.unique :  3   N.unique : 11   N.unique : 12   Dream   \n:124  \n#>  Median : 58.00   N.empty  :  0   N.empty  :  0   N.empty  :  1   Torgersen:\n52  \n#>  Mean   : 63.15   Min.nchar:  5   Min.nchar: 18   Min.nchar:  0              \n#>  3rd Qu.: 95.25   Max.nchar:  9   Max.nchar: 68   Max.nchar: 68              \n#>  Max.   :152.00                   NA's     :290   NA's     :289              \n\ntxt <- readLines(file.path(R.home(\"doc\"), \"COPYING\"))\nsummary(txt)\n#>    Length  N.unique   N.empty Min.nchar Max.nchar \n#>       339       281        58         0        77 \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI'm mostly happy with this. A few observations:\n\n1. Omitting an initial "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Mode=\"character\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " element has the advantages that the\nsummary is purely numeric, begins with \"Length\" as in current R, and in\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "summary.data.frame",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " needs less horizontal space (and gets automatically"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "right-aligned). It should still be clear (from the \"nchar\" elements) that the\nsummary represents a character variable.\n\n2. \"N.unique\" really means `length(unique(.))` and that counts NA as a distinct\nvalue, which can be confusing, not least because we present \"NA's\" (if any) as\na separate summary. So in the above example, there are actually *10* different\nkinds of `Comments`, i.e., `length(table(.))` and `nlevels(factor(.))` both\nequal 10. It is not yet clear to me if the above \"N.unique\" is the best choice.\n\n3. There is some information overlap between \"N.empty\" and \"Min.nchar\". An\nalternative would be to show \"N.empty\" further down just before \"NA's\" and\nsimilarly only if positive, but this might become too \"dynamic\". Personally I\nwouldn't have included \"N.empty\" but others were clearly in favour and we do\nhave the space.\n\n4. Previous proposals also included \"Median.nchar\", but that was discarded\nbecause averages or quartiles of string lengths were not generally considered\nrelevant (and this element would increase the width of the names).\n\nI'll wait a few weeks for more comments, possibly about \"N.unique\" or\n\"Median.nchar\" and to make sure I have not overlooked an important discussion\npoint.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1760117634.723729",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "DsL3N",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "right-aligned). It should still be clear (from the \"nchar\" elements) that the\nsummary represents a character variable.\n\n2. \"N.unique\" really means "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length(unique(.))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and that counts NA as a distinct\nvalue, which can be confusing, not least because we present \"NA's\" (if any) as\na separate summary. So in the above example, there are actually "
+                            },
+                            {
+                                "type": "text",
+                                "text": "10",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " different\nkinds of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Comments",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", i.e., "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length(table(.))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nlevels(factor(.))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " both\nequal 10. It is not yet clear to me if the above \"N.unique\" is the best choice.\n\n3. There is some information overlap between \"N.empty\" and \"Min.nchar\". An\nalternative would be to show \"N.empty\" further down just before \"NA's\" and\nsimilarly only if positive, but this might become too \"dynamic\". Personally I\nwouldn't have included \"N.empty\" but others were clearly in favour and we do\nhave the space.\n\n4. Previous proposals also included \"Median.nchar\", but that was discarded\nbecause averages or quartiles of string lengths were not generally considered\nrelevant (and this element would increase the width of the names).\n\nI'll wait a few weeks for more comments, possibly about \"N.unique\" or\n\"Median.nchar\" and to make sure I have not overlooked an important discussion\npoint."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,205 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18919] New: [&lt;-.POSIXlt and [[&lt;-.POSIXlt do not reconcile time zones of 'x', 'value' before subassignment*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18919>\n\n            Bug ID: 18919\n           Summary: [&lt;-.POSIXlt and [[&lt;-.POSIXlt do not reconcile time\n                    zones of 'x', 'value' before subassignment\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Language\n          Assignee: R-core@R-project.org\n          Reporter: jaganmn@mcmaster.ca\n\nCreated attachment 3509\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3509&amp;action=edit>\nreconciling time zones in subassignment to POSIXlt\n\n```\n&gt; (x1 &lt;- x2 &lt;- as.POSIXlt(.POSIXct(0, tz = \"UTC\")))\n[1] \"1970-01-01 UTC\"\n&gt; (y &lt;- as.POSIXlt(.POSIXct(0, tz = \"America\/Toronto\")))\n[1] \"1969-12-31 19:00:00 EST\"\n&gt; x1 - y\nTime difference of 0 secs\n&gt; x1[1L] &lt;- y\n&gt; x1 - y\nTime difference of -5 hours\n&gt; x2 - y\nTime difference of 0 secs\n&gt; x2[[1L]] &lt;- y\n&gt; x2 - y\nTime difference of -5 hours\n```\n\nThe attached patch converts `value` to the time zone of `x` before carrying out\nthe subassignment (`[&lt;-` or `[[&lt;-`) and adds a simple regression test.  There\nare two changes from `unclass` to `unCfillPOSIXlt` where the latter was all\nalong needed for correct handling of \"unfilled\" `x` and `value`.\n\nI haven't attempted to fix the handling by `[&lt;-.POSIXlt` of calls `x[] &lt;-\nvalue`, where `missing(i) &amp;&amp; missing(j)` is `TRUE`.  It is problematic not only\nfor failing to reconcile time zones but also for failing to handle correctly\ncases where, e.g., `length(value) != length(x)`.  So that issue may be better\nhandled separately ...",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1752896745.463619",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "dcQKS",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18919] New: [<-.POSIXlt and [[<-.POSIXlt do not reconcile time zones of 'x', 'value' before subassignment",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18919"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18919\n           Summary: [<-.POSIXlt and [[<-.POSIXlt do not reconcile time\n                    zones of 'x', 'value' before subassignment\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Language\n          Assignee: R-core@R-project.org\n          Reporter: jaganmn@mcmaster.ca\n\nCreated attachment 3509\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3509&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3509&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nreconciling time zones in subassignment to POSIXlt\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> (x1 <- x2 <- as.POSIXlt(.POSIXct(0, tz = \"UTC\")))\n[1] \"1970-01-01 UTC\"\n> (y <- as.POSIXlt(.POSIXct(0, tz = \"America\/Toronto\")))\n[1] \"1969-12-31 19:00:00 EST\"\n> x1 - y\nTime difference of 0 secs\n> x1[1L] <- y\n> x1 - y\nTime difference of -5 hours\n> x2 - y\nTime difference of 0 secs\n> x2[[1L]] <- y\n> x2 - y\nTime difference of -5 hours\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe attached patch converts "
+                            },
+                            {
+                                "type": "text",
+                                "text": "value",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to the time zone of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " before carrying out\nthe subassignment ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "[<-",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "[[<-",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") and adds a simple regression test.  There\nare two changes from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "unclass",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "unCfillPOSIXlt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " where the latter was all\nalong needed for correct handling of \"unfilled\" "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "value",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nI haven't attempted to fix the handling by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "[<-.POSIXlt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " of calls `x[] <-\nvalue`, where "
+                            },
+                            {
+                                "type": "text",
+                                "text": "missing(i) && missing(j)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  It is problematic not only\nfor failing to reconcile time zones but also for failing to handle correctly\ncases where, e.g., "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length(value) != length(x)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  So that issue may be better\nhandled separately ..."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

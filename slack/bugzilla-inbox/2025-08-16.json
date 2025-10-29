@@ -1,0 +1,230 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18887] Wish: support for concatenated gzip archives in gzcon*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18887>\n\n--- Comment #4 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nUnfortunately, the recent change in r88616 makes `gzcon()` sometimes confuse\nthe `0xff` byte in the comment, file name, or extra field with `EOF`.\nAdmittedly, all of these are unlikely since `0xff` is invalid under UTF-8, and\nthe problem has also been present previously in released versions of R (but not\nR-devel r88615).\n\n`hello.gz` is a file with an `0xff` byte in the comment:\n\n```\n00000000: 1f8b 0818 8897 a068 0003 6865 6c6c 6f00  .......h..hello.\n00000010: ff00 cb48 cdc9 c9e7 0200 2030 3a36 0600  ...H...... 0:6..\n00000020: 0000                                     ..\n```\n\n```\ngzip -t hello.gz &amp;&amp; echo ok\n# ok\nsvn up -r88615 &amp;&amp; make -C build -j &amp;&amp; build\/bin\/R -q -s -e '\n file(\"hello.gz\", \"rb\") |&gt; gzcon() |&gt; readLines()\n'\n# [1] \"hello\"\nsvn up -r88616 &amp;&amp; make -C build -j &amp;&amp; build\/bin\/R -q -s -e '\n file(\"hello.gz\", \"rb\") |&gt; gzcon() |&gt; readLines()\n'\n# character(0)\n```\n\nWhat was the clang warning? I couldn't reproduce it using clang version 19.1.7\n(3+b1) from Debian testing. Please let me know if reports of this kind are\nbetter suited for R-devel.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1755361083.548029",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Np=K",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18887] Wish: support for concatenated gzip archives in gzcon",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18887"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nUnfortunately, the recent change in r88616 makes "
+                            },
+                            {
+                                "type": "text",
+                                "text": "gzcon()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " sometimes confuse\nthe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "0xff",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " byte in the comment, file name, or extra field with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "EOF",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\nAdmittedly, all of these are unlikely since "
+                            },
+                            {
+                                "type": "text",
+                                "text": "0xff",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is invalid under UTF-8, and\nthe problem has also been present previously in released versions of R (but not\nR-devel r88615).\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "hello.gz",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is a file with an "
+                            },
+                            {
+                                "type": "text",
+                                "text": "0xff",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " byte in the comment:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "00000000: 1f8b 0818 8897 a068 0003 6865 6c6c 6f00  .......h..hello.\n00000010: ff00 cb48 cdc9 c9e7 0200 2030 3a36 0600  ...H...... 0:6..\n00000020: 0000                                     ..\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "gzip -t hello.gz && echo ok\n# ok\nsvn up -r88615 && make -C build -j && build\/bin\/R -q -s -e '\n file(\"hello.gz\", \"rb\") |> gzcon() |> readLines()\n'\n# [1] \"hello\"\nsvn up -r88616 && make -C build -j && build\/bin\/R -q -s -e '\n file(\"hello.gz\", \"rb\") |> gzcon() |> readLines()\n'\n# character(0)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWhat was the clang warning? I couldn't reproduce it using clang version 19.1.7\n(3+b1) from Debian testing. Please let me know if reports of this kind are\nbetter suited for R-devel."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18887] Wish: support for concatenated gzip archives in gzcon*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18887>\n\n--- Comment #5 from Brian Ripley (<mailto:ripley@stats.ox.ac.uk|ripley@stats.ox.ac.uk>) ---\nThis has been reverted for now.\n\nThe clang warning was\n\n..\/R-devel\/src\/main\/connections.c:6226:11: warning: implicit conversion loses\ninteger precision: 'int' to 'char' [-Wimplicit-int-conversion]\n 6226 |         method = gzcon_byte(priv);\n      |                ~ ^~~~~~~~~~~~~~~~\nand likely needs \n\n -Wconversion -Wno-sign-conversion\n\nwhich is useful for clang but (at least) used to be overwhelming for gcc.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1755411288.407129",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "xZP8",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18887] Wish: support for concatenated gzip archives in gzcon",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18887"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Brian Ripley ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ripley@stats.ox.ac.uk",
+                                "text": "ripley@stats.ox.ac.uk",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThis has been reverted for now.\n\nThe clang warning was\n\n..\/R-devel\/src\/main\/connections.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "6226"
+                            },
+                            {
+                                "type": "text",
+                                "text": "11: warning: implicit conversion loses\ninteger precision: 'int' to 'char' [-Wimplicit-int-conversion]\n 6226 |         method = gzcon_byte(priv);\n      |                "
+                            },
+                            {
+                                "type": "text",
+                                "text": " ^",
+                                "style": {
+                                    "strike": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "~~~~~~~~~~~~~~\nand likely needs \n\n -Wconversion -Wno-sign-conversion\n\nwhich is useful for clang but (at least) used to be overwhelming for gcc."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

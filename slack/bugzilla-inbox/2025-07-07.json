@@ -1,0 +1,494 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18469] requireNamespace() incorrectly removes attribute LibPath from argument package before passing to loadNamespace()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18469>\n\n--- Comment #2 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nBack in Feb 2023 there was an R-core internal discussion about this,\nwhere the \"general\" feeling was that we have a completely undocumented feature\nhere  (a package _attribute_ \"lib.loc\" to be used for finding the correct\nversion of the saved namespace in preference to the `lib.loc` argument of\n`loadNamespace()`),\nand we should rather consider *removing* this feature from  `loadNamespace()`\nthan adding it to `requireNamespace()`.\n\nGiven the related report, bug 18255, about `requireNamespace()` not obeying\nextra arguments, I feel it is important to first solve this issue.\n\nAlso, in the mean time (passed since Feb 2023), I am less convinced that we\nshould remove the undocumented feature ... \nWith my thoughts and experiments for bug 18255, it maybe useful occasionally if\nsuch an \"inofficial\" package\/namespace object does carry the information on\nwhere on the filesystem it wants to be loaded from.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1751890266.141799",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "NoI2",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18469] requireNamespace() incorrectly removes attribute LibPath from argument package before passing to loadNamespace()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18469"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nBack in Feb 2023 there was an R-core internal discussion about this,\nwhere the \"general\" feeling was that we have a completely undocumented feature\nhere  (a package "
+                            },
+                            {
+                                "type": "text",
+                                "text": "attribute",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " \"lib.loc\" to be used for finding the correct\nversion of the saved namespace in preference to the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lib.loc",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " argument of\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "loadNamespace()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "),\nand we should rather consider "
+                            },
+                            {
+                                "type": "text",
+                                "text": "removing",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " this feature from  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "loadNamespace()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nthan adding it to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "requireNamespace()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nGiven the related report, bug 18255, about "
+                            },
+                            {
+                                "type": "text",
+                                "text": "requireNamespace()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " not obeying\nextra arguments, I feel it is important to first solve this issue.\n\nAlso, in the mean time (passed since Feb 2023), I am less convinced that we\nshould remove the undocumented feature ... \nWith my thoughts and experiments for bug 18255, it maybe useful occasionally if\nsuch an \"inofficial\" package\/namespace object does carry the information on\nwhere on the filesystem it wants to be loaded from."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18469] requireNamespace() incorrectly removes attribute LibPath from argument package before passing to loadNamespace()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18469>\n\nTrevor Davis (<mailto:trevor.l.davis@gmail.com|trevor.l.davis@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |trevor.l.davis@gmail.com\n\n--- Comment #3 from Trevor Davis (<mailto:trevor.l.davis@gmail.com|trevor.l.davis@gmail.com>) ---\n&gt; the \"general\" feeling was that we have a completely undocumented feature... we should rather consider removing this feature from `loadNamespace()` than adding it to `requireNamespace()`... I am less convinced that we should remove the undocumented feature... \n\nThe following Github regular expression search\n\n```\n\/attr.*\"LibPath\"\/ lang:R\n```\n\nsuggests this undocumented feature of `loadNamespace()` doesn't seem to be used\nin code other than `base::library()` so maybe it is fine to not allow\n`requireNamespace()` to use this **undocumented** *internal* feature of\n`loadNamespace()` and we should keep the current\n\n```\npackage &lt;- as.character(package)[[1L]]\n```\n\nlogic which strips any such \"LibPath\" attributes out.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1751920242.516029",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "KXc",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18469] requireNamespace() incorrectly removes attribute LibPath from argument package before passing to loadNamespace()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18469"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTrevor Davis ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:trevor.l.davis@gmail.com",
+                                "text": "trevor.l.davis@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |trevor.l.davis@gmail.com\n\n--- Comment #3 from Trevor Davis ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:trevor.l.davis@gmail.com",
+                                "text": "trevor.l.davis@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "the \"general\" feeling was that we have a completely undocumented feature... we should rather consider removing this feature from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "loadNamespace()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " than adding it to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "requireNamespace()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "... I am less convinced that we should remove the undocumented feature... "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe following Github regular expression search\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\/attr.*\"LibPath\"\/ lang:R\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nsuggests this undocumented feature of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "loadNamespace()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " doesn't seem to be used\nin code other than "
+                            },
+                            {
+                                "type": "text",
+                                "text": "base::library()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " so maybe it is fine to not allow\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "requireNamespace()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to use this **undocumented** "
+                            },
+                            {
+                                "type": "text",
+                                "text": "internal",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " feature of\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "loadNamespace()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and we should keep the current\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "package <- as.character(package)[[1L]]\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nlogic which strips any such \"LibPath\" attributes out."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18469] requireNamespace() incorrectly removes attribute LibPath from argument package before passing to loadNamespace()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18469>\n\n--- Comment #4 from Trevor Davis (<mailto:trevor.l.davis@gmail.com|trevor.l.davis@gmail.com>) ---\nOr maybe `requireNamespace()` should explicitly throw an error if `package` has\nan `\"LibPath\"` attribute instead of silently discarding it?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1751921316.483579",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "EcBx\/",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18469] requireNamespace() incorrectly removes attribute LibPath from argument package before passing to loadNamespace()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18469"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Trevor Davis ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:trevor.l.davis@gmail.com",
+                                "text": "trevor.l.davis@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nOr maybe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "requireNamespace()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " should explicitly throw an error if "
+                            },
+                            {
+                                "type": "text",
+                                "text": "package",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has\nan "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"LibPath\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " attribute instead of silently discarding it?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "reactions": [
+            {
+                "name": "100",
+                "users": [
+                    "U01KXU8UNRX"
+                ],
+                "count": 1
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18469] requireNamespace() incorrectly removes attribute LibPath from argument package before passing to loadNamespace()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18469>\n\n--- Comment #5 from Trevor Davis (<mailto:trevor.l.davis@gmail.com|trevor.l.davis@gmail.com>) ---\nCreated attachment 3506\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3506&amp;action=edit>\nPatch to throw an error if `package` has a \"LibPath\" attribute",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1751929863.081759",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ES0T",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18469] requireNamespace() incorrectly removes attribute LibPath from argument package before passing to loadNamespace()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18469"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Trevor Davis ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:trevor.l.davis@gmail.com",
+                                "text": "trevor.l.davis@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3506\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3506&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3506&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch to throw an error if "
+                            },
+                            {
+                                "type": "text",
+                                "text": "package",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has a \"LibPath\" attribute"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

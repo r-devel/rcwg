@@ -1,0 +1,671 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18909] stats: stack overflow when subtracting certain time series*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18909>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #2 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nWell, in some sense its \"an inverse\" of FAQ 7.31; as Prakash mentioned the\ninfinite loop problem happens only very rarely,\ne.g., if you keep `frequency = 2*pi`, the only `n` in 1..20000\nfor which it happens is the `n = 711`.\n.\n\nAnyway, in such cases you always should first look at `traceback()`:\n```\nd &lt;- ts(1:711, frequency=2*pi); d - d\ntraceback()\n```\nwhich prints ~ 2200 lines, ending with\n```\n18: NextMethod(\"[\")\n17: `[.ts`(xtime, (xtime &lt; end) &amp; ((end - 1\/xfreq) &lt; xtime))\n16: xtime[(xtime &lt; end) &amp; ((end - 1\/xfreq) &lt; xtime)]\n15: window.default(x, ...)\n14: as.ts(window.default(x, ...))\n13: window.ts(sers[[i]], st, en)\n12: window(sers[[i]], st, en)\n11: .cbind.ts(list(e1, e2), c(deparse(substitute(e1))[1L],\ndeparse(substitute(e2))[1L]), \n        union = FALSE)\n10: Ops.ts((xtime &lt; end), ((end - 1\/xfreq) &lt; xtime))\n9: NextMethod(\"[\")\n8: `[.ts`(xtime, (xtime &lt; end) &amp; ((end - 1\/xfreq) &lt; xtime))\n7: xtime[(xtime &lt; end) &amp; ((end - 1\/xfreq) &lt; xtime)]\n6: window.default(x, ...)\n5: as.ts(window.default(x, ...))\n4: window.ts(sers[[i]], st, en)\n3: window(sers[[i]], st, en)\n2: .cbind.ts(list(e1, e2), c(deparse(substitute(e1))[1L],\ndeparse(substitute(e2))[1L]), \n       union = FALSE)\n1: Ops.ts(d, d)\n```\nNow if I start thinking and pondering, I get to the preliminary conclusion that\nalmost surely we should be fixing `stats:::window.default`.\nIts logic is already based on the (in)famous  `getOption(\"ts.eps\")`  which\nindeed is needed because of double precision \/ computer arithmetic\nimperfection, i.e., yes indeed related to FAQ 7.31:\nAnd indeed, with our `d`:\n```\n&gt; window(d, 1, end = 114.1)\nError: C stack usage  9524784 is too close to the limit\n```\nand indeed, as I suspected, it is `ts.eps`:\n```\nwindow(d, 1, end = 114.1, ts.eps = 0.01) # works fine\n```\nand so do all `ts.eps` &gt;= 7e-5 (on my platform).   \n\"Unfortunately\", `ts.eps` is 1e-5 by default.\n\nNote that the `ts.eps` option, including its default 1e-5, had been introduced\n(for S or S+\/S-PLUS) before R existed and we (R core) had used it to fix other\n(double precision imperfection related) bugs, e.g., bug 17669.  It is well\npossible (even probable in my book) that a thorough analysis would lead to more\ncareful and sophisticated settings of how and where `ts.eps` is used exactly in\nthe several `ts*()` functions.\n\nFurther note that in addition to `ts.eps` there are 3 places in the\n`stats\/R\/ts.R` source file where a hardwired\n `+0.001` has been in use (\"forever\") before rounding.... and I'm pretty sure\nthat that is also not the perfect fuzz amount for all possible situations.\n\nDitto for the hardwired   `nobs &lt;- floor(cycles + 1.01)`  in `ts()`  which has\nbeen there (in file `src\/library\/base\/R\/ts` (sic!) already in svn rev 335 (from\n1997-12-01, long before R 1.0.0 ...).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1749638576.648199",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "kCncL",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18909] stats: stack overflow when subtracting certain time series",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18909"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #2 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nWell, in some sense its \"an inverse\" of FAQ 7.31; as Prakash mentioned the\ninfinite loop problem happens only very rarely,\ne.g., if you keep "
+                            },
+                            {
+                                "type": "text",
+                                "text": "frequency = 2*pi",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", the only "
+                            },
+                            {
+                                "type": "text",
+                                "text": "n",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in 1..20000\nfor which it happens is the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "n = 711",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n.\n\nAnyway, in such cases you always should first look at "
+                            },
+                            {
+                                "type": "text",
+                                "text": "traceback()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "d <- ts(1:711, frequency=2*pi); d - d\ntraceback()\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "which prints ~ 2200 lines, ending with"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "18: NextMethod(\"[\")\n17: `[.ts`(xtime, (xtime < end) & ((end - 1\/xfreq) < xtime))\n16: xtime[(xtime < end) & ((end - 1\/xfreq) < xtime)]\n15: window.default(x, ...)\n14: as.ts(window.default(x, ...))\n13: window.ts(sers[[i]], st, en)\n12: window(sers[[i]], st, en)\n11: .cbind.ts(list(e1, e2), c(deparse(substitute(e1))[1L],\ndeparse(substitute(e2))[1L]), \n        union = FALSE)\n10: Ops.ts((xtime < end), ((end - 1\/xfreq) < xtime))\n9: NextMethod(\"[\")\n8: `[.ts`(xtime, (xtime < end) & ((end - 1\/xfreq) < xtime))\n7: xtime[(xtime < end) & ((end - 1\/xfreq) < xtime)]\n6: window.default(x, ...)\n5: as.ts(window.default(x, ...))\n4: window.ts(sers[[i]], st, en)\n3: window(sers[[i]], st, en)\n2: .cbind.ts(list(e1, e2), c(deparse(substitute(e1))[1L],\ndeparse(substitute(e2))[1L]), \n       union = FALSE)\n1: Ops.ts(d, d)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Now if I start thinking and pondering, I get to the preliminary conclusion that\nalmost surely we should be fixing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "stats:::window.default",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\nIts logic is already based on the (in)famous  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getOption(\"ts.eps\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  which\nindeed is needed because of double precision \/ computer arithmetic\nimperfection, i.e., yes indeed related to FAQ 7.31:\nAnd indeed, with our "
+                            },
+                            {
+                                "type": "text",
+                                "text": "d",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> window(d, 1, end = 114.1)\nError: C stack usage  9524784 is too close to the limit\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "and indeed, as I suspected, it is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ts.eps",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "window(d, 1, end = 114.1, ts.eps = 0.01) # works fine\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "and so do all "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ts.eps",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " >= 7e-5 (on my platform).   \n\"Unfortunately\", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ts.eps",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is 1e-5 by default.\n\nNote that the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ts.eps",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " option, including its default 1e-5, had been introduced\n(for S or S+\/S-PLUS) before R existed and we (R core) had used it to fix other\n(double precision imperfection related) bugs, e.g., bug 17669.  It is well\npossible (even probable in my book) that a thorough analysis would lead to more\ncareful and sophisticated settings of how and where "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ts.eps",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is used exactly in\nthe several "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ts*()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " functions.\n\nFurther note that in addition to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ts.eps",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " there are 3 places in the\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "stats\/R\/ts.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " source file where a hardwired\n "
+                            },
+                            {
+                                "type": "text",
+                                "text": "+0.001",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has been in use (\"forever\") before rounding.... and I'm pretty sure\nthat that is also not the perfect fuzz amount for all possible situations.\n\nDitto for the hardwired   "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nobs <- floor(cycles + 1.01)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ts()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  which has\nbeen there (in file "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/library\/base\/R\/ts",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (sic!) already in svn rev 335 (from\n1997-12-01, long before R 1.0.0 ...)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18909] infinite loop when subtracting certain time series*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18909>\n\n--- Comment #3 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nThe content of attachment 3496 has been deleted for the following reason:\n\nirrelevant; the error message is there in the text;  screenshots are strongly\ndiscouraged apart possibly for graphics or GUI",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1749639499.024559",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "HiFq",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18909] infinite loop when subtracting certain time series",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18909"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe content of attachment 3496 has been deleted for the following reason:\n\nirrelevant; the error message is there in the text;  screenshots are strongly\ndiscouraged apart possibly for graphics or GUI"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 7084] text(x, y, labels) - recycling problems and RFC*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=7084>\n\n--- Comment #14 from Heather Turner (<mailto:ht@heatherturner.net|ht@heatherturner.net>) ---\nCreated attachment 3497\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3497&amp;action=edit>\npatch that handles expressions as well\n\nPatch incorporating Paul's suggestion in Comment 12.\n\nTested with gdiff for patched vs unpatched R-devel r88298, on examples from\ngrid, graphics, grDevices, lattice and ggplot2. \n\nggplot2 also passes `R CMD check` with the patched R-devel, although I had to\nuse `_R_CHECK_FORCE_SUGGESTS_=FALSE` as I couldn't get ragg to install from\nsource on macOS (all other suggested packages for ggplot2 were installed). \n\nAs this bug is unlikely to be affected by graphics device, I think this patch\nis ready to be committed.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1749650500.296409",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "oSUm",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 7084] text(x, y, labels) - recycling problems and RFC",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=7084"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #14 from Heather Turner ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ht@heatherturner.net",
+                                "text": "ht@heatherturner.net"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3497\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3497&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3497&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\npatch that handles expressions as well\n\nPatch incorporating Paul's suggestion in Comment 12.\n\nTested with gdiff for patched vs unpatched R-devel r88298, on examples from\ngrid, graphics, grDevices, lattice and ggplot2. \n\nggplot2 also passes "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R CMD check",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " with the patched R-devel, although I had to\nuse "
+                            },
+                            {
+                                "type": "text",
+                                "text": "_R_CHECK_FORCE_SUGGESTS_=FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as I couldn't get ragg to install from\nsource on macOS (all other suggested packages for ggplot2 were installed). \n\nAs this bug is unlikely to be affected by graphics device, I think this patch\nis ready to be committed."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18892] Support the use of netrc when using the libcurl downloader?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18892>\n\n--- Comment #8 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\n&gt; Also it seems there have been some security vulnerabilities related to netrc files in curl (leaking secrets):\n\nAs I understand it, those vulnerabilities seem to be due to `curl` mishandling\n`.netrc` files; they don't seem explicitly like deficiencies in `.netrc`\nitself, per-se.\n\n&gt; What kind of fix did you have in mind? On Unix, the R temporary session directory where the cache is stored by default is only accessible to the user. And when the user provides a custom cache directory, the user has control over its permissions.\n\nI was thinking something like:\n\n- Remove the credentials from the URL before forming the file path, or\n- Use a hash (SHA?) of the URL for the filename.\n\nBut given that the directory is indeed accessible only by the current user, I\nthink you're right that this isn't a huge deal.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1749662354.885309",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "mnU",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18892] Support the use of netrc when using the libcurl downloader?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18892"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #8 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Also it seems there have been some security vulnerabilities related to netrc files in curl (leaking secrets):"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nAs I understand it, those vulnerabilities seem to be due to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "curl",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " mishandling\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": ".netrc",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " files; they don't seem explicitly like deficiencies in "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".netrc",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nitself, per-se.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "What kind of fix did you have in mind? On Unix, the R temporary session directory where the cache is stored by default is only accessible to the user. And when the user provides a custom cache directory, the user has control over its permissions."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI was thinking something like:\n\n- Remove the credentials from the URL before forming the file path, or\n- Use a hash (SHA?) of the URL for the filename.\n\nBut given that the directory is indeed accessible only by the current user, I\nthink you're right that this isn't a huge deal."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 7084] text(x, y, labels) - recycling problems and RFC*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=7084>\n\nPaul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n           Assignee|R-core@R-project.org        |paul@stat.auckland.ac.nz\n             Status|CONFIRMED                   |CLOSED\n\n--- Comment #15 from Paul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) ---\nThanks for the new patch and the extra testing.  This is now in r-devel\n(r88305).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1749693762.668419",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Ddr",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 7084] text(x, y, labels) - recycling problems and RFC",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=7084"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nPaul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n           Assignee|R-core@R-project.org        |paul@stat.auckland.ac.nz\n             Status|CONFIRMED                   |CLOSED\n\n--- Comment #15 from Paul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for the new patch and the extra testing.  This is now in r-devel\n(r88305)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

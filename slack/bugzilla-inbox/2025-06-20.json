@@ -1,0 +1,199 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17853] Path traversal vulnerability with untar(tar=\"internal\"), which affects install.packages*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17853>\n\nIvan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #8 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nCreated attachment 3500\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3500&amp;action=edit>\nAvoid extraction by drive letter\n\nA recent change to make use of `checkPath()` in r88326 when extracting files\nduring `untar()` is a step in the right direction, but there is one contrived\ncase that it currently doesn't cover: on Windows, leading `\/` may be used to\nhide an absolute path with a drive letter from the check:\n\n```\nstopifnot(.Platform$OS.type == 'windows')\n\nname0 &lt;- normalizePath('~\/hello.txt', '\/', FALSE)\nif (file.exists(name0))\n  stop('refusing to overwrite already existing ', sQuote(name))\n\nname &lt;- charToRaw(paste0('\/', name0))\nstopifnot(length(name) &lt;= 100)\ncontent &lt;- charToRaw('hello world\\n')\n\n# adapted from utils::tar\nheader &lt;- raw(512L)\nheader[seq_along(name)] &lt;- name\nheader[101:107] &lt;- charToRaw(sprintf(\"%07o\", as.octmode('0600')))\nheader[125:135] &lt;- charToRaw(sprintf(\"%011o\", length(content)))\nheader[258:262] &lt;- charToRaw(\"ustar\")\nheader[264:265] &lt;- charToRaw(\"0\")\nheader[149:156] &lt;- charToRaw(\" \")\nheader[157L] &lt;- charToRaw(\"0\")\nchecksum &lt;- sum(as.integer(header)) %% 2^24\nheader[149:154] &lt;- charToRaw(sprintf(\"%06o\", as.integer(checksum)))\nheader[155L] &lt;- as.raw(0L)\n\nwriteBin(\n  c(header, content, raw(512L - length(content))),\n  'file.tar'\n)\nuntar('file.tar', exdir = tempdir(), tar = 'internal')\nif (file.exists(name0))\n  stop('extracted ', sQuote(name0), ' by absolute path')\n```\n\nIt's hard to come up with a fix that doesn't duplicate the code too much.\nMoving the leading `\/` check above the drive letter check makes it possible to\nperform a second check for the leading `\/` as part of the drive letter.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1750428289.850099",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "kV30",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17853] Path traversal vulnerability with untar(tar=\"internal\"), which affects install.packages",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17853"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIvan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #8 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3500\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3500&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3500&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nAvoid extraction by drive letter\n\nA recent change to make use of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "checkPath()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in r88326 when extracting files\nduring "
+                            },
+                            {
+                                "type": "text",
+                                "text": "untar()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is a step in the right direction, but there is one contrived\ncase that it currently doesn't cover: on Windows, leading "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " may be used to\nhide an absolute path with a drive letter from the check:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "stopifnot(.Platform$OS.type == 'windows')\n\nname0 <- normalizePath('~\/hello.txt', '\/', FALSE)\nif (file.exists(name0))\n  stop('refusing to overwrite already existing ', sQuote(name))\n\nname <- charToRaw(paste0('\/', name0))\nstopifnot(length(name) <= 100)\ncontent <- charToRaw('hello world\\n')\n\n# adapted from utils::tar\nheader <- raw(512L)\nheader[seq_along(name)] <- name\nheader[101:107] <- charToRaw(sprintf(\"%07o\", as.octmode('0600')))\nheader[125:135] <- charToRaw(sprintf(\"%011o\", length(content)))\nheader[258:262] <- charToRaw(\"ustar\")\nheader[264:265] <- charToRaw(\"0\")\nheader[149:156] <- charToRaw(\" \")\nheader[157L] <- charToRaw(\"0\")\nchecksum <- sum(as.integer(header)) %% 2^24\nheader[149:154] <- charToRaw(sprintf(\"%06o\", as.integer(checksum)))\nheader[155L] <- as.raw(0L)\n\nwriteBin(\n  c(header, content, raw(512L - length(content))),\n  'file.tar'\n)\nuntar('file.tar', exdir = tempdir(), tar = 'internal')\nif (file.exists(name0))\n  stop('extracted ', sQuote(name0), ' by absolute path')\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIt's hard to come up with a fix that doesn't duplicate the code too much.\nMoving the leading "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " check above the drive letter check makes it possible to\nperform a second check for the leading "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as part of the drive letter."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17853] Path traversal vulnerability with untar(tar=\"internal\"), which affects install.packages*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17853>\n\n--- Comment #9 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nThanks, Ivan. I've improved the filtering in R-devel to cover the case you have\ndiscovered. Thanks for the report.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1750441085.486729",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "+5R",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17853] Path traversal vulnerability with untar(tar=\"internal\"), which affects install.packages",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17853"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #9 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks, Ivan. I've improved the filtering in R-devel to cover the case you have\ndiscovered. Thanks for the report."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

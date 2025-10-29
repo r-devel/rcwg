@@ -1,0 +1,242 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18885] browser() handles `if (TRUE)` strangely*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18885>\n\nIvan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #2 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nBug 15770 is related. The current problem stems from how `if`, `while`, `for`,\n`{` determine whether to run the debugger: they do so when the current\nenvironment has the single-step flag set and the current context _doesn't_ have\nthe \"browser finish\" flag set (used by the `f` command). (There are additional\nconditions, e.g. `if` checks for the branch being taken and the body expression\nnot consisting of a call to `{`, which would call the debugger on its own.)\n\nWhen evaluating an `if`-expression from the command prompt of a function being\ndebugged, both conditions end up being true: the environment where the `if` is\nevaluated has the single-step flag on, and `f` is not in action.\n\nWhat if `browser()` disabled single-stepping in the current environment for the\nduration of the REPL expression being evaluated? That would avoid both the\noriginal problem (`RDEBUG` won't be accidentally inherited because it'll be\nunset) and the current problem (REPL expressions won't be single-stepped).\nThere's probably a better way than the following proof-of-concept patch, but it\npasses `LANGUAGE=en TZ=UTC make check-devel` and avoids both problems:\n\n```\nIndex: src\/main\/main.c\n===================================================================\n--- src\/main\/main.c     (revision 88214)\n+++ src\/main\/main.c     (working copy)\n@@ -254,8 +254,9 @@\n                return 0;\n            }\n            \/* PR#15770 We don't want to step into expressions entered at the\ndebug prompt.\n-              The 'S' will be changed back to 's' after the next eval. *\/\n-           if (R_BrowserLastCommand == 's') R_BrowserLastCommand = 'S';\n+              Disable debugging of this environment for the duration of the\ncall. *\/\n+           browsevalue = -RDEBUG(rho);\n+           SET_RDEBUG(rho, 0);\n        }\n        R_Visible = FALSE;\n        R_EvalDepth = 0;\n@@ -274,7 +275,9 @@\n        Rf_callToplevelHandlers(thisExpr, value, TRUE, wasDisplayed);\n        R_CurrentExpr = value; \/* Necessary? Doubt it. *\/\n        UNPROTECT(2); \/* thisExpr, value *\/\n-       if (R_BrowserLastCommand == 'S') R_BrowserLastCommand = 's';\n+       if (browselevel &amp;&amp; browsevalue &lt; 0)\n+           \/* Done evaluating REPL expression, continue stepping. *\/\n+           SET_RDEBUG(rho, 1);\n        R_IoBufferWriteReset(&amp;R_ConsoleIob);\n        state-&gt;prompt_type = 1;\n        return(1);\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1747492034.837109",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "=3az",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18885] browser() handles ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "if (TRUE)",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " strangely",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18885"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIvan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #2 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nBug 15770 is related. The current problem stems from how "
+                            },
+                            {
+                                "type": "text",
+                                "text": "if",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "while",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "for",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "{",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " determine whether to run the debugger: they do so when the current\nenvironment has the single-step flag set and the current context "
+                            },
+                            {
+                                "type": "text",
+                                "text": "doesn't",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " have\nthe \"browser finish\" flag set (used by the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "f",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " command). (There are additional\nconditions, e.g. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "if",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " checks for the branch being taken and the body expression\nnot consisting of a call to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "{",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which would call the debugger on its own.)\n\nWhen evaluating an "
+                            },
+                            {
+                                "type": "text",
+                                "text": "if",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "-expression from the command prompt of a function being\ndebugged, both conditions end up being true: the environment where the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "if",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is\nevaluated has the single-step flag on, and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "f",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is not in action.\n\nWhat if "
+                            },
+                            {
+                                "type": "text",
+                                "text": "browser()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " disabled single-stepping in the current environment for the\nduration of the REPL expression being evaluated? That would avoid both the\noriginal problem ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "RDEBUG",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " won't be accidentally inherited because it'll be\nunset) and the current problem (REPL expressions won't be single-stepped).\nThere's probably a better way than the following proof-of-concept patch, but it\npasses "
+                            },
+                            {
+                                "type": "text",
+                                "text": "LANGUAGE=en TZ=UTC make check-devel",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and avoids both problems:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/main\/main.c\n===================================================================\n--- src\/main\/main.c     (revision 88214)\n+++ src\/main\/main.c     (working copy)\n@@ -254,8 +254,9 @@\n                return 0;\n            }\n            \/* PR#15770 We don't want to step into expressions entered at the\ndebug prompt.\n-              The 'S' will be changed back to 's' after the next eval. *\/\n-           if (R_BrowserLastCommand == 's') R_BrowserLastCommand = 'S';\n+              Disable debugging of this environment for the duration of the\ncall. *\/\n+           browsevalue = -RDEBUG(rho);\n+           SET_RDEBUG(rho, 0);\n        }\n        R_Visible = FALSE;\n        R_EvalDepth = 0;\n@@ -274,7 +275,9 @@\n        Rf_callToplevelHandlers(thisExpr, value, TRUE, wasDisplayed);\n        R_CurrentExpr = value; \/* Necessary? Doubt it. *\/\n        UNPROTECT(2); \/* thisExpr, value *\/\n-       if (R_BrowserLastCommand == 'S') R_BrowserLastCommand = 's';\n+       if (browselevel && browsevalue < 0)\n+           \/* Done evaluating REPL expression, continue stepping. *\/\n+           SET_RDEBUG(rho, 1);\n        R_IoBufferWriteReset(&R_ConsoleIob);\n        state->prompt_type = 1;\n        return(1);\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

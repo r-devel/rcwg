@@ -1,0 +1,204 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18955] cairo library update 1.16 -&gt; 1.18 seems to break font embedding into PDF (R 4.3 -&gt; 4.4 transition)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18955>\n\n--- Comment #13 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nFrom the outputs shown here I tend to agree with Paul that the primary problem\nis probably that the font is not found on Windows, hence it is substituted. The\nsubstituted font is embedded, so embedding works.\n\nI had a closer look using the ggplot2 example. R on Windows uses a call to\ncairo_select_font_face() to find the font. This call is a wrapper for the \"toy\"\nfont finding interface and is generally discouraged in the documentation [1].\nIt seems its behavior has changed with cairo 1.18. What is particularly\nstrange, I can't find any attempts to actually look for font files using\nProcess Monitor.\n\nAs I wrote above, Cairo in Rtools is built with fontconfig support, even though\nR on Windows (as well as Cairo) don't use fontconfig on Windows. Incidentally,\nfontconfig became disabled by default in cairo 1.17, but Rtools enables it\nexplicitly. Note e.g. Msys2 also enables it explicitly.\n\nNow, when I modify R to use fontconfig whenever available, so even on Windows,\nthe example works fine, the font is embedded. We just get a warning from\nfontconfig that the config file is missing, but it falls back to a default that\ncan find the Windows fonts. \n\nFontconfig error: Cannot load default config file: No such file: (null)\n\nWhen I add a default fontconfig config file into \"x64\", so where RTerm is - I\nwas running from Rterm - it is used and the warning goes away.\n\nSo, in summary, it may be that this is a bug in cairo (or, change in behavior)\nthat the toy interface doesn't seem to be working anymore. Using fontconfig\nmight be a work-around, even though it may not be the most natural thing on\nWindows. It may be there would be a way to look up the fonts on Windows some\nother way, avoiding the \"toy\" interface.\n\n[1] <https:\/\/www.cairographics.org\/manual\/cairo-text.html#cairo-select-font-face>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1761054986.108579",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "WsKA",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18955] cairo library update 1.16 -> 1.18 seems to break font embedding into PDF (R 4.3 -> 4.4 transition)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18955"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #13 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nFrom the outputs shown here I tend to agree with Paul that the primary problem\nis probably that the font is not found on Windows, hence it is substituted. The\nsubstituted font is embedded, so embedding works.\n\nI had a closer look using the ggplot2 example. R on Windows uses a call to\ncairo_select_font_face() to find the font. This call is a wrapper for the \"toy\"\nfont finding interface and is generally discouraged in the documentation [1].\nIt seems its behavior has changed with cairo 1.18. What is particularly\nstrange, I can't find any attempts to actually look for font files using\nProcess Monitor.\n\nAs I wrote above, Cairo in Rtools is built with fontconfig support, even though\nR on Windows (as well as Cairo) don't use fontconfig on Windows. Incidentally,\nfontconfig became disabled by default in cairo 1.17, but Rtools enables it\nexplicitly. Note e.g. Msys2 also enables it explicitly.\n\nNow, when I modify R to use fontconfig whenever available, so even on Windows,\nthe example works fine, the font is embedded. We just get a warning from\nfontconfig that the config file is missing, but it falls back to a default that\ncan find the Windows fonts. \n\nFontconfig error: Cannot load default config file: No such file: (null)\n\nWhen I add a default fontconfig config file into \"x64\", so where RTerm is - I\nwas running from Rterm - it is used and the warning goes away.\n\nSo, in summary, it may be that this is a bug in cairo (or, change in behavior)\nthat the toy interface doesn't seem to be working anymore. Using fontconfig\nmight be a work-around, even though it may not be the most natural thing on\nWindows. It may be there would be a way to look up the fonts on Windows some\nother way, avoiding the \"toy\" interface.\n\n[1] "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/www.cairographics.org\/manual\/cairo-text.html#cairo-select-font-face"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18955] cairo library update 1.16 -&gt; 1.18 seems to break font embedding into PDF (R 4.3 -&gt; 4.4 transition)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18955>\n\n--- Comment #14 from Kristian Vlahovicek (<mailto:kristian@bioinfo.hr|kristian@bioinfo.hr>) ---\nThank you Tomas! \n\n\nSo, the way I read it, there seems to have been a change in the way cairo\nbehaves after all! This would explain it all, because, I'm able to perfectly\nrestore functionality just by regressing MXE toolchain to compile with cairo\n1.16. \n\nI did notice that the font selection R uses is referred to in cairo as the\n'toy' approach...\n\nFor the moment, I'm able to continue working by preparing a custom toolchain\nwith cairo 1.16 and then using that to compile Cairo lib from source (I dare\nnot compile the base R exe, not brave enough :) ), and using `CairoPDF()`\ninstead of `cairo_pdf()`\n\nBut it would be nice to get the proper font finding\/embedding back to way it\nused to work...\n\nIs there anything I could do to help in exactly identifying where the problem\nlies? ie is it the lack of fontconfig or cairo itself?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1761055879.604069",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "qwF",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18955] cairo library update 1.16 -> 1.18 seems to break font embedding into PDF (R 4.3 -> 4.4 transition)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18955"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #14 from Kristian Vlahovicek ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kristian@bioinfo.hr",
+                                "text": "kristian@bioinfo.hr"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you Tomas! \n\n\n\nSo, the way I read it, there seems to have been a change in the way cairo\nbehaves after all! This would explain it all, because, I'm able to perfectly\nrestore functionality just by regressing MXE toolchain to compile with cairo\n1.16. \n\nI did notice that the font selection R uses is referred to in cairo as the\n'toy' approach...\n\nFor the moment, I'm able to continue working by preparing a custom toolchain\nwith cairo 1.16 and then using that to compile Cairo lib from source (I dare\nnot compile the base R exe, not brave enough :) ), and using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "CairoPDF()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ninstead of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cairo_pdf()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nBut it would be nice to get the proper font finding\/embedding back to way it\nused to work...\n\nIs there anything I could do to help in exactly identifying where the problem\nlies? ie is it the lack of fontconfig or cairo itself?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18955] cairo library update 1.16 -&gt; 1.18 seems to break font embedding into PDF (R 4.3 -&gt; 4.4 transition)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18955>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #15 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nRight, we should fix or work-around this in R. \n\nI've submitted this to cairo:\n<https:\/\/gitlab.freedesktop.org\/cairo\/cairo\/-\/issues\/911>\n\nBtw, I thought building R from source was easier than building Rtools (but of\ncourse neither of that should be needed by end users).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1761072527.339679",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Pgj",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18955] cairo library update 1.16 -> 1.18 seems to break font embedding into PDF (R 4.3 -> 4.4 transition)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18955"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #15 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nRight, we should fix or work-around this in R. \n\nI've submitted this to cairo:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/gitlab.freedesktop.org\/cairo\/cairo\/-\/issues\/911"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nBtw, I thought building R from source was easier than building Rtools (but of\ncourse neither of that should be needed by end users)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

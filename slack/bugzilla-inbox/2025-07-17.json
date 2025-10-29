@@ -1,0 +1,578 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18918] subassignment from real to complex gives NA (rather than 0) imaginary part*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18918>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CONFIRMED\n                 CC|                            |maechler@stat.math.ethz.ch\n     Ever confirmed|0                           |1\n\n--- Comment #2 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nI agree with Sebastian and would also want to change these.\n\n `checkmate` has a lot of reverse dependencies and a bit many open issues on\nGH.. and `SparseArray` on BioC is also used quite a bit,\nbut then I'd be pretty confident their maintainers could relatively quickly\nupdate these somewhat \"border case\" checks.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1752766288.963339",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "S3eH",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18918] subassignment from real to complex gives NA (rather than 0) imaginary part",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18918"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CONFIRMED\n                 CC|                            |maechler@stat.math.ethz.ch\n     Ever confirmed|0                           |1\n\n--- Comment #2 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI agree with Sebastian and would also want to change these.\n\n "
+                            },
+                            {
+                                "type": "text",
+                                "text": "checkmate",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has a lot of reverse dependencies and a bit many open issues on\nGH.. and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "SparseArray",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " on BioC is also used quite a bit,\nbut then I'd be pretty confident their maintainers could relatively quickly\nupdate these somewhat \"border case\" checks."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18681] [.POSIXlt sets \"balanced\" attribute wrongly*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18681>\n\nMikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CLOSED                      |REOPENED\n         Resolution|FIXED                       |---\n\n--- Comment #4 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nUnfortunately, my analysis in comment 0 was incomplete.  Even with the patch in\nattachment 3320, it is still possible, with out of bounds subscripts, to create\nunbalanced `POSIXlt` objects with attribute `balanced = TRUE`.  Currently, we\nsee:\n\n```\n&gt; (x &lt;- as.POSIXlt(.POSIXct(0, tz = \"UTC\")))\n[1] \"1970-01-01 UTC\"\n&gt; str(unclass(x))\nList of 11\n $ sec   : num 0\n $ min   : int 0\n $ hour  : int 0\n $ mday  : int 1\n $ mon   : int 0\n $ year  : int 70\n $ wday  : int 4\n $ yday  : int 0\n $ isdst : int 0\n $ zone  : chr \"UTC\"\n $ gmtoff: int 0\n - attr(*, \"tzone\")= chr \"UTC\"\n - attr(*, \"balanced\")= logi TRUE\n&gt; str(unclass(x[length(x) + 1L]))\nList of 11\n $ sec   : num NA\n $ min   : int NA\n $ hour  : int NA\n $ mday  : int NA\n $ mon   : int NA\n $ year  : int NA\n $ wday  : int NA\n $ yday  : int NA\n $ isdst : int NA\n $ zone  : chr NA\n $ gmtoff: int NA\n - attr(*, \"tzone\")= chr \"UTC\"\n - attr(*, \"balanced\")= logi TRUE\n```\n\nIt seems that, even if `x` is fully balanced, there is no way to guarantee that\n`x[i]` is fully balanced without either (1) testing that `x[i]` is fully\nbalanced or (2) testing that the subscript `i` is not out of bounds.  Each\noperation would carry nontrivial overhead, so perhaps it is best after all to\nset `balanced = NA` unconditionally ... ?\n\n```\nIndex: src\/library\/base\/R\/datetime.R\n===================================================================\n--- src\/library\/base\/R\/datetime.R       (revision 88424)\n+++ src\/library\/base\/R\/datetime.R       (working copy)\n@@ -1302,7 +1302,7 @@\n         if(mj) # x[i]\n             `attr&lt;-`(.POSIXlt(lapply(unCfillPOSIXlt(x), `[`, i, drop = drop),\n                               attr(x, \"tzone\"), oldClass(x)),\n-                     \"balanced\", if(isTRUE(attr(x, \"balanced\"))) TRUE else NA)\n+                     \"balanced\", NA)\n         else # x[i,j]\n             unCfillPOSIXlt(x)[[j]][i]\n     }\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1752773258.037019",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Cb+d1",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18681] [.POSIXlt sets \"balanced\" attribute wrongly",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18681"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CLOSED                      |REOPENED\n         Resolution|FIXED                       |---\n\n--- Comment #4 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nUnfortunately, my analysis in comment 0 was incomplete.  Even with the patch in\nattachment 3320, it is still possible, with out of bounds subscripts, to create\nunbalanced "
+                            },
+                            {
+                                "type": "text",
+                                "text": "POSIXlt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " objects with attribute "
+                            },
+                            {
+                                "type": "text",
+                                "text": "balanced = TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  Currently, we\nsee:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> (x <- as.POSIXlt(.POSIXct(0, tz = \"UTC\")))\n[1] \"1970-01-01 UTC\"\n> str(unclass(x))\nList of 11\n $ sec   : num 0\n $ min   : int 0\n $ hour  : int 0\n $ mday  : int 1\n $ mon   : int 0\n $ year  : int 70\n $ wday  : int 4\n $ yday  : int 0\n $ isdst : int 0\n $ zone  : chr \"UTC\"\n $ gmtoff: int 0\n - attr(*, \"tzone\")= chr \"UTC\"\n - attr(*, \"balanced\")= logi TRUE\n> str(unclass(x[length(x) + 1L]))\nList of 11\n $ sec   : num NA\n $ min   : int NA\n $ hour  : int NA\n $ mday  : int NA\n $ mon   : int NA\n $ year  : int NA\n $ wday  : int NA\n $ yday  : int NA\n $ isdst : int NA\n $ zone  : chr NA\n $ gmtoff: int NA\n - attr(*, \"tzone\")= chr \"UTC\"\n - attr(*, \"balanced\")= logi TRUE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIt seems that, even if "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is fully balanced, there is no way to guarantee that\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "x[i]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is fully balanced without either (1) testing that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x[i]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is fully\nbalanced or (2) testing that the subscript "
+                            },
+                            {
+                                "type": "text",
+                                "text": "i",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is not out of bounds.  Each\noperation would carry nontrivial overhead, so perhaps it is best after all to\nset "
+                            },
+                            {
+                                "type": "text",
+                                "text": "balanced = NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " unconditionally ... ?\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/base\/R\/datetime.R\n===================================================================\n--- src\/library\/base\/R\/datetime.R       (revision 88424)\n+++ src\/library\/base\/R\/datetime.R       (working copy)\n@@ -1302,7 +1302,7 @@\n         if(mj) # x[i]\n             `attr<-`(.POSIXlt(lapply(unCfillPOSIXlt(x), `[`, i, drop = drop),\n                               attr(x, \"tzone\"), oldClass(x)),\n-                     \"balanced\", if(isTRUE(attr(x, \"balanced\"))) TRUE else NA)\n+                     \"balanced\", NA)\n         else # x[i,j]\n             unCfillPOSIXlt(x)[[j]][i]\n     }\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18681] [.POSIXlt sets \"balanced\" attribute wrongly*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18681>\n\n--- Comment #5 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nHmm, interesting ... but very border-case I'd say.... and I do not see this a\nbug, since the result of your `x[length(x) + 1L]`  *is* balanced in some sense:\nIf you balance it, it does not change  ... which I could take as a reasonal\ndefinition of 'balanced' :\n```\n&gt; (d1 &lt;- as.POSIXlt(.POSIXct(1, tz = \"UTC\")))\n[1] \"1970-01-01 00:00:01 UTC\"\n&gt; dput(dNA2 &lt;- d1[2])\nstructure(list(sec = NA_real_, min = NA_integer_, hour = NA_integer_, \n    mday = NA_integer_, mon = NA_integer_, year = NA_integer_, \n    wday = NA_integer_, yday = NA_integer_, isdst = NA_integer_, \n    zone = NA_character_, gmtoff = NA_integer_), class = c(\"POSIXlt\", \n\"POSIXt\"), tzone = \"UTC\", balanced = TRUE)\n&gt; identical(dNA2, balancePOSIXlt(dNA2))\n[1] TRUE\n&gt; \n```\n\nYes, one could critize the `[.POSIXlt` method here, but I think not because it\nkeeps `balanced = TRUE` but rather as it does not return the identical object\nas `as.POSIXlt(NA ..)`:\n```\n&gt; dput(dNA &lt;- as.POSIXlt(NA, tz=\"UTC\"))\nstructure(list(sec = NA_real_, min = NA_integer_, hour = NA_integer_, \n    mday = NA_integer_, mon = NA_integer_, year = NA_integer_, \n    wday = NA_integer_, yday = NA_integer_, isdst = -1L, zone = \"UTC\", \n    gmtoff = 0L), class = c(\"POSIXlt\", \"POSIXt\"), tzone = \"UTC\", balanced =\nTRUE)\n```\nwhich has non-NA  `(isdst, zone, gmtoff)` list entries whereas the `x[2]`\n(out-of-bound index) had `NA` everywhere.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1752777632.419169",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "AC4",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18681] [.POSIXlt sets \"balanced\" attribute wrongly",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18681"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nHmm, interesting ... but very border-case I'd say.... and I do not see this a\nbug, since the result of your "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x[length(x) + 1L]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "is",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " balanced in some sense:\nIf you balance it, it does not change  ... which I could take as a reasonal\ndefinition of 'balanced' :"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> (d1 <- as.POSIXlt(.POSIXct(1, tz = \"UTC\")))\n[1] \"1970-01-01 00:00:01 UTC\"\n> dput(dNA2 <- d1[2])\nstructure(list(sec = NA_real_, min = NA_integer_, hour = NA_integer_, \n    mday = NA_integer_, mon = NA_integer_, year = NA_integer_, \n    wday = NA_integer_, yday = NA_integer_, isdst = NA_integer_, \n    zone = NA_character_, gmtoff = NA_integer_), class = c(\"POSIXlt\", \n\"POSIXt\"), tzone = \"UTC\", balanced = TRUE)\n> identical(dNA2, balancePOSIXlt(dNA2))\n[1] TRUE\n> \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nYes, one could critize the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "[.POSIXlt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method here, but I think not because it\nkeeps "
+                            },
+                            {
+                                "type": "text",
+                                "text": "balanced = TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " but rather as it does not return the identical object\nas "
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.POSIXlt(NA ..)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> dput(dNA <- as.POSIXlt(NA, tz=\"UTC\"))\nstructure(list(sec = NA_real_, min = NA_integer_, hour = NA_integer_, \n    mday = NA_integer_, mon = NA_integer_, year = NA_integer_, \n    wday = NA_integer_, yday = NA_integer_, isdst = -1L, zone = \"UTC\", \n    gmtoff = 0L), class = c(\"POSIXlt\", \"POSIXt\"), tzone = \"UTC\", balanced =\nTRUE)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "which has non-NA  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(isdst, zone, gmtoff)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " list entries whereas the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x[2]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n(out-of-bound index) had "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " everywhere."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18681] [.POSIXlt sets \"balanced\" attribute wrongly*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18681>\n\n--- Comment #6 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\n(In reply to Martin Maechler from comment #5)\n&gt; If you balance it, it does not change  ... which I could take as a reasonal\n&gt; definition of 'balanced' :\n\nIt does not change because `balancePOSIXlt(x)` returns `x` immediately if\n`attr(x, \"balanced\")` is `TRUE`.  We should be comparing `x` and ``\nbalancePOSIXlt(`attr&lt;-`(x, \"balanced\", NA)) ``:\n\n```\n&gt; identical(dNA2, balancePOSIXlt(`attr&lt;-`(dNA2, \"balanced\", NA)))\n[1] FALSE\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1752778199.671189",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "cGj",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18681] [.POSIXlt sets \"balanced\" attribute wrongly",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18681"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #6 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Martin Maechler from comment #5)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "If you balance it, it does not change  ... which I could take as a reasonal\ndefinition of 'balanced' :"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIt does not change because "
+                            },
+                            {
+                                "type": "text",
+                                "text": "balancePOSIXlt(x)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " returns "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " immediately if\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "attr(x, \"balanced\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  We should be comparing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and ``\nbalancePOSIXlt("
+                            },
+                            {
+                                "type": "text",
+                                "text": "attr<-",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "(x, \"balanced\", NA)) ``:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> identical(dNA2, balancePOSIXlt(`attr<-`(dNA2, \"balanced\", NA)))\n[1] FALSE\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

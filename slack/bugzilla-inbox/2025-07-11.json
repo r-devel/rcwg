@@ -1,0 +1,838 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18888] pchisq(0,0) returns 0, not 1*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18888>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|CONFIRMED                   |CLOSED\n\n--- Comment #4 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nI have now committed changes to `GammaDist.Rd` and `Chisquare.Rd` (svn rev\n88402),\nwith thanks to you, Robert,\nand following your suggestions in comment 2.\n\nYour comment 3 is correct, and is really according to the general rule in R for\nsuch \"special\"  continuous functions: \n\n `f(*, a = Inf)` should give the result of the (mathematical) limit `\\lim_{a -&gt;\noo} f(*,a)`",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1752239462.273579",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "36k",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18888] pchisq(0,0) returns 0, not 1",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18888"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|CONFIRMED                   |CLOSED\n\n--- Comment #4 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI have now committed changes to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "GammaDist.Rd",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Chisquare.Rd",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (svn rev\n88402),\nwith thanks to you, Robert,\nand following your suggestions in comment 2.\n\nYour comment 3 is correct, and is really according to the general rule in R for\nsuch \"special\"  continuous functions: \n\n "
+                            },
+                            {
+                                "type": "text",
+                                "text": "f(*, a = Inf)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " should give the result of the (mathematical) limit `\\lim_{a ->\noo} f(*,a)`"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18897] hatvalues for class \"nls\"*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18897>\n\n--- Comment #1 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nThis proposal looks ok to me (but the argument needs to be called `model`, not\n`object`).  \n\nAlso, for the `\"plinear\"` case, I'd use `.NotYetImplemented()` here, as I think\nan implementation is not hard, just tedious:  After all, e.g., the gradient wrt\nto the *linear* parameters is trivial and so I'd be confident that with a few\nextra lines that case could be implemented with some but limited effort. ... or\nless efficient computationally, but much easier for the programmer, you'd refit\nusing `algorithm=\"default\"` but be starting from the fitted parameters of the\n\"plinear\" fit.\n\nConsequently, my definition of  `hatvalues.nls` is currently  \n\n```\nhatvalues.nls &lt;- function (model, ...)\n{\n    if (inherits(mm &lt;- model$m, \"nlsModel.plinear\")) {\n        .NotYetImplemented(\"hatvalues() for nls(*, algorithm='plinear')\")\n    } else {\n        grad &lt;- mm$gradient()\n        rowSums(grad %*% chol2inv(mm$Rmat()) * grad)\n    }\n}\n```\n\nNo need for a new patch for `nls.R` but some regr-testing code + *.Rd file\nupdates would be nice to complete this.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1752242429.643029",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "0vM",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18897] hatvalues for class \"nls\"",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18897"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThis proposal looks ok to me (but the argument needs to be called "
+                            },
+                            {
+                                "type": "text",
+                                "text": "model",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", not\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "object",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ").  \n\nAlso, for the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"plinear\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " case, I'd use "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".NotYetImplemented()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " here, as I think\nan implementation is not hard, just tedious:  After all, e.g., the gradient wrt\nto the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "linear",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " parameters is trivial and so I'd be confident that with a few\nextra lines that case could be implemented with some but limited effort. ... or\nless efficient computationally, but much easier for the programmer, you'd refit\nusing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "algorithm=\"default\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " but be starting from the fitted parameters of the\n\"plinear\" fit.\n\nConsequently, my definition of  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "hatvalues.nls",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is currently  \n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "hatvalues.nls <- function (model, ...)\n{\n    if (inherits(mm <- model$m, \"nlsModel.plinear\")) {\n        .NotYetImplemented(\"hatvalues() for nls(*, algorithm='plinear')\")\n    } else {\n        grad <- mm$gradient()\n        rowSums(grad %*% chol2inv(mm$Rmat()) * grad)\n    }\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nNo need for a new patch for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nls.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " but some regr-testing code + *.Rd file\nupdates would be nice to complete this."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17684] X11 event handling regression (?) in scrolling detection*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17684>\n\nTrevor Davis (<mailto:trevor.l.davis@gmail.com|trevor.l.davis@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |trevor.l.davis@gmail.com\n\n--- Comment #4 from Trevor Davis (<mailto:trevor.l.davis@gmail.com|trevor.l.davis@gmail.com>) ---\n&gt; Also, your patch seems to directly revert the bug fix #16700 ... or is this a wrong impression from code reading?\n&gt; Did you check that your patch keeps bug #16700 fixed?\n\nI observe that it does not keep bug #16700 fixed.  Here is a table comparing\nthe graphic event integer values I observe with `x11()` before and after bug\nfix #16700 and for comparison what two Windows users told me what currently\nhappens with `windows()`:\n\n| | `x11()` current | `windows()` current | `x11()` prior bug fix #16700 |\n|---|---|---|---|\n| left click | `0L` | `0L` | `0L` |\n| left release | `0L` | `integer(0)` | `0L` |\n| scroll wheel click | `1L` | `1L` or undetected | `1L` |\n| scroll wheel release | `1L` | `integer(0)` or undetected | `1L` |\n| right click | `2L` | `2L` | `c(0L, 1L)` |\n| right release | `2L` | `integer(0)` | `c(0L, 1L)` |\n| scroll wheel up | `integer(0)` | undetected | `2L` |\n| scroll wheel down | `integer(0)` | undetected | `c(0L, 2L)` |\n\nNote in particular after the bug fix #16700 when moving a mouse values like\n`(0L, 2L)` now represent that both the left and right buttons are pressed down\nwhich seems desirable to preserve and the right click value better matches what\n`windows()` returns.\n\nI speculate instead of reverting to the old `x11()` scrolling behavior ideally\nwe'd want instead for `scroll wheel up` to report `3L` and `scroll wheel down`\nto report `4L`.  Then each R graphics event integer would be the X11 Button\nnumber minus one:\n\n|    | X11 Button | R graphics event integer |\n|---|---|---|\n| left click | Button1 | 0 |\n| scroll wheel click | Button2 | 1 |\n| right click | Button3 | 2 |\n| scroll up | Button4 | 3 |\n| scroll down | Button5 | 4 |",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1752254879.916219",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "GRp",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17684] X11 event handling regression (?) in scrolling detection",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17684"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTrevor Davis ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:trevor.l.davis@gmail.com",
+                                "text": "trevor.l.davis@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |trevor.l.davis@gmail.com\n\n--- Comment #4 from Trevor Davis ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:trevor.l.davis@gmail.com",
+                                "text": "trevor.l.davis@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Also, your patch seems to directly revert the bug fix #16700 ... or is this a wrong impression from code reading?\nDid you check that your patch keeps bug #16700 fixed?"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI observe that it does not keep bug #16700 fixed.  Here is a table comparing\nthe graphic event integer values I observe with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x11()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " before and after bug\nfix #16700 and for comparison what two Windows users told me what currently\nhappens with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "windows()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n| | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x11()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " current | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "windows()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " current | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x11()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " prior bug fix #16700 |\n|---|---|---|---|\n| left click | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "0L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "0L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "0L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| left release | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "0L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "integer(0)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "0L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| scroll wheel click | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "1L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "1L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or undetected | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "1L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| scroll wheel release | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "1L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "integer(0)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or undetected | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "1L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| right click | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "2L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "2L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "c(0L, 1L)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| right release | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "2L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "integer(0)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "c(0L, 1L)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| scroll wheel up | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "integer(0)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | undetected | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "2L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| scroll wheel down | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "integer(0)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | undetected | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "c(0L, 2L)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n\nNote in particular after the bug fix #16700 when moving a mouse values like\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(0L, 2L)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " now represent that both the left and right buttons are pressed down\nwhich seems desirable to preserve and the right click value better matches what\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "windows()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " returns.\n\nI speculate instead of reverting to the old "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x11()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " scrolling behavior ideally\nwe'd want instead for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "scroll wheel up",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to report "
+                            },
+                            {
+                                "type": "text",
+                                "text": "3L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "scroll wheel down",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nto report "
+                            },
+                            {
+                                "type": "text",
+                                "text": "4L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  Then each R graphics event integer would be the X11 Button\nnumber minus one:\n\n|    | X11 Button | R graphics event integer |\n|---|---|---|\n| left click | Button1 | 0 |\n| scroll wheel click | Button2 | 1 |\n| right click | Button3 | 2 |\n| scroll up | Button4 | 3 |\n| scroll down | Button5 | 4 |"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18916] New: Clarify that pnorm, pt, etc, are cumulative distribution functions*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18916>\n\n            Bug ID: 18916\n           Summary: Clarify that pnorm, pt, etc, are cumulative\n                    distribution functions\n           Product: R\n           Version: R 4.5.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: enhancement\n          Priority: P5\n         Component: Documentation\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:dmuenz@gmail.com|dmuenz@gmail.com>\n\nFor the p* family of cumulative distribution functions (e.g., pnorm and pt), I\nthink the documentation would be clearer if the functions were referred to as\n\"cumulative distribution functions\" rather than just \"distribution functions\".\nThe latter, though correct, seems too vague and thus potentially confusing.\nThanks for your consideration.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1752261673.585539",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "b5p=U",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18916] New: Clarify that pnorm, pt, etc, are cumulative distribution functions",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18916"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18916\n           Summary: Clarify that pnorm, pt, etc, are cumulative\n                    distribution functions\n           Product: R\n           Version: R 4.5.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: enhancement\n          Priority: P5\n         Component: Documentation\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:dmuenz@gmail.com",
+                                "text": "dmuenz@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nFor the p* family of cumulative distribution functions (e.g., pnorm and pt), I\nthink the documentation would be clearer if the functions were referred to as\n\"cumulative distribution functions\" rather than just \"distribution functions\".\nThe latter, though correct, seems too vague and thus potentially confusing.\nThanks for your consideration."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18916] Clarify that pnorm, pt, etc, are cumulative distribution functions*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18916>\n\nSebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n                 CC|                            |seb.meyer@fau.de\n             Status|UNCONFIRMED                 |CONFIRMED\n\n--- Comment #1 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\nThanks. I agree CDF is clearer and ?Distributions uses this terminology for\n'pxxx' as well, so I'd be happy to see this adopted on the individual help\npages. I believe a patch against the svn trunk would be welcome.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1752263635.248039",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "\/ePr",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18916] Clarify that pnorm, pt, etc, are cumulative distribution functions",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18916"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n                 CC|                            |seb.meyer@fau.de\n             Status|UNCONFIRMED                 |CONFIRMED\n\n--- Comment #1 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks. I agree CDF is clearer and ?Distributions uses this terminology for\n'pxxx' as well, so I'd be happy to see this adopted on the individual help\npages. I believe a patch against the svn trunk would be welcome."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

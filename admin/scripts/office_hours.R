@@ -1,22 +1,23 @@
 # Data for next office hours ----------------------------------------------
 
 # UTC times
-# Invite Michael!!
-# Thurs Nov 13 10am and 17:30pm (EMEA/APAC Perth: 5pm, Melbourne: 9pm Thurs Nov 13 | AMER PDT 9:30, Hamilton 13:30pm Thurs Nov 13, usual winter time)
-# Thurs Dec 11 03:30am, 10am, 8pm (APAC UTC 3:30 am, IST 9am, Jakarta 10:30am, Auckland: 4:30pm  Thurs Nov 13 | EMEA UK Thurs 10am | AMER PDT: 12pm, UK: 8pm, Auckland: Fri 9am)
+# Thurs Dec 11 10am, 8pm (EMEA UK Thurs 10am | AMER PDT: 12pm, UK: 8pm, Auckland: Fri Dec 12 9am)
+# Fri Dec 12 02:00am (APAC UTC 2:00 am, IST 7:30am, Jakarta 09:00am, Auckland: 3:00pm)
 
 # January: back to winter times?
 
-day <- 14 # day number
-month <- "October"
+day <- c(11, 11, 12) # day number
+month <- "December"
 
-meetup <- c(emea = "https://www.meetup.com/r-contributors/events/308410639/",
-            amer = "https://www.meetup.com/r-contributors/events/311125443/")
+meetup <- c(emea = "https://www.meetup.com/r-contributors/events/311344152/",
+            amer = "https://www.meetup.com/r-contributors/events/311344204/",
+            apac = "https://www.meetup.com/r-contributors/events/311344211/")
 
-zoom <- c(emea = "https://us02web.zoom.us/j/86872140379?pwd=Dx3XGa4jFibEDOMW8k1GuC0zcaBrw0.1",
-          amer = "https://us02web.zoom.us/j/83913220856?pwd=hkBMRbH72eXz8zNEYiQB3LzOXETrGZ.1")
+zoom <- c(emea = "https://us02web.zoom.us/j/82709474418?pwd=LSoxPzjbCKfZ4Dzqw3EVAGwPFqN43R.1",
+          amer = "https://us02web.zoom.us/j/89905390972?pwd=PQYglr5EKLUfIuhflLX4bxHIibM6RI.1",
+          apac = "https://us02web.zoom.us/j/89168945557?pwd=ea8BgaXNAZpiRyQjhNKZyZSBNDFS5j.1")
 
-utc_times <- c("09:00", "16:30")
+utc_times <- c("10:00", "20:00", "02:00")
 
 ## will need to adapt functions for separate EMEA/APAC meetings!
 
@@ -74,7 +75,7 @@ source("admin/R/social_post.R")
 # "office_hour_reminder" for mastodon/slack reminders
 post <- office_hour_post(month, day, utc_times,
                          meetup, zoom,
-                         venue = "slack",
+                         venue = "rweekly",
                          templates = "admin/posts/office_hour")
 
 # Mastodon via Buffer ------------------------------------
@@ -82,8 +83,8 @@ post <- office_hour_post(month, day, utc_times,
 # Also Bluesky by bridging. No longer post on Twitter.
 # This could replaced by rtoot now, but won't schedule in advance
 
-post <- office_hour_post(month, day, utc_times,
-                         meetup, zoom,
+post <- office_hour_post(month, day[3], utc_times[3],
+                         meetup[3], zoom[3],
                          venue = "mastodon",
                          templates = "admin/posts/office_hour")
 
@@ -171,13 +172,13 @@ linkedin_createevent(browser = browser,
                      image = normalizePath("admin/brooke-cagle-g1Kr4Ozfoac-unsplash.jpg"),
                      alttext = "Three people laughing together, as they sit around a table with laptops, notebooks and drinks.",
                      eventtype = "^External event link",
-                     name = "R Contributor Office Hour (EMEA/APAC)",
+                     name = "R Contributor Office Hour (EMEA)",
                      tz = "(UTC+00:00) Coordinated Universal Time",
-                     startday = day,
+                     startday = day[1],
                      startmonth = month,
-                     starttime = "09:00", #UTC time
-                     endtime = "10:00",
-                     eventlink = emea,
+                     starttime = "10:00", #UTC time
+                     endtime = "11:00",
+                     eventlink = meetup["emea"],
                      description = description,
                      postcontent = postcontent)
 
@@ -198,13 +199,39 @@ linkedin_createevent(browser = browser,
                      alttext = "Three people laughing together, as they sit around a table with laptops, notebooks and drinks.",
                      eventtype = "^External event link",
                      name = "R Contributor Office Hour (AMER)",
-                     tz = "(UTC-07:00) Pacific Time (US and Canada)", # during summer
-                     #tz = "(UTC-08:00) Pacific Time (US and Canada), Tijuana",
-                     startday = day,
+                     #tz = "(UTC-07:00) Pacific Time (US and Canada)", # during summer
+                     tz = "(UTC-08:00) Pacific Time (US and Canada), Tijuana",
+                     startday = day[2],
                      startmonth = month,
-                     starttime = "09:30",
-                     endtime = "10:30",
-                     eventlink = amer,
+                     starttime = "12:00",
+                     endtime = "13:00",
+                     eventlink = meetup["amer"],
+                     description = description,
+                     postcontent = postcontent)
+
+description <- "Join the #RStats Asia-Pacific Office Hour to
+- discuss how to get started contributing to R
+- get help/feedback on contributions you are working on
+- look at open bugs/work on message translations together
+"
+
+postcontent <- list(
+    "Join the #RStats Asia-Pacific Office Hour to",
+    key = "enter", "- discuss how to get started contributing to R",
+    key = "enter", "- get help/feedback on contributions you are working on",
+    key = "enter", "- look at open bugs/work on message translations together")
+
+linkedin_createevent(browser = browser,
+                     image = normalizePath("admin/brooke-cagle-g1Kr4Ozfoac-unsplash.jpg"),
+                     alttext = "Three people laughing together, as they sit around a table with laptops, notebooks and drinks.",
+                     eventtype = "^External event link",
+                     name = "R Contributor Office Hour (APAC)",
+                     tz = "(UTC-08:00) Pacific Time (US and Canada), Tijuana",
+                     startday = day[3],
+                     startmonth = month,
+                     starttime = "15:00",
+                     endtime = "16:00",
+                     eventlink = meetup["apac"],
                      description = description,
                      postcontent = postcontent)
 

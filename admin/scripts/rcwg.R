@@ -9,16 +9,24 @@ source("admin/R/update_readme_dates.R")
 ### 2025 dates
 
 # Tues
-# Oct 21 (UTC 18:30)
-# Nov 18/19 (UTC 19:30; Melbourne 19 Dec 06:30 am [Auckland 08:30pm, San Fran 11:30pm, Hamilton 3:30pm, Copenhagen 8:30pm])
 # Dec 18/19 (UTC 19:30; Auckland 19 December 08:30am)
+
+### 2026 dates
+
+# not set up at all yet, need to confirm
+# Fri
+# Jan 23 UTC 15:00
+
+month <- "December"
+day <- 18
+time <- "19:30" # UTC !!
+zoom <- "https://us02web.zoom.us/j/88612135282?pwd=ZzSjahkaTd0cC4XQjMOI5WzZnW4IZH.1"
 
 # times here are UK times!
 # second number is n'th 'day' of the month, e.g. `3, "Friday"` = 3rd Friday
 # !! Think I have inconsistency here: Slack message and Twitter/Mastodon were wrong last time
-update_readme_dates(1, "October", 3, "Tuesday", "19:30", 2025)
-update_readme_dates(2, "November", 3, "Tuesday", "19:30", 2025)
-#update_readme_dates(2, "December", 3, "Thursday", "19:30", 2025)
+update_readme_dates(1, "December", 3, "Thursday", "19:30", 2025)
+update_readme_dates(2, "January", 4, "Friday", "15:00", 2026)
 
 
 # Update RCWG contacts ---------------------------------------------------------
@@ -60,6 +68,9 @@ system(paste("kill -1", pid))
 ## (use one on R Contribution Working Group Calendar, so it shows as this when email)
 ## (paste and enter for comma-separated list to be added in bulk)
 ## - turn off option for people to see full guest list
+## - add unsubscribe notice
+You are being invited as a subscriber to the R-Contribution-WG mailing list, please visit
+https://stat.ethz.ch/mailman/listinfo/r-contribution-wg if you wish to unsubscribe.
 ## - add specific agenda items to Google calendar invite (RCWG calendar)
 
 # Social media posts ------------------------------------------------------
@@ -70,16 +81,13 @@ source("admin/R/buffer_post.R")
 # auth_setup() # choose user token and login as RContributors on Mastodon
 
 # slack announcement
-month <- "October"
-day <- 21
-time <- "18:30" # UTC !!
 weekday <- get_weekday(day, month, abbreviate = TRUE)
 agenda = c(
-" - R Dev Days past/upcoming
- - Good practices on R-devel repos
- - Birdaro training mid-way report"
+" - R Dev Day updates
+ - Birdaro training (community playbook)
+ - Research Software Maintenance Fund project"
 )
-zoom <- "https://us02web.zoom.us/j/88612135282?pwd=ZzSjahkaTd0cC4XQjMOI5WzZnW4IZH.1"
+
 post <- social_post(weekday = weekday,
                     day = day,
                     month = month,
@@ -113,7 +121,7 @@ buffer_signin(browser = browser,
 buffer_createpost(browser = browser,
                   day = NULL, # number, day of month
                   month = NULL, # month number
-                  time = "18:30", # UTC
+                  time = time, # UTC
                   venue = "mastodon",
                   postcontent = post)
 
@@ -122,3 +130,4 @@ browser$close()
 # stop server
 pid <- system2("lsof", "-t -i :5556", stdout = TRUE)
 system(paste("kill -1", pid))
+

@@ -26,8 +26,8 @@ Después de la [Incubadora de ideas](ideas_incubator.md) en agosto-septiembre de
 We meet (on Zoom) every 1-2 months, usually alternating between the third Friday of the month, 15:00 UTC and the third Tuesday of the month, 19:30 UTC (-1hr during Daylight Savings Time in Europe). 
 
 Next planned meeting(s):
- - Thursday, December 18, 2025, 19:30-20:30 UTC ([find your local time](https://arewemeetingyet.com/UTC/2025-12-18/19:30/R%20Contribution%20Working%20Group)).
  - Friday, January 23, 2026, 15:00-16:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2026-01-23/15:00/R%20Contribution%20Working%20Group)).
+ - Tuesday, February 17, 2026, 19:30-20:30 UTC ([find your local time](https://arewemeetingyet.com/UTC/2026-02-17/19:30/R%20Contribution%20Working%20Group)).
 
 Meeting details will be posted on the [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), or you can email rowforwards@gmail.com to be added to/removed from the mailing list to receive meeting invitations.
 
@@ -37,8 +37,8 @@ Meeting details will be posted on the [R-Devel Slack Group](https://forwards.git
 Nos reunimos (en Zoom) cada 1-2 meses, alternando entre el cuarto viernes del mes, 15:00 UTC y el cuarto martes del mes, 19:30 UTC (-1 hora durante el horario de verano).
 
 Próximas reuniones planificadas:
- - jueves 18 de diciembre de 2025, 19:30-20:30 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2025-12-18/19:30/Grupo%20de%20trabajo%20de%20contribución%20R)).
  - viernes 23 de enero de 2026, 15:00-16:00 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2026-01-23/15:00/Grupo%20de%20trabajo%20de%20contribución%20R)).
+ - martes 17 de febrero de 2026, 19:30-20:30 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2026-02-17/19:30/Grupo%20de%20trabajo%20de%20contribución%20R)).
 
 Los detalles de la reunión se publicarán en [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), o puede enviar un correo electrónico a rowforwards@gmail.com para que lo agreguen o eliminen de la lista de correo para recibir invitaciones a reuniones.
 

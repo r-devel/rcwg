@@ -1,0 +1,330 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18962] New: dyn.unload does not call R_unload_lib*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18962>\n\n            Bug ID: 18962\n           Summary: dyn.unload does not call R_unload_lib\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: miguel@dull.systems\n\nCreated attachment 3558\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3558&amp;action=edit>\nPatch\n\nThe Writing R extensions manual, [section\n5.3](<https:\/\/cran.r-project.org\/doc\/manuals\/r-devel\/R-exts.html#dyn%5F002eload-and-dyn%5F002eunload-1>)\nsays that the act of unloading a DLL triggers the execution of `R_unload_lib`\n(where \"lib\" is the name of the target DLL file with the extension removed).\nThis does not happen, generally.\n\nThe easiest way of reproducing this error is to load the `eicm` library,\navailable on CRAN and then unload its associated DLL. I've picked `eicm`\nbecause the `R_unload_eicm` function [emits a diagnostic\nmessage](<https:\/\/github.com\/cran\/eicm\/blob\/master\/src\/init.c#L55>) during\nexecution.\n\nThe steps to reproduce the issue are:\n```\ninstall.packages('eicm') # if not previously installed\nlibrary('eicm')\ndyn.unload(getLoadedDLLs()[[\"eicm\"]][[\"path\"]])\n```\nThe last command fails to print the expected \"Releasing logit lookup tables\"\nmessage.\nAfter applying the attached patch, the diagnostic message does appear.\n\nThis issue affects 26 CRAN packages (cplm, curl, dbarts, dparser, eicm, farver,\ngeos, git2r, ichimoku, irlba, keyring, lfe, Matrix, mcmcsae, nanonext,\nnonmem2rx, rjags, robustlmm, RProtoBuf, Runuran, rxode2, stringi, systemfonts,\ntextshaping, TMB and TPmsm).\n\nI have excluded 25 more packages that define an empty `R_unload_` function.\n\nPackages that enable dynamic lookup (look for `TRUE` in the \"Dynamic.Lookup\"\ncolumn of the output of `getLoadedDLLs()`) are unaffected.\n\n----\n\nThe suggested fix replaces `R_dlsym` (whose purpose is to look for registered\nsymbols) with `R_osDynSymbol-&gt;dlsym` (which does not care about symbol\nregistration status). This latter routine is [the one used to look\nfor](<https:\/\/github.com\/r-devel\/r-svn\/blob\/8675c09bd70d7bfaef8a031f58cef353c421daaa\/src\/main\/Rdynload.c#L897>)\nthe `R_init_lib` symbol during initialization, so it makes sense to use it for\npurposes of unloading.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1761812736.385629",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "dED",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18962] New: dyn.unload does not call R_unload_lib",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18962"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18962\n           Summary: dyn.unload does not call R_unload_lib\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: miguel@dull.systems\n\nCreated attachment 3558\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3558&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3558&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch\n\nThe Writing R extensions manual, [section\n5.3]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/cran.r-project.org\/doc\/manuals\/r-devel\/R-exts.html#dyn%5F002eload-and-dyn%5F002eunload-1"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\nsays that the act of unloading a DLL triggers the execution of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_unload_lib",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n(where \"lib\" is the name of the target DLL file with the extension removed).\nThis does not happen, generally.\n\nThe easiest way of reproducing this error is to load the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "eicm",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " library,\navailable on CRAN and then unload its associated DLL. I've picked "
+                            },
+                            {
+                                "type": "text",
+                                "text": "eicm",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nbecause the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_unload_eicm",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " function [emits a diagnostic\nmessage]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/cran\/eicm\/blob\/master\/src\/init.c#L55"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") during\nexecution.\n\nThe steps to reproduce the issue are:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "install.packages('eicm') # if not previously installed\nlibrary('eicm')\ndyn.unload(getLoadedDLLs()[[\"eicm\"]][[\"path\"]])\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "The last command fails to print the expected \"Releasing logit lookup tables\"\nmessage.\nAfter applying the attached patch, the diagnostic message does appear.\n\nThis issue affects 26 CRAN packages (cplm, curl, dbarts, dparser, eicm, farver,\ngeos, git2r, ichimoku, irlba, keyring, lfe, Matrix, mcmcsae, nanonext,\nnonmem2rx, rjags, robustlmm, RProtoBuf, Runuran, rxode2, stringi, systemfonts,\ntextshaping, TMB and TPmsm).\n\nI have excluded 25 more packages that define an empty "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_unload_",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " function.\n\nPackages that enable dynamic lookup (look for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in the \"Dynamic.Lookup\"\ncolumn of the output of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getLoadedDLLs()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") are unaffected.\n\n----\n\nThe suggested fix replaces "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_dlsym",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (whose purpose is to look for registered\nsymbols) with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_osDynSymbol->dlsym",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (which does not care about symbol\nregistration status). This latter routine is [the one used to look\nfor]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/8675c09bd70d7bfaef8a031f58cef353c421daaa\/src\/main\/Rdynload.c#L897"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\nthe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_init_lib",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " symbol during initialization, so it makes sense to use it for\npurposes of unloading."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18962] dyn.unload does not call R_unload_lib*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18962>\n\n--- Comment #1 from Miguel Lechon (miguel@dull.systems) ---\nThe suggested diff comes from [PR\n214](<https:\/\/github.com\/r-devel\/r-svn\/pull\/214>) to r-devel\/r-svn. I believe the\nfailing \"MacOS-15-intel\" check is pre-existing and unrelated.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1761826758.883989",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "9Jj",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18962] dyn.unload does not call R_unload_lib",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18962"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Miguel Lechon (miguel@dull.systems) ---\nThe suggested diff comes from [PR\n214]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/pull\/214"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") to r-devel\/r-svn. I believe the\nfailing \"MacOS-15-intel\" check is pre-existing and unrelated."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18505] varIdent  depends on order of grouping variable in data*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18505>\n\n--- Comment #4 from Russ Lenth (<mailto:russell-lenth@uiowa.edu|russell-lenth@uiowa.edu>) ---\nFor further evidence of the impact of this, I received a [bug report for the\nemmeans package](<https:\/\/github.com\/rvlenth\/emmeans\/issues\/555>) that shows an\nexample where the Satterthwaite degrees of freedom depends on the order of the\ndata. \n\n--Russ Lenth\nemeritus, University of Iowa",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1761848902.858909",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "FKB",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18505] varIdent  depends on order of grouping variable in data",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18505"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Russ Lenth ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:russell-lenth@uiowa.edu",
+                                "text": "russell-lenth@uiowa.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nFor further evidence of the impact of this, I received a [bug report for the\nemmeans package]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/rvlenth\/emmeans\/issues\/555"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") that shows an\nexample where the Satterthwaite degrees of freedom depends on the order of the\ndata. \n\n--Russ Lenth\nemeritus, University of Iowa"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,93 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18987] Report server-side errors in package downloads using X-Error-Message header*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18987>\n\nJulian Bermudez Valderrama (<mailto:jbermudez@sonatype.com|jbermudez@sonatype.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3593|0                           |1\n        is obsolete|                            |\n\n--- Comment #5 from Julian Bermudez Valderrama (<mailto:jbermudez@sonatype.com|jbermudez@sonatype.com>) ---\nCreated attachment 3596\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3596&amp;action=edit>\ngit-svn diff patch file for \"Report server-side errors in package downloads\nusing RFC9457 body parsing\" (modular)\n\n(In reply to Simon Urbanek from comment #4)\nHi Simon, Thank you for the feedback on modularizing the RFC 9457\nimplementation!\n\nI've refactored the code into separate, reusable components as you suggested.\n\n### Modular Architecture\n\nThe implementation is now split into three independent modules:\n\n**1. http_utils.c\/h** - Generic HTTP utilities\n   - Response body capture (http_response_body structure)\n   - HTTP status checking (http_get_status, http_is_error_status)\n   - Content-Type capture\n   - No RFC 9457-specific code\n\n**2. json_utils.c\/h** - Reusable JSON parser\n   - Generic string field extraction (json_extract_string)\n   - Handles escape sequences (\\n, \\t, \\r, \\\", \\\\)\n   - Can be reused for any JSON parsing needs in R\n\n**3. rfc9457.c\/h** - RFC 9457 integration layer\n   - Orchestrates http_utils and json_utils\n   - RFC 9457-specific logic (Content-Type checking, field extraction)\n   - Clean separation of concerns\n\n### Changes Summary\n\n- Extracted code from libcurl.c into modular components\n- Updated libcurl.c to use modular components (http, json, rfc9457)\n- Updated <http:\/\/Makefile.in|Makefile.in> to build new modules\n- All existing tests pass (tests\/rfc9457.R, tests\/rfc9457-fallback.R)\n\nThe attached patch file includes the mentioned changes.\n(`report-server-side-errors-using-rfc9457-body-parsing-modular.diff`)\n\nPlease, let me know your thoughts about it!",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1768321625.201309",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "p=775",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18987] Report server-side errors in package downloads using X-Error-Message header",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18987"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nJulian Bermudez Valderrama ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jbermudez@sonatype.com",
+                                "text": "jbermudez@sonatype.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3593|0                           |1\n        is obsolete|                            |\n\n--- Comment #5 from Julian Bermudez Valderrama ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jbermudez@sonatype.com",
+                                "text": "jbermudez@sonatype.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3596\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3596&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3596&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ngit-svn diff patch file for \"Report server-side errors in package downloads\nusing RFC9457 body parsing\" (modular)\n\n(In reply to Simon Urbanek from comment #4)\nHi Simon, Thank you for the feedback on modularizing the RFC 9457\nimplementation!\n\nI've refactored the code into separate, reusable components as you suggested.\n\n### Modular Architecture\n\nThe implementation is now split into three independent modules:\n\n**1. http_utils.c\/h** - Generic HTTP utilities\n   - Response body capture (http_response_body structure)\n   - HTTP status checking (http_get_status, http_is_error_status)\n   - Content-Type capture\n   - No RFC 9457-specific code\n\n**2. json_utils.c\/h** - Reusable JSON parser\n   - Generic string field extraction (json_extract_string)\n   - Handles escape sequences (\\n, \\t, \\r, \\\", \\\\)\n   - Can be reused for any JSON parsing needs in R\n\n**3. rfc9457.c\/h** - RFC 9457 integration layer\n   - Orchestrates http_utils and json_utils\n   - RFC 9457-specific logic (Content-Type checking, field extraction)\n   - Clean separation of concerns\n\n### Changes Summary\n\n- Extracted code from libcurl.c into modular components\n- Updated libcurl.c to use modular components (http, json, rfc9457)\n- Updated "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/Makefile.in",
+                                "text": "Makefile.in"
+                            },
+                            {
+                                "type": "text",
+                                "text": " to build new modules\n- All existing tests pass (tests\/rfc9457.R, tests\/rfc9457-fallback.R)\n\nThe attached patch file includes the mentioned changes.\n("
+                            },
+                            {
+                                "type": "text",
+                                "text": "report-server-side-errors-using-rfc9457-body-parsing-modular.diff",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n\nPlease, let me know your thoughts about it!"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

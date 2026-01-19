@@ -1,0 +1,318 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18962] dyn.unload does not call R_unload_lib*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18962>\n\n--- Comment #3 from Miguel Lechon (miguel@dull.systems) ---\n(You may think that I'm splitting hairs, and I apologize if that's the case.)\n\nThe invocation of the `R_unload_lib` method precedes, by necessity, the act of\nunloading the DLL. Calling that function is no different than calling its\nsibling `R_init_lib` or any of the `.C` or `.Call` methods that may be present\nin that same library.\n\nThe patch I propose only addresses the symbol lookup issue that prevents R from\nfinding the `R_unload_lib` function. The DLL unloading reliability issues you\ndescribe can't possibly interfere with that call.\n\nHaving said that, I wholeheartedly agree with you that this is a low priority\nitem. My hope in bringing it up is to save fellow package developers some\nhead-scratching. I also have to admit a bit of excitement in attempting my\nfirst contribution (however small) to the project, after a few years in the\nsidelines.\n\nIn any case, if you believe the issue requires further analysis and extra time\ninvestment by a member of the Core Team, then I would say the point is moot.\n\nThanks for your patience!",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1762544784.126999",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "u80\/",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18962] dyn.unload does not call R_unload_lib",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18962"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Miguel Lechon (miguel@dull.systems) ---\n(You may think that I'm splitting hairs, and I apologize if that's the case.)\n\nThe invocation of the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_unload_lib",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method precedes, by necessity, the act of\nunloading the DLL. Calling that function is no different than calling its\nsibling "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_init_lib",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or any of the "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".C",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".Call",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " methods that may be present\nin that same library.\n\nThe patch I propose only addresses the symbol lookup issue that prevents R from\nfinding the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_unload_lib",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " function. The DLL unloading reliability issues you\ndescribe can't possibly interfere with that call.\n\nHaving said that, I wholeheartedly agree with you that this is a low priority\nitem. My hope in bringing it up is to save fellow package developers some\nhead-scratching. I also have to admit a bit of excitement in attempting my\nfirst contribution (however small) to the project, after a few years in the\nsidelines.\n\nIn any case, if you believe the issue requires further analysis and extra time\ninvestment by a member of the Core Team, then I would say the point is moot.\n\nThanks for your patience!"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18963] Allow packages to provide serialization hooks for R objects*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18963>\n\nLuke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |WONTFIX\n             Status|CONFIRMED                   |CLOSED\n\n--- Comment #5 from Luke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) ---\n(In reply to Kevin Ushey from comment #4)\n&gt; &gt; I usually handle this sort of thing by including an external pointer in the object. When those are unserialized the pointer value is NULL, so a function using the object can check if the object went through a serialize\/unserialize cycle and needs to be reconstituted in some way. Not suitable for all situations, but it is an option that is available now.\n&gt; \n&gt; In my view, this becomes a bit painful since now every function in a package\n&gt; that uses such an object now needs to perform this validation. It's also\n&gt; worth saying that an unserialized object might not always be destined to be\n&gt; used directly via the functions \/ APIs provided by the package that created\n&gt; it; e.g. a user might be defining their own functions, there might be\n&gt; extension packages using these objects, and so on. It's an easy operation to\n&gt; forget.\n\nIn my experience it isn't painful. The reconstituted data does need to live in\na reference object (EXTPTR or environment) so the reconstitution only happens\non first use. It doesn't work for all situations but does for many. I used this\napproach for the hashtable support in `utils`.\n\n&gt; &gt; I don't think the proposed solution would help much, because it is strictly limited to explicit serialization of a single object with saveRDS, so not really an interesting case as you could simply provide your own method for that instead - and not addressing the original issue of hitting any other serialization points.\n&gt; \n&gt; My thought was to allow for package-defined callbacks to run to transform an\n&gt; R object before it is serialized just around the core serialization code\n&gt; itself; in serialize.c, there could be some pre-serialization transformation\n&gt; performed in WriteItem, and a similar reversing transformation after an item\n&gt; is read via ReadItem. This would avoid touching the \"core\" serialization\n&gt; code, while allowing the transformations to happen in all serialization code\n&gt; paths (save\/load; readRDS\/saveRDS; serialize\/unserialize).\n&gt; \n&gt; Beyond just external pointers, I think there are other potential benefits\n&gt; here -- e.g. some objects could have alternate compact representations, and\n&gt; serializing those compact representations could be more space-efficient and\n&gt; time-efficient.\n&gt; \n&gt; &gt; I can see the value of something like this, but it would be challenging to design. The fundamental problem is that at the point where an object with an S3 class is unserialized there is no information available about what package(s) need to be loaded to provide the unwrap method. There would have to be some convention about adding such information at the wrap stage for this to work.\n&gt; \n&gt; I was thinking that `wrap()` would tag the transformed object, probably via\n&gt; an attribute with some special name, with details about the transformation\n&gt; (the package used? the method used?) and that information would be used to\n&gt; load the necessary packages after unserialization, but before `unwrap()` is\n&gt; invoked on the unserialized object.\n\nCalling a generic for each object with a class attribute to be serialized would\nincur an unaccepetable performance hit for some payloads. It might be possible\nto come up with some optimizations that avoid some of the overhead, but that is\nlikely to be difficult and hard to maintain. Coming up with a protocol for\ncommunicating method or package information through the serialization process\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1762559162.877329",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Das",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18963] Allow packages to provide serialization hooks for R objects",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18963"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nLuke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |WONTFIX\n             Status|CONFIRMED                   |CLOSED\n\n--- Comment #5 from Luke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Kevin Ushey from comment #4)\n> > I usually handle this sort of thing by including an external pointer in the object. When those are unserialized the pointer value is NULL, so a function using the object can check if the object went through a serialize\/unserialize cycle and needs to be reconstituted in some way. Not suitable for all situations, but it is an option that is available now."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nIn my view, this becomes a bit painful since now every function in a package\nthat uses such an object now needs to perform this validation. It's also\nworth saying that an unserialized object might not always be destined to be\nused directly via the functions \/ APIs provided by the package that created\nit; e.g. a user might be defining their own functions, there might be\nextension packages using these objects, and so on. It's an easy operation to\nforget."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIn my experience it isn't painful. The reconstituted data does need to live in\na reference object (EXTPTR or environment) so the reconstitution only happens\non first use. It doesn't work for all situations but does for many. I used this\napproach for the hashtable support in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "utils",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n> > I don't think the proposed solution would help much, because it is strictly limited to explicit serialization of a single object with saveRDS, so not really an interesting case as you could simply provide your own method for that instead - and not addressing the original issue of hitting any other serialization points."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nMy thought was to allow for package-defined callbacks to run to transform an\nR object before it is serialized just around the core serialization code\nitself; in serialize.c, there could be some pre-serialization transformation\nperformed in WriteItem, and a similar reversing transformation after an item\nis read via ReadItem. This would avoid touching the \"core\" serialization\ncode, while allowing the transformations to happen in all serialization code\npaths (save\/load; readRDS\/saveRDS; serialize\/unserialize).\n\nBeyond just external pointers, I think there are other potential benefits\nhere -- e.g. some objects could have alternate compact representations, and\nserializing those compact representations could be more space-efficient and\ntime-efficient.\n\n> I can see the value of something like this, but it would be challenging to design. The fundamental problem is that at the point where an object with an S3 class is unserialized there is no information available about what package(s) need to be loaded to provide the unwrap method. There would have to be some convention about adding such information at the wrap stage for this to work.\n\nI was thinking that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "wrap()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " would tag the transformed object, probably via\nan attribute with some special name, with details about the transformation\n(the package used? the method used?) and that information would be used to\nload the necessary packages after unserialization, but before "
+                            },
+                            {
+                                "type": "text",
+                                "text": "unwrap()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is\ninvoked on the unserialized object."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nCalling a generic for each object with a class attribute to be serialized would\nincur an unaccepetable performance hit for some payloads. It might be possible\nto come up with some optimizations that avoid some of the overhead, but that is\nlikely to be difficult and hard to maintain. Coming up with a protocol for\ncommunicating method or package information through the serialization process"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "would also likely to be a lot of work. And it had better be done right the\nfirst time or we would end up having to maintain multiple protocols to handle\nboth old and new serializations.\n\nBut thinking about this more I really don't think we can afford to add more\nautomatic code execution in the unserialize process without a truly compelling\nreason and a lot of guardrails. It is just too risky in the current \"security\nresearch\" climate. The incident a couple of years ago ended up wasting huge\namounts of time not just for us in R-core but for many others as well,\nincluding folks in your organization. The possible benefits just don't\noutweighing the risks, so I am closing this as WONTFIX.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1762559162.899039",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "PS\/B",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "would also likely to be a lot of work. And it had better be done right the\nfirst time or we would end up having to maintain multiple protocols to handle\nboth old and new serializations.\n\nBut thinking about this more I really don't think we can afford to add more\nautomatic code execution in the unserialize process without a truly compelling\nreason and a lot of guardrails. It is just too risky in the current \"security\nresearch\" climate. The incident a couple of years ago ended up wasting huge\namounts of time not just for us in R-core but for many others as well,\nincluding folks in your organization. The possible benefits just don't\noutweighing the risks, so I am closing this as WONTFIX."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18963] Allow packages to provide serialization hooks for R objects*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18963>\n\n--- Comment #6 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nFair enough, thanks! I appreciate your taking the time to evaluate the\nproposal.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1762561818.280879",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "EL1t",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18963] Allow packages to provide serialization hooks for R objects",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18963"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #6 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nFair enough, thanks! I appreciate your taking the time to evaluate the\nproposal."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

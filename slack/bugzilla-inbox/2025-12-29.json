@@ -1,0 +1,482 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18948] Grammatical error in `summary`: should be \"NA\" not \"NA's\"*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18948>\n\nAyush Singh (<mailto:rawatsinghayush9720@gmail.com|rawatsinghayush9720@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |rawatsinghayush9720@gmail.c\n                   |                            |om\n\n--- Comment #9 from Ayush Singh (<mailto:rawatsinghayush9720@gmail.com|rawatsinghayush9720@gmail.com>) ---\nCreated attachment 3589\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3589&amp;action=edit>\nPatch to implement consensus on grammatical pluralization of NA counts (NA for\nlogicals, NAs for others).\n\nI have uploaded a proposed patch for Bug 18948.\n\nImplementation Details:\n\nUpdated summary.R to differentiate labels: \"NA\" for summary.logical and \"NAs\"\nfor summary.default and other types.\n\nUpdated dates.R and datetime.R to ensure internal consistency for string\nmatching.\n\nUpdated regression tests in reg-tests-1a.R and synchronized\nreg-tests-2.Rout.save.\n\nThe patch was verified against the latest R-devel build using make check, and\nall tests passed.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1767015477.208289",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "IK\/",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18948] Grammatical error in ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "summary",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ": should be \"NA\" not \"NA's\"",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18948"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nAyush Singh ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:rawatsinghayush9720@gmail.com",
+                                "text": "rawatsinghayush9720@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |rawatsinghayush9720@gmail.c\n                   |                            |om\n\n--- Comment #9 from Ayush Singh ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:rawatsinghayush9720@gmail.com",
+                                "text": "rawatsinghayush9720@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3589\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3589&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3589&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch to implement consensus on grammatical pluralization of NA counts (NA for\nlogicals, NAs for others).\n\nI have uploaded a proposed patch for Bug 18948.\n\nImplementation Details:\n\nUpdated summary.R to differentiate labels: \"NA\" for summary.logical and \"NAs\"\nfor summary.default and other types.\n\nUpdated dates.R and datetime.R to ensure internal consistency for string\nmatching.\n\nUpdated regression tests in reg-tests-1a.R and synchronized\nreg-tests-2.Rout.save.\n\nThe patch was verified against the latest R-devel build using make check, and\nall tests passed."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18987] New: Report server-side errors in package downloads using X-Error-Message header*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18987>\n\n            Bug ID: 18987\n           Summary: Report server-side errors in package downloads using\n                    X-Error-Message header\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: enhancement\n          Priority: P5\n         Component: Wishlist\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:jbermudez@sonatype.com|jbermudez@sonatype.com>\n\nCreated attachment 3590\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3590&amp;action=edit>\ngit-svn diff patch file for \"Report server-side errors in package downloads\nusing X-Error-Message header\"\n\n## Overview\n\nAdd support for capturing and displaying custom error messages via\n`X-Error-Message` HTTP response header in `download.file()` and\n`install.packages()` functions.\n\nThis enables repository administrators to provide detailed, actionable \nerror messages when package downloads fail due to server-side errors.\n\n## Motivation\n\n**Current behavior:**\nWhen package downloads fail due to server-side errors (security \nrestrictions, policy violations, quarantine, etc.), users only \nreceive generic HTTP status codes such as \"403 Forbidden\". \nRepository administrators have no way to communicate specific\nfailure reasons to R users, making troubleshooting difficult.\n\n**Impact:**\n- Users cannot determine *why* a package download was blocked\n- No mechanism for servers to provide actionable guidance\n\n## Proposed Solution\n\nCapture the `X-Error-Message` header (if present) from HTTP error \nresponses and display the error alongside standard error messages.\n\n### Example Output\n\n**Before (current behavior):**\n```\nWarning: cannot open URL '<https:\/\/r.repo.example.com\/package.tar.gz>'\nHTTP status was '403 Forbidden'\n```\n\n**After (with enhancement):**\n```\nWarning: cannot open URL '<https:\/\/r.repo.example.com\/package.tar.gz>'\nHTTP status was '403 Forbidden'\nError message: Requested item is quarantined\n```\n\n## Industry Context\n\nThis challenge is well-recognized across package management ecosystems. \nMajor tools have implemented similar solutions:\n\n### Custom Error Message Headers (Similar Approach)\n\n- **NuGet (.NET)**: Uses custom headers for server-side warnings\/errors\n -\n<https:\/\/github.com\/NuGet\/Home\/wiki\/%5BSpec%5D-Server-side-warnings-for-NuGet-client>\n\n- **Hugging Face (ML Models)**: Structured error messages in HTTP headers\n -\n<https:\/\/huggingface.co\/docs\/huggingface_hub\/en\/package_reference\/utilities#huggingface_hub.errors.HfHubHTTPError>\n\n### Structured Error Formats (RFC 9457 \"Problem Details\")\n\n- **Maven (Java)**: RFC 9457 support for detailed error reporting\n - <https:\/\/github.com\/apache\/maven-resolver\/pull\/1502>\n\n- **uv (Python)**: RFC 9457 implementation for enhanced diagnostics\n - <https:\/\/github.com\/astral-sh\/uv\/pull\/16199>\n\n**Note:** While RFC 9457 provides rich structured errors, a custom header\napproach (as used by NuGet\/Hugging Face) offers similar user benefits with\nminimal implementation complexity and is more convenient for R's architecture.\n\n## Implementation\n\n### Files Changed\n\n- `src\/modules\/internet\/libcurl.c`\n- `src\/library\/utils\/R\/packages.R`\n- `tests\/download.file.R`\n\n#### C-Level Changes (`src\/modules\/internet\/libcurl.c`)\n\n1. **Added `url_error_context` struct** for per-URL error message storage\n  - 512-character buffer for error messages\n  - Flag indicating presence of custom error\n\n2. **Implemented `rcvErrorHeader()` callback**\n  - Captures X-Error-Message header\n  - Parses and stores message in per-URL context\n\n3. **Extended `download_report_url_error()`**\n  - Accepts error context parameter\n  - Displays a custom message when available\n  - Preserves existing behavior when the header is absent\n\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1767070442.336089",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "kGFFP",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18987] New: Report server-side errors in package downloads using X-Error-Message header",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18987"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18987\n           Summary: Report server-side errors in package downloads using\n                    X-Error-Message header\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: enhancement\n          Priority: P5\n         Component: Wishlist\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jbermudez@sonatype.com",
+                                "text": "jbermudez@sonatype.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3590\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3590&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3590&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ngit-svn diff patch file for \"Report server-side errors in package downloads\nusing X-Error-Message header\"\n\n## Overview\n\nAdd support for capturing and displaying custom error messages via\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "X-Error-Message",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " HTTP response header in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "download.file()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "install.packages()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " functions.\n\nThis enables repository administrators to provide detailed, actionable \nerror messages when package downloads fail due to server-side errors.\n\n## Motivation\n\n**Current behavior:**\nWhen package downloads fail due to server-side errors (security \nrestrictions, policy violations, quarantine, etc.), users only \nreceive generic HTTP status codes such as \"403 Forbidden\". \nRepository administrators have no way to communicate specific\nfailure reasons to R users, making troubleshooting difficult.\n\n**Impact:**\n- Users cannot determine "
+                            },
+                            {
+                                "type": "text",
+                                "text": "why",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " a package download was blocked\n- No mechanism for servers to provide actionable guidance\n\n## Proposed Solution\n\nCapture the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "X-Error-Message",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " header (if present) from HTTP error \nresponses and display the error alongside standard error messages.\n\n### Example Output\n\n**Before (current behavior):**"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Warning: cannot open URL '"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/r.repo.example.com\/package.tar.gz"
+                            },
+                            {
+                                "type": "text",
+                                "text": "'\nHTTP status was '403 Forbidden'\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n**After (with enhancement):**"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Warning: cannot open URL '"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/r.repo.example.com\/package.tar.gz"
+                            },
+                            {
+                                "type": "text",
+                                "text": "'\nHTTP status was '403 Forbidden'\nError message: Requested item is quarantined\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n## Industry Context\n\nThis challenge is well-recognized across package management ecosystems. \nMajor tools have implemented similar solutions:\n\n### Custom Error Message Headers (Similar Approach)\n\n- **NuGet (.NET)**: Uses custom headers for server-side warnings\/errors\n -\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/NuGet\/Home\/wiki\/%5BSpec%5D-Server-side-warnings-for-NuGet-client"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n- **Hugging Face (ML Models)**: Structured error messages in HTTP headers\n -\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/huggingface.co\/docs\/huggingface_hub\/en\/package_reference\/utilities#huggingface_hub.errors.HfHubHTTPError"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n### Structured Error Formats (RFC 9457 \"Problem Details\")\n\n- **Maven (Java)**: RFC 9457 support for detailed error reporting\n - "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/apache\/maven-resolver\/pull\/1502"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n- **uv (Python)**: RFC 9457 implementation for enhanced diagnostics\n - "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/astral-sh\/uv\/pull\/16199"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n**Note:** While RFC 9457 provides rich structured errors, a custom header\napproach (as used by NuGet\/Hugging Face) offers similar user benefits with\nminimal implementation complexity and is more convenient for R's architecture.\n\n## Implementation\n\n### Files Changed\n\n- "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/modules\/internet\/libcurl.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n- "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/library\/utils\/R\/packages.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n- "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tests\/download.file.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n#### C-Level Changes ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/modules\/internet\/libcurl.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n\n1. **Added "
+                            },
+                            {
+                                "type": "text",
+                                "text": "url_error_context",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " struct** for per-URL error message storage\n  - 512-character buffer for error messages\n  - Flag indicating presence of custom error\n\n2. **Implemented "
+                            },
+                            {
+                                "type": "text",
+                                "text": "rcvErrorHeader()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " callback**\n  - Captures X-Error-Message header\n  - Parses and stores message in per-URL context\n\n3. **Extended "
+                            },
+                            {
+                                "type": "text",
+                                "text": "download_report_url_error()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "**\n  - Accepts error context parameter\n  - Displays a custom message when available\n  - Preserves existing behavior when the header is absent"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "4. **Error context lifecycle management**\n  - Allocation in `download_add_url()`\n  - Cleanup in `download_cleanup_url()`\n  - Isolation via `CURLOPT_HEADERDATA` per-handle storage\n\n5. **Thread-safe concurrent downloads**\n  - Each URL maintains an isolated error context via array indexing\n  - No cross-contamination between concurrent downloads\n\n#### R-Level Changes (`src\/library\/utils\/R\/packages.R`)\n\n1. **Enhanced `download.packages()`**\n  - Uses `withCallingHandlers()` to capture C-level warnings\n  - Displays warnings in paired format (generic + detailed)\n  - Preserves immediate warning display in interactive sessions\n\n### Testing (`tests\/download.file.R`)\n\nAdded comprehensive backward compatibility tests:\n\n1. **Normal downloads** - Verify no behavior change when header absent\n2. **Error handling** - Confirm HTTP errors work correctly without a custom\nheader\n3. **Concurrent downloads** - Test error context isolation (libcurl multiple\nURLs)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1767070442.357779",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "GmDu",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "4. **Error context lifecycle management**\n  - Allocation in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "download_add_url()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n  - Cleanup in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "download_cleanup_url()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n  - Isolation via "
+                            },
+                            {
+                                "type": "text",
+                                "text": "CURLOPT_HEADERDATA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " per-handle storage\n\n5. **Thread-safe concurrent downloads**\n  - Each URL maintains an isolated error context via array indexing\n  - No cross-contamination between concurrent downloads\n\n#### R-Level Changes ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/library\/utils\/R\/packages.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n\n1. **Enhanced "
+                            },
+                            {
+                                "type": "text",
+                                "text": "download.packages()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "**\n  - Uses "
+                            },
+                            {
+                                "type": "text",
+                                "text": "withCallingHandlers()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to capture C-level warnings\n  - Displays warnings in paired format (generic + detailed)\n  - Preserves immediate warning display in interactive sessions\n\n### Testing ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "tests\/download.file.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n\nAdded comprehensive backward compatibility tests:\n\n1. **Normal downloads** - Verify no behavior change when header absent\n2. **Error handling** - Confirm HTTP errors work correctly without a custom\nheader\n3. **Concurrent downloads** - Test error context isolation (libcurl multiple\nURLs)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

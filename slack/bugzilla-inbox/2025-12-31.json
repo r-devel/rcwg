@@ -1,0 +1,176 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18985] 'xlengthgets' to be more ALTREP-friendly*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18985>\n\n--- Comment #7 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\nCreated attachment 3591\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3591&amp;action=edit>\nTo test with .Call\n\nR CMD SHLIB xlengthgets.c\n\n\nExample use in R 4.5.2 in Terminal in Google Colab:\n\nR&gt; dyn.load(\"xlengthgets.so\")\nR&gt; .Internal(inspect(x &lt;- 1:1e7))\n@599d237e9b68 13 INTSXP g0c0 [REF(65535)]  1 : 10000000 (compact)\nR&gt; gc(reset=TRUE)\n         used (Mb) gc trigger (Mb) max used (Mb)\nNcells 300345 16.1     707697 37.8   300345 16.1\nVcells 611735  4.7    8388608 64.0   611735  4.7\nR&gt; system.time(.Call(\"slengthgets\", x, length(x)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.096   0.034   0.130 \nR&gt; gc()\n          used (Mb) gc trigger (Mb) max used (Mb)\nNcells  300929 16.1     707697 37.8   301611 16.2\nVcells 5612827 42.9   10612183 81.0 10612183 81.0\nR&gt; .Internal(inspect(x))\n@599d237e9b68 13 INTSXP g1c0 [MARK,REF(65535)]  1 : 10000000 (expanded)\nR&gt; gc(reset=TRUE)\n          used (Mb) gc trigger (Mb) max used (Mb)\nNcells  300924 16.1     707697 37.8   300924 16.1\nVcells 5612804 42.9   10612183 81.0  5612804 42.9\nR&gt; system.time(.Call(\"slengthgets\", x, length(x)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.113   0.016   0.129 \nR&gt; gc()\n          used (Mb) gc trigger  (Mb) max used (Mb)\nNcells  300929 16.1     707697  37.8   301586 16.2\nVcells 5612827 42.9   14828682 113.2 10613032 81.0\nR&gt; .Internal(inspect(x))\n@599d237e9b68 13 INTSXP g1c0 [MARK,REF(65535)]  1 : 10000000 (expanded)\nR&gt; .Internal(inspect(x &lt;- 1:1e7))\n@599d236fe660 13 INTSXP g0c0 [REF(65535)]  1 : 10000000 (compact)\nR&gt; gc(reset=TRUE)\n         used (Mb) gc trigger (Mb) max used (Mb)\nNcells 300923 16.1     707697 37.8   300923 16.1\nVcells 612804  4.7   11862946 90.6   612804  4.7\nR&gt; system.time(.Call(\"roslengthgets\", x, length(x)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.070   0.027   0.098 \nR&gt; gc()\n          used (Mb) gc trigger (Mb) max used (Mb)\nNcells  300929 16.1     707697 37.8   301395 16.1\nVcells 5612827 42.9   10612941 81.0 10612941 81.0\nR&gt; .Internal(inspect(x))\n@599d236fe660 13 INTSXP g1c0 [MARK,REF(65535)]  1 : 10000000 (expanded)\nR&gt; gc(reset=TRUE)\n          used (Mb) gc trigger (Mb) max used (Mb)\nNcells  300924 16.1     707697 37.8   300924 16.1\nVcells 5612804 42.9   10612941 81.0  5612804 42.9\nR&gt; system.time(.Call(\"roslengthgets\", x, length(x)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.064   0.011   0.075 \nR&gt; gc()\n          used (Mb) gc trigger (Mb) max used (Mb)\nNcells  300929 16.1     707697 37.8   301402 16.1\nVcells 5612827 42.9   10612941 81.0 10612941 81.0\nR&gt; .Internal(inspect(x))\n@599d236fe660 13 INTSXP g1c0 [MARK,REF(65535)]  1 : 10000000 (expanded)\nR&gt; .Internal(inspect(x &lt;- 1:1e7))\n@599d236fe628 13 INTSXP g0c0 [REF(65535)]  1 : 10000000 (compact)\nR&gt; gc(reset=TRUE)\n         used (Mb) gc trigger (Mb) max used (Mb)\nNcells 300923 16.1     707697 37.8   300923 16.1\nVcells 612804  4.7    8490353 64.8   612804  4.7\nR&gt; system.time(.Call(\"grslengthgets\", x, length(x)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.028   0.012   0.039 \nR&gt; gc()\n         used (Mb) gc trigger (Mb) max used (Mb)\nNcells 300928 16.1     707697 37.8   301671 16.2\nVcells 612827  4.7    8388608 64.0  5613125 42.9\nR&gt; .Internal(inspect(x))\n@599d236fe628 13 INTSXP g1c0 [MARK,REF(65535)]  1 : 10000000 (compact)\nR&gt; gc(reset=TRUE)\n         used (Mb) gc trigger (Mb) max used (Mb)\nNcells 300923 16.1     707697 37.8   300923 16.1\nVcells 612804  4.7    8388608 64.0   612804  4.7\nR&gt; system.time(.Call(\"grslengthgets\", x, length(x)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.022   0.017   0.038 \nR&gt; gc()\n         used (Mb) gc trigger (Mb) max used (Mb)\nNcells 300928 16.1     707697 37.8   301671 16.2\nVcells 612827  4.7    8388608 64.0  5613125 42.9\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1767171601.690709",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "uhUk",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18985] 'xlengthgets' to be more ALTREP-friendly",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18985"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #7 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3591\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3591&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3591&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nTo test with .Call\n\nR CMD SHLIB xlengthgets.c\n\n\n\nExample use in R 4.5.2 in Terminal in Google Colab:\n\nR> dyn.load(\"xlengthgets.so\")\nR> .Internal(inspect(x <- 1:1e7))\n@599d237e9b68 13 INTSXP g0c0 [REF(65535)]  1 : 10000000 (compact)\nR> gc(reset=TRUE)\n         used (Mb) gc trigger (Mb) max used (Mb)\nNcells 300345 16.1     707697 37.8   300345 16.1\nVcells 611735  4.7    8388608 64.0   611735  4.7\nR> system.time(.Call(\"slengthgets\", x, length(x)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.096   0.034   0.130 \nR> gc()\n          used (Mb) gc trigger (Mb) max used (Mb)\nNcells  300929 16.1     707697 37.8   301611 16.2\nVcells 5612827 42.9   10612183 81.0 10612183 81.0\nR> .Internal(inspect(x))\n@599d237e9b68 13 INTSXP g1c0 [MARK,REF(65535)]  1 : 10000000 (expanded)\nR> gc(reset=TRUE)\n          used (Mb) gc trigger (Mb) max used (Mb)\nNcells  300924 16.1     707697 37.8   300924 16.1\nVcells 5612804 42.9   10612183 81.0  5612804 42.9\nR> system.time(.Call(\"slengthgets\", x, length(x)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.113   0.016   0.129 \nR> gc()\n          used (Mb) gc trigger  (Mb) max used (Mb)\nNcells  300929 16.1     707697  37.8   301586 16.2\nVcells 5612827 42.9   14828682 113.2 10613032 81.0\nR> .Internal(inspect(x))\n@599d237e9b68 13 INTSXP g1c0 [MARK,REF(65535)]  1 : 10000000 (expanded)\nR> .Internal(inspect(x <- 1:1e7))\n@599d236fe660 13 INTSXP g0c0 [REF(65535)]  1 : 10000000 (compact)\nR> gc(reset=TRUE)\n         used (Mb) gc trigger (Mb) max used (Mb)\nNcells 300923 16.1     707697 37.8   300923 16.1\nVcells 612804  4.7   11862946 90.6   612804  4.7\nR> system.time(.Call(\"roslengthgets\", x, length(x)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.070   0.027   0.098 \nR> gc()\n          used (Mb) gc trigger (Mb) max used (Mb)\nNcells  300929 16.1     707697 37.8   301395 16.1\nVcells 5612827 42.9   10612941 81.0 10612941 81.0\nR> .Internal(inspect(x))\n@599d236fe660 13 INTSXP g1c0 [MARK,REF(65535)]  1 : 10000000 (expanded)\nR> gc(reset=TRUE)\n          used (Mb) gc trigger (Mb) max used (Mb)\nNcells  300924 16.1     707697 37.8   300924 16.1\nVcells 5612804 42.9   10612941 81.0  5612804 42.9\nR> system.time(.Call(\"roslengthgets\", x, length(x)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.064   0.011   0.075 \nR> gc()\n          used (Mb) gc trigger (Mb) max used (Mb)\nNcells  300929 16.1     707697 37.8   301402 16.1\nVcells 5612827 42.9   10612941 81.0 10612941 81.0\nR> .Internal(inspect(x))\n@599d236fe660 13 INTSXP g1c0 [MARK,REF(65535)]  1 : 10000000 (expanded)\nR> .Internal(inspect(x <- 1:1e7))\n@599d236fe628 13 INTSXP g0c0 [REF(65535)]  1 : 10000000 (compact)\nR> gc(reset=TRUE)\n         used (Mb) gc trigger (Mb) max used (Mb)\nNcells 300923 16.1     707697 37.8   300923 16.1\nVcells 612804  4.7    8490353 64.8   612804  4.7\nR> system.time(.Call(\"grslengthgets\", x, length(x)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.028   0.012   0.039 \nR> gc()\n         used (Mb) gc trigger (Mb) max used (Mb)\nNcells 300928 16.1     707697 37.8   301671 16.2\nVcells 612827  4.7    8388608 64.0  5613125 42.9\nR> .Internal(inspect(x))\n@599d236fe628 13 INTSXP g1c0 [MARK,REF(65535)]  1 : 10000000 (compact)\nR> gc(reset=TRUE)\n         used (Mb) gc trigger (Mb) max used (Mb)\nNcells 300923 16.1     707697 37.8   300923 16.1\nVcells 612804  4.7    8388608 64.0   612804  4.7\nR> system.time(.Call(\"grslengthgets\", x, length(x)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.022   0.017   0.038 \nR> gc()\n         used (Mb) gc trigger (Mb) max used (Mb)\nNcells 300928 16.1     707697 37.8   301671 16.2\nVcells 612827  4.7    8388608 64.0  5613125 42.9"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "R&gt; .Internal(inspect(x))\n@599d236fe628 13 INTSXP g1c0 [MARK,REF(65535)]  1 : 10000000 (compact)\nR&gt; x &lt;- numeric(1e7); oldClass(x) &lt;- \"foo\"\nR&gt; .Internal(inspect(x))\n@78413e395010 14 REALSXP g0c7 [OBJ,REF(1),ATT] (len=10000000, tl=0)\n0,0,0,0,0,...\nATTRIB:\n  @599d237ecbd0 02 LISTSXP g0c0 [REF(1)] \n    TAG: @599d21412e20 01 SYMSXP g1c0 [MARK,REF(13690),LCK,gp=0x4000] \"class\"\n(has value)\n    @599d236f1a68 16 STRSXP g0c1 [REF(3)] (len=1, tl=0)\n      @599d21998078 09 CHARSXP g1c1 [MARK,REF(38),gp=0x61] [ASCII] [cached]\n\"foo\"\nR&gt; .Internal(inspect(y &lt;- unclass(x)))\n@599d236fe5b8 14 REALSXP g0c0 [REF(1)]  wrapper [srt=-2147483648,no_na=0]\n  @78413e395010 14 REALSXP g0c7 [OBJ,REF(2),ATT] (len=10000000, tl=0)\n0,0,0,0,0,...\n  ATTRIB:\n    @599d237ecbd0 02 LISTSXP g0c0 [REF(1)] \n      TAG: @599d21412e20 01 SYMSXP g1c0 [MARK,REF(13692),LCK,gp=0x4000] \"class\"\n(has value)\n      @599d236f1a68 16 STRSXP g0c1 [REF(4)] (len=1, tl=0)\n        @599d21998078 09 CHARSXP g1c1 [MARK,REF(38),gp=0x61] [ASCII] [cached]\n\"foo\"\nR&gt; gc(reset=TRUE)\n           used (Mb) gc trigger  (Mb) max used (Mb)\nNcells   300932 16.1     707697  37.8   300932 16.1\nVcells 10612802 81.0   17874330 136.4 10612802 81.0\nR&gt; system.time(.Call(\"slengthgets\", y, length(y)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.174   0.074   0.248 \nR&gt; gc()\n           used  (Mb) gc trigger  (Mb) max used  (Mb)\nNcells   300940  16.1     707697  37.8   301593  16.2\nVcells 20612825 157.3   38828687 296.3 30613028 233.6\nR&gt; .Internal(inspect(y))\n@599d236fe5b8 14 REALSXP g1c0 [MARK,REF(1)]  wrapper [srt=-2147483648,no_na=0]\n  @784134afd010 14 REALSXP g1c7 [OBJ,MARK,REF(1),ATT] (len=10000000, tl=0)\n0,0,0,0,0,...\n  ATTRIB:\n    @599d237ec428 02 LISTSXP g1c0 [MARK,REF(1)] \n      TAG: @599d21412e20 01 SYMSXP g1c0 [MARK,REF(13704),LCK,gp=0x4000] \"class\"\n(has value)\n      @599d236f1a68 16 STRSXP g1c1 [MARK,REF(5)] (len=1, tl=0)\n        @599d21998078 09 CHARSXP g1c1 [MARK,REF(38),gp=0x61] [ASCII] [cached]\n\"foo\"\nR&gt; gc(reset=TRUE)\n           used  (Mb) gc trigger  (Mb) max used  (Mb)\nNcells   300935  16.1     707697  37.8   300935  16.1\nVcells 20612802 157.3   38828687 296.3 20612802 157.3\nR&gt; system.time(.Call(\"slengthgets\", y, length(y)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.098   0.033   0.133 \nR&gt; gc()\n           used  (Mb) gc trigger  (Mb) max used  (Mb)\nNcells   300940  16.1     707697  37.8   301683  16.2\nVcells 20612825 157.3   38828687 296.3 30613122 233.6\nR&gt; .Internal(inspect(y))\n@599d236fe5b8 14 REALSXP g1c0 [MARK,REF(1)]  wrapper [srt=-2147483648,no_na=0]\n  @784134afd010 14 REALSXP g1c7 [OBJ,MARK,REF(1),ATT] (len=10000000, tl=0)\n0,0,0,0,0,...\n  ATTRIB:\n    @599d237ec428 02 LISTSXP g1c0 [MARK,REF(1)] \n      TAG: @599d21412e20 01 SYMSXP g1c0 [MARK,REF(13715),LCK,gp=0x4000] \"class\"\n(has value)\n      @599d236f1a68 16 STRSXP g1c1 [MARK,REF(5)] (len=1, tl=0)\n        @599d21998078 09 CHARSXP g1c1 [MARK,REF(38),gp=0x61] [ASCII] [cached]\n\"foo\"\nR&gt; .Internal(inspect(y &lt;- unclass(x)))\n@599d236fe820 14 REALSXP g0c0 [REF(1)]  wrapper [srt=-2147483648,no_na=0]\n  @78413e395010 14 REALSXP g1c7 [OBJ,MARK,REF(2),ATT] (len=10000000, tl=0)\n0,0,0,0,0,...\n  ATTRIB:\n    @599d237ecbd0 02 LISTSXP g1c0 [MARK,REF(1)] \n      TAG: @599d21412e20 01 SYMSXP g1c0 [MARK,REF(13717),LCK,gp=0x4000] \"class\"\n(has value)\n      @599d236f1a68 16 STRSXP g1c1 [MARK,REF(6)] (len=1, tl=0)\n        @599d21998078 09 CHARSXP g1c1 [MARK,REF(38),gp=0x61] [ASCII] [cached]\n\"foo\"\nR&gt; gc(reset=TRUE)\n           used (Mb) gc trigger  (Mb) max used (Mb)\nNcells   300933 16.1     707697  37.8   300933 16.1\nVcells 10612802 81.0   38828687 296.3 10612802 81.0\nR&gt; system.time(.Call(\"roslengthgets\", y, length(y)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.056   0.033   0.089 \nR&gt; gc()\n           used (Mb) gc trigger  (Mb) max used  (Mb)\nNcells   300938 16.1     707697  37.8   301681  16.2\nVcells 10612825 81.0   38828687 296.3 20613122 157.3\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1767171601.728169",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "9QWpx",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "R> .Internal(inspect(x))\n@599d236fe628 13 INTSXP g1c0 [MARK,REF(65535)]  1 : 10000000 (compact)\nR> x <- numeric(1e7); oldClass(x) <- \"foo\"\nR> .Internal(inspect(x))\n@78413e395010 14 REALSXP g0c7 [OBJ,REF(1),ATT] (len=10000000, tl=0)\n0,0,0,0,0,...\nATTRIB:\n  @599d237ecbd0 02 LISTSXP g0c0 [REF(1)] \n    TAG: @599d21412e20 01 SYMSXP g1c0 [MARK,REF(13690),LCK,gp=0x4000] \"class\"\n(has value)\n    @599d236f1a68 16 STRSXP g0c1 [REF(3)] (len=1, tl=0)\n      @599d21998078 09 CHARSXP g1c1 [MARK,REF(38),gp=0x61] [ASCII] [cached]\n\"foo\"\nR> .Internal(inspect(y <- unclass(x)))\n@599d236fe5b8 14 REALSXP g0c0 [REF(1)]  wrapper [srt=-2147483648,no_na=0]\n  @78413e395010 14 REALSXP g0c7 [OBJ,REF(2),ATT] (len=10000000, tl=0)\n0,0,0,0,0,...\n  ATTRIB:\n    @599d237ecbd0 02 LISTSXP g0c0 [REF(1)] \n      TAG: @599d21412e20 01 SYMSXP g1c0 [MARK,REF(13692),LCK,gp=0x4000] \"class\"\n(has value)\n      @599d236f1a68 16 STRSXP g0c1 [REF(4)] (len=1, tl=0)\n        @599d21998078 09 CHARSXP g1c1 [MARK,REF(38),gp=0x61] [ASCII] [cached]\n\"foo\"\nR> gc(reset=TRUE)\n           used (Mb) gc trigger  (Mb) max used (Mb)\nNcells   300932 16.1     707697  37.8   300932 16.1\nVcells 10612802 81.0   17874330 136.4 10612802 81.0\nR> system.time(.Call(\"slengthgets\", y, length(y)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.174   0.074   0.248 \nR> gc()\n           used  (Mb) gc trigger  (Mb) max used  (Mb)\nNcells   300940  16.1     707697  37.8   301593  16.2\nVcells 20612825 157.3   38828687 296.3 30613028 233.6\nR> .Internal(inspect(y))\n@599d236fe5b8 14 REALSXP g1c0 [MARK,REF(1)]  wrapper [srt=-2147483648,no_na=0]\n  @784134afd010 14 REALSXP g1c7 [OBJ,MARK,REF(1),ATT] (len=10000000, tl=0)\n0,0,0,0,0,...\n  ATTRIB:\n    @599d237ec428 02 LISTSXP g1c0 [MARK,REF(1)] \n      TAG: @599d21412e20 01 SYMSXP g1c0 [MARK,REF(13704),LCK,gp=0x4000] \"class\"\n(has value)\n      @599d236f1a68 16 STRSXP g1c1 [MARK,REF(5)] (len=1, tl=0)\n        @599d21998078 09 CHARSXP g1c1 [MARK,REF(38),gp=0x61] [ASCII] [cached]\n\"foo\"\nR> gc(reset=TRUE)\n           used  (Mb) gc trigger  (Mb) max used  (Mb)\nNcells   300935  16.1     707697  37.8   300935  16.1\nVcells 20612802 157.3   38828687 296.3 20612802 157.3\nR> system.time(.Call(\"slengthgets\", y, length(y)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.098   0.033   0.133 \nR> gc()\n           used  (Mb) gc trigger  (Mb) max used  (Mb)\nNcells   300940  16.1     707697  37.8   301683  16.2\nVcells 20612825 157.3   38828687 296.3 30613122 233.6\nR> .Internal(inspect(y))\n@599d236fe5b8 14 REALSXP g1c0 [MARK,REF(1)]  wrapper [srt=-2147483648,no_na=0]\n  @784134afd010 14 REALSXP g1c7 [OBJ,MARK,REF(1),ATT] (len=10000000, tl=0)\n0,0,0,0,0,...\n  ATTRIB:\n    @599d237ec428 02 LISTSXP g1c0 [MARK,REF(1)] \n      TAG: @599d21412e20 01 SYMSXP g1c0 [MARK,REF(13715),LCK,gp=0x4000] \"class\"\n(has value)\n      @599d236f1a68 16 STRSXP g1c1 [MARK,REF(5)] (len=1, tl=0)\n        @599d21998078 09 CHARSXP g1c1 [MARK,REF(38),gp=0x61] [ASCII] [cached]\n\"foo\"\nR> .Internal(inspect(y <- unclass(x)))\n@599d236fe820 14 REALSXP g0c0 [REF(1)]  wrapper [srt=-2147483648,no_na=0]\n  @78413e395010 14 REALSXP g1c7 [OBJ,MARK,REF(2),ATT] (len=10000000, tl=0)\n0,0,0,0,0,...\n  ATTRIB:\n    @599d237ecbd0 02 LISTSXP g1c0 [MARK,REF(1)] \n      TAG: @599d21412e20 01 SYMSXP g1c0 [MARK,REF(13717),LCK,gp=0x4000] \"class\"\n(has value)\n      @599d236f1a68 16 STRSXP g1c1 [MARK,REF(6)] (len=1, tl=0)\n        @599d21998078 09 CHARSXP g1c1 [MARK,REF(38),gp=0x61] [ASCII] [cached]\n\"foo\"\nR> gc(reset=TRUE)\n           used (Mb) gc trigger  (Mb) max used (Mb)\nNcells   300933 16.1     707697  37.8   300933 16.1\nVcells 10612802 81.0   38828687 296.3 10612802 81.0\nR> system.time(.Call(\"roslengthgets\", y, length(y)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.056   0.033   0.089 \nR> gc()\n           used (Mb) gc trigger  (Mb) max used  (Mb)\nNcells   300938 16.1     707697  37.8   301681  16.2\nVcells 10612825 81.0   38828687 296.3 20613122 157.3"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "R&gt; .Internal(inspect(y))\n@599d236fe820 14 REALSXP g1c0 [MARK,REF(1)]  wrapper [srt=-2147483648,no_na=0]\n  @78413e395010 14 REALSXP g1c7 [OBJ,MARK,REF(2),ATT] (len=10000000, tl=0)\n0,0,0,0,0,...\n  ATTRIB:\n    @599d237ecbd0 02 LISTSXP g1c0 [MARK,REF(1)] \n      TAG: @599d21412e20 01 SYMSXP g1c0 [MARK,REF(13728),LCK,gp=0x4000] \"class\"\n(has value)\n      @599d236f1a68 16 STRSXP g1c1 [MARK,REF(6)] (len=1, tl=0)\n        @599d21998078 09 CHARSXP g1c1 [MARK,REF(38),gp=0x61] [ASCII] [cached]\n\"foo\"\nR&gt; gc(reset=TRUE)\n           used (Mb) gc trigger  (Mb) max used (Mb)\nNcells   300933 16.1     707697  37.8   300933 16.1\nVcells 10612802 81.0   38828687 296.3 10612802 81.0\nR&gt; system.time(.Call(\"roslengthgets\", y, length(y)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.061   0.029   0.090 \nR&gt; gc()\n           used (Mb) gc trigger  (Mb) max used  (Mb)\nNcells   300938 16.1     707697  37.8   301681  16.2\nVcells 10612825 81.0   38828687 296.3 20613122 157.3\nR&gt; .Internal(inspect(y))\n@599d236fe820 14 REALSXP g1c0 [MARK,REF(1)]  wrapper [srt=-2147483648,no_na=0]\n  @78413e395010 14 REALSXP g1c7 [OBJ,MARK,REF(2),ATT] (len=10000000, tl=0)\n0,0,0,0,0,...\n  ATTRIB:\n    @599d237ecbd0 02 LISTSXP g1c0 [MARK,REF(1)] \n      TAG: @599d21412e20 01 SYMSXP g1c0 [MARK,REF(13739),LCK,gp=0x4000] \"class\"\n(has value)\n      @599d236f1a68 16 STRSXP g1c1 [MARK,REF(6)] (len=1, tl=0)\n        @599d21998078 09 CHARSXP g1c1 [MARK,REF(38),gp=0x61] [ASCII] [cached]\n\"foo\"\nR&gt; .Internal(inspect(y &lt;- unclass(x)))\n@599d236fe7b0 14 REALSXP g0c0 [REF(1)]  wrapper [srt=-2147483648,no_na=0]\n  @78413e395010 14 REALSXP g1c7 [OBJ,MARK,REF(3),ATT] (len=10000000, tl=0)\n0,0,0,0,0,...\n  ATTRIB:\n    @599d237ecbd0 02 LISTSXP g1c0 [MARK,REF(1)] \n      TAG: @599d21412e20 01 SYMSXP g1c0 [MARK,REF(13741),LCK,gp=0x4000] \"class\"\n(has value)\n      @599d236f1a68 16 STRSXP g1c1 [MARK,REF(7)] (len=1, tl=0)\n        @599d21998078 09 CHARSXP g1c1 [MARK,REF(38),gp=0x61] [ASCII] [cached]\n\"foo\"\nR&gt; gc(reset=TRUE)\n           used (Mb) gc trigger  (Mb) max used (Mb)\nNcells   300933 16.1     707697  37.8   300933 16.1\nVcells 10612802 81.0   38828687 296.3 10612802 81.0\nR&gt; system.time(.Call(\"grslengthgets\", y, length(y)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.035   0.026   0.062 \nR&gt; gc()\n           used (Mb) gc trigger  (Mb) max used  (Mb)\nNcells   300938 16.1     707697  37.8   301681  16.2\nVcells 10612825 81.0   38828687 296.3 20613122 157.3\nR&gt; .Internal(inspect(y))\n@599d236fe7b0 14 REALSXP g1c0 [MARK,REF(1)]  wrapper [srt=-2147483648,no_na=0]\n  @78413e395010 14 REALSXP g1c7 [OBJ,MARK,REF(3),ATT] (len=10000000, tl=0)\n0,0,0,0,0,...\n  ATTRIB:\n    @599d237ecbd0 02 LISTSXP g1c0 [MARK,REF(1)] \n      TAG: @599d21412e20 01 SYMSXP g1c0 [MARK,REF(13752),LCK,gp=0x4000] \"class\"\n(has value)\n      @599d236f1a68 16 STRSXP g1c1 [MARK,REF(7)] (len=1, tl=0)\n        @599d21998078 09 CHARSXP g1c1 [MARK,REF(38),gp=0x61] [ASCII] [cached]\n\"foo\"\nR&gt; gc(reset=TRUE)\n           used (Mb) gc trigger  (Mb) max used (Mb)\nNcells   300933 16.1     707697  37.8   300933 16.1\nVcells 10612802 81.0   38828687 296.3 10612802 81.0\nR&gt; system.time(.Call(\"grslengthgets\", y, length(y)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.027   0.034   0.061 \nR&gt; gc()\n           used (Mb) gc trigger  (Mb) max used  (Mb)\nNcells   300938 16.1     707697  37.8   301681  16.2\nVcells 10612825 81.0   38828687 296.3 20613122 157.3\nR&gt; .Internal(inspect(y))\n@599d236fe7b0 14 REALSXP g1c0 [MARK,REF(1)]  wrapper [srt=-2147483648,no_na=0]\n  @78413e395010 14 REALSXP g1c7 [OBJ,MARK,REF(3),ATT] (len=10000000, tl=0)\n0,0,0,0,0,...\n  ATTRIB:\n    @599d237ecbd0 02 LISTSXP g1c0 [MARK,REF(1)] \n      TAG: @599d21412e20 01 SYMSXP g1c0 [MARK,REF(13763),LCK,gp=0x4000] \"class\"\n(has value)\n      @599d236f1a68 16 STRSXP g1c1 [MARK,REF(7)] (len=1, tl=0)\n        @599d21998078 09 CHARSXP g1c1 [MARK,REF(38),gp=0x61] [ASCII] [cached]\n\"foo\"",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1767171601.758189",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "WdK",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "R> .Internal(inspect(y))\n@599d236fe820 14 REALSXP g1c0 [MARK,REF(1)]  wrapper [srt=-2147483648,no_na=0]\n  @78413e395010 14 REALSXP g1c7 [OBJ,MARK,REF(2),ATT] (len=10000000, tl=0)\n0,0,0,0,0,...\n  ATTRIB:\n    @599d237ecbd0 02 LISTSXP g1c0 [MARK,REF(1)] \n      TAG: @599d21412e20 01 SYMSXP g1c0 [MARK,REF(13728),LCK,gp=0x4000] \"class\"\n(has value)\n      @599d236f1a68 16 STRSXP g1c1 [MARK,REF(6)] (len=1, tl=0)\n        @599d21998078 09 CHARSXP g1c1 [MARK,REF(38),gp=0x61] [ASCII] [cached]\n\"foo\"\nR> gc(reset=TRUE)\n           used (Mb) gc trigger  (Mb) max used (Mb)\nNcells   300933 16.1     707697  37.8   300933 16.1\nVcells 10612802 81.0   38828687 296.3 10612802 81.0\nR> system.time(.Call(\"roslengthgets\", y, length(y)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.061   0.029   0.090 \nR> gc()\n           used (Mb) gc trigger  (Mb) max used  (Mb)\nNcells   300938 16.1     707697  37.8   301681  16.2\nVcells 10612825 81.0   38828687 296.3 20613122 157.3\nR> .Internal(inspect(y))\n@599d236fe820 14 REALSXP g1c0 [MARK,REF(1)]  wrapper [srt=-2147483648,no_na=0]\n  @78413e395010 14 REALSXP g1c7 [OBJ,MARK,REF(2),ATT] (len=10000000, tl=0)\n0,0,0,0,0,...\n  ATTRIB:\n    @599d237ecbd0 02 LISTSXP g1c0 [MARK,REF(1)] \n      TAG: @599d21412e20 01 SYMSXP g1c0 [MARK,REF(13739),LCK,gp=0x4000] \"class\"\n(has value)\n      @599d236f1a68 16 STRSXP g1c1 [MARK,REF(6)] (len=1, tl=0)\n        @599d21998078 09 CHARSXP g1c1 [MARK,REF(38),gp=0x61] [ASCII] [cached]\n\"foo\"\nR> .Internal(inspect(y <- unclass(x)))\n@599d236fe7b0 14 REALSXP g0c0 [REF(1)]  wrapper [srt=-2147483648,no_na=0]\n  @78413e395010 14 REALSXP g1c7 [OBJ,MARK,REF(3),ATT] (len=10000000, tl=0)\n0,0,0,0,0,...\n  ATTRIB:\n    @599d237ecbd0 02 LISTSXP g1c0 [MARK,REF(1)] \n      TAG: @599d21412e20 01 SYMSXP g1c0 [MARK,REF(13741),LCK,gp=0x4000] \"class\"\n(has value)\n      @599d236f1a68 16 STRSXP g1c1 [MARK,REF(7)] (len=1, tl=0)\n        @599d21998078 09 CHARSXP g1c1 [MARK,REF(38),gp=0x61] [ASCII] [cached]\n\"foo\"\nR> gc(reset=TRUE)\n           used (Mb) gc trigger  (Mb) max used (Mb)\nNcells   300933 16.1     707697  37.8   300933 16.1\nVcells 10612802 81.0   38828687 296.3 10612802 81.0\nR> system.time(.Call(\"grslengthgets\", y, length(y)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.035   0.026   0.062 \nR> gc()\n           used (Mb) gc trigger  (Mb) max used  (Mb)\nNcells   300938 16.1     707697  37.8   301681  16.2\nVcells 10612825 81.0   38828687 296.3 20613122 157.3\nR> .Internal(inspect(y))\n@599d236fe7b0 14 REALSXP g1c0 [MARK,REF(1)]  wrapper [srt=-2147483648,no_na=0]\n  @78413e395010 14 REALSXP g1c7 [OBJ,MARK,REF(3),ATT] (len=10000000, tl=0)\n0,0,0,0,0,...\n  ATTRIB:\n    @599d237ecbd0 02 LISTSXP g1c0 [MARK,REF(1)] \n      TAG: @599d21412e20 01 SYMSXP g1c0 [MARK,REF(13752),LCK,gp=0x4000] \"class\"\n(has value)\n      @599d236f1a68 16 STRSXP g1c1 [MARK,REF(7)] (len=1, tl=0)\n        @599d21998078 09 CHARSXP g1c1 [MARK,REF(38),gp=0x61] [ASCII] [cached]\n\"foo\"\nR> gc(reset=TRUE)\n           used (Mb) gc trigger  (Mb) max used (Mb)\nNcells   300933 16.1     707697  37.8   300933 16.1\nVcells 10612802 81.0   38828687 296.3 10612802 81.0\nR> system.time(.Call(\"grslengthgets\", y, length(y)-1L, PACKAGE=\"xlengthgets\"))\n   user  system elapsed \n  0.027   0.034   0.061 \nR> gc()\n           used (Mb) gc trigger  (Mb) max used  (Mb)\nNcells   300938 16.1     707697  37.8   301681  16.2\nVcells 10612825 81.0   38828687 296.3 20613122 157.3\nR> .Internal(inspect(y))\n@599d236fe7b0 14 REALSXP g1c0 [MARK,REF(1)]  wrapper [srt=-2147483648,no_na=0]\n  @78413e395010 14 REALSXP g1c7 [OBJ,MARK,REF(3),ATT] (len=10000000, tl=0)\n0,0,0,0,0,...\n  ATTRIB:\n    @599d237ecbd0 02 LISTSXP g1c0 [MARK,REF(1)] \n      TAG: @599d21412e20 01 SYMSXP g1c0 [MARK,REF(13763),LCK,gp=0x4000] \"class\"\n(has value)\n      @599d236f1a68 16 STRSXP g1c1 [MARK,REF(7)] (len=1, tl=0)\n        @599d21998078 09 CHARSXP g1c1 [MARK,REF(38),gp=0x61] [ASCII] [cached]\n\"foo\""
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18944] Add a preparsing filter step to aspell() in order to make LaTex spell checking more robust*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18944>\n\n--- Comment #4 from Kurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) ---\nPersonally, I think it would be nice if hunspell gained better support for\n(La)TeX preprocessing, but then even what Aspell offers is by far not good\nenough (no support for user defined environments or verb(atim) things).\nSo afaic the best would be having a fully customizable (La)TeX filter which can\nbe used for all spell checkers, perhaps even written in R.\nFor now, the best we have is the filter based on the LaTeX parsing code in\neither tools or the {parseLatex} package ...",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1767188599.664249",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "v\/A",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18944] Add a preparsing filter step to aspell() in order to make LaTex spell checking more robust",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18944"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Kurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nPersonally, I think it would be nice if hunspell gained better support for\n(La)TeX preprocessing, but then even what Aspell offers is by far not good\nenough (no support for user defined environments or verb(atim) things).\nSo afaic the best would be having a fully customizable (La)TeX filter which can\nbe used for all spell checkers, perhaps even written in R.\nFor now, the best we have is the filter based on the LaTeX parsing code in\neither tools or the {parseLatex} package ..."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

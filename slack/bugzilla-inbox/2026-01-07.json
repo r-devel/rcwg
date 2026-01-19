@@ -1,0 +1,562 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18989] New: Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989>\n\n            Bug ID: 18989\n           Summary: Wishlist: provide conversion of POSIXlt time zone\n                    retaining sub-second accuracy\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: enhancement\n          Priority: P5\n         Component: Wishlist\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>\n\nThis is a follow-up of Bug 18919 Comment 12.\n\nA `POSIXlt` object in R can be converted between time zones by converting to\n`POSIXct` and then to `POSIXlt`. However, conversion to `POSIXct` may introduce\nloss of precision of fractional seconds.\n\nIt would be good if R could provide conversion of `POSIXlt` object between time\nzones keeping the original precision of fractional seconds.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1767783665.203939",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "GWxX",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18989] New: Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18989\n           Summary: Wishlist: provide conversion of POSIXlt time zone\n                    retaining sub-second accuracy\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: enhancement\n          Priority: P5\n         Component: Wishlist\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThis is a follow-up of Bug 18919 Comment 12.\n\nA "
+                            },
+                            {
+                                "type": "text",
+                                "text": "POSIXlt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " object in R can be converted between time zones by converting to\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "POSIXct",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and then to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "POSIXlt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". However, conversion to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "POSIXct",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " may introduce\nloss of precision of fractional seconds.\n\nIt would be good if R could provide conversion of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "POSIXlt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " object between time\nzones keeping the original precision of fractional seconds."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18989] Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989>\n\n--- Comment #1 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\nIn R, one can proceed as usual and correcting the 'sec' component of the result\nafterwards, like function '.POSIXltNormalize' in tests\/datetime3.R .\n\n\nAn implementation, adapting '.POSIXltNormalize' in tests\/datetime3.R :\n\n##' convert POSIXlt to another time zone *not* losing fractional seconds\naccuracy\nPOSIXltconv &lt;- function(x, <http:\/\/to.tz|to.tz>, <http:\/\/from.tz|from.tz>) {\n    stopifnot(is.numeric(s &lt;- x$sec))\n    n &lt;- length(x &lt;- if(missing(<http:\/\/from.tz|from.tz>)) as.POSIXct(x) else as.POSIXct(x,\ntz=<http:\/\/from.tz|from.tz>))\n    x &lt;- if(missing(<http:\/\/to.tz|to.tz>)) as.POSIXlt(x) else as.POSIXlt(x, tz=<http:\/\/to.tz|to.tz>)\n    # and restore the precise seconds (recycling carefully!)\n    s &lt;- s - floor(s)\n    if(length(s) != n) s &lt;- rep_len(s, n)\n    i &lt;- which(is.finite(x$sec) &amp; s != 0)\n    if(length(i)) {\n        bal &lt;- attr(x, \"balanced\")\n        x$sec[i] &lt;- floor(x$sec[i]) + s[i]\n        if(!is.null(bal)) attr(x, \"balanced\") &lt;- bal\n    }    \n    x\n}\n\nIt corrects just the fractional part of 'sec' component because, in the past,\noffset might be not a whole minute\n(<https:\/\/stackoverflow.com\/questions\/66680634\/what-is-going-on-with-this-historical-timezone-offset-utc0057>),\nlike the Europe\/Moscow time zone in 1900\n(<https:\/\/stackoverflow.com\/questions\/50609860\/browsers-time-zones-chrome-67-error-historic-timezone-changes\/50610030#50610030>).\n\n\n'c.POSIXlt' could become\n\nc.POSIXlt &lt;- function(..., recursive = FALSE) {\n    x &lt;- list(...)\n    s &lt;- lapply(x, function(x) if(inherits(x, \"POSIXlt\")) x$sec - floor(x$sec))\n    n &lt;- lengths(x &lt;- lapply(x, as.POSIXct), use.names = FALSE)\n    x &lt;- as.POSIXlt(do.call(c, x))\n    for(i in seq_along(s)) if(length(si &lt;- s[[i]]) != (ni &lt;- n[[i]]))\n        s[[i]] &lt;- if(is.null(si)) double(ni) else rep_len(si, ni)\n    s &lt;- unlist(s, use.names = FALSE)\n    i &lt;- which(is.finite(x$sec) &amp; s != 0)\n    if(length(i)) {\n        bal &lt;- attr(x, \"balanced\")\n        x$sec[i] &lt;- floor(x$sec[i]) + s[i]\n        if(!is.null(bal)) attr(x, \"balanced\") &lt;- bal\n    }    \n    x\n}",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1767785889.353699",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Mn\/",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18989] Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nIn R, one can proceed as usual and correcting the 'sec' component of the result\nafterwards, like function '.POSIXltNormalize' in tests\/datetime3.R .\n\n\n\nAn implementation, adapting '.POSIXltNormalize' in tests\/datetime3.R :\n\n##' convert POSIXlt to another time zone "
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " losing fractional seconds\naccuracy\nPOSIXltconv <- function(x, "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/to.tz",
+                                "text": "to.tz"
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/from.tz",
+                                "text": "from.tz"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") {\n    stopifnot(is.numeric(s <- x$sec))\n    n <- length(x <- if(missing("
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/from.tz",
+                                "text": "from.tz"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")) as.POSIXct(x) else as.POSIXct(x,\ntz="
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/from.tz",
+                                "text": "from.tz"
+                            },
+                            {
+                                "type": "text",
+                                "text": "))\n    x <- if(missing("
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/to.tz",
+                                "text": "to.tz"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")) as.POSIXlt(x) else as.POSIXlt(x, tz="
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/to.tz",
+                                "text": "to.tz"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n    # and restore the precise seconds (recycling carefully!)\n    s <- s - floor(s)\n    if(length(s) != n) s <- rep_len(s, n)\n    i <- which(is.finite(x$sec) & s != 0)\n    if(length(i)) {\n        bal <- attr(x, \"balanced\")\n        x$sec[i] <- floor(x$sec[i]) + s[i]\n        if(!is.null(bal)) attr(x, \"balanced\") <- bal\n    }    \n    x\n}\n\nIt corrects just the fractional part of 'sec' component because, in the past,\noffset might be not a whole minute\n("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stackoverflow.com\/questions\/66680634\/what-is-going-on-with-this-historical-timezone-offset-utc0057"
+                            },
+                            {
+                                "type": "text",
+                                "text": "),\nlike the Europe\/Moscow time zone in 1900\n("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stackoverflow.com\/questions\/50609860\/browsers-time-zones-chrome-67-error-historic-timezone-changes\/50610030#50610030"
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\n\n\n\n'c.POSIXlt' could become\n\nc.POSIXlt <- function(..., recursive = FALSE) {\n    x <- list(...)\n    s <- lapply(x, function(x) if(inherits(x, \"POSIXlt\")) x$sec - floor(x$sec))\n    n <- lengths(x <- lapply(x, as.POSIXct), use.names = FALSE)\n    x <- as.POSIXlt(do.call(c, x))\n    for(i in seq_along(s)) if(length(si <- s[[i]]) != (ni <- n[[i]]))\n        s[[i]] <- if(is.null(si)) double(ni) else rep_len(si, ni)\n    s <- unlist(s, use.names = FALSE)\n    i <- which(is.finite(x$sec) & s != 0)\n    if(length(i)) {\n        bal <- attr(x, \"balanced\")\n        x$sec[i] <- floor(x$sec[i]) + s[i]\n        if(!is.null(bal)) attr(x, \"balanced\") <- bal\n    }    \n    x\n}"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18989] Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989>\n\n--- Comment #2 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\nA possible implementation in C, to be called from R by '.Call', copying from\n'do_asPOSIXct' and 'do_asPOSIXlt' in datetime.c :\n\nvoid R_CheckUserInterrupt(void);\nSEXP ltconv(SEXP x, SEXP to_tz, SEXP from_tz)\n{\n    \/* following do_asPOSIXct *\/\n\n    x = PROTECT(shallow_duplicate(x)); \/\/ modified\n    valid_POSIXlt(x, 9);\n\n    \/* following do_asPOSIXct *\/\n\n    R_xlen_t n = 0, nlen[9];\n    for(int i = 0; i &lt; 6; i++)\n        if((nlen[i] = XLENGTH(VECTOR_ELT(x, i))) &gt; n) n = nlen[i];\n    if((nlen[8] = XLENGTH(VECTOR_ELT(x, 8))) &gt; n) n = nlen[8];\n    if(n &gt; 0) {\n        for(int i = 0; i &lt; 6; i++)\n            check_nlen(i);\n        check_nlen(8);\n    }\n\n    \/* following do_asPOSIXlt *\/\n\n    int nans = 11;\n    SEXP ans = PROTECT(allocVector(VECSXP, nans));\n    for(int i = 0; i &lt; 9; i++)\n        SET_VECTOR_ELT(ans, i, allocVector(i &gt; 0 ? INTSXP : REALSXP, n));\n    SET_VECTOR_ELT(ans, 9, allocVector(STRSXP, n));\n    SET_VECTOR_ELT(ans, 10, allocVector(INTSXP, n));\n\n    SEXP ansnames = PROTECT(allocVector(STRSXP, nans));\n    for(int i = 0; i &lt; nans; i++)\n        SET_STRING_ELT(ansnames, i, mkChar(ltnames[i]));\n\n    \/* following do_asPOSIXct *\/\n\n    SEXP stz;\n    if(!isString((stz = from_tz)) || LENGTH(stz) != 1)\n        error(_(\"invalid '%s' value\"), \"from.tz\");\n    const char *tz = CHAR(STRING_ELT(stz, 0));\n    if(strlen(tz) == 0) {\n        char *p = getenv(\"TZ\");\n        if(p) {\n            stz = mkString(p);\n            tz = CHAR(STRING_ELT(stz, 0));\n        }\n    }\n\n    PROTECT(stz);\n    bool isUTC = (strcmp(tz, \"GMT\") == 0  || strcmp(tz, \"UTC\") == 0); \/\/ like\ndo_asPOSIXlt\n    tzset_info tzsi;\n    prepare_reset_tz(&amp;tzsi);\n    if(!isUTC &amp;&amp; strlen(tz) &gt; 0) set_tz(tz, &amp;tzsi);\n#ifdef USE_INTERNAL_MKTIME\n    else R_tzsetwall();\n#else\n    tzset();\n#endif\n\n    \/* following do_asPOSIXct, but storing in a component of ans\n    without adding fractional seconds and using INTEGER_ELT and REAL_ELT *\/\n\n    double *pct = n &gt; 0 ? REAL(VECTOR_ELT(ans, 0)) : NULL;\n    for(R_xlen_t i = 0; i &lt; n; i++) {\n        double secs = REAL_ELT(VECTOR_ELT(x, 0), i%nlen[0]), fsecs =\nfloor(secs);\n        stm tm;\n        tm.tm_sec   = R_FINITE(secs) ? (int) fsecs: NA_INTEGER;\n        tm.tm_min   = INTEGER_ELT(VECTOR_ELT(x, 1), i%nlen[1]);\n        tm.tm_hour  = INTEGER_ELT(VECTOR_ELT(x, 2), i%nlen[2]);\n        tm.tm_mday  = INTEGER_ELT(VECTOR_ELT(x, 3), i%nlen[3]);\n        tm.tm_mon   = INTEGER_ELT(VECTOR_ELT(x, 4), i%nlen[4]);\n        tm.tm_year  = INTEGER_ELT(VECTOR_ELT(x, 5), i%nlen[5]);\n        tm.tm_isdst = isUTC ? 0 : INTEGER_ELT(VECTOR_ELT(x, 8), i%nlen[8]);\n        if(!R_FINITE(secs))\n            pct[i] = secs;\n        else if(tm.tm_min  == NA_INTEGER ||\n                tm.tm_hour == NA_INTEGER || tm.tm_mday == NA_INTEGER ||\n                tm.tm_mon  == NA_INTEGER || tm.tm_year == NA_INTEGER)\n            pct[i] = NA_REAL;\n        else {\n            errno = 0;\n            double tmp = mktime0(&amp;tm, !isUTC);\n            pct[i] = ((tmp == -1.)\n#ifdef MKTIME_SETS_ERRNO\n                            &amp;&amp; errno\n#else\n                            &amp;&amp; (tm.tm_sec != 59)\n                            &amp;&amp; ((tm.tm_sec = 58), (mktime0(&amp;tm, !isUTC) !=\n-2.))\n#endif\n                            ) ?\n              NA_REAL : tmp;\n        }\n    }\n\n    \/* following do_asPOSIXct *\/\n\n    reset_tz(&amp;tzsi);\n\n    \/* added in between *\/\n    UNPROTECT(1);\n    R_CheckUserInterrupt();\n\n    \/* following do_asPOSIXlt *\/\n\n    stz = to_tz;\n    if(!isString((stz)) || LENGTH(stz) != 1)\n        error(_(\"invalid '%s' value\"), \"<http:\/\/to.tz|to.tz>\");\n    tz = CHAR(STRING_ELT(stz, 0));\n    if(strlen(tz) == 0) {\n        char *p = getenv(\"TZ\");\n        if(p) {\n            stz = mkString(p);\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1767786172.390709",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "OEPbC",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18989] Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nA possible implementation in C, to be called from R by '.Call', copying from\n'do_asPOSIXct' and 'do_asPOSIXlt' in datetime.c :\n\nvoid R_CheckUserInterrupt(void);\nSEXP ltconv(SEXP x, SEXP to_tz, SEXP from_tz)\n{\n    \/* following do_asPOSIXct *\/\n\n    x = PROTECT(shallow_duplicate(x)); \/\/ modified\n    valid_POSIXlt(x, 9);\n\n    \/* following do_asPOSIXct *\/\n\n    R_xlen_t n = 0, nlen[9];\n    for(int i = 0; i < 6; i++)\n        if((nlen[i] = XLENGTH(VECTOR_ELT(x, i))) > n) n = nlen[i];\n    if((nlen[8] = XLENGTH(VECTOR_ELT(x, 8))) > n) n = nlen[8];\n    if(n > 0) {\n        for(int i = 0; i < 6; i++)\n            check_nlen(i);\n        check_nlen(8);\n    }\n\n    \/* following do_asPOSIXlt *\/\n\n    int nans = 11;\n    SEXP ans = PROTECT(allocVector(VECSXP, nans));\n    for(int i = 0; i < 9; i++)\n        SET_VECTOR_ELT(ans, i, allocVector(i > 0 ? INTSXP : REALSXP, n));\n    SET_VECTOR_ELT(ans, 9, allocVector(STRSXP, n));\n    SET_VECTOR_ELT(ans, 10, allocVector(INTSXP, n));\n\n    SEXP ansnames = PROTECT(allocVector(STRSXP, nans));\n    for(int i = 0; i < nans; i++)\n        SET_STRING_ELT(ansnames, i, mkChar(ltnames[i]));\n\n    \/* following do_asPOSIXct *\/\n\n    SEXP stz;\n    if(!isString((stz = from_tz)) || LENGTH(stz) != 1)\n        error(_(\"invalid '%s' value\"), \"from.tz\");\n    const char *tz = CHAR(STRING_ELT(stz, 0));\n    if(strlen(tz) == 0) {\n        char *p = getenv(\"TZ\");\n        if(p) {\n            stz = mkString(p);\n            tz = CHAR(STRING_ELT(stz, 0));\n        }\n    }\n\n    PROTECT(stz);\n    bool isUTC = (strcmp(tz, \"GMT\") == 0  || strcmp(tz, \"UTC\") == 0); \/\/ like\ndo_asPOSIXlt\n    tzset_info tzsi;\n    prepare_reset_tz(&tzsi);\n    if(!isUTC && strlen(tz) > 0) set_tz(tz, &tzsi);\n#ifdef USE_INTERNAL_MKTIME\n    else R_tzsetwall();\n#else\n    tzset();\n#endif\n\n    \/* following do_asPOSIXct, but storing in a component of ans\n    without adding fractional seconds and using INTEGER_ELT and REAL_ELT *\/\n\n    double *pct = n > 0 ? REAL(VECTOR_ELT(ans, 0)) : NULL;\n    for(R_xlen_t i = 0; i < n; i++) {\n        double secs = REAL_ELT(VECTOR_ELT(x, 0), i%nlen[0]), fsecs =\nfloor(secs);\n        stm tm;\n        tm.tm_sec   = R_FINITE(secs) ? (int) fsecs: NA_INTEGER;\n        tm.tm_min   = INTEGER_ELT(VECTOR_ELT(x, 1), i%nlen[1]);\n        tm.tm_hour  = INTEGER_ELT(VECTOR_ELT(x, 2), i%nlen[2]);\n        tm.tm_mday  = INTEGER_ELT(VECTOR_ELT(x, 3), i%nlen[3]);\n        tm.tm_mon   = INTEGER_ELT(VECTOR_ELT(x, 4), i%nlen[4]);\n        tm.tm_year  = INTEGER_ELT(VECTOR_ELT(x, 5), i%nlen[5]);\n        tm.tm_isdst = isUTC ? 0 : INTEGER_ELT(VECTOR_ELT(x, 8), i%nlen[8]);\n        if(!R_FINITE(secs))\n            pct[i] = secs;\n        else if(tm.tm_min  == NA_INTEGER ||\n                tm.tm_hour == NA_INTEGER || tm.tm_mday == NA_INTEGER ||\n                tm.tm_mon  == NA_INTEGER || tm.tm_year == NA_INTEGER)\n            pct[i] = NA_REAL;\n        else {\n            errno = 0;\n            double tmp = mktime0(&tm, !isUTC);\n            pct[i] = ((tmp == -1.)\n#ifdef MKTIME_SETS_ERRNO\n                            && errno\n#else\n                            && (tm.tm_sec != 59)\n                            && ((tm.tm_sec = 58), (mktime0(&tm, !isUTC) !=\n-2.))\n#endif\n                            ) ?\n              NA_REAL : tmp;\n        }\n    }\n\n    \/* following do_asPOSIXct *\/\n\n    reset_tz(&tzsi);\n\n    \/* added in between *\/\n    UNPROTECT(1);\n    R_CheckUserInterrupt();\n\n    \/* following do_asPOSIXlt *\/\n\n    stz = to_tz;\n    if(!isString((stz)) || LENGTH(stz) != 1)\n        error(_(\"invalid '%s' value\"), \""
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/to.tz",
+                                "text": "to.tz"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\");\n    tz = CHAR(STRING_ELT(stz, 0));\n    if(strlen(tz) == 0) {\n        char *p = getenv(\"TZ\");\n        if(p) {\n            stz = mkString(p);"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "            tz = CHAR(STRING_ELT(stz, 0));\n        }\n    }\n    PROTECT(stz);\n    isUTC = (strcmp(tz, \"GMT\") == 0  || strcmp(tz, \"UTC\") == 0);\n\n    prepare_reset_tz(&amp;tzsi);\n\n    if(!isUTC &amp;&amp; strlen(tz) &gt; 0) set_tz(tz, &amp;tzsi);\n#ifdef USE_INTERNAL_MKTIME\n    else R_tzsetwall();\n#else\n    tzset();\n#endif\n\n    BEGIN_MAKElt\n\n    \/* following do_asPOSIXlt, but using fractional seconds from x *\/\n\n    SEXP s = VECTOR_ELT(x, 0);\n    for(R_xlen_t i = 0; i &lt; n; i++) {\n        stm dummy, *ptm = &amp;dummy;\n        double d = pct[i];\n        bool valid;\n        if(R_FINITE(d)) {\n            ptm = localtime0(&amp;d, !isUTC, &amp;dummy);\n            valid = (ptm != NULL);\n        } else {\n            valid = false;\n        }\n        if(valid) d = REAL_ELT(s, i%nlen[0]);\n        makelt(ptm, ans, i, valid, valid ? d - floor(d) : d);\n        if (isUTC) {\n            SET_STRING_ELT(VECTOR_ELT(ans, 9), i, STRING_ELT(tzone, 0)); \/\/\nmodified\n            INTEGER(VECTOR_ELT(ans, 10))[i] = 0;\n        } else {\n            char *p = \"\";\n            if(valid &amp;&amp; ptm-&gt;tm_isdst &gt;= 0)\n                p = R_tzname[ptm-&gt;tm_isdst];\n            SET_STRING_ELT(VECTOR_ELT(ans, 9), i, mkChar(p));\n#ifdef HAVE_TM_GMTOFF\n            INTEGER(VECTOR_ELT(ans, 10))[i] =\n                valid ? (int)ptm-&gt;tm_gmtoff : NA_INTEGER;\n#else\n            INTEGER(VECTOR_ELT(ans, 10))[i] = NA_INTEGER;\n#endif\n        }\n    }\n    x = VECTOR_ELT(x, 5); \/\/ for names\n    END_MAKElt\n    UNPROTECT(6);\n    return ans;\n}",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1767786172.412119",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "GAhJ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "tz = CHAR(STRING_ELT(stz, 0));\n        }\n    }\n    PROTECT(stz);\n    isUTC = (strcmp(tz, \"GMT\") == 0  || strcmp(tz, \"UTC\") == 0);\n\n    prepare_reset_tz(&tzsi);\n\n    if(!isUTC && strlen(tz) > 0) set_tz(tz, &tzsi);\n#ifdef USE_INTERNAL_MKTIME\n    else R_tzsetwall();\n#else\n    tzset();\n#endif\n\n    BEGIN_MAKElt\n\n    \/* following do_asPOSIXlt, but using fractional seconds from x *\/\n\n    SEXP s = VECTOR_ELT(x, 0);\n    for(R_xlen_t i = 0; i < n; i++) {\n        stm dummy, *ptm = &dummy;\n        double d = pct[i];\n        bool valid;\n        if(R_FINITE(d)) {\n            ptm = localtime0(&d, !isUTC, &dummy);\n            valid = (ptm != NULL);\n        } else {\n            valid = false;\n        }\n        if(valid) d = REAL_ELT(s, i%nlen[0]);\n        makelt(ptm, ans, i, valid, valid ? d - floor(d) : d);\n        if (isUTC) {\n            SET_STRING_ELT(VECTOR_ELT(ans, 9), i, STRING_ELT(tzone, 0)); \/\/\nmodified\n            INTEGER(VECTOR_ELT(ans, 10))[i] = 0;\n        } else {\n            char *p = \"\";\n            if(valid && ptm->tm_isdst >= 0)\n                p = R_tzname[ptm->tm_isdst];\n            SET_STRING_ELT(VECTOR_ELT(ans, 9), i, mkChar(p));\n#ifdef HAVE_TM_GMTOFF\n            INTEGER(VECTOR_ELT(ans, 10))[i] =\n                valid ? (int)ptm->tm_gmtoff : NA_INTEGER;\n#else\n            INTEGER(VECTOR_ELT(ans, 10))[i] = NA_INTEGER;\n#endif\n        }\n    }\n    x = VECTOR_ELT(x, 5); \/\/ for names\n    END_MAKElt\n    UNPROTECT(6);\n    return ans;\n}"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18987] Report server-side errors in package downloads using X-Error-Message header*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18987>\n\n--- Comment #2 from Julian Bermudez Valderrama (<mailto:jbermudez@sonatype.com|jbermudez@sonatype.com>) ---\nCreated attachment 3593\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3593&amp;action=edit>\ngit-svn diff patch file for \"Report server-side errors in package downloads\nusing RFC9457 body parsing\"",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1767848734.446519",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "=gK",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18987] Report server-side errors in package downloads using X-Error-Message header",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18987"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Julian Bermudez Valderrama ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jbermudez@sonatype.com",
+                                "text": "jbermudez@sonatype.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3593\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3593&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3593&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ngit-svn diff patch file for \"Report server-side errors in package downloads\nusing RFC9457 body parsing\""
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18987] Report server-side errors in package downloads using X-Error-Message header*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18987>\n\n--- Comment #3 from Julian Bermudez Valderrama (<mailto:jbermudez@sonatype.com|jbermudez@sonatype.com>) ---\n(In reply to Simon Urbanek from comment #1)\nSimon, thanks for the feedback!\n\nThe initial \"X-Error-Message\" custom header approach was intended as a\nlightweight mechanism for servers to communicate error details. \nThis pattern is used by package managers like NuGet CLI and Hugging Face CLI,\nwhich leverage custom headers for structured error messaging.\n\nHere's a brief example of its usage with the custom header approach:\n\n```\n$ .\/build\/bin\/R\n...\n\ninstall.packages(\"dplyr\",\nrepos=\"<https:\/\/nexus-repository.sonatype.com\/repository\/r-repo>\")\n\ntrying URL\n'<https:\/\/nexus-repository.sonatype.com\/repository\/r-repo\/src\/contrib\/dplyr_1.1.4.tar.gz>'\n...\n\nError in download.file(urls, destfiles, \"libcurl\", mode = \"wb\", ...) :\n  cannot download any files\n\nWarning in download.packages(pkgs, destdir = tmpd, available = available,  :\n  download of package 'utf8' failed\nWarning: cannot open URL\n'<https:\/\/nexus-repository.sonatype.com\/repository\/r-repo\/src\/contrib\/utf8_1.2.6.tar.gz>':\nHTTP status was '403 Forbidden'\n  Error message: --------------------&gt;&gt;&gt; Requested item is quarantined\n--------------------&gt;&gt;&gt; FOR DETAILS SEE ------&gt;&gt;&gt;\n<https:\/\/iq.sonatype.com\/ui\/links\/firewall\/repositories\/quarantinedComponent\/ZTZiNjkxNGRkN2E2NDE0OGJkYzUwYjM3ZDNkYTc1M2I>\n&lt;&lt;&lt;------\n...\n```\n\nHowever, I agree that custom headers are not as well-established as free-form\nor RFC 9457 response body approaches.\n\nTherefore, I've pivoted the implementation to RFC 9457. Key highlights:\n- Parses title, detail, and status fields from error response body.\n- Maintains full backward compatibility—no breaking changes.\n\nHere's the same scenario using RFC 9457:\n\n```\n$ .\/build\/bin\/R\n...\n\ninstall.packages(\"dplyr\",\nrepos=\"https:\/\/nexus-repository.sonatype.com\/repository\/r-repo\")\n\ntrying URL\n'https:\/\/nexus-repository.sonatype.com\/repository\/r-repo\/src\/contrib\/dplyr_1.1.4.tar.gz'\n...\n\nError in download.file(urls, destfiles, \"libcurl\", mode = \"wb\", ...) :\n  cannot download any files\n\nWarning in download.packages(pkgs, destdir = tmpd, available = available,  :\n  download of package 'utf8' failed\nWarning: cannot open URL\n'https:\/\/nexus-repository.sonatype.com\/repository\/r-repo\/src\/contrib\/utf8_1.2.6.tar.gz':\nHTTP status was '403 Forbidden'\n  Sonatype Firewall Report\n  --------------------&gt;&gt;&gt; Requested item is quarantined --------------------&gt;&gt;&gt;\nFOR DETAILS SEE ------&gt;&gt;&gt;\n<https:\/\/iq.sonatype.com\/ui\/links\/firewall\/repositories\/quarantinedComponent\/ZTZiNjkxNGRkN2E2NDE0OGJkYzUwYjM3ZDNkYTc1M2I>\n&lt;&lt;&lt;------\n...\n```\n\nFor this scenario, the server responds with `Content-Type:\napplication\/problem+json` and the following body:\n\n```\n{\n  \"title\": \"Sonatype Firewall Report\",\n  \"detail\": \"--------------------&gt;&gt;&gt; Requested item is quarantined\n--------------------&gt;&gt;&gt; FOR DETAILS SEE ------&gt;&gt;&gt;\n<https:\/\/iq.sonatype.com\/ui\/links\/firewall\/repositories\/quarantinedComponent\/ZTZiNjkxNGRkN2E2NDE0OGJkYzUwYjM3ZDNkYTc1M2I>\n&lt;&lt;&lt;------\",\n  \"status\": 403\n}\n```\n\nPlease find the patch file attached for review.\n\nShould I open a new bug report specifically for the RFC 9457 implementation, or\nwould you prefer to continue the discussion here?\n\nLooking forward to hearing from you. Thanks!",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1767848794.402419",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "0ioCX",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18987] Report server-side errors in package downloads using X-Error-Message header",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18987"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Julian Bermudez Valderrama ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jbermudez@sonatype.com",
+                                "text": "jbermudez@sonatype.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Simon Urbanek from comment #1)\nSimon, thanks for the feedback!\n\nThe initial \"X-Error-Message\" custom header approach was intended as a\nlightweight mechanism for servers to communicate error details. \nThis pattern is used by package managers like NuGet CLI and Hugging Face CLI,\nwhich leverage custom headers for structured error messaging.\n\nHere's a brief example of its usage with the custom header approach:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$ .\/build\/bin\/R\n...\n\ninstall.packages(\"dplyr\",\nrepos=\""
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/nexus-repository.sonatype.com\/repository\/r-repo"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\")\n\ntrying URL\n'"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/nexus-repository.sonatype.com\/repository\/r-repo\/src\/contrib\/dplyr_1.1.4.tar.gz"
+                            },
+                            {
+                                "type": "text",
+                                "text": "'\n...\n\nError in download.file(urls, destfiles, \"libcurl\", mode = \"wb\", ...) :\n  cannot download any files\n\nWarning in download.packages(pkgs, destdir = tmpd, available = available,  :\n  download of package 'utf8' failed\nWarning: cannot open URL\n'"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/nexus-repository.sonatype.com\/repository\/r-repo\/src\/contrib\/utf8_1.2.6.tar.gz"
+                            },
+                            {
+                                "type": "text",
+                                "text": "':\nHTTP status was '403 Forbidden'\n  Error message: -------------------->>> Requested item is quarantined\n-------------------->>> FOR DETAILS SEE ------>>>\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/iq.sonatype.com\/ui\/links\/firewall\/repositories\/quarantinedComponent\/ZTZiNjkxNGRkN2E2NDE0OGJkYzUwYjM3ZDNkYTc1M2I"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n<<<------\n...\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nHowever, I agree that custom headers are not as well-established as free-form\nor RFC 9457 response body approaches.\n\nTherefore, I've pivoted the implementation to RFC 9457. Key highlights:\n- Parses title, detail, and status fields from error response body.\n- Maintains full backward compatibility—no breaking changes.\n\nHere's the same scenario using RFC 9457:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$ .\/build\/bin\/R\n...\n\ninstall.packages(\"dplyr\",\nrepos=\"https:\/\/nexus-repository.sonatype.com\/repository\/r-repo\")\n\ntrying URL\n'https:\/\/nexus-repository.sonatype.com\/repository\/r-repo\/src\/contrib\/dplyr_1.1.4.tar.gz'\n...\n\nError in download.file(urls, destfiles, \"libcurl\", mode = \"wb\", ...) :\n  cannot download any files\n\nWarning in download.packages(pkgs, destdir = tmpd, available = available,  :\n  download of package 'utf8' failed\nWarning: cannot open URL\n'https:\/\/nexus-repository.sonatype.com\/repository\/r-repo\/src\/contrib\/utf8_1.2.6.tar.gz':\nHTTP status was '403 Forbidden'\n  Sonatype Firewall Report\n  -------------------->>> Requested item is quarantined -------------------->>>\nFOR DETAILS SEE ------>>>\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/iq.sonatype.com\/ui\/links\/firewall\/repositories\/quarantinedComponent\/ZTZiNjkxNGRkN2E2NDE0OGJkYzUwYjM3ZDNkYTc1M2I"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n<<<------\n...\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nFor this scenario, the server responds with `Content-Type:\napplication\/problem+json` and the following body:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "{\n  \"title\": \"Sonatype Firewall Report\",\n  \"detail\": \"-------------------->>> Requested item is quarantined\n-------------------->>> FOR DETAILS SEE ------>>>\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/iq.sonatype.com\/ui\/links\/firewall\/repositories\/quarantinedComponent\/ZTZiNjkxNGRkN2E2NDE0OGJkYzUwYjM3ZDNkYTc1M2I"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n<<<------\",\n  \"status\": 403\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nPlease find the patch file attached for review.\n\nShould I open a new bug report specifically for the RFC 9457 implementation, or\nwould you prefer to continue the discussion here?\n\nLooking forward to hearing from you. Thanks!"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,703 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 15275] terms.formula(y ~ (x + fn(z = NA)) - fn(z = NA),simplify=TRUE) does not simplify*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=15275>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|NEW                         |ASSIGNED\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #9 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\n(In reply to Mikael Jagan from comment #8)\n&gt; Pinging since I think ....\n\nYou are right. Thank you.\nMinor remarks \/ questions:\n\n1. In your regression tests you comment to be testing the `STRING_ELT(*, 0)`\nused in the current (unpatched) code. However your test passes already (w\/o\nwarning etc) in earlier versions of R which to me suggests that `STRING_ELT`\nwas already good enough or that your test does not really prove that that part\nof the patch was needed.\n\n2. Your checks include all kinds of `NA`s which is nicely thorough.  `NaN`\n   however do not appear in your checks.\n   I'll add one check with `NaN` ... even though I notice here that if I try to\nuse both `NA` and `NaN` in the same formula, things depend on their _order_ , \ne.g., (on x86_64 Fedora 42 Linux, gcc)\n```\nchkv &lt;- function(formula, variables, do.eval = FALSE)\n    identical(print( attr(terms(formula), \"variables\") ), # print() for testing \n              if(do.eval) variables else substitute(variables))\n\n&gt; chkv(~x + f(FALSE) + f(0) + g(NaN) + g(NA), list(x, f(FALSE), g(NaN)))\nlist(x, f(FALSE), g(NaN))\n[1] TRUE\n\n&gt; chkv(~x + f(FALSE) + f(0) + g(NA) + g(NaN), list(x, f(FALSE), g(NaN)))\nlist(x, f(FALSE), g(NA))\n[1] FALSE\n```\nwhere I remain happy to decide to not open that can of worms (we also see with\nsimple arithmetic) ...",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1762165291.210149",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "wV8",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 15275] terms.formula(y ~ (x + fn(z = NA)) - fn(z = NA),simplify=TRUE) does not simplify",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=15275"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|NEW                         |ASSIGNED\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #9 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Mikael Jagan from comment #8)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Pinging since I think ...."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nYou are right. Thank you.\nMinor remarks \/ questions:\n\n1. In your regression tests you comment to be testing the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "STRING_ELT(*, 0)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nused in the current (unpatched) code. However your test passes already (w\/o\nwarning etc) in earlier versions of R which to me suggests that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "STRING_ELT",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nwas already good enough or that your test does not really prove that that part\nof the patch was needed.\n\n2. Your checks include all kinds of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "s which is nicely thorough.  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NaN",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n   however do not appear in your checks.\n   I'll add one check with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NaN",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ... even though I notice here that if I try to\nuse both "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NaN",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in the same formula, things depend on their "
+                            },
+                            {
+                                "type": "text",
+                                "text": "order",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " , \ne.g., (on x86_64 Fedora 42 Linux, gcc)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "chkv <- function(formula, variables, do.eval = FALSE)\n    identical(print( attr(terms(formula), \"variables\") ), # print() for testing \n              if(do.eval) variables else substitute(variables))\n\n> chkv(~x + f(FALSE) + f(0) + g(NaN) + g(NA), list(x, f(FALSE), g(NaN)))\nlist(x, f(FALSE), g(NaN))\n[1] TRUE\n\n> chkv(~x + f(FALSE) + f(0) + g(NA) + g(NaN), list(x, f(FALSE), g(NaN)))\nlist(x, f(FALSE), g(NA))\n[1] FALSE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "where I remain happy to decide to not open that can of worms (we also see with\nsimple arithmetic) ..."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 15275] terms.formula(y ~ (x + fn(z = NA)) - fn(z = NA),simplify=TRUE) does not simplify*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=15275>\n\n--- Comment #10 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\n(In reply to Martin Maechler from comment #9)\n&gt; However your test passes already (w\/o warning etc) in earlier versions of R which to me suggests that `STRING_ELT` was already good enough or that your test does not really prove that that part of the patch was needed.\n\nThat part of the patch is defensive, guarding against undefined behaviour, in\nthis case dereferencing a pointer to what might be unallocated memory.  The\ntest was added in order to possibly trigger UBSan (or similar) in an augmented\nbuild of R, not because that code previously signalled an R error.  Admittedly,\nmy comment in the patch does little to make this clear.\n\nFWIW, my UBSan-enabled build of R (without the patch) does not complain there,\nbut that is just my build on my platform (`aarch64-apple-darwin`).\n\n&gt; I'll add one check with `NaN` ...\nThanks, I recall thinking about `NaN`.  I must have thought that testing too\ncarefully for differences between `NA_real_` and `NaN` might be unwise, but, on\nsecond thought, indeed, one does not expect platform dependence here as we are\nnot \"computing\".\n\n&gt; I notice here that if I try to use both `NA` and `NaN` in the same formula, things depend on their _order_\n\nYes, only the first match is preserved, so order matters, and that can be seen\nwith any combination of `NA`, `NA_integer_`, `NA_real_`, and `NaN`.  Like you,\nI did not feel motivated to touch that can of worms.  Someone can open a new\nbug report if that issue affects them.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1762182563.446369",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "+Xa3j",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 15275] terms.formula(y ~ (x + fn(z = NA)) - fn(z = NA),simplify=TRUE) does not simplify",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=15275"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #10 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Martin Maechler from comment #9)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "However your test passes already (w\/o warning etc) in earlier versions of R which to me suggests that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "STRING_ELT",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " was already good enough or that your test does not really prove that that part of the patch was needed."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThat part of the patch is defensive, guarding against undefined behaviour, in\nthis case dereferencing a pointer to what might be unallocated memory.  The\ntest was added in order to possibly trigger UBSan (or similar) in an augmented\nbuild of R, not because that code previously signalled an R error.  Admittedly,\nmy comment in the patch does little to make this clear.\n\nFWIW, my UBSan-enabled build of R (without the patch) does not complain there,\nbut that is just my build on my platform ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "aarch64-apple-darwin",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I'll add one check with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NaN",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ..."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Thanks, I recall thinking about "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NaN",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  I must have thought that testing too\ncarefully for differences between "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA_real_",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NaN",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " might be unwise, but, on\nsecond thought, indeed, one does not expect platform dependence here as we are\nnot \"computing\".\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I notice here that if I try to use both "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NaN",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in the same formula, things depend on their "
+                            },
+                            {
+                                "type": "text",
+                                "text": "order",
+                                "style": {
+                                    "italic": true
+                                }
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nYes, only the first match is preserved, so order matters, and that can be seen\nwith any combination of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA_integer_",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA_real_",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NaN",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  Like you,\nI did not feel motivated to touch that can of worms.  Someone can open a new\nbug report if that issue affects them."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 15275] terms.formula(y ~ (x + fn(z = NA)) - fn(z = NA),simplify=TRUE) does not simplify*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=15275>\n\n--- Comment #11 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nSorry, Markdown blunder.  Repeating the second part of comment 10:\n\n&gt; I'll add one check with `NaN` ...\n\nThanks, I recall thinking about `NaN`. I must have thought that testing too\ncarefully for differences between `NA_real_` and `NaN` might be unwise, but, on\nsecond thought, indeed, one does not expect platform dependence here as we are\nnot \"computing\".\n\n&gt; I notice here that if I try to use both `NA` and `NaN` in the same formula, things depend on their order\n\nYes, only the first match is preserved, so order matters, and that can be seen\nwith any combination of `NA`, `NA_integer_`, `NA_real_`, and `NaN`. Like you, I\ndid not feel motivated to touch that can of worms. Someone can open a new bug\nreport if that issue affects them.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1762182847.453269",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "eh3xW",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 15275] terms.formula(y ~ (x + fn(z = NA)) - fn(z = NA),simplify=TRUE) does not simplify",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=15275"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #11 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nSorry, Markdown blunder.  Repeating the second part of comment 10:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I'll add one check with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NaN",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ..."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThanks, I recall thinking about "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NaN",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". I must have thought that testing too\ncarefully for differences between "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA_real_",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NaN",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " might be unwise, but, on\nsecond thought, indeed, one does not expect platform dependence here as we are\nnot \"computing\".\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I notice here that if I try to use both "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NaN",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in the same formula, things depend on their order"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nYes, only the first match is preserved, so order matters, and that can be seen\nwith any combination of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA_integer_",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA_real_",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NaN",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". Like you, I\ndid not feel motivated to touch that can of worms. Someone can open a new bug\nreport if that issue affects them."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18962] dyn.unload does not call R_unload_lib*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18962>\n\nTomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tomas.kalibera@gmail.com\n           Severity|normal                      |minor\n\n--- Comment #2 from Tomas Kalibera (<mailto:tomas.kalibera@gmail.com|tomas.kalibera@gmail.com>) ---\nI'd avoid any unloading of packages\/libraries. It has a lot of problems and\ndoes not work reliably, in principle, on current systems (for just some, see\nhelp page for dyn.unload). We have seen crashes of R\/R packages caused by race\nconditions in R packages around unloading, often these are hard to track down.\n\nIt may be that there is some bug in R that makes unloading even less reliable\nthan it needs to be, and we might fix that at some point, but the priority is\nrather low - the only reliable way to get rid of a library\/packages from an R\nsession is to restart R (or any other process that dynamically links a library\nat runtime, this is not an R-specific thing - see e.g. disclaimers coming with\nsimilar API in Java or Python).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1762184727.206029",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "=xw",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18962] dyn.unload does not call R_unload_lib",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18962"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tomas.kalibera@gmail.com\n           Severity|normal                      |minor\n\n--- Comment #2 from Tomas Kalibera ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tomas.kalibera@gmail.com",
+                                "text": "tomas.kalibera@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI'd avoid any unloading of packages\/libraries. It has a lot of problems and\ndoes not work reliably, in principle, on current systems (for just some, see\nhelp page for dyn.unload). We have seen crashes of R\/R packages caused by race\nconditions in R packages around unloading, often these are hard to track down.\n\nIt may be that there is some bug in R that makes unloading even less reliable\nthan it needs to be, and we might fix that at some point, but the priority is\nrather low - the only reliable way to get rid of a library\/packages from an R\nsession is to restart R (or any other process that dynamically links a library\nat runtime, this is not an R-specific thing - see e.g. disclaimers coming with\nsimilar API in Java or Python)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

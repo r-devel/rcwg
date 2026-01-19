@@ -1,0 +1,422 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18978] New: Rgui script editor (and several other functions) do not properly close Windows clipboard*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18978>\n\n            Bug ID: 18978\n           Summary: Rgui script editor (and several other functions) do\n                    not properly close Windows clipboard\n           Product: R\n           Version: R 4.5.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Windows GUI \/ Window specific\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:robert.schlicht@tu-dresden.de|robert.schlicht@tu-dresden.de>\n\n**Description:**\nThe R internal script editor does not properly close the Windows clipboard\nafter an attempt to paste an object with not textual representation. Similar\nproblems may apply in other places.\n\n**Steps to reproduce:**\n1. Copy some object with no plain text representation (for example, a file) to\nthe clipboard.\n2. Paste this into the script editor in Rgui.exe (or as invoked by `edit(...,\neditor=\"internal\")`). The editor opens the clipboard, cannot paste the contents\nand then skips closing the clipboard.\n3. The clipboard now remains unusable in Windows until the R instance is\nterminated.\n\n**Probable reason:**\nSeveral clipboard accesses in various R source files that I looked at (not sure\nwhich one is used by the script editor) appear to be flawed in that not every\ncode path involving a successful ```OpenClipboard()``` includes the required\n```CloseClipboard()``` call:\n\n- `src\/extra\/graphapp\/clipboard.c`\n- `src\/gnuwin32\/console.c`\n- `src\/main\/connections.c`\n- `src\/library\/utils\/src\/windows\/util.c`\n\nFor example, `getstringfromclipboard()` in `src\/extra\/graphapp\/clipboard.c`\ncould be fixed as follows:\n\n```\nint getstringfromclipboard(char * str, int n)\n{\n    HGLOBAL hglb;\n    char *pc;\n    int error = 1;\n\n    if (OpenClipboard(NULL)) {\n        if ((hglb = GetClipboardData(CF_TEXT)) &amp;&amp;\n            (pc = (char *)GlobalLock(hglb))) {\n            strncpy(str, pc, n);\n            str[n+1] = '\\0';\n            GlobalUnlock(hglb);\n            error = 0;\n        }\n        CloseClipboard();\n    }\n\n    return error;\n}\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1765459300.216039",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "u4S",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18978] New: Rgui script editor (and several other functions) do not properly close Windows clipboard",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18978"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18978\n           Summary: Rgui script editor (and several other functions) do\n                    not properly close Windows clipboard\n           Product: R\n           Version: R 4.5.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Windows GUI \/ Window specific\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:robert.schlicht@tu-dresden.de",
+                                "text": "robert.schlicht@tu-dresden.de",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n**Description:**\nThe R internal script editor does not properly close the Windows clipboard\nafter an attempt to paste an object with not textual representation. Similar\nproblems may apply in other places.\n\n**Steps to reproduce:**\n1. Copy some object with no plain text representation (for example, a file) to\nthe clipboard.\n2. Paste this into the script editor in Rgui.exe (or as invoked by `edit(...,\neditor=\"internal\")`). The editor opens the clipboard, cannot paste the contents\nand then skips closing the clipboard.\n3. The clipboard now remains unusable in Windows until the R instance is\nterminated.\n\n**Probable reason:**\nSeveral clipboard accesses in various R source files that I looked at (not sure\nwhich one is used by the script editor) appear to be flawed in that not every\ncode path involving a successful "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "OpenClipboard()"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " includes the required"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "CloseClipboard()"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " call:\n\n- "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/extra\/graphapp\/clipboard.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n- "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/gnuwin32\/console.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n- "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/connections.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n- "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/library\/utils\/src\/windows\/util.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nFor example, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getstringfromclipboard()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/extra\/graphapp\/clipboard.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ncould be fixed as follows:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "int getstringfromclipboard(char * str, int n)\n{\n    HGLOBAL hglb;\n    char *pc;\n    int error = 1;\n\n    if (OpenClipboard(NULL)) {\n        if ((hglb = GetClipboardData(CF_TEXT)) &&\n            (pc = (char *)GlobalLock(hglb))) {\n            strncpy(str, pc, n);\n            str[n+1] = '\\0';\n            GlobalUnlock(hglb);\n            error = 0;\n        }\n        CloseClipboard();\n    }\n\n    return error;\n}\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18832] default expression for 'dims' differs between 'colSums' and implicit generic function definition*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18832>\n\n--- Comment #4 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\nThe `toeplitz` bug recently patched by r89146 reminded me of this (clearly\nminor) PR.  I think that it can be closed either as `WONTFIX` or as `FIXED`,\nthe latter by applying just the `src\/library\/methods\/R\/makeBasicFunsList.R`\npart of attachment 3433.  The rest of the discussion here is more or less noise\n...",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1765514007.810109",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "vO4Y",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18832] default expression for 'dims' differs between 'colSums' and implicit generic function definition",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18832"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "toeplitz",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " bug recently patched by r89146 reminded me of this (clearly\nminor) PR.  I think that it can be closed either as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "WONTFIX",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "FIXED",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\nthe latter by applying just the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/library\/methods\/R\/makeBasicFunsList.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\npart of attachment 3433.  The rest of the discussion here is more or less noise\n..."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18979] New: method for implicit generic 'norm' (x=\"ANY\", type=\"missing\") does not dispatch*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18979>\n\n            Bug ID: 18979\n           Summary: method for implicit generic 'norm' (x=\"ANY\",\n                    type=\"missing\") does not dispatch\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: S4methods\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>\n\n```\n&gt; setGeneric(\"norm\")\n[1] \"norm\"\n&gt; showMethods(\"norm\", includeDefs = TRUE)\nFunction: norm (package base)\nx=\"ANY\", type=\"ANY\"\nfunction (x, type, ...) \nbase::norm(x, type, ...)\n\n\nx=\"ANY\", type=\"missing\"\nfunction (x, type, ...) \nnorm(x, type = \"O\", ...)\n\n\n\n&gt; m &lt;- getMethod(\"norm\", c(x = \"ANY\", type = \"missing\"))\n&gt; f &lt;- get(\"norm\", environment(m), mode = \"function\")\n&gt; identical(norm, methods:::.implicitTable$norm)\n[1] TRUE\n&gt; identical(f, norm)\n[1] FALSE\n&gt; identical(f, base::norm)\n[1] TRUE\n```\n\nSo, due to namespacing, the method finds `base::norm` instead of (as almost\nsurely intended, for dispatch) the implicit generic `norm`.  A corollary is\nthat packages (e.g., **Matrix**, **flint**) have to go out of their way to\noverride the method with their own:\n\n```\n&gt; setClass(\"zzz\", slots = c(x = \"NULL\"))\n&gt; setMethod(\"norm\", c(x = \"zzz\", type = \"character\"), function (x, type, ...) \"ok\")\n&gt; norm(x, \"O\")\n[1] \"ok\"\n&gt; norm(x)\nError in norm(x, type = \"O\", ...) : invalid 'x': type \"S4\"\n&gt; setMethod(\"norm\", c(x = \"zzz\", type = \"missing\"), function (x, type, ...) \"ok\")\n&gt; norm(x)\n[1] \"ok\"\n```\n\nA one-line patch suffices:\n\n```\nIndex: src\/library\/methods\/R\/makeBasicFunsList.R\n===================================================================\n--- src\/library\/methods\/R\/makeBasicFunsList.R   (revision 89152)\n+++ src\/library\/methods\/R\/makeBasicFunsList.R   (working copy)\n@@ -214,7 +214,7 @@\n               signature = c(\"x\", \"type\"), where = where)\n     ## this method *belong*s to the generic:\n     setMethod(\"norm\", signature(x = \"ANY\", type = \"missing\"),\n-              function (x, type, ...) norm(x, type = \"O\", ...))\n+              function (x, type, ...) .implicitTable$norm(x, type = \"O\", ...))\n     setGenericImplicit(\"norm\", where, FALSE)\n\n     setGeneric(\"backsolve\", function(r, x, k = ncol(r), upper.tri = TRUE,\ntranspose = FALSE, ...)\n```\n\nAnd one can test along the lines of the earlier example:\n\n```\n## Method for implicit generic 'norm' (x=\"ANY\", type=\"missing\") called\nbase::norm,\n## not dispatching\nsetClass(\"zzz\", slots = c(x = \"NULL\"))\nsetMethod(\"norm\", c(x = \"zzz\", type = \"character\"), function (x, type, ...)\n\"ok\")\nm1 &lt;- getMethod(\"norm\", c(x = \"ANY\", type = \"missing\"))\nm2 &lt;- selectMethod(\"norm\", c(x = \"zzz\", type = \"missing\"))\nx &lt;- new(\"zzz\")\nstopifnot(is(m1, \"MethodDefinition\"),\n          is(m2, \"MethodDefinition\"),\n          identical(getDataPart(m1), getDataPart(m2)),\n          identical(norm(x, \"O\"), \"ok\"),\n          identical(norm(x     ), \"ok\"), # was Error .... : invalid 'x': type\n\"S4\"\n          removeGeneric(\"norm\"),\n          removeClass(\"zzz\"))\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1765521275.606489",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "j4t",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18979] New: method for implicit generic 'norm' (x=\"ANY\", type=\"missing\") does not dispatch",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18979"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18979\n           Summary: method for implicit generic 'norm' (x=\"ANY\",\n                    type=\"missing\") does not dispatch\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: S4methods\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> setGeneric(\"norm\")\n[1] \"norm\"\n> showMethods(\"norm\", includeDefs = TRUE)\nFunction: norm (package base)\nx=\"ANY\", type=\"ANY\"\nfunction (x, type, ...) \nbase::norm(x, type, ...)\n\n\nx=\"ANY\", type=\"missing\"\nfunction (x, type, ...) \nnorm(x, type = \"O\", ...)\n\n\n\n> m <- getMethod(\"norm\", c(x = \"ANY\", type = \"missing\"))\n> f <- get(\"norm\", environment(m), mode = \"function\")\n> identical(norm, methods:::.implicitTable$norm)\n[1] TRUE\n> identical(f, norm)\n[1] FALSE\n> identical(f, base::norm)\n[1] TRUE\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSo, due to namespacing, the method finds "
+                            },
+                            {
+                                "type": "text",
+                                "text": "base::norm",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " instead of (as almost\nsurely intended, for dispatch) the implicit generic "
+                            },
+                            {
+                                "type": "text",
+                                "text": "norm",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  A corollary is\nthat packages (e.g., **Matrix**, **flint**) have to go out of their way to\noverride the method with their own:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> setClass(\"zzz\", slots = c(x = \"NULL\"))\n> setMethod(\"norm\", c(x = \"zzz\", type = \"character\"), function (x, type, ...) \"ok\")\n> norm(x, \"O\")\n[1] \"ok\"\n> norm(x)\nError in norm(x, type = \"O\", ...) : invalid 'x': type \"S4\"\n> setMethod(\"norm\", c(x = \"zzz\", type = \"missing\"), function (x, type, ...) \"ok\")\n> norm(x)\n[1] \"ok\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nA one-line patch suffices:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/methods\/R\/makeBasicFunsList.R\n===================================================================\n--- src\/library\/methods\/R\/makeBasicFunsList.R   (revision 89152)\n+++ src\/library\/methods\/R\/makeBasicFunsList.R   (working copy)\n@@ -214,7 +214,7 @@\n               signature = c(\"x\", \"type\"), where = where)\n     ## this method *belong*s to the generic:\n     setMethod(\"norm\", signature(x = \"ANY\", type = \"missing\"),\n-              function (x, type, ...) norm(x, type = \"O\", ...))\n+              function (x, type, ...) .implicitTable$norm(x, type = \"O\", ...))\n     setGenericImplicit(\"norm\", where, FALSE)\n\n     setGeneric(\"backsolve\", function(r, x, k = ncol(r), upper.tri = TRUE,\ntranspose = FALSE, ...)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nAnd one can test along the lines of the earlier example:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "## Method for implicit generic 'norm' (x=\"ANY\", type=\"missing\") called\nbase::norm,\n## not dispatching\nsetClass(\"zzz\", slots = c(x = \"NULL\"))\nsetMethod(\"norm\", c(x = \"zzz\", type = \"character\"), function (x, type, ...)\n\"ok\")\nm1 <- getMethod(\"norm\", c(x = \"ANY\", type = \"missing\"))\nm2 <- selectMethod(\"norm\", c(x = \"zzz\", type = \"missing\"))\nx <- new(\"zzz\")\nstopifnot(is(m1, \"MethodDefinition\"),\n          is(m2, \"MethodDefinition\"),\n          identical(getDataPart(m1), getDataPart(m2)),\n          identical(norm(x, \"O\"), \"ok\"),\n          identical(norm(x     ), \"ok\"), # was Error .... : invalid 'x': type\n\"S4\"\n          removeGeneric(\"norm\"),\n          removeClass(\"zzz\"))\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

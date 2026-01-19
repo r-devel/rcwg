@@ -1,0 +1,904 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18970] wrapper around `proportions()` to ease publication-like table preparation [with patch]*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18970>\n\n--- Comment #5 from Thomas Soeiro (<mailto:Thomas.SOEIRO@ap-hm.fr|Thomas.SOEIRO@ap-hm.fr>) ---\nAs the wish is to *format* tables and proportions, we could rather add a\n`format.table()` method. Here is a back compatible patch that set attributes\nthat can be reused by `format.table()`:\n\n```\ndiff -u a\/table.R b\/table.R\n--- a\/table.R   2025-12-26 12:50:58.044268400 +0100\n+++ b\/table.R   2025-12-26 13:28:30.063717300 +0100\n@@ -286,13 +286,40 @@\n    else sum(x)\n }\n\n-proportions &lt;- function (x, margin = NULL)\n+proportions &lt;- function (x, margin = NULL, valid = FALSE, counts = FALSE)\n {\n+    oldx &lt;- x\n+    if (isTRUE(valid)) {\n+        dn_nona &lt;- lapply(dimnames(x), stats::na.omit)\n+        x &lt;- do.call(`[`, c(list(x), dn_nona, drop = FALSE))\n+    }\n+    if (isTRUE(counts))\n+        attr(x, \"counts\") &lt;- oldx\n     if (length(margin))\n         sweep(x, margin, marginSums(x, margin), `\/`, check.margin = FALSE)\n     else x\/sum(x)\n }\n\n+format.table &lt;- function(x, fmt = \"%d (%.1f)\", trim = TRUE, justify = \"none\",\n+                         ...)\n+{\n+    if (!inherits(x, \"table\"))\n+        stop(\"'x' must be a \\\"table\\\" object\")\n+    counts &lt;- attr(x, \"counts\")\n+    if (!is.null(counts) &amp;&amp; !is.null(fmt)) {\n+        if (identical(dim(x), dim(counts))) {\n+            x[] &lt;- sprintf(fmt, counts, x)\n+        } else {\n+            dn_nona &lt;- lapply(dimnames(counts), stats::na.omit)\n+            counts_nona &lt;- do.call(`[`, c(list(counts), dn_nona, drop =\nFALSE))\n+            out &lt;- sprintf(fmt, counts_nona, x)\n+            x &lt;- do.call(`[&lt;-`, c(list(counts), dn_nona, list(out)))\n+        }\n+    }\n+    x &lt;- format(unclass(x), trim = trim, justify = justify, ...)\n+    x\n+}\n+\n prop.table &lt;- proportions\n margin.table &lt;- marginSums\n\n```\n\nA new example (derived from ?table):\n\n```\nairquality |&gt;\n  transform(OzHi = Ozone &gt; 80) |&gt;\n  xtabs(~ OzHi + Month, data = _, addNA = TRUE) |&gt;\n  proportions(margin = 2, valid = TRUE, counts = TRUE) |&gt;\n  magrittr::multiply_by(100) |&gt;\n  format()\n       Month\n# OzHi    5           6           7           8           9          \n#   FALSE \"25 (96.2)\" \"9 (100.0)\" \"20 (76.9)\" \"19 (73.1)\" \"27 (93.1)\"\n#   TRUE  \"1 (3.8)\"   \"0 (0.0)\"   \"6 (23.1)\"  \"7 (26.9)\"  \"2 (6.9)\"  \n#   &lt;NA&gt;  \"5\"         \"21\"        \"5\"         \"5\"         \"1\"        \n```\n\nExamles from comment 0:\n\n```\nDF &lt;- as.data.frame(UCBAdmissions)\ntbl &lt;- xtabs(Freq ~ Gender + Admit, DF)\ntbl |&gt;\n  proportions(valid = TRUE, counts = TRUE) |&gt;\n  magrittr::multiply_by(100) |&gt;\n  format()\n#         Admit\n# Gender   Admitted      Rejected     \n#   Male   \"1198 (26.5)\" \"1493 (33.0)\"\n#   Female \"557 (12.3)\"  \"1278 (28.2)\"\n\nwarpbreaks[c(1, 2, 10), \"wool\"] &lt;- NA\ntbl_na &lt;- table(warpbreaks[-1], useNA = \"ifany\")\ntbl_na |&gt;\n  proportions(valid = TRUE, counts = TRUE) |&gt;\n  magrittr::multiply_by(100) |&gt;\n  format()\n#       tension\n# wool   L          M          H         \n#   A    \"7 (13.7)\" \"8 (15.7)\" \"9 (17.6)\"\n#   B    \"9 (17.6)\" \"9 (17.6)\" \"9 (17.6)\"\n#   &lt;NA&gt; \"2\"        \"1\"        \"0\"       \n\ntbl_na |&gt;\n  addmargins(margin = 2) |&gt;\n  proportions(margin = 2, valid = TRUE, counts = TRUE) |&gt;\n  magrittr::multiply_by(100) |&gt;\n  format()\n#       tension\n# wool   L          M          H          Sum        \n#   A    \"7 (43.8)\" \"8 (47.1)\" \"9 (50.0)\" \"24 (47.1)\"\n#   B    \"9 (56.2)\" \"9 (52.9)\" \"9 (50.0)\" \"27 (52.9)\"\n#   &lt;NA&gt; \"2\"        \"1\"        \"0\"        \"3\"        \n\ntbl |&gt;\n  addmargins() |&gt;\n  proportions(valid = TRUE, counts = TRUE) |&gt;\n  magrittr::multiply_by(100 * 4) |&gt;\n  format()\n#         Admit\n# Gender   Admitted      Rejected      Sum           \n#   Male   \"1198 (26.5)\" \"1493 (33.0)\" \"2691 (59.5)\" \n#   Female \"557 (12.3)\"  \"1278 (28.2)\" \"1835 (40.5)\" \n#   Sum    \"1755 (38.8)\" \"2771 (61.2)\" \"4526 (100.0)\"\n```\n\nNotes from comment 0:\n\n```\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1766753404.429789",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "r+H",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18970] wrapper around ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "proportions()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to ease publication-like table preparation [with patch]",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18970"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Thomas Soeiro ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Thomas.SOEIRO@ap-hm.fr",
+                                "text": "Thomas.SOEIRO@ap-hm.fr",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nAs the wish is to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " tables and proportions, we could rather add a\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "format.table()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method. Here is a back compatible patch that set attributes\nthat can be reused by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format.table()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff -u a\/table.R b\/table.R\n--- a\/table.R   2025-12-26 12:50:58.044268400 +0100\n+++ b\/table.R   2025-12-26 13:28:30.063717300 +0100\n@@ -286,13 +286,40 @@\n    else sum(x)\n }\n\n-proportions <- function (x, margin = NULL)\n+proportions <- function (x, margin = NULL, valid = FALSE, counts = FALSE)\n {\n+    oldx <- x\n+    if (isTRUE(valid)) {\n+        dn_nona <- lapply(dimnames(x), stats::na.omit)\n+        x <- do.call(`[`, c(list(x), dn_nona, drop = FALSE))\n+    }\n+    if (isTRUE(counts))\n+        attr(x, \"counts\") <- oldx\n     if (length(margin))\n         sweep(x, margin, marginSums(x, margin), `\/`, check.margin = FALSE)\n     else x\/sum(x)\n }\n\n+format.table <- function(x, fmt = \"%d (%.1f)\", trim = TRUE, justify = \"none\",\n+                         ...)\n+{\n+    if (!inherits(x, \"table\"))\n+        stop(\"'x' must be a \\\"table\\\" object\")\n+    counts <- attr(x, \"counts\")\n+    if (!is.null(counts) && !is.null(fmt)) {\n+        if (identical(dim(x), dim(counts))) {\n+            x[] <- sprintf(fmt, counts, x)\n+        } else {\n+            dn_nona <- lapply(dimnames(counts), stats::na.omit)\n+            counts_nona <- do.call(`[`, c(list(counts), dn_nona, drop =\nFALSE))\n+            out <- sprintf(fmt, counts_nona, x)\n+            x <- do.call(`[<-`, c(list(counts), dn_nona, list(out)))\n+        }\n+    }\n+    x <- format(unclass(x), trim = trim, justify = justify, ...)\n+    x\n+}\n+\n prop.table <- proportions\n margin.table <- marginSums\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nA new example (derived from ?table):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "airquality |>\n  transform(OzHi = Ozone > 80) |>\n  xtabs(~ OzHi + Month, data = _, addNA = TRUE) |>\n  proportions(margin = 2, valid = TRUE, counts = TRUE) |>\n  magrittr::multiply_by(100) |>\n  format()\n       Month\n# OzHi    5           6           7           8           9          \n#   FALSE \"25 (96.2)\" \"9 (100.0)\" \"20 (76.9)\" \"19 (73.1)\" \"27 (93.1)\"\n#   TRUE  \"1 (3.8)\"   \"0 (0.0)\"   \"6 (23.1)\"  \"7 (26.9)\"  \"2 (6.9)\"  \n#   <NA>  \"5\"         \"21\"        \"5\"         \"5\"         \"1\"        \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nExamles from comment 0:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "DF <- as.data.frame(UCBAdmissions)\ntbl <- xtabs(Freq ~ Gender + Admit, DF)\ntbl |>\n  proportions(valid = TRUE, counts = TRUE) |>\n  magrittr::multiply_by(100) |>\n  format()\n#         Admit\n# Gender   Admitted      Rejected     \n#   Male   \"1198 (26.5)\" \"1493 (33.0)\"\n#   Female \"557 (12.3)\"  \"1278 (28.2)\"\n\nwarpbreaks[c(1, 2, 10), \"wool\"] <- NA\ntbl_na <- table(warpbreaks[-1], useNA = \"ifany\")\ntbl_na |>\n  proportions(valid = TRUE, counts = TRUE) |>\n  magrittr::multiply_by(100) |>\n  format()\n#       tension\n# wool   L          M          H         \n#   A    \"7 (13.7)\" \"8 (15.7)\" \"9 (17.6)\"\n#   B    \"9 (17.6)\" \"9 (17.6)\" \"9 (17.6)\"\n#   <NA> \"2\"        \"1\"        \"0\"       \n\ntbl_na |>\n  addmargins(margin = 2) |>\n  proportions(margin = 2, valid = TRUE, counts = TRUE) |>\n  magrittr::multiply_by(100) |>\n  format()\n#       tension\n# wool   L          M          H          Sum        \n#   A    \"7 (43.8)\" \"8 (47.1)\" \"9 (50.0)\" \"24 (47.1)\"\n#   B    \"9 (56.2)\" \"9 (52.9)\" \"9 (50.0)\" \"27 (52.9)\"\n#   <NA> \"2\"        \"1\"        \"0\"        \"3\"        \n\ntbl |>\n  addmargins() |>\n  proportions(valid = TRUE, counts = TRUE) |>\n  magrittr::multiply_by(100 * 4) |>\n  format()\n#         Admit\n# Gender   Admitted      Rejected      Sum           \n#   Male   \"1198 (26.5)\" \"1493 (33.0)\" \"2691 (59.5)\" \n#   Female \"557 (12.3)\"  \"1278 (28.2)\" \"1835 (40.5)\" \n#   Sum    \"1755 (38.8)\" \"2771 (61.2)\" \"4526 (100.0)\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nNotes from comment 0:\n\n```"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "# use %f for non-integer input\nmtcars |&gt;\n  xtabs(mpg ~ vs, data = _) |&gt;\n  proportions(valid = TRUE, counts = TRUE) |&gt;\n  magrittr::multiply_by(100) |&gt;\n  format(fmt = \"%.2f (%.2f)\")\n# vs\n#                0                1 \n# \"299.10 (46.52)\" \"343.80 (53.48)\" \n\n# check drop = FALSE\ntable(c(1, 1, 1, NA), c(1, 2, 2, 2), useNA = \"ifany\") |&gt;\n  proportions(margin = 2, valid = TRUE)\n  #  \n  #   1 2\n  # 1 1 1\n\n# non-sensical results with inappropriate combinations of margins\ntbl_na |&gt;\n  addmargins(margin = 1) |&gt;\n  proportions(margin = 2, valid = TRUE, counts = TRUE) |&gt;\n  magrittr::multiply_by(100 * 2) |&gt;\n  format()\n#       tension\n# wool   L            M            H           \n#   A    \"7 (41.2)\"   \"8 (45.7)\"   \"9 (50.0)\"  \n#   B    \"9 (52.9)\"   \"9 (51.4)\"   \"9 (50.0)\"  \n#   &lt;NA&gt; \"2\"          \"1\"          \"0\"         \n#   Sum  \"18 (105.9)\" \"18 (102.9)\" \"18 (100.0)\"\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1766753404.451729",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "9k=QD",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# use %f for non-integer input\nmtcars |>\n  xtabs(mpg ~ vs, data = _) |>\n  proportions(valid = TRUE, counts = TRUE) |>\n  magrittr::multiply_by(100) |>\n  format(fmt = \"%.2f (%.2f)\")\n# vs\n#                0                1 \n# \"299.10 (46.52)\" \"343.80 (53.48)\" \n\n# check drop = FALSE\ntable(c(1, 1, 1, NA), c(1, 2, 2, 2), useNA = \"ifany\") |>\n  proportions(margin = 2, valid = TRUE)\n  #  \n  #   1 2\n  # 1 1 1\n\n# non-sensical results with inappropriate combinations of margins\ntbl_na |>\n  addmargins(margin = 1) |>\n  proportions(margin = 2, valid = TRUE, counts = TRUE) |>\n  magrittr::multiply_by(100 * 2) |>\n  format()\n#       tension\n# wool   L            M            H           \n#   A    \"7 (41.2)\"   \"8 (45.7)\"   \"9 (50.0)\"  \n#   B    \"9 (52.9)\"   \"9 (51.4)\"   \"9 (50.0)\"  \n#   <NA> \"2\"          \"1\"          \"0\"         \n#   Sum  \"18 (105.9)\" \"18 (102.9)\" \"18 (100.0)\"\n```"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18970] ease publication-like table preparation [with patch]*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18970>\n\n--- Comment #6 from Thomas Soeiro (<mailto:Thomas.SOEIRO@ap-hm.fr|Thomas.SOEIRO@ap-hm.fr>) ---\nAdditionally, the `format.table()` could also have an argument to format `dnn`\n(e.g. `method = c(\"non.compact\", \"row.compact\", \"col.compact\", \"compact\"), lsep\n= \" | \"` as in\n[format.ftable](<https:\/\/stat.ethz.ch\/R-manual\/R-devel\/library\/stats\/html\/read.ftable.html>)).\nThis would allow to preserve `dnn` when writing a table to a file with e.g.\n`write.csv2()`.\n\nHappy to work on a patch if R-Core is interested :)\n\n(However, I don't know how we should handle tables whith `length(dim(.) !=\n2)`.)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1766754259.108869",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "gFRa",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18970] ease publication-like table preparation [with patch]",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18970"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #6 from Thomas Soeiro ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Thomas.SOEIRO@ap-hm.fr",
+                                "text": "Thomas.SOEIRO@ap-hm.fr",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nAdditionally, the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format.table()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " could also have an argument to format "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dnn",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n(e.g. `method = c(\"non.compact\", \"row.compact\", \"col.compact\", \"compact\"), lsep\n= \" | \"` as in\n[format.ftable]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/R-manual\/R-devel\/library\/stats\/html\/read.ftable.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")).\nThis would allow to preserve "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dnn",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " when writing a table to a file with e.g.\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "write.csv2()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nHappy to work on a patch if R-Core is interested :)\n\n(However, I don't know how we should handle tables whith `length(dim(.) !=\n2)`.)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 2606] modifying ftable to allow percentages (wishlist)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=2606>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|NEW                         |CLOSED\n         Resolution|---                         |DUPLICATE\n\n--- Comment #6 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\n(In reply to Elin Waring from comment #5)\n&gt; I think that this is an older version of bug 18970. I would suggest that this be closed ....\n\nIndeed, thank you, Elin; I agree, notably as I clearly prefer the approach\ntaken there, using an `addmargins()`-like function.\n\"`DUPLICATE`\" of course is not 100% correct ..\n\n*** This bug has been marked as a duplicate of bug 18970 ***",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1766760065.609849",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "A9Rq",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 2606] modifying ftable to allow percentages (wishlist)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=2606"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|NEW                         |CLOSED\n         Resolution|---                         |DUPLICATE\n\n--- Comment #6 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Elin Waring from comment #5)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I think that this is an older version of bug 18970. I would suggest that this be closed ...."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIndeed, thank you, Elin; I agree, notably as I clearly prefer the approach\ntaken there, using an "
+                            },
+                            {
+                                "type": "text",
+                                "text": "addmargins()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "-like function.\n\""
+                            },
+                            {
+                                "type": "text",
+                                "text": "DUPLICATE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\" of course is not 100% correct ..\n\n*** This bug has been marked as a duplicate of bug 18970 ***"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18970] ease publication-like table preparation [with patch]*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18970>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jitterbug-import\n\n--- Comment #7 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\n*** Bug 2606 has been marked as a duplicate of this bug. ***",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1766760065.759699",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "j4Up",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18970] ease publication-like table preparation [with patch]",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18970"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jitterbug-import\n\n--- Comment #7 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n*** Bug 2606 has been marked as a duplicate of this bug. ***"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18970] ease publication-like table preparation [with patch]*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18970>\n\n--- Comment #8 from Elin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) ---\nI think this is the right approach because it builds on a standard structure of\nthe `format()`  generic.  It seems obvious once it is pointed out that there\nshould be a `format.table()`.  \n\nHowever, I think that doing that should consider a couple of other issues.\nFirst, as far as I can tell, if you are given a table object there is no way to\nknow:  \n\n1. if it already has had addmargins() applied and, if so, what \"kind\" of\nmargins.\n\n2. if it has been converted to proportions and, if so, what \"kind\" of\nproportions.\n\n3.  if any of the variables are ordered, which would make a cumulative margins\nand proportions potentially relevant.\n\n\nIn my personal handling of these, I do take advantage of adding attributes and\nthe fact that that a regular table and proportions table can be combined using\n`rbind()`.  I really strongly agree with adding an option to proportions to\ninclude the counts in the returned  object.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1766774378.118059",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "oPVkD",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18970] ease publication-like table preparation [with patch]",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18970"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #8 from Elin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI think this is the right approach because it builds on a standard structure of\nthe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  generic.  It seems obvious once it is pointed out that there\nshould be a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format.table()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  \n\nHowever, I think that doing that should consider a couple of other issues.\nFirst, as far as I can tell, if you are given a table object there is no way to\nknow:  \n\n1. if it already has had addmargins() applied and, if so, what \"kind\" of\nmargins.\n\n2. if it has been converted to proportions and, if so, what \"kind\" of\nproportions.\n\n3.  if any of the variables are ordered, which would make a cumulative margins\nand proportions potentially relevant.\n\n\n\nIn my personal handling of these, I do take advantage of adding attributes and\nthe fact that that a regular table and proportions table can be combined using\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "rbind()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  I really strongly agree with adding an option to proportions to\ninclude the counts in the returned  object."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17604] approx's new na.rm=FALSE does not play well with 'ties' argument.  (R-devel post 3.6.1)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17604>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|CONFIRMED                   |CLOSED\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #5 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nA few months ago, when visiting Vienna, I did realize that this is a bug in the\nfeature I had committed (not so long before Bill D. reported this problem);\nI am sorry that I've overlooked \/ forgotten it for so long.\n\nAfter fixing it finally (in R-devel for now, svn rev 89238), I also\nacknowledge that Tomas (in comment 2) was right on spot with\n&gt;   perhaps \"nx\" shouldn't be only \"sum(ok)\"?\n\nIndeed, `nx` has been used in only one place, and my change has eliminated it,\nas indeed, correctly it would always have been `length(x)`.\nIt took me a while to convince myself that the only code changes needed were\n*simplifications*...  ((and I am still only 99.8% sure about the change because\nit seemed so strange we had it more complicatedly and only therefore wrongly\n..))",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1766781445.711269",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ShO",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17604] approx's new na.rm=FALSE does not play well with 'ties' argument.  (R-devel post 3.6.1)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17604"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|CONFIRMED                   |CLOSED\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #5 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nA few months ago, when visiting Vienna, I did realize that this is a bug in the\nfeature I had committed (not so long before Bill D. reported this problem);\nI am sorry that I've overlooked \/ forgotten it for so long.\n\nAfter fixing it finally (in R-devel for now, svn rev 89238), I also\nacknowledge that Tomas (in comment 2) was right on spot with"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "  perhaps \"nx\" shouldn't be only \"sum(ok)\"?"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIndeed, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nx",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has been used in only one place, and my change has eliminated it,\nas indeed, correctly it would always have been "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length(x)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\nIt took me a while to convince myself that the only code changes needed were\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "simplifications",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "...  ((and I am still only 99.8% sure about the change because\nit seemed so strange we had it more complicatedly and only therefore wrongly\n..))"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18970] ease publication-like table preparation [with patch]*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18970>\n\nThomas Soeiro (<mailto:Thomas.SOEIRO@ap-hm.fr|Thomas.SOEIRO@ap-hm.fr>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3567|0                           |1\n        is obsolete|                            |\n\n--- Comment #9 from Thomas Soeiro (<mailto:Thomas.SOEIRO@ap-hm.fr|Thomas.SOEIRO@ap-hm.fr>) ---\nCreated attachment 3580\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3580&amp;action=edit>\nupdated code and documentation proposal\n\nOptimistically assuming there's some interest in this proposal with Martin's\ncomment in bug 2606, here's an updated version that includes an `inline_dnn`\nargument, as mentioned in comment 6.\n\n```\nairquality |&gt;\n  transform(OzHi = Ozone &gt; 80) |&gt;\n  xtabs(~ OzHi + Month, data = _, addNA = TRUE) |&gt;\n  proportions(margin = 2, valid = TRUE, counts = TRUE) |&gt;\n  magrittr::multiply_by(100) |&gt;\n  format(inline_dnn = c(TRUE, TRUE))\n#       Month 5         6         7         8         9        \n# OzHi\n# FALSE       25 (96.2) 9 (100.0) 20 (76.9) 19 (73.1) 27 (93.1)\n# TRUE        1 (3.8)   0 (0.0)   6 (23.1)  7 (26.9)  2 (6.9)\n# &lt;NA&gt;        5         21        5         5         1\n\nairquality |&gt;\n  transform(OzHi = Ozone &gt; 80) |&gt;\n  xtabs(~OzHi, data = _, addNA = TRUE) |&gt;\n  proportions(valid = TRUE, counts = TRUE) |&gt;\n  magrittr::multiply_by(100) |&gt;\n  format(inline_dnn = TRUE)\n#       OzHi      FALSE       TRUE       &lt;NA&gt;\n#            100 (86.2)  16 (13.8)         37\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1766795977.429869",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "rdov+",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18970] ease publication-like table preparation [with patch]",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18970"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThomas Soeiro ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Thomas.SOEIRO@ap-hm.fr",
+                                "text": "Thomas.SOEIRO@ap-hm.fr",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3567|0                           |1\n        is obsolete|                            |\n\n--- Comment #9 from Thomas Soeiro ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Thomas.SOEIRO@ap-hm.fr",
+                                "text": "Thomas.SOEIRO@ap-hm.fr",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3580\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3580&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3580&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nupdated code and documentation proposal\n\nOptimistically assuming there's some interest in this proposal with Martin's\ncomment in bug 2606, here's an updated version that includes an "
+                            },
+                            {
+                                "type": "text",
+                                "text": "inline_dnn",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nargument, as mentioned in comment 6.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "airquality |>\n  transform(OzHi = Ozone > 80) |>\n  xtabs(~ OzHi + Month, data = _, addNA = TRUE) |>\n  proportions(margin = 2, valid = TRUE, counts = TRUE) |>\n  magrittr::multiply_by(100) |>\n  format(inline_dnn = c(TRUE, TRUE))\n#       Month 5         6         7         8         9        \n# OzHi\n# FALSE       25 (96.2) 9 (100.0) 20 (76.9) 19 (73.1) 27 (93.1)\n# TRUE        1 (3.8)   0 (0.0)   6 (23.1)  7 (26.9)  2 (6.9)\n# <NA>        5         21        5         5         1\n\nairquality |>\n  transform(OzHi = Ozone > 80) |>\n  xtabs(~OzHi, data = _, addNA = TRUE) |>\n  proportions(valid = TRUE, counts = TRUE) |>\n  magrittr::multiply_by(100) |>\n  format(inline_dnn = TRUE)\n#       OzHi      FALSE       TRUE       <NA>\n#            100 (86.2)  16 (13.8)         37\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18970] ease publication-like table preparation [with patch]*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18970>\n\n--- Comment #10 from Thomas Soeiro (<mailto:Thomas.SOEIRO@ap-hm.fr|Thomas.SOEIRO@ap-hm.fr>) ---\n&gt; First, as far as I can tell, if you are given a table object there is no way to know:\n&gt;\n&gt; 1. if it already has had addmargins() applied and, if so, what \"kind\" of margins.\n&gt; 2. if it has been converted to proportions and, if so, what \"kind\" of proportions.\n&gt; 3. if any of the variables are ordered, which would make a cumulative margins and proportions potentially relevant.\n\nI agree that adding attributes could be useful. The `count` attribute is\noptional in the current proposal, but I think that it would be better to always\nset it. I don't know if such \"breaking\" changes are acceptable.\n\nFWIW, regarding addmargins, I tried (and failed) to \"automatically\" adjust for\nmargin sums\/totals in a previous version a few years ago (but I hadn't thought\nof using attributes back then). It's certainly doable, but I think it's\nacceptable to adjust manually as we already typically multiply by 100 to get\npercentages (see `magrittr::multiply_by()` in comment 5).\n\n&gt; In my personal handling of these, I do take advantage of adding attributes **and the fact that that a regular table and proportions table can be combined using `rbind()`**. I really strongly agree with adding an option to proportions to include the counts in the returned object.\n\nSame here, which is the main motivation for `format(*, inline_dnn = TRUE)`.\nOtherwise `dnn` are lost.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1766799153.287939",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Y=W",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18970] ease publication-like table preparation [with patch]",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18970"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #10 from Thomas Soeiro ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Thomas.SOEIRO@ap-hm.fr",
+                                "text": "Thomas.SOEIRO@ap-hm.fr",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "First, as far as I can tell, if you are given a table object there is no way to know:\n\n1. if it already has had addmargins() applied and, if so, what \"kind\" of margins.\n2. if it has been converted to proportions and, if so, what \"kind\" of proportions.\n3. if any of the variables are ordered, which would make a cumulative margins and proportions potentially relevant."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI agree that adding attributes could be useful. The "
+                            },
+                            {
+                                "type": "text",
+                                "text": "count",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " attribute is\noptional in the current proposal, but I think that it would be better to always\nset it. I don't know if such \"breaking\" changes are acceptable.\n\nFWIW, regarding addmargins, I tried (and failed) to \"automatically\" adjust for\nmargin sums\/totals in a previous version a few years ago (but I hadn't thought\nof using attributes back then). It's certainly doable, but I think it's\nacceptable to adjust manually as we already typically multiply by 100 to get\npercentages (see "
+                            },
+                            {
+                                "type": "text",
+                                "text": "magrittr::multiply_by()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in comment 5).\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "In my personal handling of these, I do take advantage of adding attributes **and the fact that that a regular table and proportions table can be combined using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "rbind()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "**. I really strongly agree with adding an option to proportions to include the counts in the returned object."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSame here, which is the main motivation for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format(*, inline_dnn = TRUE)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\nOtherwise "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dnn",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " are lost."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -78,7 +78,7 @@ Minutes of previous meetings: https://github.com/r-devel/rcwg/tree/main/team_min
     - Copy event to Office Hours calendar for sharing via Teamup.
     - Add guests: r-contribution-wg@r-project.org on Forwards Calendar event. FOR ALL EVENTS!!
         TODO FOR APR 2025 ONWARDS]
-4. Add reminder on personal calendar one week before office hours to promote
+4. Add reminder on personal calendar (gmail) one week before office hours to promote
 5. [Automated] Add to contributor.r-project.org/events
     - If need to force change refresh settings on Teamup
 6. Post on social media with help from scripts/office_hours.R

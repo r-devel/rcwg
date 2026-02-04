@@ -3,31 +3,25 @@
 source("admin/R/update_readme_dates.R")
 
 ### Usual times
-# Fri 15:00 UK
-# Tue 19:30 UK
-
-### 2025 dates
-
-# Tues
-# Dec 18/19 (UTC 19:30; Auckland 19 December 08:30am)
+# 3rd Fri 15:00 UK
+# 3rd Tue 19:30 UK
 
 ### 2026 dates
 
-# not set up at all yet, need to confirm
-# Fri
-# Jan 23 UTC 15:00
+# Jan 28 20:00 UTC
+# Feb 20 19:30 UTC
+# Mar 20 15:00 UTC
 
-month <- "December"
-day <- 18
-time <- "19:30" # UTC !!
-zoom <- "https://us02web.zoom.us/j/88612135282?pwd=ZzSjahkaTd0cC4XQjMOI5WzZnW4IZH.1"
+month <- "January"
+day <- 28
+time <- "20:00" # UTC !!
+zoom <- "https://us02web.zoom.us/j/83792625860?pwd=yYHf1VHqBVxM9luqOYQ7ACIma2dlBJ.1"
 
 # times here are UK times!
 # second number is n'th 'day' of the month, e.g. `3, "Friday"` = 3rd Friday
 # !! Think I have inconsistency here: Slack message and Twitter/Mastodon were wrong last time
-update_readme_dates(1, "December", 3, "Thursday", "19:30", 2025)
-update_readme_dates(2, "January", 4, "Friday", "15:00", 2026)
-
+update_readme_dates(1, "January", 4, "Wednesday", "20:00", 2026)
+update_readme_dates(2, "February", 3, "Tuesday", "19:30", 2026)
 
 # Update RCWG contacts ---------------------------------------------------------
 
@@ -83,9 +77,8 @@ source("admin/R/buffer_post.R")
 # slack announcement
 weekday <- get_weekday(day, month, abbreviate = TRUE)
 agenda = c(
-" - R Dev Day updates
- - Birdaro training (community playbook)
- - Research Software Maintenance Fund project"
+" - Draft community playbook
+ - R Dev Days 2026"
 )
 
 post <- social_post(weekday = weekday,

@@ -1,25 +1,20 @@
 # Data for next office hours ----------------------------------------------
 
 # UTC times
-# Thurs Dec 11 10am, 8pm (EMEA UK Thurs 10am | AMER PDT: 12pm, UK: 8pm, Auckland: Fri Dec 12 9am)
-# Fri Dec 12 02:00am (APAC UTC 2:00 am, IST 7:30am, Jakarta 09:00am, Auckland: 3:00pm)
+# Feb 12 10:00 17:30
+# Mar 12 10:00 16:30 (USA clocks changed but not UK)
 
-# January: back to winter times?
+day <- 12 # day number
+month <- "February"
 
-day <- c(11, 11, 12) # day number
-month <- "December"
+meetup <- c(emea = "https://www.meetup.com/r-contributors/events/313018660",
+            amer = "https://www.meetup.com/r-contributors/events/313023308")
 
-meetup <- c(emea = "https://www.meetup.com/r-contributors/events/311344152/",
-            amer = "https://www.meetup.com/r-contributors/events/311344204/",
-            apac = "https://www.meetup.com/r-contributors/events/311344211/")
+# check the zoom matches the meetup page!
+zoom <- c(emea = "https://us02web.zoom.us/j/86872140379?pwd=Dx3XGa4jFibEDOMW8k1GuC0zcaBrw0.1",
+          amer = "https://us02web.zoom.us/j/86753519203?pwd=1XEpRYkxyNADREngIabLXgmJNhnDqF.1")
 
-zoom <- c(emea = "https://us02web.zoom.us/j/82709474418?pwd=LSoxPzjbCKfZ4Dzqw3EVAGwPFqN43R.1",
-          amer = "https://us02web.zoom.us/j/89905390972?pwd=PQYglr5EKLUfIuhflLX4bxHIibM6RI.1",
-          apac = "https://us02web.zoom.us/j/89168945557?pwd=ea8BgaXNAZpiRyQjhNKZyZSBNDFS5j.1")
-
-utc_times <- c("10:00", "20:00", "02:00")
-
-## will need to adapt functions for separate EMEA/APAC meetings!
+utc_times <- c("10:00", "17:30")
 
 # Ensure office hour announced on meetup (see rcwg_tasks.md) --------------
 
@@ -60,6 +55,7 @@ system(paste("kill -1", pid))
 ## (paste and enter for comma-separated list to be added in bulk)
 ## - turn off option for people to see full guest list
 ## - add note about why they are being sent calendar invite and how to unsubscribe
+## - maybe want to add description of office hour (join us for...) now inviting directly
 
 You are being invited as a subscriber to the R-Contribution-WG mailing list, please visit
 https://stat.ethz.ch/mailman/listinfo/r-contribution-wg if you wish to unsubscribe.
@@ -75,7 +71,7 @@ source("admin/R/social_post.R")
 # "office_hour_reminder" for mastodon/slack reminders
 post <- office_hour_post(month, day, utc_times,
                          meetup, zoom,
-                         venue = "rweekly",
+                         venue = "slack",
                          templates = "admin/posts/office_hour")
 
 # Mastodon via Buffer ------------------------------------
@@ -83,8 +79,8 @@ post <- office_hour_post(month, day, utc_times,
 # Also Bluesky by bridging. No longer post on Twitter.
 # This could replaced by rtoot now, but won't schedule in advance
 
-post <- office_hour_post(month, day[3], utc_times[3],
-                         meetup[3], zoom[3],
+post <- office_hour_post(month, day, utc_times,
+                         meetup, zoom,
                          venue = "mastodon",
                          templates = "admin/posts/office_hour")
 
@@ -113,16 +109,16 @@ buffer_signin(browser = browser,
 # If NULL, will post this day, this month, next hour (UTC times)
 # must be on Publish tab
 buffer_createpost(browser = browser,
-                  day = NULL, # day number of month, e.g. 10
+                  day = 5, # day number of month, e.g. 10
                   month = NULL,
-                  time = NULL, # 24 hour clock, e.g. "09:00"
+                  time = 10:00, # 24 hour clock, e.g. "09:00"
                   postcontent = post[[1]],
                   venue = "mastodon")
 
 buffer_createpost(browser = browser,
                   day = NULL,
                   month = NULL,
-                  time = "16:30",
+                  time = "17:30",
                   postcontent = post[[2]],
                   venue = "mastodon")
 
@@ -174,7 +170,7 @@ linkedin_createevent(browser = browser,
                      eventtype = "^External event link",
                      name = "R Contributor Office Hour (EMEA)",
                      tz = "(UTC+00:00) Coordinated Universal Time",
-                     startday = day[1],
+                     startday = day,
                      startmonth = month,
                      starttime = "10:00", #UTC time
                      endtime = "11:00",
@@ -201,10 +197,10 @@ linkedin_createevent(browser = browser,
                      name = "R Contributor Office Hour (AMER)",
                      #tz = "(UTC-07:00) Pacific Time (US and Canada)", # during summer
                      tz = "(UTC-08:00) Pacific Time (US and Canada), Tijuana",
-                     startday = day[2],
+                     startday = day,
                      startmonth = month,
-                     starttime = "12:00",
-                     endtime = "13:00",
+                     starttime = "09:30",
+                     endtime = "10:30",
                      eventlink = meetup["amer"],
                      description = description,
                      postcontent = postcontent)
@@ -227,7 +223,7 @@ linkedin_createevent(browser = browser,
                      eventtype = "^External event link",
                      name = "R Contributor Office Hour (APAC)",
                      tz = "(UTC-08:00) Pacific Time (US and Canada), Tijuana",
-                     startday = day[3],
+                     startday = day,
                      startmonth = month,
                      starttime = "15:00",
                      endtime = "16:00",

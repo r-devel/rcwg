@@ -9,19 +9,19 @@ source("admin/R/update_readme_dates.R")
 ### 2026 dates
 
 # Jan 28 20:00 UTC
-# Feb 20 19:30 UTC
+# Feb 17 19:30 UTC
 # Mar 20 15:00 UTC
 
-month <- "January"
-day <- 28
-time <- "20:00" # UTC !!
-zoom <- "https://us02web.zoom.us/j/83792625860?pwd=yYHf1VHqBVxM9luqOYQ7ACIma2dlBJ.1"
+month <- "February"
+day <- 17
+time <- "19:30" # UTC !!
+zoom <- "https://us02web.zoom.us/j/89799409139?pwd=wZpmu7VSEfATI8W3y10t8gZVEXqe9a.1"
 
 # times here are UK times!
 # second number is n'th 'day' of the month, e.g. `3, "Friday"` = 3rd Friday
 # !! Think I have inconsistency here: Slack message and Twitter/Mastodon were wrong last time
-update_readme_dates(1, "January", 4, "Wednesday", "20:00", 2026)
 update_readme_dates(2, "February", 3, "Tuesday", "19:30", 2026)
+update_readme_dates(1, "January", 4, "Wednesday", "20:00", 2026)
 
 # Update RCWG contacts ---------------------------------------------------------
 
@@ -78,7 +78,7 @@ source("admin/R/buffer_post.R")
 weekday <- get_weekday(day, month, abbreviate = TRUE)
 agenda = c(
 " - Draft community playbook
- - R Dev Days 2026"
+ - GSoC 2026"
 )
 
 post <- social_post(weekday = weekday,
@@ -86,7 +86,8 @@ post <- social_post(weekday = weekday,
                     month = month,
                     time = time,
                     agenda = agenda,
-                    venue = "mastodon", # "slack"/"mastodon"
+                    zoom = zoom,
+                    venue = "slack", # "slack"/"mastodon"
                     templates = "admin/posts/rcwg",
                     ask = TRUE)
 

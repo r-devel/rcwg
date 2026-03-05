@@ -1,20 +1,18 @@
 # Data for next office hours ----------------------------------------------
 
-# UTC times
-# Feb 12 10:00 17:30
-# Mar 12 10:00 16:30 (USA clocks changed but not UK)
+# UTC times (for Mar - Sept, UTC time is stable)
+# Mar 10 09:00 16:00
 
-day <- 12 # day number
-month <- "February"
+day <- 10 # day number
+month <- "March"
+utc_times <- c("09:00", "16:00")
 
-meetup <- c(emea = "https://www.meetup.com/r-contributors/events/313018660",
-            amer = "https://www.meetup.com/r-contributors/events/313023308")
+meetup <- c(emea = "https://www.meetup.com/r-contributors/events/313444342",
+            amer = "https://www.meetup.com/r-contributors/events/312747416")
 
 # check the zoom matches the meetup page!
 zoom <- c(emea = "https://us02web.zoom.us/j/86872140379?pwd=Dx3XGa4jFibEDOMW8k1GuC0zcaBrw0.1",
           amer = "https://us02web.zoom.us/j/86753519203?pwd=1XEpRYkxyNADREngIabLXgmJNhnDqF.1")
-
-utc_times <- c("10:00", "17:30")
 
 # Ensure office hour announced on meetup (see rcwg_tasks.md) --------------
 
@@ -26,7 +24,7 @@ source("admin/R/r_contribution_wg_subscribers.R")
 
 # start Selenium server on my machine
 # using ~ rather than ${HOME} here does not work!
-# stick with standalone sever from http://selenium-release.storage.googleapis.com/index.html
+# stick with standalone sever from http://selenium-release.storage.googleapis.com/index.html?path=3.9/
 # if issues, reinstall geckodriver (and Java?)
 system("java -Dwebdriver.gecko.driver=${HOME}/Selenium/geckodriver \\
        -jar ~/Selenium/selenium-server-standalone-3.9.1.jar -port 5556 \\
@@ -35,6 +33,8 @@ system("java -Dwebdriver.gecko.driver=${HOME}/Selenium/geckodriver \\
 # start firefox under remote control - this must work for the rest to work!
 browser <- remoteDriver(port = 5556)
 browser$open()
+
+rD <- rsDriver(browser = "firefox", port = 5556L)
 
 # keyring::key_set("R-contribution-wg password") # opens dialog to enter password
 
@@ -50,6 +50,11 @@ browser$close()
 pid <- system2("lsof", "-t -i :5556", stdout = TRUE)
 system(paste("kill -1", pid))
 
+email <- read.csv("tmp/emails.csv")$email
+email <- email[!grepl("[(]", email)]
+email <- sub(" at ", "@", email)
+cat(sub(" at ", "@", email), sep = ", ")
+
 ## - copy list of current subscribers, add to guest list on Google calendar event
 ## (use one on Office Hours Calendar, so it shows as this when email)
 ## (paste and enter for comma-separated list to be added in bulk)
@@ -57,7 +62,14 @@ system(paste("kill -1", pid))
 ## - add note about why they are being sent calendar invite and how to unsubscribe
 ## - maybe want to add description of office hour (join us for...) now inviting directly
 
-You are being invited as a subscriber to the R-Contribution-WG mailing list, please visit
+Join an online Office Hour to
+- discuss how to get started contributing to R
+- get help/feedback on contributions you are working on
+- look at open bugs/work on translations together
+
+<Zoom details>
+
+Calendar invites are sent to subscribers of the R-Contribution-WG mailing list, please visit
 https://stat.ethz.ch/mailman/listinfo/r-contribution-wg if you wish to unsubscribe.
 
 # Social media posts ------------------------------------------------------

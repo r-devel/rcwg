@@ -3,25 +3,35 @@
 source("admin/R/update_readme_dates.R")
 
 ### Usual times
-# 3rd Fri 15:00 UK
-# 3rd Tue 19:30 UK
+# 4th Thu 15:30 - 16:30 UK
+# 4th Tue 20:30 - 21:30 UK
 
 ### 2026 dates
 
-# Jan 28 20:00 UTC
-# Feb 17 19:30 UTC
-# Mar 20 15:00 UTC
+# Mar 26 15:30 UTC
+# Apr 28 19:30 UTC
+# May 28 14:30 UTC
+# Jun 23 19:30 UTC
+# Jul 23 14:30 UTC
+# Aug 25 19:30 UTC
+# Sep 24 14:30 UTC
 
-month <- "February"
-day <- 17
+month <- "March"
+day <- 26
+time <- "15:30" # UTC !!
+zoom <- "https://us02web.zoom.us/j/83792625860?pwd=yYHf1VHqBVxM9luqOYQ7ACIma2dlBJ.1"
+
+month <- "April"
+day <- 28
 time <- "19:30" # UTC !!
-zoom <- "https://us02web.zoom.us/j/89799409139?pwd=wZpmu7VSEfATI8W3y10t8gZVEXqe9a.1"
+zoom <- "https://us02web.zoom.us/j/89350851297?pwd=6thgJaE8VtBzG6eGMEU68tffnWJWWq.1"
 
 # times here are UK times!
 # second number is n'th 'day' of the month, e.g. `3, "Friday"` = 3rd Friday
 # !! Think I have inconsistency here: Slack message and Twitter/Mastodon were wrong last time
-update_readme_dates(2, "February", 3, "Tuesday", "19:30", 2026)
-update_readme_dates(1, "January", 4, "Wednesday", "20:00", 2026)
+update_readme_dates(1, "March", 4, "Thursday", "15:30", 2026)
+update_readme_dates(2, "April", 4, "Tuesday", "20:30", 2026)
+
 
 # Update RCWG contacts ---------------------------------------------------------
 

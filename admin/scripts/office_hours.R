@@ -5,7 +5,7 @@
 
 day <- 10 # day number
 month <- "March"
-utc_times <- c("09:00", "16:00")
+utc_times <- c("08:00", "16:00")
 
 meetup <- c(emea = "https://www.meetup.com/r-contributors/events/313444342",
             amer = "https://www.meetup.com/r-contributors/events/312747416")
@@ -34,8 +34,6 @@ system("java -Dwebdriver.gecko.driver=${HOME}/Selenium/geckodriver \\
 browser <- remoteDriver(port = 5556)
 browser$open()
 
-rD <- rsDriver(browser = "firefox", port = 5556L)
-
 # keyring::key_set("R-contribution-wg password") # opens dialog to enter password
 
 # get subscribers to email list
@@ -49,11 +47,6 @@ browser$close()
 # stop server
 pid <- system2("lsof", "-t -i :5556", stdout = TRUE)
 system(paste("kill -1", pid))
-
-email <- read.csv("tmp/emails.csv")$email
-email <- email[!grepl("[(]", email)]
-email <- sub(" at ", "@", email)
-cat(sub(" at ", "@", email), sep = ", ")
 
 ## - copy list of current subscribers, add to guest list on Google calendar event
 ## (use one on Office Hours Calendar, so it shows as this when email)
@@ -180,7 +173,7 @@ linkedin_createevent(browser = browser,
                      image = normalizePath("admin/brooke-cagle-g1Kr4Ozfoac-unsplash.jpg"),
                      alttext = "Three people laughing together, as they sit around a table with laptops, notebooks and drinks.",
                      eventtype = "^External event link",
-                     name = "R Contributor Office Hour (EMEA)",
+                     name = "R Contributor Office Hour (EMEA/APAC)",
                      tz = "(UTC+00:00) Coordinated Universal Time",
                      startday = day,
                      startmonth = month,

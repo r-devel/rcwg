@@ -45,9 +45,9 @@ source("admin/R/r_contribution_wg_subscribers.R")
 # start Selenium server on my machine
 # using ~ rather than ${HOME} here does not work!
 # stick with standalone sever from http://selenium-release.storage.googleapis.com/index.html
-# if issues, reinstall geckodriver (and Java?)
-system("java -Dwebdriver.gecko.driver=${HOME}/Selenium/geckodriver \\
-       -jar ~/Selenium/selenium-server-standalone-3.9.1.jar -port 5556 \\
+# geckodriver from homebrew ` brew install geckodriver`
+# Java as advised https://cran.r-project.org/doc/manuals/r-patched/R-admin.html#Java-_0028macOS_0029
+system("java -jar ~/Selenium/selenium-server-standalone-3.9.1.jar -port 5556 \\
        &>/dev/null &")
 
 # start firefox under remote control - this must work for the rest to work!
@@ -68,12 +68,12 @@ browser$close()
 pid <- system2("lsof", "-t -i :5556", stdout = TRUE)
 system(paste("kill -1", pid))
 
-## - copy list of current subscribers, add to guest list on Google calendar event
+## - copy list of current subscribers, add to guest list on Google calendar event (all events)
 ## (use one on R Contribution Working Group Calendar, so it shows as this when email)
 ## (paste and enter for comma-separated list to be added in bulk)
 ## - turn off option for people to see full guest list
 ## - add unsubscribe notice
-You are being invited as a subscriber to the R-Contribution-WG mailing list, please visit
+Calendar invites are sent to subscribers of the R-Contribution-WG mailing list, please visit
 https://stat.ethz.ch/mailman/listinfo/r-contribution-wg if you wish to unsubscribe.
 ## - add specific agenda items to Google calendar invite (RCWG calendar)
 

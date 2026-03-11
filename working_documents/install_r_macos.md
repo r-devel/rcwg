@@ -362,6 +362,8 @@ run the following commands within Terminal.app:
     "s\|\\\$(GIT) svn info\|\$TOP_SRCDIR/.github/scripts/svn-info.sh\|"
     "\$TOP_SRCDIR/Makefile.in" </code>
 
+    **N.B. This command all needs to be on one line** (copying and pasting from how it appears here on GitHub introduces a line-break that causes issues).
+
     </details>
 
 4.  Configure the R installation with `--enable-R-framework` to prepare

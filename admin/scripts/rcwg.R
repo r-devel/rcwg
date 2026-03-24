@@ -87,8 +87,8 @@ source("admin/R/buffer_post.R")
 # slack announcement
 weekday <- get_weekday(day, month, abbreviate = TRUE)
 agenda = c(
-" - Draft community playbook
- - GSoC 2026"
+" - R Dev Day useR! 2026 & R Project Sprint 2026
+- Updates on work in progress"
 )
 
 post <- social_post(weekday = weekday,
@@ -105,8 +105,7 @@ post <- social_post(weekday = weekday,
 # using ~ rather than ${HOME} here does not work!
 # stick with standalone sever from http://selenium-release.storage.googleapis.com/index.html
 # if issues, reinstall geckodriver (and Java?)
-system("java -Dwebdriver.gecko.driver=${HOME}/Selenium/geckodriver \\
-       -jar ~/Selenium/selenium-server-standalone-3.9.1.jar -port 5556 \\
+system("java -jar ~/Selenium/selenium-server-standalone-3.9.1.jar -port 5556 \\
        &>/dev/null &")
 
 # start firefox under remote control - this must work for the rest to work!

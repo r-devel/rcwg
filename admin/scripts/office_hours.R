@@ -3,16 +3,16 @@
 # UTC times (for Mar - Sept, UTC time is stable)
 # Mar 10 09:00 16:00
 
-day <- 10 # day number
-month <- "March"
+day <- 14 # day number
+month <- "April"
 utc_times <- c("08:00", "16:00")
 
-meetup <- c(emea = "https://www.meetup.com/r-contributors/events/313444342",
-            amer = "https://www.meetup.com/r-contributors/events/312747416")
+meetup <- c(emea = "https://www.meetup.com/r-contributors/events/313618589",
+            amer = "https://www.meetup.com/r-contributors/events/313618631")
 
 # check the zoom matches the meetup page!
-zoom <- c(emea = "https://us02web.zoom.us/j/86872140379?pwd=Dx3XGa4jFibEDOMW8k1GuC0zcaBrw0.1",
-          amer = "https://us02web.zoom.us/j/86753519203?pwd=1XEpRYkxyNADREngIabLXgmJNhnDqF.1")
+zoom <- c(emea = "https://us02web.zoom.us/j/81682101653?pwd=O6WTmHTbrNCvJW8x0gCOYBMD3W2HmK.1",
+          amer = "https://us02web.zoom.us/j/86226876200?pwd=MNcmrFiUzYjj7CXYbNHZraORkK8dQV.1")
 
 # Ensure office hour announced on meetup (see rcwg_tasks.md) --------------
 
@@ -24,10 +24,10 @@ source("admin/R/r_contribution_wg_subscribers.R")
 
 # start Selenium server on my machine
 # using ~ rather than ${HOME} here does not work!
-# stick with standalone sever from http://selenium-release.storage.googleapis.com/index.html?path=3.9/
-# if issues, reinstall geckodriver (and Java?)
-system("java -Dwebdriver.gecko.driver=${HOME}/Selenium/geckodriver \\
-       -jar ~/Selenium/selenium-server-standalone-3.9.1.jar -port 5556 \\
+# stick with standalone sever from http://selenium-release.storage.googleapis.com/index.html
+# geckodriver from homebrew ` brew install geckodriver`
+# Java as advised https://cran.r-project.org/doc/manuals/r-patched/R-admin.html#Java-_0028macOS_0029
+system("java -jar ~/Selenium/selenium-server-standalone-3.9.1.jar -port 5556 \\
        &>/dev/null &")
 
 # start firefox under remote control - this must work for the rest to work!
@@ -94,9 +94,9 @@ source("admin/R/buffer_post.R")
 # start Selenium server on my machine
 # using ~ rather than ${HOME} here does not work!
 # stick with standalone sever from http://selenium-release.storage.googleapis.com/index.html
-# if issues, reinstall geckodriver (and Java?)
-system("java -Dwebdriver.gecko.driver=${HOME}/Selenium/geckodriver \\
-       -jar ~/Selenium/selenium-server-standalone-3.9.1.jar -port 5556 \\
+# geckodriver from homebrew ` brew install geckodriver`
+# Java as advised https://cran.r-project.org/doc/manuals/r-patched/R-admin.html#Java-_0028macOS_0029
+system("java -jar ~/Selenium/selenium-server-standalone-3.9.1.jar -port 5556 \\
        &>/dev/null &")
 
 # start firefox under remote control - this must work for the rest to work!
@@ -114,9 +114,9 @@ buffer_signin(browser = browser,
 # If NULL, will post this day, this month, next hour (UTC times)
 # must be on Publish tab
 buffer_createpost(browser = browser,
-                  day = 5, # day number of month, e.g. 10
+                  day = NULL, # day number of month, e.g. 10
                   month = NULL,
-                  time = 10:00, # 24 hour clock, e.g. "09:00"
+                  time = NULL, # 24 hour clock, e.g. "09:00"
                   postcontent = post[[1]],
                   venue = "mastodon")
 
@@ -140,9 +140,9 @@ source("admin/R/linkedin_event.R")
 # start Selenium server on my machine
 # using ~ rather than ${HOME} here does not work!
 # stick with standalone sever from http://selenium-release.storage.googleapis.com/index.html
-# if issues, reinstall geckodriver (and Java?)
-system("java -Dwebdriver.gecko.driver=${HOME}/Selenium/geckodriver \\
-       -jar ~/Selenium/selenium-server-standalone-3.9.1.jar -port 5556 \\
+# geckodriver from homebrew ` brew install geckodriver`
+# Java as advised https://cran.r-project.org/doc/manuals/r-patched/R-admin.html#Java-_0028macOS_0029
+system("java -jar ~/Selenium/selenium-server-standalone-3.9.1.jar -port 5556 \\
        &>/dev/null &")
 
 # start firefox under remote control - this must work for the rest to work!
@@ -177,8 +177,8 @@ linkedin_createevent(browser = browser,
                      tz = "(UTC+00:00) Coordinated Universal Time",
                      startday = day,
                      startmonth = month,
-                     starttime = "10:00", #UTC time
-                     endtime = "11:00",
+                     starttime = "09:00", #UTC time
+                     endtime = "10:00",
                      eventlink = meetup["emea"],
                      description = description,
                      postcontent = postcontent)
@@ -200,12 +200,12 @@ linkedin_createevent(browser = browser,
                      alttext = "Three people laughing together, as they sit around a table with laptops, notebooks and drinks.",
                      eventtype = "^External event link",
                      name = "R Contributor Office Hour (AMER)",
-                     #tz = "(UTC-07:00) Pacific Time (US and Canada)", # during summer
-                     tz = "(UTC-08:00) Pacific Time (US and Canada), Tijuana",
+                     tz = "(UTC-07:00) Pacific Time (US and Canada)", # during summer
+                     #tz = "(UTC-08:00) Pacific Time (US and Canada), Tijuana",
                      startday = day,
                      startmonth = month,
-                     starttime = "09:30",
-                     endtime = "10:30",
+                     starttime = "09:00",
+                     endtime = "10:00",
                      eventlink = meetup["amer"],
                      description = description,
                      postcontent = postcontent)

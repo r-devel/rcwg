@@ -8,7 +8,6 @@ source("admin/R/update_readme_dates.R")
 
 ### 2026 dates
 
-# Mar 26 15:30 UTC
 # Apr 28 19:30 UTC
 # May 28 14:30 UTC
 # Jun 23 19:30 UTC
@@ -16,21 +15,23 @@ source("admin/R/update_readme_dates.R")
 # Aug 25 19:30 UTC
 # Sep 24 14:30 UTC
 
-month <- "March"
-day <- 26
-time <- "15:30" # UTC !!
-zoom <- "https://us02web.zoom.us/j/83792625860?pwd=yYHf1VHqBVxM9luqOYQ7ACIma2dlBJ.1"
-
 month <- "April"
 day <- 28
 time <- "19:30" # UTC !!
 zoom <- "https://us02web.zoom.us/j/89350851297?pwd=6thgJaE8VtBzG6eGMEU68tffnWJWWq.1"
 
+month <- "May"
+day <- 28
+time <- "14:30" # UTC !!
+zoom <- "https://us02web.zoom.us/j/83792625860?pwd=yYHf1VHqBVxM9luqOYQ7ACIma2dlBJ.1"
+
+
+
 # times here are UK times!
 # second number is n'th 'day' of the month, e.g. `3, "Friday"` = 3rd Friday
 # !! Think I have inconsistency here: Slack message and Twitter/Mastodon were wrong last time
-update_readme_dates(1, "March", 4, "Thursday", "15:30", 2026)
-update_readme_dates(2, "April", 4, "Tuesday", "20:30", 2026)
+update_readme_dates(1, "April", 4, "Tuesday", "20:30", 2026)
+update_readme_dates(2, "May", 4, "Thursday", "15:30", 2026)
 
 
 # Update RCWG contacts ---------------------------------------------------------
@@ -87,8 +88,8 @@ source("admin/R/buffer_post.R")
 # slack announcement
 weekday <- get_weekday(day, month, abbreviate = TRUE)
 agenda = c(
-" - R Dev Day useR! 2026 & R Project Sprint 2026
-- Updates on work in progress"
+" - GSoC projects selected for ranking
+- R Dev Day participant numbers and logistics"
 )
 
 post <- social_post(weekday = weekday,
@@ -98,6 +99,16 @@ post <- social_post(weekday = weekday,
                     agenda = agenda,
                     zoom = zoom,
                     venue = "slack", # "slack"/"mastodon"
+                    templates = "admin/posts/rcwg",
+                    ask = TRUE)
+
+post <- social_post(weekday = weekday,
+                    day = day,
+                    month = month,
+                    time = time,
+                    agenda = agenda,
+                    zoom = zoom,
+                    venue = "mastodon",
                     templates = "admin/posts/rcwg",
                     ask = TRUE)
 

@@ -1,7 +1,7 @@
 library(RSelenium)
 
 linkedin_signin <- function(browser, page, username, key = "LinkedIn password"){
-    browser$navigate(page)
+    browser$navigate("https://www.linkedin.com/login")
 
     # cookie control
     #elem <- browser$findElement(using = 'css',
@@ -10,13 +10,16 @@ linkedin_signin <- function(browser, page, username, key = "LinkedIn password"){
 
     # sign in
     # keyring::key_set("LinkedIn password")
-    elem <- browser$findElement(using = 'id', "username")
+    elem <- browser$findElement(using = 'xpath',
+                                "//input[@type='email']")
     elem$sendKeysToElement(list(username))
     elem <- browser$findElement(using = 'id', "password")
     elem$sendKeysToElement(list(keyring::key_get(key)))
-    elem <- browser$findElement(using = 'css',
-                                "[aria-label='Sign in']")
+    elem <- browser$findElement(using = 'xpath',
+                                "//button[@aria-label='Sign in']")
     elem$clickElement()
+
+    browser$navigate(page)
 }
 
 # press enter in console to continue, don't click next button!

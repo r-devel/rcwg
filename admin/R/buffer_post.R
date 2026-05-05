@@ -81,6 +81,8 @@ buffer_createpost <- function(
                                 "//button[text()='Done']")
     elem$clickElement()
 
+    Sys.sleep(2) # pause to allow time to register?
+
     elem <- browser$findElement(using = 'xpath',
                                 "//button[text()='Schedule Post']")
     elem$clickElement()
@@ -118,18 +120,13 @@ selectTime <- function(time = "9:30"){
 
     # hour
     elem <- browser$findElement(using = "xpath",
-                                "//div[@aria-label='hour, Time selector']")
-    elem$sendKeysToElement(list(format(date, "%I")))
-
-    # minute
-    elem <- browser$findElement(using = "xpath",
-                                "//div[@aria-label='minute, Time selector']")
-    elem$sendKeysToElement(list(format(date, "%M")))
-
-    # am/pm
-    elem <- browser$findElement(using = "xpath",
-                                "//div[@aria-label='AM/PM, Time selector']")
-    elem$sendKeysToElement(list(format(date, "%p")))
+                                "//input[@placeholder='Enter time...']")
+    elem$clickElement()
+    for (i in 1:8) {
+        elem$sendKeysToElement(list(key = "backspace"))
+        next
+    }
+    elem$sendKeysToElement(list(format(date, "%I:%M %P")))
 }
 
 

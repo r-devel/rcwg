@@ -3,18 +3,19 @@
 # UTC times (for Mar - Sept, UTC time is stable)
 # Mar 10 09:00 16:00
 
-day <- 14 # day number
-month <- "April"
+day <- 12 # day number
+month <- "May"
 utc_times <- c("08:00", "16:00")
 
-meetup <- c(emea = "https://www.meetup.com/r-contributors/events/313618589",
-            amer = "https://www.meetup.com/r-contributors/events/313618631")
+meetup <- c(emea = "https://www.meetup.com/r-contributors/events/313883462",
+            amer = "https://www.meetup.com/r-contributors/events/314420463")
 
 # check the zoom matches the meetup page!
 zoom <- c(emea = "https://us02web.zoom.us/j/81682101653?pwd=O6WTmHTbrNCvJW8x0gCOYBMD3W2HmK.1",
           amer = "https://us02web.zoom.us/j/86226876200?pwd=MNcmrFiUzYjj7CXYbNHZraORkK8dQV.1")
 
 # Ensure office hour announced on meetup (see rcwg_tasks.md) --------------
+# - may not see banner, but not announce if Announce button showing!
 
 # Send calendar invite to r-contribution-wg@r-project.org contacts --------
 
@@ -123,7 +124,7 @@ buffer_createpost(browser = browser,
 buffer_createpost(browser = browser,
                   day = NULL,
                   month = NULL,
-                  time = "17:30",
+                  time = "16:00",
                   postcontent = post[[2]],
                   venue = "mastodon")
 
@@ -207,32 +208,6 @@ linkedin_createevent(browser = browser,
                      starttime = "09:00",
                      endtime = "10:00",
                      eventlink = meetup["amer"],
-                     description = description,
-                     postcontent = postcontent)
-
-description <- "Join the #RStats Asia-Pacific Office Hour to
-- discuss how to get started contributing to R
-- get help/feedback on contributions you are working on
-- look at open bugs/work on message translations together
-"
-
-postcontent <- list(
-    "Join the #RStats Asia-Pacific Office Hour to",
-    key = "enter", "- discuss how to get started contributing to R",
-    key = "enter", "- get help/feedback on contributions you are working on",
-    key = "enter", "- look at open bugs/work on message translations together")
-
-linkedin_createevent(browser = browser,
-                     image = normalizePath("admin/brooke-cagle-g1Kr4Ozfoac-unsplash.jpg"),
-                     alttext = "Three people laughing together, as they sit around a table with laptops, notebooks and drinks.",
-                     eventtype = "^External event link",
-                     name = "R Contributor Office Hour (APAC)",
-                     tz = "(UTC-08:00) Pacific Time (US and Canada), Tijuana",
-                     startday = day,
-                     startmonth = month,
-                     starttime = "15:00",
-                     endtime = "16:00",
-                     eventlink = meetup["apac"],
                      description = description,
                      postcontent = postcontent)
 

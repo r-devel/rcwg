@@ -3,12 +3,12 @@
 # UTC times (for Mar - Sept, UTC time is stable)
 # Mar 10 09:00 16:00
 
-day <- 12 # day number
-month <- "May"
+day <- 9 # day number
+month <- "June"
 utc_times <- c("08:00", "16:00")
 
-meetup <- c(emea = "https://www.meetup.com/r-contributors/events/313883462",
-            amer = "https://www.meetup.com/r-contributors/events/314420463")
+meetup <- c(emea = "https://www.meetup.com/r-contributors/events/313883468",
+            amer = "https://www.meetup.com/r-contributors/events/314877509")
 
 # check the zoom matches the meetup page!
 zoom <- c(emea = "https://us02web.zoom.us/j/81682101653?pwd=O6WTmHTbrNCvJW8x0gCOYBMD3W2HmK.1",

@@ -49,12 +49,6 @@ buffer_createpost <- function(
         elem$clickElement()
     }
 
-    if (!"twitter" %in% venue) {
-        elem <- browser$findElement(using = 'xpath',
-                                    "//button[@aria-label='twitter channel (selected)']")
-        elem$clickElement()
-    }
-
     elem <- browser$findElement(using = 'xpath',
                                 "//button[@aria-label='linkedin channel (selected)']")
     elem$clickElement()

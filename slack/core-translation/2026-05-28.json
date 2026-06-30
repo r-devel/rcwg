@@ -1,0 +1,218 @@
+[
+    {
+        "user": "U0524MK6H3K",
+        "type": "message",
+        "ts": "1779984469.678669",
+        "edited": {
+            "user": "U0524MK6H3K",
+            "ts": "1780169005.000000"
+        },
+        "client_msg_id": "fde8a466-14e9-4e19-926c-8c82ddc7ae9a",
+        "text": "I see, there's a <https:\/\/savannah.gnu.org\/bugs\/?65104|new check> in `msgmerge` requiring the reference file to be either ASCII or UTF-8-encoded. Right now the workaround is to move the driver into a shell script, _encoding the `*.po` file into UTF-8 in the process_:\n\n`driver = force-outside-strings %A %B`\n\n```#!\/bin\/sh\nbase=\"$1\"\nmerge=\"$2\"\nbase_u8=`mktemp`\nmsgconv -t UTF-8 -o \"$base_u8\" \"$base\"\nmsguniq \"$merge\" | msgmerge -o \"$base\" - \"$base_u8\"\nexit=$?\nrm -f \"$base_u8\"\nexit $exit```\nThe script can be made smarter to determine the original encoding and `msgconv` the file back into it. (And also preserve the text width if desired.)\n\nSince merging instead of rebasing should lower the number of conflicts, it will make it possible switch to `po3way` and preserve the R-side fixes such as <https:\/\/github.com\/r-devel\/r-svn\/commit\/05b5978a7bfa3280ddfd23baa4030add1a2e0930|r89992>, which currently have to be discarded.\n\n*Edit*: a smarter script:\n```#!\/bin\/sh\nbase=\"$1\"\nmerge=\"$2\"\n\nbefore=`sha1sum \"$base\"`\n\n# msgmerge now requires the merge base to be UTF-8 if not ASCII\nbase_charset=`sed -n '\/^\"Content-Type: \/{s\/^\"Content-Type: .*charset=\\(.*\\)\\\\\\\\n\"$\/\\1\/p;q}' \"$merge\"`\nbase_u8=`mktemp`\nif [ ! -n \"$base_charset\" ]; then\n\techo \"Failed to determine charset in $merge\"\n\tbase_charset=\"UTF-8\"\nfi\nmsgconv -t UTF-8 -o \"$base_u8\" \"$base\"\n# assuming UTF-8 locale\nmax_width=`wc -L \"$base_u8\" | sed 's\/ .*\/\/'`\n\n# override matching translations in the base file from the merged-in file\nmsguniq \"$merge\" | msgmerge - \"$base_u8\" | msgconv -t $base_charset -w $max_width -o \"$base\"\n\nafter=`sha1sum \"$base\"`\n\nif [ \"$before\" = \"$after\" ]; then\n\techo \"file unchanged after msgmerge!\"\nfi\n\nrm -f \"$base_u8\"```\nErrors are deliberately ignored because they all correspond to historical damaged files (such as a few Latin-1 strings in a `*.po` marked as `charset=UTF-8`) where a following commit fixes the problem anyway.",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "gc7f0c5d391a",
+            "image_72": "https:\/\/secure.gravatar.com\/avatar\/c7f0c5d391a6f869c9310694b55fa506.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0018-72.png",
+            "first_name": "Ivan",
+            "real_name": "Ivan Krylov",
+            "display_name": "Ivan Krylov",
+            "team": "T01DW9DLB2A",
+            "name": "ikrylov",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1750070821.690539",
+        "parent_user_id": "U0524MK6H3K",
+        "attachments": [
+            {
+                "from_url": "https:\/\/savannah.gnu.org\/bugs\/?65104",
+                "service_icon": "https:\/\/savannah.gnu.org\/images\/Savannah.theme\/icon.png",
+                "id": 1,
+                "original_url": "https:\/\/savannah.gnu.org\/bugs\/?65104",
+                "fallback": "GNU gettext - Bugs: bug #65104, msgmerge fails to merge utf8 PO... [Savannah]",
+                "text": "Savannah is a central point for development, distribution\nand maintenance of free software, both GNU and non-GNU.",
+                "title": "GNU gettext - Bugs: bug #65104, msgmerge fails to merge utf8 PO... [Savannah]",
+                "title_link": "https:\/\/savannah.gnu.org\/bugs\/?65104",
+                "service_name": "savannah.gnu.org"
+            }
+        ],
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "neZa\/",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I see, there's a "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/savannah.gnu.org\/bugs\/?65104",
+                                "text": "new check"
+                            },
+                            {
+                                "type": "text",
+                                "text": " in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "msgmerge",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " requiring the reference file to be either ASCII or UTF-8-encoded. Right now the workaround is to move the driver into a shell script, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "encoding the ",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "*.po",
+                                "style": {
+                                    "italic": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " file into UTF-8 in the process",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "driver = force-outside-strings %A %B",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "#!\/bin\/sh\nbase=\"$1\"\nmerge=\"$2\"\nbase_u8=`mktemp`\nmsgconv -t UTF-8 -o \"$base_u8\" \"$base\"\nmsguniq \"$merge\" | msgmerge -o \"$base\" - \"$base_u8\"\nexit=$?\nrm -f \"$base_u8\"\nexit $exit"
+                            }
+                        ],
+                        "border": 0
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nThe script can be made smarter to determine the original encoding and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "msgconv",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " the file back into it. (And also preserve the text width if desired.)\n\nSince merging instead of rebasing should lower the number of conflicts, it will make it possible switch to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "po3way",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and preserve the R-side fixes such as "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/commit\/05b5978a7bfa3280ddfd23baa4030add1a2e0930",
+                                "text": "r89992"
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which currently have to be discarded.\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "Edit",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ": a smarter script:\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "#!\/bin\/sh\nbase=\"$1\"\nmerge=\"$2\"\n\nbefore=`sha1sum \"$base\"`\n\n# msgmerge now requires the merge base to be UTF-8 if not ASCII\nbase_charset=`sed -n '\/^\"Content-Type: \/{s\/^\"Content-Type: .*charset=\\(.*\\)\\\\\\\\n\"$\/\\1\/p;q}' \"$merge\"`\nbase_u8=`mktemp`\nif [ ! -n \"$base_charset\" ]; then\n\techo \"Failed to determine charset in $merge\"\n\tbase_charset=\"UTF-8\"\nfi\nmsgconv -t UTF-8 -o \"$base_u8\" \"$base\"\n# assuming UTF-8 locale\nmax_width=`wc -L \"$base_u8\" | sed 's\/ .*\/\/'`\n\n# override matching translations in the base file from the merged-in file\nmsguniq \"$merge\" | msgmerge - \"$base_u8\" | msgconv -t $base_charset -w $max_width -o \"$base\"\n\nafter=`sha1sum \"$base\"`\n\nif [ \"$before\" = \"$after\" ]; then\n\techo \"file unchanged after msgmerge!\"\nfi\n\nrm -f \"$base_u8\""
+                            }
+                        ],
+                        "border": 0
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nErrors are deliberately ignored because they all correspond to historical damaged files (such as a few Latin-1 strings in a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "*.po",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " marked as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "charset=UTF-8",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") where a following commit fixes the problem anyway."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

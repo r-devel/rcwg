@@ -1,0 +1,415 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19086] New: nlminb() no longer works reliably with bounds*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19086>\n\n            Bug ID: 19086\n           Summary: nlminb() no longer works reliably with bounds\n           Product: R\n           Version: R 4.6.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kaskr@dtu.dk|kaskr@dtu.dk>\n\nCreated attachment 3729\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3729&amp;action=edit>\nPatch against R-devel\n\nThis is a follow-up on a long standing nlminb() bug intitially reported here:\n<https:\/\/hypatia.math.ethz.ch\/pipermail\/r-devel\/2019-January\/077211.html>\nMartin Maechler provided a summary of affected platforms here:\n<https:\/\/hypatia.math.ethz.ch\/pipermail\/r-devel\/2019-February\/077257.html>\n\nA short recap: After the release of R-3.5.0, I noticed that nlminb() was\nsuddenly failing for a lot of optimization problems that used to work. Common\nfor them all was that they used bounds. I boiled down a simple example\ndemonstrating the problem:\n\nf &lt;- function(x) sum( log(diff(x)^2+.01) + (x[1]-1)^2 )\nopt &lt;- nlminb(rep(0, 10), f, lower=-1, upper=3)\nxhat &lt;- rep(1, 10)\nabs( opt$objective - f(xhat) ) &lt; 1e-4  ## Must be TRUE\n\nNotably, the example converges in ~68 iterations when removing the bounds.\nWhen supplying bounds the example fails to converge within the default 150\niterations. That holds even when increasing the bounds to a level where the\nproblem is effectively unconstrained.\n\nSolution: In portsrc.f (lines 9620-9621) two matrix vector products are carried\nout, essentially corresponding to (x=t(L)%*%x; x=L%*%x):\n    CALL DL7TVM(N, V(X01), V(L), V(X01))\n    CALL DL7VML(N, V(X01), V(L), V(X01))\nThese calls are passing identical 2nd and 4th arguments, which violate the\nFortran aliasing rules! When compiled with optimization, the resulting x\nbecomes a zero vector regardless of its value on input.\nTo fix the argument aliasing issue one can simply substitute a temporary like\nthis:\n    CALL DL7TVM(N, V(TEMP1), V(L), V(X01))\n    CALL DL7VML(N, V(X01), V(L), V(TEMP1))\n\nSee attached 'portsrc.patch'. With this simple patch nlminb() with bounds works\nagain!",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1781253158.382449",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ufI",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19086] New: nlminb() no longer works reliably with bounds",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19086"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19086\n           Summary: nlminb() no longer works reliably with bounds\n           Product: R\n           Version: R 4.6.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kaskr@dtu.dk",
+                                "text": "kaskr@dtu.dk"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3729\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3729&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3729&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch against R-devel\n\nThis is a follow-up on a long standing nlminb() bug intitially reported here:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/hypatia.math.ethz.ch\/pipermail\/r-devel\/2019-January\/077211.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nMartin Maechler provided a summary of affected platforms here:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/hypatia.math.ethz.ch\/pipermail\/r-devel\/2019-February\/077257.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nA short recap: After the release of R-3.5.0, I noticed that nlminb() was\nsuddenly failing for a lot of optimization problems that used to work. Common\nfor them all was that they used bounds. I boiled down a simple example\ndemonstrating the problem:\n\nf <- function(x) sum( log(diff(x)^2+.01) + (x[1]-1)^2 )\nopt <- nlminb(rep(0, 10), f, lower=-1, upper=3)\nxhat <- rep(1, 10)\nabs( opt$objective - f(xhat) ) < 1e-4  ## Must be TRUE\n\nNotably, the example converges in ~68 iterations when removing the bounds.\nWhen supplying bounds the example fails to converge within the default 150\niterations. That holds even when increasing the bounds to a level where the\nproblem is effectively unconstrained.\n\nSolution: In portsrc.f (lines 9620-9621) two matrix vector products are carried\nout, essentially corresponding to (x=t(L)%"
+                            },
+                            {
+                                "type": "text",
+                                "text": "%x; x=L%",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "%x):\n    CALL DL7TVM(N, V(X01), V(L), V(X01))\n    CALL DL7VML(N, V(X01), V(L), V(X01))\nThese calls are passing identical 2nd and 4th arguments, which violate the\nFortran aliasing rules! When compiled with optimization, the resulting x\nbecomes a zero vector regardless of its value on input.\nTo fix the argument aliasing issue one can simply substitute a temporary like\nthis:\n    CALL DL7TVM(N, V(TEMP1), V(L), V(X01))\n    CALL DL7VML(N, V(X01), V(L), V(TEMP1))\n\nSee attached 'portsrc.patch'. With this simple patch nlminb() with bounds works\nagain!"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19069] aperm(X, 1:length(dim(X))) should short-circuit and just return X.*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19069>\n\n--- Comment #14 from Kurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) ---\nSo here we go again ...\nI now committed \n\nr90136 | hornik | 2026-06-12 09:14:40 +0200 (Fri, 12 Jun 2026) | 1 line\nHave aperm.default() copy attributes as documented since 2006.\n\nand \n\nr90137 | hornik | 2026-06-12 10:53:54 +0200 (Fri, 12 Jun 2026) | 1 line\nShort-circuit identity permutation (PR#19069), second try.\n\nwith the latter using a modified version of the suggested patch (only \nwhen resize is true).\n\nAll CRAN packages which had failed with c90023 worked fine for me with the\nabove changes, so hopefully we can close the issue now.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1781254708.659539",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "gkMYM",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19069] aperm(X, 1:length(dim(X))) should short-circuit and just return X.",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19069"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #14 from Kurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nSo here we go again ...\nI now committed \n\nr90136 | hornik | 2026-06-12 09:14:40 +0200 (Fri, 12 Jun 2026) | 1 line\nHave aperm.default() copy attributes as documented since 2006.\n\nand \n\nr90137 | hornik | 2026-06-12 10:53:54 +0200 (Fri, 12 Jun 2026) | 1 line\nShort-circuit identity permutation (PR#19069), second try.\n\nwith the latter using a modified version of the suggested patch (only \nwhen resize is true).\n\nAll CRAN packages which had failed with c90023 worked fine for me with the\nabove changes, so hopefully we can close the issue now."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19087] New: Security issue with `pdf()`\/`postscript()`*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19087>\n\n            Bug ID: 19087\n           Summary: Security issue with `pdf()`\/`postscript()`\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: I\/O\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:h.wickham@gmail.com|h.wickham@gmail.com>\n\n`file` is, in the vast majority of cases, a path — inert data naming where\nbytes should land. But in `pdf()` and `postscript()`, when its first character\nis `|`, the remainder is handed to `R_popen()`, i.e. executed by `\/bin\/sh -c`.\nSo `pdf(file = x)` is a write-to-disk operation for almost all values of `x`\nand an arbitrary-command-execution operation for a small, invisible subset of\nthem. Nothing at the call site signals that the second mode exists, and it\nrequires a close read of the documentation to discover it exists.\n\nIt's reasonable to expect that a careful R programmer will know that `system()`\nis potentially dangerous when given unsanitized user inputs; I don't think they\nhave any particular reason to suspect that `pdf()` is just as bad. This matters\nbecause filenames are routinely derived from untrusted input. R is now deployed\nin Shiny, plumber, OpenCPU and batch report-generation services where it's\nreasonable for the filename to be a user-specified parameter.\n\nThe cost of removing this functionality is very small because the legitimate\ncapability of piping device output to a program remains fully available through\n`postscript(file = \"\", command = …)` and `<http:\/\/print.it|print.it> = TRUE`.\n\nI have prepared a small patch to fix this problem which you can find at\n<https:\/\/github.com\/r-devel\/r-svn\/pull\/264> \/\n<https:\/\/patch-diff.githubusercontent.com\/raw\/r-devel\/r-svn\/pull\/264.patch>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1781292374.816579",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "loqoq",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19087] New: Security issue with ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "pdf()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "postscript()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19087"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19087\n           Summary: Security issue with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pdf()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "postscript()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: I\/O\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:h.wickham@gmail.com",
+                                "text": "h.wickham@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "file",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is, in the vast majority of cases, a path — inert data naming where\nbytes should land. But in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pdf()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "postscript()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", when its first character\nis "
+                            },
+                            {
+                                "type": "text",
+                                "text": "|",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", the remainder is handed to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_popen()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", i.e. executed by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/bin\/sh -c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\nSo "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pdf(file = x)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is a write-to-disk operation for almost all values of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nand an arbitrary-command-execution operation for a small, invisible subset of\nthem. Nothing at the call site signals that the second mode exists, and it\nrequires a close read of the documentation to discover it exists.\n\nIt's reasonable to expect that a careful R programmer will know that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "system()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nis potentially dangerous when given unsanitized user inputs; I don't think they\nhave any particular reason to suspect that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pdf()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is just as bad. This matters\nbecause filenames are routinely derived from untrusted input. R is now deployed\nin Shiny, plumber, OpenCPU and batch report-generation services where it's\nreasonable for the filename to be a user-specified parameter.\n\nThe cost of removing this functionality is very small because the legitimate\ncapability of piping device output to a program remains fully available through\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "postscript(file = \"\", command = …)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/print.it",
+                                "text": "print.it",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " = TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nI have prepared a small patch to fix this problem which you can find at\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/pull\/264"
+                            },
+                            {
+                                "type": "text",
+                                "text": " \/\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/patch-diff.githubusercontent.com\/raw\/r-devel\/r-svn\/pull\/264.patch"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

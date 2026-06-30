@@ -1,0 +1,246 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19017] Typo\/bug in ar.yw.default,  ar.ols,  ar.burg.default*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19017>\n\nSimone Giannerini (<mailto:sgiannerini@gmail.com|sgiannerini@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n         Resolution|---                         |FIXED",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776010295.156389",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "TbZV",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19017] Typo\/bug in ar.yw.default,  ar.ols,  ar.burg.default",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19017"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSimone Giannerini ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:sgiannerini@gmail.com",
+                                "text": "sgiannerini@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n         Resolution|---                         |FIXED"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19017] Typo\/bug in ar.yw.default,  ar.ols,  ar.burg.default*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19017>\n\n--- Comment #1 from Simone Giannerini (<mailto:sgiannerini@gmail.com|sgiannerini@gmail.com>) ---\nFixed in R 4.6.0. Commit 89665 (56bb637) by MM",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776011452.970539",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "DSyj",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19017] Typo\/bug in ar.yw.default,  ar.ols,  ar.burg.default",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19017"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Simone Giannerini ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:sgiannerini@gmail.com",
+                                "text": "sgiannerini@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nFixed in R 4.6.0. Commit 89665 (56bb637) by MM"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19049] New: btpe implementation rbinom has incorrect signs for error terms in Stirling approximation*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19049>\n\n            Bug ID: 19049\n           Summary: btpe implementation rbinom has incorrect signs for\n                    error terms in Stirling approximation\n           Product: R\n           Version: R 4.6.x\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Language\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:k88hudson@gmail.com|k88hudson@gmail.com>\n\nCreated attachment 3671\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3671&amp;action=edit>\nFix for error terms in BTPE Stirling approximation\n\nI have been looking at implementations of the BTPE algorithm across several\nlanguages and it seems that R's implementation in rbinom inherits an\nerror in the 1988 paper by Kachitvichyanukul and Schmeiser [1] from which\nthe algorithm originates. The signs for the error terms in the Stirling\napproximation in step 5.3 are incorrect; all four terms are added,\nbut the last two should be subtracted.\n\nStep 5.3 (Page 219):\n\nNote that the formula shifts by 1 to handle 0:\n```\n# ln(n!) = n*ln(n+1) - (n+1) + log(2*pi*(n+1))\/2 + stirling_correction(n+1) +\nO((n+1)^-11)\nstirling_correction = function(x) {\n  1\/(12*x) - 1\/(360*x^3) + 1\/(1260*x^5) - 1\/(1680*x^7) + 1\/(1188*x^9)\n}\nxM = M + 0.5\nx1 = y + 1\nf1 = M + 1\nz = n + 1 - M\nw = n - y + 1\n```\n\nIn the paper:\n```\nxM * log(f1\/x1) +\n  (n - M + 0.5) * log(z\/w) +\n  (y - M) * log(w*r\/(x1*q)) +\n  stirling_correction(f1) +\n  stirling_correction(z) +\n  stirling_correction(x1) +\n  stirling_correction(w)\n```\n\nThe correction should be:\n```\nxM * log(f1\/x1) +\n  (n - M + 0.5) * log(z\/w) +\n  (y - M) * log(w*r\/(x1*q)) +\n  stirling_correction(f1) +\n  stirling_correction(z) -\n  stirling_correction(x1) -\n  stirling_correction(w)\n```\n\nYou can see the signs should be different in that the first two error terms\nstem from the approximation to the numerator and the second from the\ndenominator of equation (1) on page 218, and hence have different signs.\n\nAs far as I know, the authors of GSL[2] were first to notice and fix it. My\ncollaborator Jason Asher (@jasonasher) worked through the derivation of\nthe equation and we independently confirm the error.\n\nI've included a patch. Let me know if you would like\nmore details or there is something I should do in terms of contributing the\nfix.\n\n\n[1] <https:\/\/doi.org\/10.1145\/42372.42381>\n[2]\n<https:\/\/github.com\/ampl\/gsl\/blob\/fb0cfbc82b5e9e4d22444efce9241924f4aefb83\/randist\/binomial_tpe.c#L339-L361>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776015792.174969",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "7QS",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19049] New: btpe implementation rbinom has incorrect signs for error terms in Stirling approximation",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19049"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19049\n           Summary: btpe implementation rbinom has incorrect signs for\n                    error terms in Stirling approximation\n           Product: R\n           Version: R 4.6.x\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Language\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:k88hudson@gmail.com",
+                                "text": "k88hudson@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3671\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3671&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3671&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nFix for error terms in BTPE Stirling approximation\n\nI have been looking at implementations of the BTPE algorithm across several\nlanguages and it seems that R's implementation in rbinom inherits an\nerror in the 1988 paper by Kachitvichyanukul and Schmeiser [1] from which\nthe algorithm originates. The signs for the error terms in the Stirling\napproximation in step 5.3 are incorrect; all four terms are added,\nbut the last two should be subtracted.\n\nStep 5.3 (Page 219):\n\nNote that the formula shifts by 1 to handle 0:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# ln(n!) = n*ln(n+1) - (n+1) + log(2*pi*(n+1))\/2 + stirling_correction(n+1) +\nO((n+1)^-11)\nstirling_correction = function(x) {\n  1\/(12*x) - 1\/(360*x^3) + 1\/(1260*x^5) - 1\/(1680*x^7) + 1\/(1188*x^9)\n}\nxM = M + 0.5\nx1 = y + 1\nf1 = M + 1\nz = n + 1 - M\nw = n - y + 1\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIn the paper:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "xM * log(f1\/x1) +\n  (n - M + 0.5) * log(z\/w) +\n  (y - M) * log(w*r\/(x1*q)) +\n  stirling_correction(f1) +\n  stirling_correction(z) +\n  stirling_correction(x1) +\n  stirling_correction(w)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe correction should be:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "xM * log(f1\/x1) +\n  (n - M + 0.5) * log(z\/w) +\n  (y - M) * log(w*r\/(x1*q)) +\n  stirling_correction(f1) +\n  stirling_correction(z) -\n  stirling_correction(x1) -\n  stirling_correction(w)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nYou can see the signs should be different in that the first two error terms\nstem from the approximation to the numerator and the second from the\ndenominator of equation (1) on page 218, and hence have different signs.\n\nAs far as I know, the authors of GSL[2] were first to notice and fix it. My\ncollaborator Jason Asher (@jasonasher) worked through the derivation of\nthe equation and we independently confirm the error.\n\nI've included a patch. Let me know if you would like\nmore details or there is something I should do in terms of contributing the\nfix.\n\n\n\n[1] "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/doi.org\/10.1145\/42372.42381"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n[2]\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/ampl\/gsl\/blob\/fb0cfbc82b5e9e4d22444efce9241924f4aefb83\/randist\/binomial_tpe.c#L339-L361"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,1088 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16750] Treat character as factor in summary.default*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16750>\n\n--- Comment #5 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\nComing back to this after some offline discussions, the current proposal for\nthe default summary for character vectors is (here given as a separate method,\nbut to be integrated into `summary.default`):\n\n```\nsummary.character &lt;- function (object, ...)\n{\n    nas &lt;- <http:\/\/is.na|is.na>(object)\n    object &lt;- object[!nas]\n    ncs &lt;- nchar(object, allowNA = TRUE) # NB: NA if \"bytes\"-encoded\n    nna &lt;- sum(nas)\n    value &lt;-\n        c(Length    = length(nas),\n          N.unique  = length(unique(object)), # NB: not counting any NA value\n          N.blank   = length(grep(\"^[ \\t\\r\\n]*$\", object, perl = TRUE)), # NB:\n= trimws()\n          Min.nchar = min(ncs),\n          Max.nchar = max(ncs),\n          NAs       = if(nna &gt; 0) nna) # NB: not \"NA's\" (Bug 18948)\n    class(value) &lt;- c(\"summaryDefault\", \"table\")\n    value\n}\n```\n\nCompared to the earlier draft, this incorporates the following changes:\n\n* `allowNA=TRUE` in `nchar()` ensures that the summary doesn't fail for invalid\nor \"bytes\"-encoded strings but returns NA for \"Min.nchar\" and \"Max.nchar\".\n\n* We really want \"N.unique\" to ignore NAs (whose count is given separately, if\nany), so the number of unique values matches the number of levels if summarized\nas a factor.\n\n* Switch from \"N.empty\" to \"N.blank\": \"N.empty\" would just count empty strings\n(\"\"), but some people guessed it might also count \"  \" etc. Furthermore, when\nproducing a summary after `read.table` from manually curated spreadsheet data,\nit often happens that some \"empty\" cells that actually represent missing values\nstill contain one or more blanks. \"Min.nchar\" already tells us if there are any\nempty strings (which is why I didn't like \"N.empty\" in the first place), but\nthe number of \"blank\" (whitespace-only) elements gives additional information\n(this considers platform-independent whitespace similar to the default\n`trimws()`). The additional `grep` clearly increases the computational cost\ncompared to `sum(ncs==0)`, but that should be irrelevant for the typical use of\n`summary()` when exploring new datasets with a manageable number of columns.\n\nI plan to have this feature request resolved in the trunk by the end of this\nweek.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1768903076.891619",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "F+6I",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16750] Treat character as factor in summary.default",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16750"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nComing back to this after some offline discussions, the current proposal for\nthe default summary for character vectors is (here given as a separate method,\nbut to be integrated into "
+                            },
+                            {
+                                "type": "text",
+                                "text": "summary.default",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "summary.character <- function (object, ...)\n{\n    nas <- "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(object)\n    object <- object[!nas]\n    ncs <- nchar(object, allowNA = TRUE) # NB: NA if \"bytes\"-encoded\n    nna <- sum(nas)\n    value <-\n        c(Length    = length(nas),\n          N.unique  = length(unique(object)), # NB: not counting any NA value\n          N.blank   = length(grep(\"^[ \\t\\r\\n]*$\", object, perl = TRUE)), # NB:\n= trimws()\n          Min.nchar = min(ncs),\n          Max.nchar = max(ncs),\n          NAs       = if(nna > 0) nna) # NB: not \"NA's\" (Bug 18948)\n    class(value) <- c(\"summaryDefault\", \"table\")\n    value\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nCompared to the earlier draft, this incorporates the following changes:\n\n* "
+                            },
+                            {
+                                "type": "text",
+                                "text": "allowNA=TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nchar()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ensures that the summary doesn't fail for invalid\nor \"bytes\"-encoded strings but returns NA for \"Min.nchar\" and \"Max.nchar\".\n\n* We really want \"N.unique\" to ignore NAs (whose count is given separately, if\nany), so the number of unique values matches the number of levels if summarized\nas a factor.\n\n* Switch from \"N.empty\" to \"N.blank\": \"N.empty\" would just count empty strings\n(\"\"), but some people guessed it might also count \"  \" etc. Furthermore, when\nproducing a summary after "
+                            },
+                            {
+                                "type": "text",
+                                "text": "read.table",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " from manually curated spreadsheet data,\nit often happens that some \"empty\" cells that actually represent missing values\nstill contain one or more blanks. \"Min.nchar\" already tells us if there are any\nempty strings (which is why I didn't like \"N.empty\" in the first place), but\nthe number of \"blank\" (whitespace-only) elements gives additional information\n(this considers platform-independent whitespace similar to the default\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "trimws()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "). The additional "
+                            },
+                            {
+                                "type": "text",
+                                "text": "grep",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " clearly increases the computational cost\ncompared to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "sum(ncs==0)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", but that should be irrelevant for the typical use of\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "summary()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " when exploring new datasets with a manageable number of columns.\n\nI plan to have this feature request resolved in the trunk by the end of this\nweek."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16750] Treat character as factor in summary.default*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16750>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #6 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nVery nice.  There's one thing which I only note now:\nThe `NAs` counts are *not* `format()`ted together with the numbers above, which\nhas been the case for numeric summaries, too.  Only for `factor` they *are*\nformatted together and hence properly indented.\nWith the new character methods, where all the numbers reported are counts, (as\nin the factor case), one would really \"like\" to see the `NAs` counts formatted\ntogether with the other counts.\n`summary(penguins_raw)`\nis an example which shows all cases (and is also visible in\n`tests\/Examples\/datasets-Ex.Rout` after  `make check-devel` with your new\n`summary.character()` in place):\n\n```\n&gt; (sDF &lt;- summary(penguins_raw)) |&gt; print(width = 88)\n     studyName   Sample Number         Species          Region          Island  \n Length   :344   Min.   :  1.00   Length   :344   Length   :344   Length   :344 \n N.unique :  3   1st Qu.: 29.00   N.unique :  3   N.unique :  1   N.unique :  3 \n N.blank  :  0   Median : 58.00   N.blank  :  0   N.blank  :  0   N.blank  :  0 \n Min.nchar:  7   Mean   : 63.15   Min.nchar: 33   Min.nchar:  6   Min.nchar:  5 \n Max.nchar:  7   3rd Qu.: 95.25   Max.nchar: 41   Max.nchar:  6   Max.nchar:  9 \n                 Max.   :152.00                                                 \n\n       Stage       Individual ID Clutch Completion    Date Egg         \n Length   :344   Length   :344   Length   :344     Min.   :2007-11-09  \n N.unique :  1   N.unique :190   N.unique :  2     1st Qu.:2007-11-28  \n N.blank  :  0   N.blank  :  0   N.blank  :  0     Median :2008-11-09  \n Min.nchar: 18   Min.nchar:  4   Min.nchar:  2     Mean   :2008-11-27  \n Max.nchar: 18   Max.nchar:  6   Max.nchar:  3     3rd Qu.:2009-11-16  \n                                                   Max.   :2009-12-01  \n\n Culmen Length (mm) Culmen Depth (mm) Flipper Length (mm) Body Mass (g) \n Min.   :32.10      Min.   :13.10     Min.   :172.0       Min.   :2700  \n 1st Qu.:39.23      1st Qu.:15.60     1st Qu.:190.0       1st Qu.:3550  \n Median :44.45      Median :17.30     Median :197.0       Median :4050  \n Mean   :43.92      Mean   :17.15     Mean   :200.9       Mean   :4202  \n 3rd Qu.:48.50      3rd Qu.:18.70     3rd Qu.:213.0       3rd Qu.:4750  \n Max.   :59.60      Max.   :21.50     Max.   :231.0       Max.   :6300  \n NAs    :2          NAs    :2         NAs    :2           NAs    :2     \n        Sex      Delta 15 N (o\/oo) Delta 13 C (o\/oo)      Comments  \n Length   :344   Min.   : 7.632    Min.   :-27.02    Length   :344  \n N.unique :  2   1st Qu.: 8.300    1st Qu.:-26.32    N.unique : 10  \n N.blank  :  0   Median : 8.652    Median :-25.83    N.blank  :  0  \n Min.nchar:  4   Mean   : 8.733    Mean   :-25.69    Min.nchar: 18  \n Max.nchar:  6   3rd Qu.: 9.172    3rd Qu.:-25.06    Max.nchar: 68  \n NAs      :11    Max.   :10.025    Max.   :-23.79    NAs      :290  \n                 NAs    :14        NAs    :13                       \n&gt; \n```\nAnd it's the last group (and 2nd-to-last line above) where the formatting (i.e.\nnon-indentation of `NAs`) of the `Sex` summary is unfortunate and the one for\n`Comments` is entirely \"lucky\".\n\nNote however that this really the  `summary.data.frame()` method which needs\ntweaking; it produces a character _matrix_ which then is simply `print()`ed\nabove.\nHence, all the above should not affect the discussion here about \"the optimal\" \n`summary(&lt;character&gt;)` method.\nActually, the now **unified** use of `\"NAs\"` could \/ should be made use of in\ntweaking  `summary.data.frame()`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1768906108.665769",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "gj2",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16750] Treat character as factor in summary.default",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16750"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #6 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nVery nice.  There's one thing which I only note now:\nThe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NAs",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " counts are "
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "ted together with the numbers above, which\nhas been the case for numeric summaries, too.  Only for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "factor",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " they "
+                            },
+                            {
+                                "type": "text",
+                                "text": "are",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nformatted together and hence properly indented.\nWith the new character methods, where all the numbers reported are counts, (as\nin the factor case), one would really \"like\" to see the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NAs",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " counts formatted\ntogether with the other counts.\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "summary(penguins_raw)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nis an example which shows all cases (and is also visible in\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "tests\/Examples\/datasets-Ex.Rout",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " after  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "make check-devel",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " with your new\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "summary.character()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in place):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> (sDF <- summary(penguins_raw)) |> print(width = 88)\n     studyName   Sample Number         Species          Region          Island  \n Length   :344   Min.   :  1.00   Length   :344   Length   :344   Length   :344 \n N.unique :  3   1st Qu.: 29.00   N.unique :  3   N.unique :  1   N.unique :  3 \n N.blank  :  0   Median : 58.00   N.blank  :  0   N.blank  :  0   N.blank  :  0 \n Min.nchar:  7   Mean   : 63.15   Min.nchar: 33   Min.nchar:  6   Min.nchar:  5 \n Max.nchar:  7   3rd Qu.: 95.25   Max.nchar: 41   Max.nchar:  6   Max.nchar:  9 \n                 Max.   :152.00                                                 \n\n       Stage       Individual ID Clutch Completion    Date Egg         \n Length   :344   Length   :344   Length   :344     Min.   :2007-11-09  \n N.unique :  1   N.unique :190   N.unique :  2     1st Qu.:2007-11-28  \n N.blank  :  0   N.blank  :  0   N.blank  :  0     Median :2008-11-09  \n Min.nchar: 18   Min.nchar:  4   Min.nchar:  2     Mean   :2008-11-27  \n Max.nchar: 18   Max.nchar:  6   Max.nchar:  3     3rd Qu.:2009-11-16  \n                                                   Max.   :2009-12-01  \n\n Culmen Length (mm) Culmen Depth (mm) Flipper Length (mm) Body Mass (g) \n Min.   :32.10      Min.   :13.10     Min.   :172.0       Min.   :2700  \n 1st Qu.:39.23      1st Qu.:15.60     1st Qu.:190.0       1st Qu.:3550  \n Median :44.45      Median :17.30     Median :197.0       Median :4050  \n Mean   :43.92      Mean   :17.15     Mean   :200.9       Mean   :4202  \n 3rd Qu.:48.50      3rd Qu.:18.70     3rd Qu.:213.0       3rd Qu.:4750  \n Max.   :59.60      Max.   :21.50     Max.   :231.0       Max.   :6300  \n NAs    :2          NAs    :2         NAs    :2           NAs    :2     \n        Sex      Delta 15 N (o\/oo) Delta 13 C (o\/oo)      Comments  \n Length   :344   Min.   : 7.632    Min.   :-27.02    Length   :344  \n N.unique :  2   1st Qu.: 8.300    1st Qu.:-26.32    N.unique : 10  \n N.blank  :  0   Median : 8.652    Median :-25.83    N.blank  :  0  \n Min.nchar:  4   Mean   : 8.733    Mean   :-25.69    Min.nchar: 18  \n Max.nchar:  6   3rd Qu.: 9.172    3rd Qu.:-25.06    Max.nchar: 68  \n NAs      :11    Max.   :10.025    Max.   :-23.79    NAs      :290  \n                 NAs    :14        NAs    :13                       \n> \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "And it's the last group (and 2nd-to-last line above) where the formatting (i.e.\nnon-indentation of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NAs",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") of the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Sex",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " summary is unfortunate and the one for\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "Comments",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is entirely \"lucky\".\n\nNote however that this really the  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "summary.data.frame()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method which needs\ntweaking; it produces a character "
+                            },
+                            {
+                                "type": "text",
+                                "text": "matrix",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " which then is simply "
+                            },
+                            {
+                                "type": "text",
+                                "text": "print()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "ed\nabove.\nHence, all the above should not affect the discussion here about \"the optimal\" \n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "summary(<character>)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method.\nActually, the now **unified** use of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"NAs\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " could \/ should be made use of in\ntweaking  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "summary.data.frame()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16750] Treat character as factor in summary.default*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16750>\n\n--- Comment #7 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\nThank you, Martin. Funnily enough I noticed the exact same misalignment also\njust today and will take care of this, but wanted to focus the resumption of\nthis PR on the actual contents, so these are settled.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1768909441.954059",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "p+T5H",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16750] Treat character as factor in summary.default",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16750"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #7 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you, Martin. Funnily enough I noticed the exact same misalignment also\njust today and will take care of this, but wanted to focus the resumption of\nthis PR on the actual contents, so these are settled."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18992] New: please support tweaking LDFLAGS used for pkg-config file*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18992>\n\n            Bug ID: 18992\n           Summary: please support tweaking LDFLAGS used for pkg-config\n                    file\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Installation\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:bdrung@debian.org|bdrung@debian.org>\n\nWhen building the pkg-config file for libR in `src\/unix\/Makefile.in`, the\nfollowing stanza,\n\n```\ninstall-pc:\n    @$(MKINSTALLDIRS) \"$(DESTDIR)$(libdir)\/pkgconfig\"\n    -@$(SED) -e \"s:@rhome:$(rhome):\" \\\n      -e \"s:@rincludedir:$(rincludedir):\" \\\n      -e \"s:@rarch:$(R_ARCH):\" \\\n      -e 's:@libsprivate:$(STATIC_LIBR_PC):' \\\n      -e 's:@others:$(MAIN_LDFLAGS) $(LDFLAGS):' \\\n      -e 's\/@VERSION\/$(VERSION)\/' $(srcdir)\/libR.pc.in \\\n      &gt; \"$(DESTDIR)$(libdir)\/pkgconfig\/libR.pc\"\n```\n\ncombines `MAIN_LDFLAGS` with `LDFLAGS` and sticks it into the \"Libs\" field of\nthe resulting `libR.pc` file. That's not what you want: `LDFLAGS` contains the\nuser's linker flags at this point, i.e. whatever they have in their environment\nvariable.\n\nThis has been reported as bug #17744 before and Gentoo removes the `LDFLAGS`\nwith a patch. On Ubuntu we started setting --package-metadata and ran into\n<https:\/\/launchpad.net\/bugs\/2138363>. The --package-metadata flag must not leak\ninto the pkg-config file.\n\nSo please allow distribution packagers to tweaking LDFLAGS used for pkg-config\nfile.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1768912172.981639",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "76MwZ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18992] New: please support tweaking LDFLAGS used for pkg-config file",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18992"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18992\n           Summary: please support tweaking LDFLAGS used for pkg-config\n                    file\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Installation\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:bdrung@debian.org",
+                                "text": "bdrung@debian.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nWhen building the pkg-config file for libR in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/unix\/Makefile.in",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", the\nfollowing stanza,\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "install-pc:\n    @$(MKINSTALLDIRS) \"$(DESTDIR)$(libdir)\/pkgconfig\"\n    -@$(SED) -e \"s:@rhome:$(rhome):\" \\\n      -e \"s:@rincludedir:$(rincludedir):\" \\\n      -e \"s:@rarch:$(R_ARCH):\" \\\n      -e 's:@libsprivate:$(STATIC_LIBR_PC):' \\\n      -e 's:@others:$(MAIN_LDFLAGS) $(LDFLAGS):' \\\n      -e 's\/@VERSION\/$(VERSION)\/' $(srcdir)\/libR.pc.in \\\n      > \"$(DESTDIR)$(libdir)\/pkgconfig\/libR.pc\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\ncombines "
+                            },
+                            {
+                                "type": "text",
+                                "text": "MAIN_LDFLAGS",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "LDFLAGS",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and sticks it into the \"Libs\" field of\nthe resulting "
+                            },
+                            {
+                                "type": "text",
+                                "text": "libR.pc",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " file. That's not what you want: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "LDFLAGS",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " contains the\nuser's linker flags at this point, i.e. whatever they have in their environment\nvariable.\n\nThis has been reported as bug #17744 before and Gentoo removes the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "LDFLAGS",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nwith a patch. On Ubuntu we started setting --package-metadata and ran into\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/launchpad.net\/bugs\/2138363"
+                            },
+                            {
+                                "type": "text",
+                                "text": ". The --package-metadata flag must not leak\ninto the pkg-config file.\n\nSo please allow distribution packagers to tweaking LDFLAGS used for pkg-config\nfile."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18992] please support tweaking LDFLAGS used for pkg-config file*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18992>\n\n--- Comment #1 from Benjamin Drung (<mailto:bdrung@debian.org|bdrung@debian.org>) ---\nCreated attachment 3598\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3598&amp;action=edit>\nintroduce LIBR_LDFLAGS environment variable",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1768912818.173689",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "eUwt",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18992] please support tweaking LDFLAGS used for pkg-config file",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18992"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Benjamin Drung ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:bdrung@debian.org",
+                                "text": "bdrung@debian.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3598\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3598&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3598&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nintroduce LIBR_LDFLAGS environment variable"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18993] New: do not ignore failure to create libR.pc*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18993>\n\n            Bug ID: 18993\n           Summary: do not ignore failure to create libR.pc\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Installation\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:bdrung@debian.org|bdrung@debian.org>\n\nSilently failing to create `libR.pc` will make debugging harder and is not what\ndownstream distributions want.\n\nThe sed command can fail in case one of the substitution strings contains the\nseparator. Instead of ignoring the failure, a separator character should be\npicked that is not part of the substitution string. `LDFLAGS` might contain `:`\nand fail.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1768913329.879099",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "mxI",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18993] New: do not ignore failure to create libR.pc",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18993"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18993\n           Summary: do not ignore failure to create libR.pc\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Installation\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:bdrung@debian.org",
+                                "text": "bdrung@debian.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSilently failing to create "
+                            },
+                            {
+                                "type": "text",
+                                "text": "libR.pc",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " will make debugging harder and is not what\ndownstream distributions want.\n\nThe sed command can fail in case one of the substitution strings contains the\nseparator. Instead of ignoring the failure, a separator character should be\npicked that is not part of the substitution string. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "LDFLAGS",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " might contain "
+                            },
+                            {
+                                "type": "text",
+                                "text": ":",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nand fail."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18993] do not ignore failure to create libR.pc*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18993>\n\n--- Comment #1 from Benjamin Drung (<mailto:bdrung@debian.org|bdrung@debian.org>) ---\nCreated attachment 3599\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3599&amp;action=edit>\ndo not ignore failure to create libR.pc",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1768913370.193269",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Sog0A",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18993] do not ignore failure to create libR.pc",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18993"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Benjamin Drung ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:bdrung@debian.org",
+                                "text": "bdrung@debian.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3599\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3599&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3599&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ndo not ignore failure to create libR.pc"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17136] Documentation for method=\"BY\" in p.adjust()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17136>\n\nMahjabin Oyshi (<mailto:oyshimahjabin3@gmail.com|oyshimahjabin3@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |oyshimahjabin3@gmail.com\n\n--- Comment #2 from Mahjabin Oyshi (<mailto:oyshimahjabin3@gmail.com|oyshimahjabin3@gmail.com>) ---\nCreated attachment 3600\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3600&amp;action=edit>\nClarify BY method documentation (harmonic correction and conservativeness).\n\nThis patch updates the documentation of the BY option in p.adjust(). The\nprevious text grouped BH and BY together and said they were ‘more powerful than\nthe others’, which is not accurate for BY. The new wording separates BH and BY,\nbriefly describes how BY modifies BH to handle general dependence, and\nclarifies that BY is much more conservative than BH and can even be more\nconservative than Bonferroni",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1768916228.087579",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "kWOKg",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17136] Documentation for method=\"BY\" in p.adjust()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17136"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMahjabin Oyshi ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:oyshimahjabin3@gmail.com",
+                                "text": "oyshimahjabin3@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |oyshimahjabin3@gmail.com\n\n--- Comment #2 from Mahjabin Oyshi ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:oyshimahjabin3@gmail.com",
+                                "text": "oyshimahjabin3@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3600\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3600&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3600&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nClarify BY method documentation (harmonic correction and conservativeness).\n\nThis patch updates the documentation of the BY option in p.adjust(). The\nprevious text grouped BH and BY together and said they were ‘more powerful than\nthe others’, which is not accurate for BY. The new wording separates BH and BY,\nbriefly describes how BY modifies BH to handle general dependence, and\nclarifies that BY is much more conservative than BH and can even be more\nconservative than Bonferroni"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17136] Documentation for method=\"BY\" in p.adjust()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17136>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n             Status|UNCONFIRMED                 |CONFIRMED\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #3 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nThank you, so now we got a 3rd iteration of John Maindonald's soon 10 year old\nproposal.   I assume R core has remained quiet for so long, because none of us\nfelt expert enough in the field to judge the different nuances.\nThe latest patch (Comment 2) uses somewhat too strong language I think\n(\"substantially\" \/ \"often\"), also separates \"BH\" from \"BY\" such that they are\ndescribed less jointly.NN\n\n\nJM's example showing that BY may be more conservative than even Bonferroni and\nhence is important to simply show why the current phrasing needs correction.\nIt also does mention \"Theorem 1.3\" (as patch #2) which I want to keep (as from\nJM's original patch).\n\nI plan to commit my \"mixture\" of your propositions within the next two days.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1768930780.145099",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "I+Uh",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17136] Documentation for method=\"BY\" in p.adjust()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17136"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n             Status|UNCONFIRMED                 |CONFIRMED\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #3 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you, so now we got a 3rd iteration of John Maindonald's soon 10 year old\nproposal.   I assume R core has remained quiet for so long, because none of us\nfelt expert enough in the field to judge the different nuances.\nThe latest patch (Comment 2) uses somewhat too strong language I think\n(\"substantially\" \/ \"often\"), also separates \"BH\" from \"BY\" such that they are\ndescribed less jointly.NN\n\n\n\nJM's example showing that BY may be more conservative than even Bonferroni and\nhence is important to simply show why the current phrasing needs correction.\nIt also does mention \"Theorem 1.3\" (as patch #2) which I want to keep (as from\nJM's original patch).\n\nI plan to commit my \"mixture\" of your propositions within the next two days."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16750] Treat character as factor in summary.default*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16750>\n\n--- Comment #8 from Elin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) ---\nI think this is good. It is very similar to what we ended up with for\ncharacters in skimr. We include more by default, but that doesn't make sense in\nthe context of `summary()`. As mentioned,for example, we do count the number of\nwhitespace strings\n\nI think this proposal is good for base R, and the number of statistics is\nsimilar to that for other classes. And then it's up to the user to decide if\nthe character vector should really be a factor vector.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1768940020.902469",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "jawsm",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16750] Treat character as factor in summary.default",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16750"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #8 from Elin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI think this is good. It is very similar to what we ended up with for\ncharacters in skimr. We include more by default, but that doesn't make sense in\nthe context of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "summary()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". As mentioned,for example, we do count the number of\nwhitespace strings\n\nI think this proposal is good for base R, and the number of statistics is\nsimilar to that for other classes. And then it's up to the user to decide if\nthe character vector should really be a factor vector."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

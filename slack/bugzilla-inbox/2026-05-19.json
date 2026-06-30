@@ -1,0 +1,414 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19036] model.matrix(fit, newdata) doesn't respect factors levels from glm fit but does for lm*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19036>\n\n--- Comment #3 from Mauricio Vargas (<mailto:mvargassepulveda@gmail.com|mvargassepulveda@gmail.com>) ---\nCreated attachment 3699\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3699&amp;action=edit>\nPatch for 19036 (GLM)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1779189596.795479",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "yUsM",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19036] model.matrix(fit, newdata) doesn't respect factors levels from glm fit but does for lm",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19036"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Mauricio Vargas ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:mvargassepulveda@gmail.com",
+                                "text": "mvargassepulveda@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3699\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3699&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3699&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch for 19036 (GLM)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19036] model.matrix(fit, newdata) doesn't respect factors levels from glm fit but does for lm*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19036>\n\n--- Comment #4 from Mauricio Vargas (<mailto:mvargassepulveda@gmail.com|mvargassepulveda@gmail.com>) ---\nI added a patch using the instructions I read in 18693",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1779189700.894899",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "12A9s",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19036] model.matrix(fit, newdata) doesn't respect factors levels from glm fit but does for lm",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19036"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Mauricio Vargas ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:mvargassepulveda@gmail.com",
+                                "text": "mvargassepulveda@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI added a patch using the instructions I read in 18693"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17549] When building a package, use inRbuildignore() before copying package contents to Tdir*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17549>\n\nKurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |Kurt.Hornik@wu.ac.at\n\n--- Comment #5 from Kurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) ---\nA few comments.\n\n* This might be a nice task for one of the upcoming R Dev Days (and I\n  could imagine joining the task force).\n\n* What should not be too hard is ignoring things at top level (do dir()\n  there, drop elts matched from .Rbuildignore, then loop over what is\n  left).  \n\n  This would work in my use cases, where I tend to have a sometimes big\n  Work subdir which I always have in .Rbuildignore.\n\n  Others may do this differently.  Hard to know on the CRAN end because\n  we don't see what gets ignored.  A useful subtask may be extracting\n  the .Rbuildignore files for all CRAN package github repos.\n\n* One could perhaps try to put the \n\n        ## remove exclude files\n        allfiles &lt;- dir(\".\", all.files = TRUE, recursive = TRUE,\n                        full.names = TRUE, include.dirs = TRUE)\n        ....\n\n  part of the build code into a separate function and optionally run it\n  ahead of copying, and then compare performance.  Note that the\n  non-windows part of the build code does\n\n            ## This should preserve dates and permissions (subject to\n            ## umask, if that is consulted which it seems it usually is not).\n            ## Permissions are increased later.\n            ## -L is to follow (de-reference) symlinks\n            ## --preserve is GNU only: at least macOS, FreeBSD and Solaris\n            ##   have non-GNU cp's as it seems do some Linuxen.\n            ver &lt;- suppressWarnings(system2(\"cp\", \"--version\", stdout = TRUE,\n                                            stderr = FALSE))\n            GNU_cp &lt;- any(grepl(\"GNU coreutils\", ver))\n            cp_sw &lt;- if(GNU_cp) \"-LR --preserve=timestamps\" else \"-pLR\"\n\n  so I am not sure if file.copy(recursive = TRUE) would be good enough.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1779196937.068849",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "WLc5",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17549] When building a package, use inRbuildignore() before copying package contents to Tdir",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17549"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nKurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |Kurt.Hornik@wu.ac.at\n\n--- Comment #5 from Kurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nA few comments.\n\n* This might be a nice task for one of the upcoming R Dev Days (and I\n  could imagine joining the task force).\n\n* What should not be too hard is ignoring things at top level (do dir()\n  there, drop elts matched from .Rbuildignore, then loop over what is\n  left).  \n\n  This would work in my use cases, where I tend to have a sometimes big\n  Work subdir which I always have in .Rbuildignore.\n\n  Others may do this differently.  Hard to know on the CRAN end because\n  we don't see what gets ignored.  A useful subtask may be extracting\n  the .Rbuildignore files for all CRAN package github repos.\n\n* One could perhaps try to put the \n\n        ## remove exclude files\n        allfiles <- dir(\".\", all.files = TRUE, recursive = TRUE,\n                        full.names = TRUE, include.dirs = TRUE)\n        ....\n\n  part of the build code into a separate function and optionally run it\n  ahead of copying, and then compare performance.  Note that the\n  non-windows part of the build code does\n\n            ## This should preserve dates and permissions (subject to\n            ## umask, if that is consulted which it seems it usually is not).\n            ## Permissions are increased later.\n            ## -L is to follow (de-reference) symlinks\n            ## --preserve is GNU only: at least macOS, FreeBSD and Solaris\n            ##   have non-GNU cp's as it seems do some Linuxen.\n            ver <- suppressWarnings(system2(\"cp\", \"--version\", stdout = TRUE,\n                                            stderr = FALSE))\n            GNU_cp <- any(grepl(\"GNU coreutils\", ver))\n            cp_sw <- if(GNU_cp) \"-LR --preserve=timestamps\" else \"-pLR\"\n\n  so I am not sure if file.copy(recursive = TRUE) would be good enough."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19074] parallel::makeCluster(&lt;cluster&gt;, type = \"PSOCK\") does not give an error*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19074>\n\nKevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |kevinushey@gmail.com\n\n--- Comment #1 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nI dug into this. The PSOCK case isn't intentionally accepting a cluster -- it's\njust that nothing validates names\nin makePSOCKcluster, and the cluster's internal structure happens to satisfy a\ncode path that was meant for\nsomething else.\n\nSpecifically: with cl (a SOCKcluster, i.e. a list of SOCKnode objects) passed\nas names:\n\n- is.numeric(names) is FALSE, so the integer branch at snowSOCK.R:164 is\nskipped.\n- local is FALSE, so the sequential else-branch at snowSOCK.R:246-251 runs:\nfor (i in seq_along(cl))\n    cl[[i]] &lt;- newPSOCKnode(names[[i]], options = options, rank = i)\n- Each names[[i]] is a SOCKnode, which is a list. In newPSOCKnode\n(snowSOCK.R:87-90):\nif (is.list(machine)) {\n    options &lt;- addClusterOptions(options, machine)\n    machine &lt;- machine$host\n}\n- That branch was inherited from snow to support per-host option lists like\nlist(host = \"foo\", port = 1234, ...). A\n SOCKnode happens to be a list with a $host element (\"localhost\"), so it slips\nthrough and a fresh worker is\nlaunched on localhost.\n\nNet effect: a brand-new, independent cluster of the same node count is created;\nthe original cl is left alive. So\nmakeCluster(cl) silently leaks an entire second cluster.\n\nFORK and MPI fail fast only because their starters coerce eagerly --\nmakeForkCluster does as.integer(nnodes) at the\n top (forkCluster.R:24) and snow's makeMPIcluster does similarly with\nas.double(). makePSOCKcluster has no\nequivalent sanity check.\n\nSo yes, this should be an error. Two ways to fix it, depending on how broad we\nwant to be.\n\nOption A: narrow check\n\nJust reject inputs that already inherit from \"cluster\". Minimal, covers the\nreported case uniformly across all\ntypes:\n\n```\nIndex: src\/library\/parallel\/R\/snow.R\n===================================================================\n--- src\/library\/parallel\/R\/snow.R     (revision 89220)\n+++ src\/library\/parallel\/R\/snow.R     (working copy)\n@@ -169,6 +169,8 @@\n makeCluster &lt;-\n     function (spec, type = getClusterOption(\"type\"), ...)\n {\n+    if (inherits(spec, \"cluster\"))\n+        stop(\"'spec' is already a cluster object\")\n     switch(type,\n            PSOCK = makePSOCKcluster(names = spec, ...),\n            FORK = makeForkCluster(nnodes = spec, ...),\n\nIndex: src\/library\/parallel\/R\/snowSOCK.R\n===================================================================\n--- src\/library\/parallel\/R\/snowSOCK.R (revision 89220)\n+++ src\/library\/parallel\/R\/snowSOCK.R (working copy)\n@@ -152,6 +152,8 @@\n\n makePSOCKcluster &lt;- function(names, ...)\n {\n+    if (inherits(names, \"cluster\"))\n+        stop(\"'names' is already a cluster object\")\n     options &lt;- addClusterOptions(defaultClusterOptions, list(...))\n     manual &lt;- getClusterOption(\"manual\", options)\n     homogeneous &lt;- getClusterOption(\"homogeneous\", options)\n```\n\nOption B: positively validate spec\/names\n\nSame fix for the cluster case, but also catches other unexpected values (NULL,\ndata.frame, environment, ...) with a clear\nmessage. The trick that lets us preserve the (undocumented) PSOCK\nlist-of-host-specs form while still rejecting\ncluster objects is is.null(oldClass(x)) -- a SOCKcluster\/SOCKnode has a class\nattribute, a hand-written host spec\nlist (list(host = ..., port = ..., ...)) does not.\n\n```\nIndex: src\/library\/parallel\/R\/snow.R\n===================================================================\n--- src\/library\/parallel\/R\/snow.R     (revision 89220)\n+++ src\/library\/parallel\/R\/snow.R     (working copy)\n@@ -169,6 +169,10 @@\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1779217819.756039",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "HrZE",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19074] parallel::makeCluster(<cluster>, type = \"PSOCK\") does not give an error",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19074"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nKevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |kevinushey@gmail.com\n\n--- Comment #1 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI dug into this. The PSOCK case isn't intentionally accepting a cluster -- it's\njust that nothing validates names\nin makePSOCKcluster, and the cluster's internal structure happens to satisfy a\ncode path that was meant for\nsomething else.\n\nSpecifically: with cl (a SOCKcluster, i.e. a list of SOCKnode objects) passed\nas names:\n\n- is.numeric(names) is FALSE, so the integer branch at snowSOCK.R:164 is\nskipped.\n- local is FALSE, so the sequential else-branch at snowSOCK.R:246-251 runs:\nfor (i in seq_along(cl))\n    cl[[i]] <- newPSOCKnode(names[[i]], options = options, rank = i)\n- Each names[[i]] is a SOCKnode, which is a list. In newPSOCKnode\n(snowSOCK.R:87-90):\nif (is.list(machine)) {\n    options <- addClusterOptions(options, machine)\n    machine <- machine$host\n}\n- That branch was inherited from snow to support per-host option lists like\nlist(host = \"foo\", port = 1234, ...). A\n SOCKnode happens to be a list with a $host element (\"localhost\"), so it slips\nthrough and a fresh worker is\nlaunched on localhost.\n\nNet effect: a brand-new, independent cluster of the same node count is created;\nthe original cl is left alive. So\nmakeCluster(cl) silently leaks an entire second cluster.\n\nFORK and MPI fail fast only because their starters coerce eagerly --\nmakeForkCluster does as.integer(nnodes) at the\n top (forkCluster.R:24) and snow's makeMPIcluster does similarly with\nas.double(). makePSOCKcluster has no\nequivalent sanity check.\n\nSo yes, this should be an error. Two ways to fix it, depending on how broad we\nwant to be.\n\nOption A: narrow check\n\nJust reject inputs that already inherit from \"cluster\". Minimal, covers the\nreported case uniformly across all\ntypes:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/parallel\/R\/snow.R\n===================================================================\n--- src\/library\/parallel\/R\/snow.R     (revision 89220)\n+++ src\/library\/parallel\/R\/snow.R     (working copy)\n@@ -169,6 +169,8 @@\n makeCluster <-\n     function (spec, type = getClusterOption(\"type\"), ...)\n {\n+    if (inherits(spec, \"cluster\"))\n+        stop(\"'spec' is already a cluster object\")\n     switch(type,\n            PSOCK = makePSOCKcluster(names = spec, ...),\n            FORK = makeForkCluster(nnodes = spec, ...),\n\nIndex: src\/library\/parallel\/R\/snowSOCK.R\n===================================================================\n--- src\/library\/parallel\/R\/snowSOCK.R (revision 89220)\n+++ src\/library\/parallel\/R\/snowSOCK.R (working copy)\n@@ -152,6 +152,8 @@\n\n makePSOCKcluster <- function(names, ...)\n {\n+    if (inherits(names, \"cluster\"))\n+        stop(\"'names' is already a cluster object\")\n     options <- addClusterOptions(defaultClusterOptions, list(...))\n     manual <- getClusterOption(\"manual\", options)\n     homogeneous <- getClusterOption(\"homogeneous\", options)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nOption B: positively validate spec\/names\n\nSame fix for the cluster case, but also catches other unexpected values (NULL,\ndata.frame, environment, ...) with a clear\nmessage. The trick that lets us preserve the (undocumented) PSOCK\nlist-of-host-specs form while still rejecting\ncluster objects is is.null(oldClass(x)) -- a SOCKcluster\/SOCKnode has a class\nattribute, a hand-written host spec\nlist (list(host = ..., port = ..., ...)) does not.\n\n```\nIndex: src\/library\/parallel\/R\/snow.R\n===================================================================\n--- src\/library\/parallel\/R\/snow.R     (revision 89220)\n+++ src\/library\/parallel\/R\/snow.R     (working copy)\n@@ -169,6 +169,10 @@"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": " makeCluster &lt;-\n     function (spec, type = getClusterOption(\"type\"), ...)\n {\n+    if (!(is.numeric(spec) || is.character(spec) ||\n+          (is.list(spec) &amp;&amp; is.null(oldClass(spec)))))\n+        stop(\"'spec' must be a numeric count, a character vector \",\n+             \"of host names, or a list of host specifications\")\n     switch(type,\n            PSOCK = makePSOCKcluster(names = spec, ...),\n            FORK = makeForkCluster(nnodes = spec, ...),\n\nIndex: src\/library\/parallel\/R\/snowSOCK.R\n===================================================================\n--- src\/library\/parallel\/R\/snowSOCK.R (revision 89220)\n+++ src\/library\/parallel\/R\/snowSOCK.R (working copy)\n@@ -152,6 +152,15 @@\n\n makePSOCKcluster &lt;- function(names, ...)\n {\n+    ok &lt;- is.numeric(names) || is.character(names)\n+    if (!ok &amp;&amp; is.list(names) &amp;&amp; is.null(oldClass(names)))\n+        ok &lt;- all(vapply(names, function(el)\n+                         is.character(el) ||\n+                             (is.list(el) &amp;&amp; is.null(oldClass(el))),\n+                         logical(1)))\n+    if (!ok)\n+        stop(\"'names' must be a numeric count, a character vector \",\n+             \"of host names, or a list of host specifications\")\n     options &lt;- addClusterOptions(defaultClusterOptions, list(...))\n     manual &lt;- getClusterOption(\"manual\", options)\n     homogeneous &lt;- getClusterOption(\"homogeneous\", options)\n```\n\nI'd lean toward B since the cryptic 'list' object cannot be coerced to type\n'integer' from FORK is also a smell,\nand a single check at makeCluster cleans that up too. But A is much smaller if\nwe want to keep the patch minimal.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1779217819.779989",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "bAZ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "makeCluster <-\n     function (spec, type = getClusterOption(\"type\"), ...)\n {\n+    if (!(is.numeric(spec) || is.character(spec) ||\n+          (is.list(spec) && is.null(oldClass(spec)))))\n+        stop(\"'spec' must be a numeric count, a character vector \",\n+             \"of host names, or a list of host specifications\")\n     switch(type,\n            PSOCK = makePSOCKcluster(names = spec, ...),\n            FORK = makeForkCluster(nnodes = spec, ...),\n\nIndex: src\/library\/parallel\/R\/snowSOCK.R\n===================================================================\n--- src\/library\/parallel\/R\/snowSOCK.R (revision 89220)\n+++ src\/library\/parallel\/R\/snowSOCK.R (working copy)\n@@ -152,6 +152,15 @@\n\n makePSOCKcluster <- function(names, ...)\n {\n+    ok <- is.numeric(names) || is.character(names)\n+    if (!ok && is.list(names) && is.null(oldClass(names)))\n+        ok <- all(vapply(names, function(el)\n+                         is.character(el) ||\n+                             (is.list(el) && is.null(oldClass(el))),\n+                         logical(1)))\n+    if (!ok)\n+        stop(\"'names' must be a numeric count, a character vector \",\n+             \"of host names, or a list of host specifications\")\n     options <- addClusterOptions(defaultClusterOptions, list(...))\n     manual <- getClusterOption(\"manual\", options)\n     homogeneous <- getClusterOption(\"homogeneous\", options)\n```\n\nI'd lean toward B since the cryptic 'list' object cannot be coerced to type\n'integer' from FORK is also a smell,\nand a single check at makeCluster cleans that up too. But A is much smaller if\nwe want to keep the patch minimal."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18364] Initializing Column Improper Length*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18364>\n\nGabriel Becker (<mailto:gabembecker@gmail.com|gabembecker@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |gabembecker@gmail.com\n     Ever confirmed|0                           |1\n             Status|UNCONFIRMED                 |TRIAGED\n\n--- Comment #3 from Gabriel Becker (<mailto:gabembecker@gmail.com|gabembecker@gmail.com>) ---\nThis seems consistent with the behavior of a vector outside of a data.frame\ncontext, and thus I'd argue it's \"correct\", if - as indicated - somewhat\nunintuitive\/unlikely to be intentional:\n\n```\n[1]  1  2  3 NA  7  7\n```\n\nIn more detail, the way I figure it is that either\n\n1. The length of a new column is initialized to the `NROW(df)`\n2. subassignment of the new column occurs with behavior as above\n3. the new column is added to `df`\n\nOR\n\n1. The new column is added to `df` as a vector of all `NA`s\n2. subassignment into the new column occurs\n\nBoth mental models would result in the same ultimate behavior here, which is\nwhat R currently does.\n\nI suggest we close this issue as wontfix.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1779231595.756609",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "g=gQ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18364] Initializing Column Improper Length",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18364"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nGabriel Becker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:gabembecker@gmail.com",
+                                "text": "gabembecker@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |gabembecker@gmail.com\n     Ever confirmed|0                           |1\n             Status|UNCONFIRMED                 |TRIAGED\n\n--- Comment #3 from Gabriel Becker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:gabembecker@gmail.com",
+                                "text": "gabembecker@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThis seems consistent with the behavior of a vector outside of a data.frame\ncontext, and thus I'd argue it's \"correct\", if - as indicated - somewhat\nunintuitive\/unlikely to be intentional:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[1]  1  2  3 NA  7  7\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIn more detail, the way I figure it is that either\n\n1. The length of a new column is initialized to the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NROW(df)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n2. subassignment of the new column occurs with behavior as above\n3. the new column is added to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "df",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nOR\n\n1. The new column is added to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "df",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as a vector of all "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "s\n2. subassignment into the new column occurs\n\nBoth mental models would result in the same ultimate behavior here, which is\nwhat R currently does.\n\nI suggest we close this issue as wontfix."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

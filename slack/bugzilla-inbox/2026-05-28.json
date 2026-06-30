@@ -1,0 +1,1013 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19015] R segmentation fault in Windows with empty -e argument*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19015>\n\n--- Comment #3 from Trevor Davis (<mailto:trevor.l.davis@gmail.com|trevor.l.davis@gmail.com>) ---\nCreated attachment 3713\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3713&amp;action=edit>\nBill Denney's original patch reformatted as an svn patch\n\nComments contained from Bill Denney's original patch\n\n&gt; Fix: R_Suicide segfault when called before callback pointers are initialized\n&gt;\n&gt; On Windows, several callback dispatch functions (R_Suicide, R_ShowMessage,\nR_CleanUp) unconditionally dereference function pointers (ptr_Suicide,\nptr_ShowMessage, ptr_CleanUp) that are NULL until R_SetParams() runs.\nR_SetParams() is called near the end of cmdlineoptions() (line 1352), but\nR_Suicide() is called during option parsing (e.g. line 1293 for an empty -e\nexpression), causing a NULL function pointer dereference\n(STATUS_ACCESS_VIOLATION \/ 0xC0000005).\n&gt;\n&gt; The same latent bug exists on Unix: ptr_R_Suicide, ptr_R_ShowMessage, and ptr_R_CleanUp are set in Rf_initialize_R() (lines 313-321), but R_Suicide is called at line 292 (Solaris thr_stksegment failure) before initialization. The Unix code already uses NULL guards in some dispatch functions (R_WriteConsole and R_WriteConsoleEx at lines 77-78), but not in R_Suicide, R_ShowMessage, or R_CleanUp.\n&gt;\n&gt; The fix adds NULL guards with stderr fallbacks to all affected dispatch functions on both platforms, following the pattern already established by R_WriteConsole on Unix.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1779994953.084819",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "qOXh",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19015] R segmentation fault in Windows with empty -e argument",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19015"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Trevor Davis ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:trevor.l.davis@gmail.com",
+                                "text": "trevor.l.davis@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3713\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3713&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3713&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nBill Denney's original patch reformatted as an svn patch\n\nComments contained from Bill Denney's original patch\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Fix: R_Suicide segfault when called before callback pointers are initialized\n\n On Windows, several callback dispatch functions (R_Suicide, R_ShowMessage,"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "R_CleanUp) unconditionally dereference function pointers (ptr_Suicide,\nptr_ShowMessage, ptr_CleanUp) that are NULL until R_SetParams() runs.\nR_SetParams() is called near the end of cmdlineoptions() (line 1352), but\nR_Suicide() is called during option parsing (e.g. line 1293 for an empty -e\nexpression), causing a NULL function pointer dereference\n(STATUS_ACCESS_VIOLATION \/ 0xC0000005).\n>"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "The same latent bug exists on Unix: ptr_R_Suicide, ptr_R_ShowMessage, and ptr_R_CleanUp are set in Rf_initialize_R() (lines 313-321), but R_Suicide is called at line 292 (Solaris thr_stksegment failure) before initialization. The Unix code already uses NULL guards in some dispatch functions (R_WriteConsole and R_WriteConsoleEx at lines 77-78), but not in R_Suicide, R_ShowMessage, or R_CleanUp.\n\n The fix adds NULL guards with stderr fallbacks to all affected dispatch functions on both platforms, following the pattern already established by R_WriteConsole on Unix."
+                            }
+                        ],
+                        "contains_padding": true
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 7195] additional examples for R-intro.texi*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=7195>\n\nLlu�s (<mailto:lluis.revilla@gmail.com|lluis.revilla@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |lluis.revilla@gmail.com\n\n--- Comment #2 from Llu�s (<mailto:lluis.revilla@gmail.com|lluis.revilla@gmail.com>) ---\nCreated attachment 3714\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3714&amp;action=edit>\nUpdate of the patch\n\nI updated the patch, dropping one code block that in my opinion wasn't good. \nI think some of the changes have their merit to make it easier for new readers. \nFor example, it replaces some \"magic numbers\" with the output of the model\nbeing explained. \n\nBut this is not a big deal if the report is closed without further action.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1780003367.976879",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "B0M5",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 7195] additional examples for R-intro.texi",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=7195"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nLlu�s ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:lluis.revilla@gmail.com",
+                                "text": "lluis.revilla@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |lluis.revilla@gmail.com\n\n--- Comment #2 from Llu�s ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:lluis.revilla@gmail.com",
+                                "text": "lluis.revilla@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3714\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3714&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3714&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nUpdate of the patch\n\nI updated the patch, dropping one code block that in my opinion wasn't good. \nI think some of the changes have their merit to make it easier for new readers. \nFor example, it replaces some \"magic numbers\" with the output of the model\nbeing explained. \n\nBut this is not a big deal if the report is closed without further action."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 7195] additional examples for R-intro.texi*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=7195>\n\n--- Comment #3 from Llu�s (<mailto:lluis.revilla@gmail.com|lluis.revilla@gmail.com>) ---\nCreated attachment 3715\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3715&amp;action=edit>\nCorrect patch\n\nApologies, the diff was reversed and I didn't realize before submitting.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1780003774.350059",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Kmd",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 7195] additional examples for R-intro.texi",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=7195"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Llu�s ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:lluis.revilla@gmail.com",
+                                "text": "lluis.revilla@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3715\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3715&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3715&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCorrect patch\n\nApologies, the diff was reversed and I didn't realize before submitting."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19079] New: S4 packages with group methods error with \"subscript out of bounds\" under unloadNamespace with Imports: methods*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19079>\n\n            Bug ID: 19079\n           Summary: S4 packages with group methods error with \"subscript\n                    out of bounds\" under unloadNamespace with Imports:\n                    methods\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: NEW\n          Severity: minor\n          Priority: P5\n         Component: S4methods\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>\n\nCreated attachment 3716\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3716&amp;action=edit>\nPrevent uncaching \"other\" packages' generics\n\nSimilar to Bug #18540, I found that the CRAN package {spam} fails to unload\nbecause it uses `Imports: methods` instead of `Depends: methods`:\n\n```\nR_DEFAULT_PACKAGES=NULL Rscript -e \"loadNamespace('spam');\nunloadNamespace('spam')\"\n# &lt;environment: namespace:spam&gt;\n# Error in generics[[i]] : subscript out of bounds\n# Calls: unloadNamespace ... .updateMethodsInTable -&gt; .updateMethodsInTable -&gt;\n.checkGroupSigLength\n# Execution halted\n```\n\nAs discussed there and added in r84688 to WRE, as of now it's generally\nencouraged to just use `Depends: methods` for S4 packages to work around such\nissues.\n\nNevertheless, the bug is quite hard to make sense of, so a fix would be nice.\n\nI deployed a friendly LLM (Gemini) to diagnose and fix the issue, and it wrote\na very simple fix, as attached here with a corresponding regression test. Its\ninternal reasoning to the root cause is as follows:\n\n---\n\nThe crash is a result of over-eager uncaching combined with R-specific list\nbehaviors:\n\n1.  **Over-eager Uncaching**: When `unloadNamespace(\"myTstS4\")` runs, it calls\n`methods::cacheMetaData(ns, FALSE, ns)` to clean up S4 metadata.\n    *   Inside `cacheMetaData`, it loops over all generics the package has\nmethods for.\n    *   If `attach = FALSE` (detaching\/unloading), it calls `.uncacheGeneric(f,\nfdef)` for **all** these generics, even if they belong to other packages (e.g.,\nbase generics like `Math` or `Ops` defined in `base`\/`methods`).\n    *   This completely deletes the generic (e.g., `Math`) from the `methods`\ninternal cache (`.genericTable`).\n\n2.  **Cache Miss in Minimal Session**: Later, `.updateMethodsInTable` is called\nto remove the package's methods from the generic.\n    *   For a group generic (like `Math`), it loops over its members (e.g.,\n`abs`).\n    *   For each member, it calls `.updateMethodsInTable(abs_generic)`.\n    *   Since `abs` belongs to group `Math`, it calls `getGeneric(\"Math\")` to\nverify signature lengths in `.checkGroupSigLength`.\n    *   Since `Math` was just removed from the cache, and `methods` is not\nattached (so it is not on the search path), `getGeneric(\"Math\")` fails to find\nit and silently returns `NULL`.\n\n3.  **R List Assignment &amp; `unlist()` Gotcha**:\n    *   In `.updateMethodsInTable`, the list of generics is constructed:\n        ```\n        generics &lt;- vector(\"list\", length(groups))\n        for(i in seq_along(groups))\n            generics[[i]] &lt;- getGeneric(groups[[i]])\n        ```\n    *   If `getGeneric` returns `NULL`, the assignment `generics[[i]] &lt;- NULL`\n**deletes** the element from the list, reducing the list's length (e.g., from 1\nto 0).\n    *   Inside `.checkGroupSigLength`, when `recall` is triggered, it calls\n`Recall(unlist(gnames, FALSE), unlist(generics, FALSE))`.\n    *   `unlist()` silently drops `NULL` elements from lists.\n    *   This causes the `generics` list to become shorter than the `gnames`\nlist.\n    *   In the recursive call, the loop `for(i in seq_along(gnames))` attempts\nto access `generics[[i]]` where `i` is out of bounds, triggering the `subscript\nout of bounds` crash.\n\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1780011033.400339",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "V3rQ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19079] New: S4 packages with group methods error with \"subscript out of bounds\" under unloadNamespace with Imports: methods",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19079"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19079\n           Summary: S4 packages with group methods error with \"subscript\n                    out of bounds\" under unloadNamespace with Imports:\n                    methods\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: NEW\n          Severity: minor\n          Priority: P5\n         Component: S4methods\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3716\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3716&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3716&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPrevent uncaching \"other\" packages' generics\n\nSimilar to Bug #18540, I found that the CRAN package {spam} fails to unload\nbecause it uses "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Imports: methods",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " instead of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Depends: methods",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "R_DEFAULT_PACKAGES=NULL Rscript -e \"loadNamespace('spam');\nunloadNamespace('spam')\"\n# <environment: namespace:spam>\n# Error in generics[[i]] : subscript out of bounds\n# Calls: unloadNamespace ... .updateMethodsInTable -> .updateMethodsInTable ->\n.checkGroupSigLength\n# Execution halted\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nAs discussed there and added in r84688 to WRE, as of now it's generally\nencouraged to just use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Depends: methods",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for S4 packages to work around such\nissues.\n\nNevertheless, the bug is quite hard to make sense of, so a fix would be nice.\n\nI deployed a friendly LLM (Gemini) to diagnose and fix the issue, and it wrote\na very simple fix, as attached here with a corresponding regression test. Its\ninternal reasoning to the root cause is as follows:\n\n---\n\nThe crash is a result of over-eager uncaching combined with R-specific list\nbehaviors:\n\n1.  **Over-eager Uncaching**: When "
+                            },
+                            {
+                                "type": "text",
+                                "text": "unloadNamespace(\"myTstS4\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " runs, it calls\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods::cacheMetaData(ns, FALSE, ns)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to clean up S4 metadata.\n    *   Inside "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cacheMetaData",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", it loops over all generics the package has\nmethods for.\n    *   If "
+                            },
+                            {
+                                "type": "text",
+                                "text": "attach = FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (detaching\/unloading), it calls `.uncacheGeneric(f,\nfdef)` for **all** these generics, even if they belong to other packages (e.g.,\nbase generics like "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Math",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Ops",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " defined in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "base",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\n    *   This completely deletes the generic (e.g., "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Math",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") from the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ninternal cache ("
+                            },
+                            {
+                                "type": "text",
+                                "text": ".genericTable",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\n\n2.  **Cache Miss in Minimal Session**: Later, "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".updateMethodsInTable",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is called\nto remove the package's methods from the generic.\n    *   For a group generic (like "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Math",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), it loops over its members (e.g.,\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "abs",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\n    *   For each member, it calls "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".updateMethodsInTable(abs_generic)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n    *   Since "
+                            },
+                            {
+                                "type": "text",
+                                "text": "abs",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " belongs to group "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Math",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", it calls "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getGeneric(\"Math\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to\nverify signature lengths in "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".checkGroupSigLength",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n    *   Since "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Math",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " was just removed from the cache, and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is not\nattached (so it is not on the search path), "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getGeneric(\"Math\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " fails to find\nit and silently returns "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n3.  **R List Assignment & "
+                            },
+                            {
+                                "type": "text",
+                                "text": "unlist()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " Gotcha**:\n    *   In "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".updateMethodsInTable",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", the list of generics is constructed:\n        "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "        generics <- vector(\"list\", length(groups))\n        for(i in seq_along(groups))\n            generics[[i]] <- getGeneric(groups[[i]])\n        "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "    *   If "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getGeneric",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " returns "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", the assignment "
+                            },
+                            {
+                                "type": "text",
+                                "text": "generics[[i]] <- NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n**deletes** the element from the list, reducing the list's length (e.g., from 1\nto 0).\n    *   Inside "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".checkGroupSigLength",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", when "
+                            },
+                            {
+                                "type": "text",
+                                "text": "recall",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is triggered, it calls\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "Recall(unlist(gnames, FALSE), unlist(generics, FALSE))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n    *   "
+                            },
+                            {
+                                "type": "text",
+                                "text": "unlist()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " silently drops "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " elements from lists.\n    *   This causes the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "generics",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " list to become shorter than the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "gnames",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nlist.\n    *   In the recursive call, the loop "
+                            },
+                            {
+                                "type": "text",
+                                "text": "for(i in seq_along(gnames))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " attempts\nto access "
+                            },
+                            {
+                                "type": "text",
+                                "text": "generics[[i]]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " where "
+                            },
+                            {
+                                "type": "text",
+                                "text": "i",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is out of bounds, triggering the `subscript\nout of bounds` crash."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "The fix restricts uncaching to only those generics that actually belong to the\npackage being unloaded.\n\n---\n\nEven if the suggested fix is found deficient, I hope this diagnosis points the\nway to a fix.\n\nThis is tested on r-svn: <https:\/\/github.com\/r-devel\/r-svn\/pull\/258>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1780011033.419779",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "JfRBK",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "The fix restricts uncaching to only those generics that actually belong to the\npackage being unloaded.\n\n---\n\nEven if the suggested fix is found deficient, I hope this diagnosis points the\nway to a fix.\n\nThis is tested on r-svn: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/pull\/258"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19079] S4 packages with group methods error with \"subscript out of bounds\" under unloadNamespace with Imports: methods*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19079>\n\nMichael Lawrence (<mailto:lawremi@gmail.com|lawremi@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |lawremi@gmail.com\n\n--- Comment #1 from Michael Lawrence (<mailto:lawremi@gmail.com|lawremi@gmail.com>) ---\nThanks for the report and the suggested fix.\n\nOne thing to watch out for with S4 generics is that `@package` points to the\npackage defining the function that the generic represents. So for example if a\npackage does `setGeneric(\"nrow\", ...)`, `@package` will be \"base\", and with\nthis fix, the `nrow()` methods would remain. \n\nWhy not see what your friend does with that feedback :)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1780015158.722079",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "fWqq",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19079] S4 packages with group methods error with \"subscript out of bounds\" under unloadNamespace with Imports: methods",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19079"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMichael Lawrence ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:lawremi@gmail.com",
+                                "text": "lawremi@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |lawremi@gmail.com\n\n--- Comment #1 from Michael Lawrence ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:lawremi@gmail.com",
+                                "text": "lawremi@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for the report and the suggested fix.\n\nOne thing to watch out for with S4 generics is that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "@package",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " points to the\npackage defining the function that the generic represents. So for example if a\npackage does "
+                            },
+                            {
+                                "type": "text",
+                                "text": "setGeneric(\"nrow\", ...)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "@package",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " will be \"base\", and with\nthis fix, the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nrow()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " methods would remain. \n\nWhy not see what your friend does with that feedback :)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19079] S4 packages with group methods error with \"subscript out of bounds\" under unloadNamespace with Imports: methods*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19079>\n\nMichael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3716|0                           |1\n        is obsolete|                            |\n\n--- Comment #2 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nCreated attachment 3717\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3717&amp;action=edit>\nUpdated patch for unloading generics without methods to handle e.g. base\ngenerics better\n\nGreat point! I was content to just let the unload process only finish partially\nin that case, but indeed our friend was able to push further by looking for the\ndefinition in the correct environment.\n\nUpdated here and on GitHub with a new test case ensuring `nrow()` reverts to\nnon-generic after unloading the test package: `stopifnot(!isGeneric('nrow'))`",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1780036114.145759",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Ac2",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19079] S4 packages with group methods error with \"subscript out of bounds\" under unloadNamespace with Imports: methods",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19079"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMichael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3716|0                           |1\n        is obsolete|                            |\n\n--- Comment #2 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3717\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3717&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3717&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nUpdated patch for unloading generics without methods to handle e.g. base\ngenerics better\n\nGreat point! I was content to just let the unload process only finish partially\nin that case, but indeed our friend was able to push further by looking for the\ndefinition in the correct environment.\n\nUpdated here and on GitHub with a new test case ensuring "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nrow()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " reverts to\nnon-generic after unloading the test package: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "stopifnot(!isGeneric('nrow'))",
+                                "style": {
+                                    "code": true
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

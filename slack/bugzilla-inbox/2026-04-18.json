@@ -1,0 +1,348 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18989] Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989>\n\n--- Comment #18 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\n(In reply to Suharto Anggono from comment #16)\n\nThank you, Suharto. Indeed, the differences you explored and summarized here\nare very useful to me,  and revealing of the effects.\n\nI'm no exploring these, notably with the  \"floor sec before as.POSIXct\"\nchange to R-devel you had proposed.\n\nI will get back here within a few days I hope.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776527852.215619",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "vENQ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18989] Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #18 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Suharto Anggono from comment #16)\n\nThank you, Suharto. Indeed, the differences you explored and summarized here\nare very useful to me,  and revealing of the effects.\n\nI'm no exploring these, notably with the  \"floor sec before as.POSIXct\"\nchange to R-devel you had proposed.\n\nI will get back here within a few days I hope."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19054] New: all(&lt;symbol&gt;) can lead to ASAN error (out-of-bounds read)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19054>\n\n            Bug ID: 19054\n           Summary: all(&lt;symbol&gt;) can lead to ASAN error (out-of-bounds\n                    read)\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nCreated attachment 3678\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3678&amp;action=edit>\nCandidate patch.\n\nThe source of this issue appears to be the assumption that `coerceVector(t,\nLGLSXP)` must return a `LGLSXP` vector in logic.c#486, but that instead emits a\nwarning while returning `R_NilValue`.\n\nI've attached a patch that fixes this specific issue, but I think it's worth\nconsidering whether `coerceVector()` ought to emit an error rather than (or, in\naddition to?) a warning when unable to coerce to the requested type, since a\nsubstantial amount of C code proceeds with the assumption that `coerceVector()`\nwas successful.\n\nTo reproduce, it should suffice to use something like `all(quote(x))` in a\nversion of R built with ASAN; alternatively, a quick way to test with Docker\nis:\n\n```\n$ docker run -it rocker\/r-devel-ubsan-clang RD -s -e \"print(R.version);\nall(quote(x))\"\n               _\nplatform       x86_64-pc-linux-gnu\narch           x86_64\nos             linux-gnu\nsystem         x86_64, linux-gnu\nstatus         Under development (unstable)\nmajor          4\nminor          7.0\nyear           2026\nmonth          04\nday            13\nsvn rev        89874\nlanguage       R\nversion.string R Under development (unstable) (2026-04-13 r89874)\nnickname       Unsuffered Consequences\n=================================================================\n==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7d8e3a7e2018 at\npc 0x7f3e3ef362c1 bp 0x7fff4cd88870 sp 0x7fff4cd88868\nREAD of size 4 at 0x7d8e3a7e2018 thread T0\n    #0 0x7f3e3ef362c0 in checkValues \/tmp\/R-devel\/src\/main\/logic.c:424:11\n    #1 0x7f3e3ef362c0 in do_logic3 \/tmp\/R-devel\/src\/main\/logic.c:488:8\n    #2 0x7f3e3edfba52 in Rf_eval \/tmp\/R-devel\/src\/main\/eval.c:1264:9\n    #3 0x7f3e3ef40f45 in Rf_ReplIteration \/tmp\/R-devel\/src\/main\/main.c:264:15\n    #4 0x7f3e3ef43e70 in R_ReplConsole \/tmp\/R-devel\/src\/main\/main.c:317:11\n    #5 0x7f3e3ef43c84 in run_Rmainloop \/tmp\/R-devel\/src\/main\/main.c:1235:5\n    #6 0x7f3e3ef43f6a in Rf_mainloop \/tmp\/R-devel\/src\/main\/main.c:1242:5\n    #7 0x55932feb5004 in main \/tmp\/R-devel\/src\/main\/Rmain.c:29:5\n    #8 0x7f3e3e199f76 in __libc_start_call_main\ncsu\/..\/sysdeps\/nptl\/libc_start_call_main.h:58:16\n    #9 0x7f3e3e19a026 in __libc_start_main csu\/..\/csu\/libc-start.c:360:3\n    #10 0x55932fdca380 in _start (\/usr\/local\/lib\/R\/bin\/exec\/R+0x2d380)\n(BuildId: 06f7995818cca9e0da5b6c1a9bd0046df9a824b5)\n\n0x7d8e3a7e2018 is located 0 bytes after 7960-byte region\n[0x7d8e3a7e0100,0x7d8e3a7e2018)\nallocated by thread T0 here:\n    #0 0x55932fe6f928 in malloc (\/usr\/local\/lib\/R\/bin\/exec\/R+0xd2928) (BuildId:\n06f7995818cca9e0da5b6c1a9bd0046df9a824b5)\n    #1 0x7f3e3ef570b4 in GetNewPage \/tmp\/R-devel\/src\/main\/memory.c:998:12\n    #2 0x7f3e3ef5644e in Rf_InitMemory \/tmp\/R-devel\/src\/main\/memory.c:2267:5\n    #3 0x7f3e3ef428ed in setup_Rmainloop \/tmp\/R-devel\/src\/main\/main.c:984:5\n    #4 0x7f3e3ef43f60 in Rf_mainloop \/tmp\/R-devel\/src\/main\/main.c:1241:5\n    #5 0x55932feb5004 in main \/tmp\/R-devel\/src\/main\/Rmain.c:29:5\n    #6 0x7f3e3e199f76 in __libc_start_call_main\ncsu\/..\/sysdeps\/nptl\/libc_start_call_main.h:58:16\n    #7 0x7fff4cd8adca  (&lt;unknown module&gt;)\n\nSUMMARY: AddressSanitizer: heap-buffer-overflow\n\/tmp\/R-devel\/src\/main\/logic.c:424:11 in checkValues\nShadow bytes around the buggy address:\n  0x7d8e3a7e1d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776562931.704029",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "HRBpZ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19054] New: all(<symbol>) can lead to ASAN error (out-of-bounds read)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19054"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19054\n           Summary: all(<symbol>) can lead to ASAN error (out-of-bounds\n                    read)\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3678\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3678&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3678&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCandidate patch.\n\nThe source of this issue appears to be the assumption that `coerceVector(t,\nLGLSXP)` must return a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "LGLSXP",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " vector in logic.c#486, but that instead emits a\nwarning while returning "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_NilValue",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nI've attached a patch that fixes this specific issue, but I think it's worth\nconsidering whether "
+                            },
+                            {
+                                "type": "text",
+                                "text": "coerceVector()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ought to emit an error rather than (or, in\naddition to?) a warning when unable to coerce to the requested type, since a\nsubstantial amount of C code proceeds with the assumption that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "coerceVector()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nwas successful.\n\nTo reproduce, it should suffice to use something like "
+                            },
+                            {
+                                "type": "text",
+                                "text": "all(quote(x))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in a\nversion of R built with ASAN; alternatively, a quick way to test with Docker\nis:\n\n```\n$ docker run -it rocker\/r-devel-ubsan-clang RD -s -e \"print(R.version);\nall(quote(x))\"\n               _\nplatform       x86_64-pc-linux-gnu\narch           x86_64\nos             linux-gnu\nsystem         x86_64, linux-gnu\nstatus         Under development (unstable)\nmajor          4\nminor          7.0\nyear           2026\nmonth          04\nday            13\nsvn rev        89874\nlanguage       R\nversion.string R Under development (unstable) (2026-04-13 r89874)\nnickname       Unsuffered Consequences\n=================================================================\n==1==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7d8e3a7e2018 at\npc 0x7f3e3ef362c1 bp 0x7fff4cd88870 sp 0x7fff4cd88868\nREAD of size 4 at 0x7d8e3a7e2018 thread T0\n    #0 0x7f3e3ef362c0 in checkValues \/tmp\/R-devel\/src\/main\/logic.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "424"
+                            },
+                            {
+                                "type": "text",
+                                "text": "11\n    #1 0x7f3e3ef362c0 in do_logic3 \/tmp\/R-devel\/src\/main\/logic.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "488"
+                            },
+                            {
+                                "type": "text",
+                                "text": "8\n    #2 0x7f3e3edfba52 in Rf_eval \/tmp\/R-devel\/src\/main\/eval.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "1264"
+                            },
+                            {
+                                "type": "text",
+                                "text": "9\n    #3 0x7f3e3ef40f45 in Rf_ReplIteration \/tmp\/R-devel\/src\/main\/main.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "264"
+                            },
+                            {
+                                "type": "text",
+                                "text": "15\n    #4 0x7f3e3ef43e70 in R_ReplConsole \/tmp\/R-devel\/src\/main\/main.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "317"
+                            },
+                            {
+                                "type": "text",
+                                "text": "11\n    #5 0x7f3e3ef43c84 in run_Rmainloop \/tmp\/R-devel\/src\/main\/main.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "1235"
+                            },
+                            {
+                                "type": "text",
+                                "text": "5\n    #6 0x7f3e3ef43f6a in Rf_mainloop \/tmp\/R-devel\/src\/main\/main.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "1242"
+                            },
+                            {
+                                "type": "text",
+                                "text": "5\n    #7 0x55932feb5004 in main \/tmp\/R-devel\/src\/main\/Rmain.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "29"
+                            },
+                            {
+                                "type": "text",
+                                "text": "5\n    #8 0x7f3e3e199f76 in __libc_start_call_main\ncsu\/..\/sysdeps\/nptl\/libc_start_call_main.h"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "58"
+                            },
+                            {
+                                "type": "text",
+                                "text": "16\n    #9 0x7f3e3e19a026 in __libc_start_main csu\/..\/csu\/libc-start.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "360"
+                            },
+                            {
+                                "type": "text",
+                                "text": "3\n    #10 0x55932fdca380 in _start (\/usr\/local\/lib\/R\/bin\/exec\/R+0x2d380)\n(BuildId: 06f7995818cca9e0da5b6c1a9bd0046df9a824b5)\n\n0x7d8e3a7e2018 is located 0 bytes after 7960-byte region\n[0x7d8e3a7e0100,0x7d8e3a7e2018)\nallocated by thread T0 here:\n    #0 0x55932fe6f928 in malloc (\/usr\/local\/lib\/R\/bin\/exec\/R+0xd2928) (BuildId:\n06f7995818cca9e0da5b6c1a9bd0046df9a824b5)\n    #1 0x7f3e3ef570b4 in GetNewPage \/tmp\/R-devel\/src\/main\/memory.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "998"
+                            },
+                            {
+                                "type": "text",
+                                "text": "12\n    #2 0x7f3e3ef5644e in Rf_InitMemory \/tmp\/R-devel\/src\/main\/memory.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "2267"
+                            },
+                            {
+                                "type": "text",
+                                "text": "5\n    #3 0x7f3e3ef428ed in setup_Rmainloop \/tmp\/R-devel\/src\/main\/main.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "984"
+                            },
+                            {
+                                "type": "text",
+                                "text": "5\n    #4 0x7f3e3ef43f60 in Rf_mainloop \/tmp\/R-devel\/src\/main\/main.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "1241"
+                            },
+                            {
+                                "type": "text",
+                                "text": "5\n    #5 0x55932feb5004 in main \/tmp\/R-devel\/src\/main\/Rmain.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "29"
+                            },
+                            {
+                                "type": "text",
+                                "text": "5\n    #6 0x7f3e3e199f76 in __libc_start_call_main\ncsu\/..\/sysdeps\/nptl\/libc_start_call_main.h"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "58"
+                            },
+                            {
+                                "type": "text",
+                                "text": "16\n    #7 0x7fff4cd8adca  (<unknown module>)\n\nSUMMARY: AddressSanitizer: heap-buffer-overflow\n\/tmp\/R-devel\/src\/main\/logic.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "424"
+                            },
+                            {
+                                "type": "text",
+                                "text": "11 in checkValues\nShadow bytes around the buggy address:\n  0x7d8e3a7e1d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "  0x7d8e3a7e1e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n  0x7d8e3a7e1e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n  0x7d8e3a7e1f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n  0x7d8e3a7e1f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n=&gt;0x7d8e3a7e2000: 00 00 00[fa]fa fa fa fa fa fa fa fa fa fa fa fa\n  0x7d8e3a7e2080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n  0x7d8e3a7e2100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n  0x7d8e3a7e2180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n  0x7d8e3a7e2200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n  0x7d8e3a7e2280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\nShadow byte legend (one shadow byte represents 8 application bytes):\n  Addressable:           00\n  Partially addressable: 01 02 03 04 05 06 07\n  Heap left redzone:       fa\n  Freed heap region:       fd\n  Stack left redzone:      f1\n  Stack mid redzone:       f2\n  Stack right redzone:     f3\n  Stack after return:      f5\n  Stack use after scope:   f8\n  Global redzone:          f9\n  Global init order:       f6\n  Poisoned by user:        f7\n  Container overflow:      fc\n  Array cookie:            ac\n  Intra object redzone:    bb\n  ASan internal:           fe\n  Left alloca redzone:     ca\n  Right alloca redzone:    cb\n==1==ABORTING\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776562931.725799",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "+0Ied",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "0x7d8e3a7e1e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n  0x7d8e3a7e1e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n  0x7d8e3a7e1f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n  0x7d8e3a7e1f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n=>0x7d8e3a7e2000: 00 00 00[fa]fa fa fa fa fa fa fa fa fa fa fa fa\n  0x7d8e3a7e2080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n  0x7d8e3a7e2100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n  0x7d8e3a7e2180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n  0x7d8e3a7e2200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n  0x7d8e3a7e2280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\nShadow byte legend (one shadow byte represents 8 application bytes):\n  Addressable:           00\n  Partially addressable: 01 02 03 04 05 06 07\n  Heap left redzone:       fa\n  Freed heap region:       fd\n  Stack left redzone:      f1\n  Stack mid redzone:       f2\n  Stack right redzone:     f3\n  Stack after return:      f5\n  Stack use after scope:   f8\n  Global redzone:          f9\n  Global init order:       f6\n  Poisoned by user:        f7\n  Container overflow:      fc\n  Array cookie:            ac\n  Intra object redzone:    bb\n  ASan internal:           fe\n  Left alloca redzone:     ca\n  Right alloca redzone:    cb\n==1==ABORTING\n```"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

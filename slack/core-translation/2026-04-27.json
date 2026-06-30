@@ -1,0 +1,528 @@
+[
+    {
+        "user": "U0524MK6H3K",
+        "type": "message",
+        "ts": "1777305327.835379",
+        "client_msg_id": "300a4186-7612-428f-b882-b8d280d10ed0",
+        "text": "The repository is now <https:\/\/codeberg.org\/aitap\/R-weblate-translation-diagnosis\/branches|on Codeberg>, with notable commits in separate branches: `for-rebase` containing the 8th March state of the Weblate repository and `upstream` containing a more recent state of the Subversion mirror fetched from `<https:\/\/translate.rx.studio\/git\/r-project\/base-r-gui\/>`. I also prepared versions of the branches that contain only the file with <https:\/\/translate.rx.studio\/translate\/r-project\/utils-r\/pl\/?checksum=b5f1f84e73cdbbc9|the Polish translation in question> (`for-rebase-Polish-only` and `upstream-Polish-only`) by running `FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch -f -d \/tmp\/gfb\/ --prune-empty --tree-filter 'find \\! -path .\/src\/library\/utils\/po\/R-pl.po -type f -delete' --`\n`HEAD ^`git merge-base for-rebase upstream``. The merge base is r89568 (7th March).\n\nOn 7th March 2026, in r89565, the `*.pot` files were updated. The string `'memory.limit()' is Windows-specific` finally disappeared from the translation templates.\n\nOn 8th March 2026, in r89578, the `*.po` files were updated following the changes in the `*.pot` templates. `msgmerge` moved a fuzzy translation from a different place in the same file. This resulted in the following diff:\n\n```-msgid \"'memory.size()' is Windows-specific\"\n+#, fuzzy\n+msgid \"'memory.size()' is no longer supported\"\n msgstr \"funkcja 'memory.size()' jest specyficzna dla systemów Windows\"\n\n-msgid \"'memory.limit()' is Windows-specific\"\n+#, fuzzy\n+msgid \"'memory.limit()' is no longer supported\"\n msgstr \"funkcja 'memory.limit()' jest specyficzna dla systemów Windows\"```\n...\n```-#, fuzzy\n-msgid \"'memory.size()' is no longer supported\"\n-msgstr \"funkcja 'memory.size()' jest specyficzna dla systemów Windows\"\n-\n-#, fuzzy\n-msgid \"'memory.limit()' is no longer supported\"\n-msgstr \"funkcja 'memory.limit()' jest specyficzna dla systemów Windows\"```\n(The fuzzy translation originates from a different `msgmerge` performed in r81158, on 8th November 2021.)\n\nMeanwhile, the string was translated on Weblate on 6th September 2024, resulting in a similar-looking diff:\n\n```-#, fuzzy\n msgid \"'memory.size()' is no longer supported\"\n-msgstr \"funkcja 'memory.size()' jest specyficzna dla systemów Windows\"\n+msgstr \"funkcja 'memory.size()' nie jest już obsługiwana\"\n\n-#, fuzzy\n msgid \"'memory.limit()' is no longer supported\"\n-msgstr \"funkcja 'memory.limit()' jest specyficzna dla systemów Windows\"\n+msgstr \"funkcja 'memory.limit()' nie jest już obsługiwana\"```\nWhen rebasing, the latter diff needs to be applied on top of the file where the former diff had already been applied. Eventually the following conflict happens:\n\n```&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD\n=======\nmsgid \"'memory.size()' is no longer supported\"\nmsgstr \"funkcja 'memory.size()' nie jest już obsługiwana\"\n\nmsgid \"'memory.limit()' is no longer supported\"\nmsgstr \"funkcja 'memory.limit()' nie jest już obsługiwana\"\n\n&gt;&gt;&gt;&gt;&gt;&gt;&gt; bbe59a8f364 (Translated using Weblate (Polish))```\n`deconflict.py weblate` keeps the \"right\" part of the conflict (the Weblate translation). Unfortunately, now there are two translations of the same string in the same file (the `do-rebase` branch):\n\n```#, fuzzy\nmsgid \"'memory.limit()' is no longer supported\"\nmsgstr \"funkcja 'memory.limit()' jest specyficzna dla systemów Windows\"```\n...\n```msgid \"'memory.limit()' is no longer supported\"\nmsgstr \"funkcja 'memory.limit()' nie jest już obsługiwana\"```\nIs there a process that fixes the `*.po` files? Does it keep the first translation it sees?\n\nI see there's a commented-out `po3way` merge driver. Evidently, simple line-by-line merging is inappropriate for `*.po` files when `msgmerge` moves translations around. Thankfully, if all we want is to take the Weblate side in all conflicts, we can define a simpler merge driver using the same `msgmerge` tool as follows:\n\n```# .gitattributes\n*.po merge=po-auto-resolve```\n```# .git\/config\n[merge \"po-auto-resolve\"]\ndriver = msguniq %B | msgmerge -o %A - %A```\n`-o %A` follows the merge driver protocol (overwrite current version of the file); the first positional argument contains the preferred translations (`%B`, the Weblate patches being applied); the second positional argument contains the base file (original translations from the Subversion repository). Presumably they would need to be reordered if the repository ever switches from rebasing to merging. The `msguniq` part needs more investigation: why are there non-unique translations in the Weblate part of the repository?\n\nWith that merge driver in place, I can run `git rebase upstream-Polish-only`, get no conflicts at all and preserve the Weblate translation of the string in question (branch `do-rebase-2` on Codeberg).",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "gc7f0c5d391a",
+            "image_72": "https:\/\/secure.gravatar.com\/avatar\/c7f0c5d391a6f869c9310694b55fa506.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0018-72.png",
+            "first_name": "Ivan",
+            "real_name": "Ivan Krylov",
+            "display_name": "Ivan Krylov",
+            "team": "T01DW9DLB2A",
+            "name": "ikrylov",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1750070821.690539",
+        "parent_user_id": "U0524MK6H3K",
+        "attachments": [
+            {
+                "from_url": "https:\/\/codeberg.org\/aitap\/R-weblate-translation-diagnosis\/branches",
+                "image_url": "https:\/\/codeberg.org\/aitap\/R-weblate-translation-diagnosis\/-\/summary-card",
+                "image_width": 1200,
+                "image_height": 600,
+                "image_bytes": 39102,
+                "service_icon": "https:\/\/codeberg.org\/favicon.ico",
+                "id": 1,
+                "original_url": "https:\/\/codeberg.org\/aitap\/R-weblate-translation-diagnosis\/branches",
+                "fallback": "Codeberg.org: R-weblate-translation-diagnosis",
+                "text": "R-weblate-translation-diagnosis",
+                "title": "R-weblate-translation-diagnosis",
+                "title_link": "https:\/\/codeberg.org\/aitap\/R-weblate-translation-diagnosis\/branches",
+                "service_name": "Codeberg.org"
+            },
+            {
+                "from_url": "https:\/\/translate.rx.studio\/translate\/r-project\/utils-r\/pl\/?checksum=b5f1f84e73cdbbc9",
+                "image_url": "https:\/\/translate.rx.studio\/widget\/r-project\/utils-r\/pl\/open-graph.png",
+                "image_width": 1200,
+                "image_height": 630,
+                "image_bytes": 385541,
+                "service_icon": "https:\/\/translate.rx.studio\/static\/weblate-180.png",
+                "id": 2,
+                "original_url": "https:\/\/translate.rx.studio\/translate\/r-project\/utils-r\/pl\/?checksum=b5f1f84e73cdbbc9",
+                "fallback": "Weblate: The R Project for Statistical Computing\/utils (R files) — Polish",
+                "text": "The R Project for Statistical Computing is being translated into 30 languages using Weblate. Join the translation or start translating your own project.",
+                "title": "The R Project for Statistical Computing\/utils (R files) — Polish",
+                "title_link": "https:\/\/translate.rx.studio\/translate\/r-project\/utils-r\/pl\/?checksum=b5f1f84e73cdbbc9",
+                "service_name": "Weblate"
+            }
+        ],
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "XLnMv",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "The repository is now "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/codeberg.org\/aitap\/R-weblate-translation-diagnosis\/branches",
+                                "text": "on Codeberg"
+                            },
+                            {
+                                "type": "text",
+                                "text": ", with notable commits in separate branches: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "for-rebase",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " containing the 8th March state of the Weblate repository and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "upstream",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " containing a more recent state of the Subversion mirror fetched from "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/translate.rx.studio\/git\/r-project\/base-r-gui\/",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". I also prepared versions of the branches that contain only the file with "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/translate.rx.studio\/translate\/r-project\/utils-r\/pl\/?checksum=b5f1f84e73cdbbc9",
+                                "text": "the Polish translation in question"
+                            },
+                            {
+                                "type": "text",
+                                "text": " ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "for-rebase-Polish-only",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "upstream-Polish-only",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") by running "
+                            },
+                            {
+                                "type": "text",
+                                "text": "FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch -f -d \/tmp\/gfb\/ --prune-empty --tree-filter 'find \\! -path .\/src\/library\/utils\/po\/R-pl.po -type f -delete' --",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "HEAD ^`git merge-base for-rebase upstream`",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". The merge base is r89568 (7th March).\n\nOn 7th March 2026, in r89565, the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "*.pot",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " files were updated. The string "
+                            },
+                            {
+                                "type": "text",
+                                "text": "'memory.limit()' is Windows-specific",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " finally disappeared from the translation templates.\n\nOn 8th March 2026, in r89578, the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "*.po",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " files were updated following the changes in the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "*.pot",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " templates. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "msgmerge",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " moved a fuzzy translation from a different place in the same file. This resulted in the following diff:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "-msgid \"'memory.size()' is Windows-specific\"\n+#, fuzzy\n+msgid \"'memory.size()' is no longer supported\"\n msgstr \"funkcja 'memory.size()' jest specyficzna dla systemów Windows\"\n\n-msgid \"'memory.limit()' is Windows-specific\"\n+#, fuzzy\n+msgid \"'memory.limit()' is no longer supported\"\n msgstr \"funkcja 'memory.limit()' jest specyficzna dla systemów Windows\""
+                            }
+                        ],
+                        "border": 0
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "...\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "-#, fuzzy\n-msgid \"'memory.size()' is no longer supported\"\n-msgstr \"funkcja 'memory.size()' jest specyficzna dla systemów Windows\"\n-\n-#, fuzzy\n-msgid \"'memory.limit()' is no longer supported\"\n-msgstr \"funkcja 'memory.limit()' jest specyficzna dla systemów Windows\""
+                            }
+                        ],
+                        "border": 0
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n(The fuzzy translation originates from a different "
+                            },
+                            {
+                                "type": "text",
+                                "text": "msgmerge",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " performed in r81158, on 8th November 2021.)\n\nMeanwhile, the string was translated on Weblate on 6th September 2024, resulting in a similar-looking diff:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "-#, fuzzy\n msgid \"'memory.size()' is no longer supported\"\n-msgstr \"funkcja 'memory.size()' jest specyficzna dla systemów Windows\"\n+msgstr \"funkcja 'memory.size()' nie jest już obsługiwana\"\n\n-#, fuzzy\n msgid \"'memory.limit()' is no longer supported\"\n-msgstr \"funkcja 'memory.limit()' jest specyficzna dla systemów Windows\"\n+msgstr \"funkcja 'memory.limit()' nie jest już obsługiwana\""
+                            }
+                        ],
+                        "border": 0
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nWhen rebasing, the latter diff needs to be applied on top of the file where the former diff had already been applied. Eventually the following conflict happens:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "<<<<<<< HEAD\n=======\nmsgid \"'memory.size()' is no longer supported\"\nmsgstr \"funkcja 'memory.size()' nie jest już obsługiwana\"\n\nmsgid \"'memory.limit()' is no longer supported\"\nmsgstr \"funkcja 'memory.limit()' nie jest już obsługiwana\"\n\n>>>>>>> bbe59a8f364 (Translated using Weblate (Polish))"
+                            }
+                        ],
+                        "border": 0
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "deconflict.py weblate",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " keeps the \"right\" part of the conflict (the Weblate translation). Unfortunately, now there are two translations of the same string in the same file (the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "do-rebase",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " branch):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "#, fuzzy\nmsgid \"'memory.limit()' is no longer supported\"\nmsgstr \"funkcja 'memory.limit()' jest specyficzna dla systemów Windows\""
+                            }
+                        ],
+                        "border": 0
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "...\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "msgid \"'memory.limit()' is no longer supported\"\nmsgstr \"funkcja 'memory.limit()' nie jest już obsługiwana\""
+                            }
+                        ],
+                        "border": 0
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nIs there a process that fixes the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "*.po",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " files? Does it keep the first translation it sees?\n\nI see there's a commented-out "
+                            },
+                            {
+                                "type": "text",
+                                "text": "po3way",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " merge driver. Evidently, simple line-by-line merging is inappropriate for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "*.po",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " files when "
+                            },
+                            {
+                                "type": "text",
+                                "text": "msgmerge",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " moves translations around. Thankfully, if all we want is to take the Weblate side in all conflicts, we can define a simpler merge driver using the same "
+                            },
+                            {
+                                "type": "text",
+                                "text": "msgmerge",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " tool as follows:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# .gitattributes\n*.po merge=po-auto-resolve"
+                            }
+                        ],
+                        "border": 0
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# .git\/config\n[merge \"po-auto-resolve\"]\ndriver = msguniq %B | msgmerge -o %A - %A"
+                            }
+                        ],
+                        "border": 0
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "-o %A",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " follows the merge driver protocol (overwrite current version of the file); the first positional argument contains the preferred translations ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "%B",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", the Weblate patches being applied); the second positional argument contains the base file (original translations from the Subversion repository). Presumably they would need to be reordered if the repository ever switches from rebasing to merging. The "
+                            },
+                            {
+                                "type": "text",
+                                "text": "msguniq",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " part needs more investigation: why are there non-unique translations in the Weblate part of the repository?\n\nWith that merge driver in place, I can run "
+                            },
+                            {
+                                "type": "text",
+                                "text": "git rebase upstream-Polish-only",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", get no conflicts at all and preserve the Weblate translation of the string in question (branch "
+                            },
+                            {
+                                "type": "text",
+                                "text": "do-rebase-2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " on Codeberg)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "reactions": [
+            {
+                "name": "pray",
+                "users": [
+                    "U01N3ET8N82"
+                ],
+                "count": 1
+            }
+        ]
+    }
+]

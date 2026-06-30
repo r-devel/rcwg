@@ -1,0 +1,498 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19071] wilcox.test and precision when detecting zeros*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19071>\n\n--- Comment #7 from Kurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) ---\nI guess we all agree that the test should be scale invariant.\n\nNow, if we so a signed rank test where all inputs are of the order\n1e-18, the test cannot know whether these are all rounding errors or\nfrom measurements done on a exa scale :-)\n\nI would not mind reusing a given digits.rank for determining zeros via\nzapsmall: if this is inappropriate, users could simply not give\ndigits.rank and transform the inputs themselves as appropriate?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1778588158.034739",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ydsIi",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19071] wilcox.test and precision when detecting zeros",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19071"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #7 from Kurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI guess we all agree that the test should be scale invariant.\n\nNow, if we so a signed rank test where all inputs are of the order\n1e-18, the test cannot know whether these are all rounding errors or\nfrom measurements done on a exa scale :-)\n\nI would not mind reusing a given digits.rank for determining zeros via\nzapsmall: if this is inappropriate, users could simply not give\ndigits.rank and transform the inputs themselves as appropriate?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19069] aperm(X, 1:length(dim(X))) should short-circuit and just return X.*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19069>\n\n--- Comment #7 from Kurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) ---\nVery confusing ...\n\nApparently, t() by default preserves classes.  The docs say the value is\n\n     A matrix, with ‘dim’ and ‘dimnames’ constructed appropriately from\n     those of ‘x’, and other attributes except names copied across.\n\nwhich might include the class attribute: the C code indeed has\n\n    copyMostAttrib(a, r);\n\nFor aperm(), we say\n\n     A transposed version of array ‘a’, with subscripts permuted as\n     indicated by the array ‘perm’.  If ‘resize’ is ‘TRUE’, the array\n     is reshaped as well as having its elements permuted, the\n     ‘dimnames’ are also permuted; if ‘resize = FALSE’ then the\n     returned object has the same dimensions as ‘a’, and the dimnames\n     are dropped.  In each case other attributes are copied from ‘a’.\n\nbut that clearly is not happening in the C code.\n\nThe above indeed promises to drop the dimnames if resize = FALSE, even\nwhen not permuting.  Strange.\n\nI guess we need to first decide about the\n\n  and other attributes except names copied across.\n\ncontract.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1778588194.661579",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ibXN5",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19069] aperm(X, 1:length(dim(X))) should short-circuit and just return X.",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19069"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #7 from Kurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nVery confusing ...\n\nApparently, t() by default preserves classes.  The docs say the value is\n\n     A matrix, with ‘dim’ and ‘dimnames’ constructed appropriately from\n     those of ‘x’, and other attributes except names copied across.\n\nwhich might include the class attribute: the C code indeed has\n\n    copyMostAttrib(a, r);\n\nFor aperm(), we say\n\n     A transposed version of array ‘a’, with subscripts permuted as\n     indicated by the array ‘perm’.  If ‘resize’ is ‘TRUE’, the array\n     is reshaped as well as having its elements permuted, the\n     ‘dimnames’ are also permuted; if ‘resize = FALSE’ then the\n     returned object has the same dimensions as ‘a’, and the dimnames\n     are dropped.  In each case other attributes are copied from ‘a’.\n\nbut that clearly is not happening in the C code.\n\nThe above indeed promises to drop the dimnames if resize = FALSE, even\nwhen not permuting.  Strange.\n\nI guess we need to first decide about the\n\n  and other attributes except names copied across.\n\ncontract."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19069] aperm(X, 1:length(dim(X))) should short-circuit and just return X.*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19069>\n\n--- Comment #8 from Kurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) ---\nBtw, afaict even in very old versions of R we never copied attributes.\nc38940 changed\n\n-  \\code{dimnames} are also permuted;\n-  if \\code{FALSE} then the returned object has the same dimensions as\n-  \\code{a}, and the dimnames are dropped.\n+  \\code{dimnames} are also permuted; if \\code{resize = FALSE} then the\n+  returned object has the same dimensions as \\code{a}, and the dimnames\n+  are dropped.  In each case other attributes are copied from \\code{a}.\n\npresumably copying the change from t.Rd.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1778588971.475519",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "H3YI",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19069] aperm(X, 1:length(dim(X))) should short-circuit and just return X.",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19069"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #8 from Kurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nBtw, afaict even in very old versions of R we never copied attributes.\nc38940 changed\n\n-  \\code{dimnames} are also permuted;\n-  if \\code{FALSE} then the returned object has the same dimensions as\n-  \\code{a}, and the dimnames are dropped.\n+  \\code{dimnames} are also permuted; if \\code{resize = FALSE} then the\n+  returned object has the same dimensions as \\code{a}, and the dimnames\n+  are dropped.  In each case other attributes are copied from \\code{a}.\n\npresumably copying the change from t.Rd."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19069] aperm(X, 1:length(dim(X))) should short-circuit and just return X.*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19069>\n\n--- Comment #9 from Pavel N. Krivitsky (<mailto:p.krivitsky@unsw.edu.au|p.krivitsky@unsw.edu.au>) ---\nIn my opinion, it would be better to bring the implementation into agreement\nwith the documentation, as opposed to the other way around, and to ask the\npackage maintainers to insert an `unclass()` in their `apply()` calls if they\ndo something unusual with the `[` method. My reasons:\n\n1. Relying on undocumented behaviour is one thing; relying on behaviour\ncontrary to documentation is another.\n2. It's consistent with `t()`.\n3. It's more useful for a developer: the code to restore attributes after\nremoval requires saving the starting attributes, whereas removing attributes\ndoes not.\n\nThough, now that I look, I don't think I quite understand what `resize` is\nactually supposed to control. Does it determine how to handle a situation in\nwhich `length(a) != prod(dim(a))`? But, `array()` docs say \"the product of the\nvalues must match the length of the array.\"",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1778591366.987399",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "KVy",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19069] aperm(X, 1:length(dim(X))) should short-circuit and just return X.",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19069"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #9 from Pavel N. Krivitsky ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:p.krivitsky@unsw.edu.au",
+                                "text": "p.krivitsky@unsw.edu.au",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nIn my opinion, it would be better to bring the implementation into agreement\nwith the documentation, as opposed to the other way around, and to ask the\npackage maintainers to insert an "
+                            },
+                            {
+                                "type": "text",
+                                "text": "unclass()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in their "
+                            },
+                            {
+                                "type": "text",
+                                "text": "apply()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " calls if they\ndo something unusual with the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "[",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method. My reasons:\n\n1. Relying on undocumented behaviour is one thing; relying on behaviour\ncontrary to documentation is another.\n2. It's consistent with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "t()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n3. It's more useful for a developer: the code to restore attributes after\nremoval requires saving the starting attributes, whereas removing attributes\ndoes not.\n\nThough, now that I look, I don't think I quite understand what "
+                            },
+                            {
+                                "type": "text",
+                                "text": "resize",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is\nactually supposed to control. Does it determine how to handle a situation in\nwhich "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length(a) != prod(dim(a))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "? But, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "array()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " docs say \"the product of the\nvalues must match the length of the array.\""
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19069] aperm(X, 1:length(dim(X))) should short-circuit and just return X.*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19069>\n\n--- Comment #10 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\n(In reply to Pavel N. Krivitsky from comment #9)\n`resize = FALSE` plugs the _original_ `dim` to the permuted array.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1778599613.099439",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "+EO",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19069] aperm(X, 1:length(dim(X))) should short-circuit and just return X.",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19069"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #10 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Pavel N. Krivitsky from comment #9)\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "resize = FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " plugs the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "original",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dim",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to the permuted array."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19069] aperm(X, 1:length(dim(X))) should short-circuit and just return X.*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19069>\n\n--- Comment #11 from Kurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) ---\nI don't have a strong opinion on this ... but again, afaict aperm() has never\ncopied attributes, despite the docs saying so, and nobody noticed\/complained\n:-)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1778604038.148939",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "m37",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19069] aperm(X, 1:length(dim(X))) should short-circuit and just return X.",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19069"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #11 from Kurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI don't have a strong opinion on this ... but again, afaict aperm() has never\ncopied attributes, despite the docs saying so, and nobody noticed\/complained\n:-)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "reactions": [
+            {
+                "name": "laughing",
+                "users": [
+                    "U07MWC5T8FJ"
+                ],
+                "count": 1
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18743] \"hclust()\" documentation about \"ward.D\" and \"ward.D2\" need to be revised. In addition to the incorrect description of the \"ward.D\" and \"ward.D2\" options, there is a lack of correct information about the value of d to be set.*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18743>\n\n--- Comment #10 from Atsushi Kimura (<mailto:atkimura@nstac.go.jp|atkimura@nstac.go.jp>) ---\nI translated the \"Introduction\" section of 202204_ESTRELA_22-27_StudyNote.pdf\ninto English.\n\n====================================\n1. Introduction\nIn the March 2021 issue of this journal, we published an article on\nhierarchical cluster analysis of household survey data (Kimura and\nTakabe [1]).\nSeveral readers of the article commented that they were interested in\ncluster analysis but didn't understand the differences in options for\nthe Ward method in R's hclust function, how to use it correctly, or how\nto interpret the analysis results.\nOsumi [2] points out that, as is common in hierarchical classification,\neven with the same method name, differences in the selection of\nsimilarity\/dissimilarity, the stratification procedure, and the use of\nindependently defined options can result in completely different output\nresults for the same data depending on the software used.\nMurtagh and Legendre [3] also indicate that there are multiple\nvariations of Ward method statistical software available and warn\nagainst their use. While the R hclust function subsequently received\nadditional features, including the ward.D and ward.D2 options, the R\ndocumentation is not particularly helpful for beginners. Inaccurate\ndescriptions can be found in information available on the internet and\nelsewhere. It is understandable that users may be confused.\n\nThis article explains the differences between the ward.D and ward.D2\noptions of the hclust function currently in use since version 3.0.3,\ntheir correct usage, and the basic concepts and characteristics of\nWard[4]. Furthermore, it compares the results of applying a program\nimplemented independently by the author based on Ward[4] with the hclust\nfunction to an actual data analysis example[1], verifying that the\ninternal processing of the hclust function is consistent with what has\nbeen described. The design and implementation of the independently\nimplemented program used here will be explained in detail in the next\narticle. This should serve as a useful reference for concrete examples\nof implementing mathematical formulas and algorithms in a program. The\nviews expressed in this article are those of the author only and do not\nrepresent those of the organization to which the author belongs.\nFurthermore, any errors or omissions in this text are solely the\nresponsibility of the author.\n==================",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1778621598.270309",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "AhO",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18743] \"hclust()\" documentation about \"ward.D\" and \"ward.D2\" need to be revised. In addition to the incorrect description of the \"ward.D\" and \"ward.D2\" options, there is a lack of correct information about the value of d to be set.",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18743"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #10 from Atsushi Kimura ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:atkimura@nstac.go.jp",
+                                "text": "atkimura@nstac.go.jp",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI translated the \"Introduction\" section of 202204_ESTRELA_22-27_StudyNote.pdf\ninto English.\n\n====================================\n1. Introduction\nIn the March 2021 issue of this journal, we published an article on\nhierarchical cluster analysis of household survey data (Kimura and\nTakabe [1]).\nSeveral readers of the article commented that they were interested in\ncluster analysis but didn't understand the differences in options for\nthe Ward method in R's hclust function, how to use it correctly, or how\nto interpret the analysis results.\nOsumi [2] points out that, as is common in hierarchical classification,\neven with the same method name, differences in the selection of\nsimilarity\/dissimilarity, the stratification procedure, and the use of\nindependently defined options can result in completely different output\nresults for the same data depending on the software used.\nMurtagh and Legendre [3] also indicate that there are multiple\nvariations of Ward method statistical software available and warn\nagainst their use. While the R hclust function subsequently received\nadditional features, including the ward.D and ward.D2 options, the R\ndocumentation is not particularly helpful for beginners. Inaccurate\ndescriptions can be found in information available on the internet and\nelsewhere. It is understandable that users may be confused.\n\nThis article explains the differences between the ward.D and ward.D2\noptions of the hclust function currently in use since version 3.0.3,\ntheir correct usage, and the basic concepts and characteristics of\nWard[4]. Furthermore, it compares the results of applying a program\nimplemented independently by the author based on Ward[4] with the hclust\nfunction to an actual data analysis example[1], verifying that the\ninternal processing of the hclust function is consistent with what has\nbeen described. The design and implementation of the independently\nimplemented program used here will be explained in detail in the next\narticle. This should serve as a useful reference for concrete examples\nof implementing mathematical formulas and algorithms in a program. The\nviews expressed in this article are those of the author only and do not\nrepresent those of the organization to which the author belongs.\nFurthermore, any errors or omissions in this text are solely the\nresponsibility of the author.\n=================="
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

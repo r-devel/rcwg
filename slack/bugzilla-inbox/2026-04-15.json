@@ -1,0 +1,1539 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19036] model.matrix(fit, newdata) doesn't respect factors levels from glm fit but does for lm*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19036>\n\nMauricio Vargas (<mailto:mvargassepulveda@gmail.com|mvargassepulveda@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |mvargassepulveda@gmail.com\n\n--- Comment #2 from Mauricio Vargas (<mailto:mvargassepulveda@gmail.com|mvargassepulveda@gmail.com>) ---\nI found the same on my end.\n\nI propose this correction as I added to my source copy here:\n<https:\/\/github.com\/pachadotdev\/r-source\/commit\/ba6ea5a1f76ec4f61a37a26ca102826ef0871e3d#diff-1345dbc1e43a5e2594f6d44f707d96e7fd539bccb4d081bdf7fcac535ae54794>\n\nIn this section of `src\/library\/stats\/R\/glm.R`\n\n\n```\n...\nnargs &lt;- dots[match(c(\"data\", \"na.action\", \"subset\"), names(dots), 0L)]\n    if (length(nargs) || is.null(formula$model)) {\n        fcall &lt;- formula$call\n        fcall$method &lt;- \"model.frame\"\n\n\n\n\n\n        ## need stats:: for non-standard evaluation\n        fcall[[1L]] &lt;- quote(stats::glm)\n\n\n\n        fcall[names(nargs)] &lt;- nargs\n        env &lt;- environment(formula$terms) %||% parent.frame()\n        eval(fcall, env)\n    }\n    else formula$model\n}\n```\n\nI changed `model.frame.glm()` to mirror `model.frame.lm()`:\n\n\n```\n...\nnargs &lt;- dots[match(c(\"data\", \"na.action\", \"subset\"), names(dots), 0L)]\n    if (length(nargs) || is.null(formula$model)) {\n        ## mimic glm(method = \"model.frame\") but call model.frame directly\n        ## to support xlev argument (PR#18800)\n        fcall &lt;- formula$call\n        m &lt;- match(c(\"formula\", \"data\", \"subset\", \"weights\", \"na.action\",\n                     \"etastart\", \"mustart\", \"offset\"), names(fcall), 0L)\n        fcall &lt;- fcall[c(1L, m)]\n        fcall$drop.unused.levels &lt;- TRUE\n        ## need stats:: for non-standard evaluation\n        fcall[[1L]] &lt;- quote(stats::model.frame)\n        fcall$xlev &lt;- formula$xlevels\n        ## We want to copy over attributes here, especially predvars.\n        fcall$formula &lt;- terms(formula)\n        fcall[names(nargs)] &lt;- nargs\n        env &lt;- environment(formula$terms) %||% parent.frame()\n        eval(fcall, env)\n    }\n    else formula$model\n}\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776250103.954559",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "rU3M3",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19036] model.matrix(fit, newdata) doesn't respect factors levels from glm fit but does for lm",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19036"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMauricio Vargas ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:mvargassepulveda@gmail.com",
+                                "text": "mvargassepulveda@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |mvargassepulveda@gmail.com\n\n--- Comment #2 from Mauricio Vargas ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:mvargassepulveda@gmail.com",
+                                "text": "mvargassepulveda@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI found the same on my end.\n\nI propose this correction as I added to my source copy here:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/pachadotdev\/r-source\/commit\/ba6ea5a1f76ec4f61a37a26ca102826ef0871e3d#diff-1345dbc1e43a5e2594f6d44f707d96e7fd539bccb4d081bdf7fcac535ae54794"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIn this section of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/library\/stats\/R\/glm.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "...\nnargs <- dots[match(c(\"data\", \"na.action\", \"subset\"), names(dots), 0L)]\n    if (length(nargs) || is.null(formula$model)) {\n        fcall <- formula$call\n        fcall$method <- \"model.frame\"\n\n\n\n\n\n        ## need stats:: for non-standard evaluation\n        fcall[[1L]] <- quote(stats::glm)\n\n\n\n        fcall[names(nargs)] <- nargs\n        env <- environment(formula$terms) %||% parent.frame()\n        eval(fcall, env)\n    }\n    else formula$model\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI changed "
+                            },
+                            {
+                                "type": "text",
+                                "text": "model.frame.glm()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to mirror "
+                            },
+                            {
+                                "type": "text",
+                                "text": "model.frame.lm()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "...\nnargs <- dots[match(c(\"data\", \"na.action\", \"subset\"), names(dots), 0L)]\n    if (length(nargs) || is.null(formula$model)) {\n        ## mimic glm(method = \"model.frame\") but call model.frame directly\n        ## to support xlev argument (PR#18800)\n        fcall <- formula$call\n        m <- match(c(\"formula\", \"data\", \"subset\", \"weights\", \"na.action\",\n                     \"etastart\", \"mustart\", \"offset\"), names(fcall), 0L)\n        fcall <- fcall[c(1L, m)]\n        fcall$drop.unused.levels <- TRUE\n        ## need stats:: for non-standard evaluation\n        fcall[[1L]] <- quote(stats::model.frame)\n        fcall$xlev <- formula$xlevels\n        ## We want to copy over attributes here, especially predvars.\n        fcall$formula <- terms(formula)\n        fcall[names(nargs)] <- nargs\n        env <- environment(formula$terms) %||% parent.frame()\n        eval(fcall, env)\n    }\n    else formula$model\n}\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18361] ls.str() not agile to LANGUAGE*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18361>\n\n--- Comment #4 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nNow that `get()` signals classed errors for missing arguments, `print.ls_str`\nwas fixed to check the class of the error condition in r87080; the fix has been\nreleased in 4.5.0. There is no special handling for variables that legitimately\nbecame missing between the call to `ls.str()` and the `print()` method.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776255628.894809",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "onU",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18361] ls.str() not agile to LANGUAGE",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18361"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nNow that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "get()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " signals classed errors for missing arguments, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "print.ls_str",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nwas fixed to check the class of the error condition in r87080; the fix has been\nreleased in 4.5.0. There is no special handling for variables that legitimately\nbecame missing between the call to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ls.str()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "print()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16158] Error in predict.lm for rank-deficient cases*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16158>\n\nMauricio Vargas (<mailto:mvargassepulveda@gmail.com|mvargassepulveda@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |mvargassepulveda@gmail.com\n\n--- Comment #32 from Mauricio Vargas (<mailto:mvargassepulveda@gmail.com|mvargassepulveda@gmail.com>) ---\n(In reply to Martin Maechler from comment #30)\nfrom what I learned in Econometrics (and trying to \"translate\" that to\nArmadillo) I see that the corrected QR is the right option",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776256961.901889",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "j94GS",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16158] Error in predict.lm for rank-deficient cases",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16158"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMauricio Vargas ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:mvargassepulveda@gmail.com",
+                                "text": "mvargassepulveda@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |mvargassepulveda@gmail.com\n\n--- Comment #32 from Mauricio Vargas ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:mvargassepulveda@gmail.com",
+                                "text": "mvargassepulveda@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Martin Maechler from comment #30)\nfrom what I learned in Econometrics (and trying to \"translate\" that to\nArmadillo) I see that the corrected QR is the right option"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17886] glm.fit says convergence is OK while the likelihood has no maximum*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17886>\n\nMauricio Vargas (<mailto:mvargassepulveda@gmail.com|mvargassepulveda@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |mvargassepulveda@gmail.com\n\n--- Comment #3 from Mauricio Vargas (<mailto:mvargassepulveda@gmail.com|mvargassepulveda@gmail.com>) ---\n(In reply to André Gillibert from comment #2)\nSorry to comment on an old thread, I recently had a meeting with Joao Santos\nSilva and I showed him a deviance rule like this,\n\nOne of the results he showed me is relevant here, and it is that when the\ndependent variable is not a count, some measures of goodness-of-fit for Poisson\nregression (like deviance) depend on the scale of the data, and therefore are\nuninformative.\n\nThere are more details about that here: A cautionary note on goodness-of-fit\nstatistics for models estimated by pseudo maximum likelihood\n<https:\/\/journals.sagepub.com\/doi\/pdf\/10.1177\/1536867X251341411>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776257450.817879",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "jxBUu",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17886] glm.fit says convergence is OK while the likelihood has no maximum",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17886"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMauricio Vargas ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:mvargassepulveda@gmail.com",
+                                "text": "mvargassepulveda@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |mvargassepulveda@gmail.com\n\n--- Comment #3 from Mauricio Vargas ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:mvargassepulveda@gmail.com",
+                                "text": "mvargassepulveda@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to André Gillibert from comment #2)\nSorry to comment on an old thread, I recently had a meeting with Joao Santos\nSilva and I showed him a deviance rule like this,\n\nOne of the results he showed me is relevant here, and it is that when the\ndependent variable is not a count, some measures of goodness-of-fit for Poisson\nregression (like deviance) depend on the scale of the data, and therefore are\nuninformative.\n\nThere are more details about that here: A cautionary note on goodness-of-fit\nstatistics for models estimated by pseudo maximum likelihood\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/journals.sagepub.com\/doi\/pdf\/10.1177\/1536867X251341411"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17886] glm.fit says convergence is OK while the likelihood has no maximum*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17886>\n\n--- Comment #4 from Mauricio Vargas (<mailto:mvargassepulveda@gmail.com|mvargassepulveda@gmail.com>) ---\n(In reply to André Gillibert from comment #2)\nSorry to comment on an old thread, I recently had a meeting with Joao Santos\nSilva and I showed him a deviance rule like this,\n\nOne of the results he showed me is relevant here, and it is that when the\ndependent variable is not a count, some measures of goodness-of-fit for Poisson\nregression (like deviance) depend on the scale of the data, and therefore are\nuninformative.\n\nThere are more details about that here: A cautionary note on goodness-of-fit\nstatistics for models estimated by pseudo maximum likelihood\n<https:\/\/journals.sagepub.com\/doi\/pdf\/10.1177\/1536867X251341411>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776257491.606189",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "2Tuz",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17886] glm.fit says convergence is OK while the likelihood has no maximum",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17886"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Mauricio Vargas ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:mvargassepulveda@gmail.com",
+                                "text": "mvargassepulveda@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to André Gillibert from comment #2)\nSorry to comment on an old thread, I recently had a meeting with Joao Santos\nSilva and I showed him a deviance rule like this,\n\nOne of the results he showed me is relevant here, and it is that when the\ndependent variable is not a count, some measures of goodness-of-fit for Poisson\nregression (like deviance) depend on the scale of the data, and therefore are\nuninformative.\n\nThere are more details about that here: A cautionary note on goodness-of-fit\nstatistics for models estimated by pseudo maximum likelihood\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/journals.sagepub.com\/doi\/pdf\/10.1177\/1536867X251341411"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18981] Compilation fails on some older (but supported) Linux distros*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18981>\n\nIvan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n     Ever confirmed|0                           |1\n             Status|UNCONFIRMED                 |CONFIRMED\n\n--- Comment #1 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nThe argument names have been added in r89176, so this bug report can be closed.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776258339.316559",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "kBc",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18981] Compilation fails on some older (but supported) Linux distros",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18981"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIvan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n     Ever confirmed|0                           |1\n             Status|UNCONFIRMED                 |CONFIRMED\n\n--- Comment #1 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe argument names have been added in r89176, so this bug report can be closed."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18981] Compilation fails on some older (but supported) Linux distros*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18981>\n\nLuke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n                 CC|                            |luke@stat.uiowa.edu\n         Resolution|---                         |FIXED",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776258780.869259",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "pd2C",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18981] Compilation fails on some older (but supported) Linux distros",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18981"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nLuke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n                 CC|                            |luke@stat.uiowa.edu\n         Resolution|---                         |FIXED"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18693] rmultinom()  using LDOUBLE is platform dependent*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18693>\n\nMauricio Vargas (<mailto:mvargassepulveda@gmail.com|mvargassepulveda@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |mvargassepulveda@gmail.com\n\n--- Comment #8 from Mauricio Vargas (<mailto:mvargassepulveda@gmail.com|mvargassepulveda@gmail.com>) ---\nI found something similar while doing inference and comparing different\nplatforms with GitHub Actions back in Oct 2025.\n\nI wish I could have found this thread much earlier, so thx a lot to all those\nwho commented.\n\nI took the comments and worked on this:\n<https:\/\/github.com\/pachadotdev\/r-source\/commit\/a390ce706e6b14a878739ff28a5850a3809d015f>\n\nIn ‎src\/nmath\/rmultinom.c‎, we can change this:\n\n```\n{\n    int k;\n    double pp;\n    LDOUBLE p_tot = 0.;\n    \/* This calculation is sensitive to exact values, so we try to\n       ensure that the calculations are as accurate as possible\n       so different platforms are more likely to give the same\n       result. *\/\n\n\n\n#ifdef MATHLIB_STANDALONE\n    if (K &lt; 1) { ML_WARNING(ME_DOMAIN, \"rmultinom\"); return;}\n    if (n &lt; 0)  ML_WARN_ret_NAN(0);\n#else\n    if (K == NA_INTEGER || K &lt; 1) { ML_WARNING(ME_DOMAIN, \"rmultinom\");\nreturn;}\n    if (n == NA_INTEGER || n &lt; 0)  ML_WARN_ret_NAN(0);\n#endif\n\n    \/* Note: prob[K] is only used here for checking  sum_k prob[k] = 1 ;\n     *       Could make loop one shorter and drop that check !\n     *\/\n    for(k = 0; k &lt; K; k++) {\n        pp = prob[k];\n        if (!R_FINITE(pp) || pp &lt; 0. || pp &gt; 1.) ML_WARN_ret_NAN(k);\n        p_tot += pp;\n\n\n\n\n        rN[k] = 0;\n    }\n    if(fabs((double)(p_tot - 1.)) &gt; 1e-7)\n        MATHLIB_ERROR(_(\"rbinom: probability sum should be 1, but is %g\"),\n                      (double) p_tot);\n    if (n == 0) return;\n    if (K == 1 &amp;&amp; p_tot == 0.) return;\/* trivial border case: do as rbinom *\/\n\n    \/* Generate the first K-1 obs. via binomials *\/\n\n    for(k = 0; k &lt; K-1; k++) { \/* (p_tot, n) are for \"remaining binomial\" *\/\n        if(prob[k] != 0.) {\n            pp = (double)(prob[k] \/ p_tot);\n            \/* printf(\"[%d] %.17f\\n\", k+1, pp); *\/\n            rN[k] = ((pp &lt; 1.) ? (int) rbinom((double) n,  pp) :\n                     \/*&gt;= 1; &gt; 1 happens because of rounding *\/\n                     n);\n            n -= rN[k];\n        }\n        else rN[k] = 0;\n        if(n &lt;= 0) \/* we have all*\/ return;\n        p_tot -= prob[k]; \/* i.e. = sum(prob[(k+1):K]) *\/\n\n\n\n\n    }\n    rN[K-1] = n;\n    return;\n```\n\nWith\n\n```\n{\n    int k;\n    double pp;\n    \/* Use Kahan compensated summation for platform-independent accuracy.\n       This avoids relying on LDOUBLE (long double) which varies across\n       platforms (e.g., 80-bit on x86 vs 64-bit on ARM).\n       See Bug#18693. *\/\n    double p_tot = 0.;\n    double p_comp = 0.; \/* Kahan compensation term *\/\n    double y, t;\n\n#ifdef MATHLIB_STANDALONE\n    if (K &lt; 1) { ML_WARNING(ME_DOMAIN, \"rmultinom\"); return;}\n    if (n &lt; 0)  ML_WARN_ret_NAN(0);\n#else\n    if (K == NA_INTEGER || K &lt; 1) { ML_WARNING(ME_DOMAIN, \"rmultinom\");\nreturn;}\n    if (n == NA_INTEGER || n &lt; 0)  ML_WARN_ret_NAN(0);\n#endif\n\n    \/* Note: prob[K] is only used here for checking  sum_k prob[k] = 1 ;\n     *       Could make loop one shorter and drop that check !\n     *\/\n    for(k = 0; k &lt; K; k++) {\n        pp = prob[k];\n        if (!R_FINITE(pp) || pp &lt; 0. || pp &gt; 1.) ML_WARN_ret_NAN(k);\n        \/* Kahan summation: p_tot += pp with compensation *\/\n        y = pp - p_comp;\n        t = p_tot + y;\n        p_comp = (t - p_tot) - y;\n        p_tot = t;\n        rN[k] = 0;\n    }\n    if(fabs(p_tot - 1.) &gt; 1e-7)\n        MATHLIB_ERROR(_(\"rbinom: probability sum should be 1, but is %g\"),\n                      p_tot);\n    if (n == 0) return;\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776259249.827929",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "wXVxT",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18693] rmultinom()  using LDOUBLE is platform dependent",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18693"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMauricio Vargas ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:mvargassepulveda@gmail.com",
+                                "text": "mvargassepulveda@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |mvargassepulveda@gmail.com\n\n--- Comment #8 from Mauricio Vargas ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:mvargassepulveda@gmail.com",
+                                "text": "mvargassepulveda@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI found something similar while doing inference and comparing different\nplatforms with GitHub Actions back in Oct 2025.\n\nI wish I could have found this thread much earlier, so thx a lot to all those\nwho commented.\n\nI took the comments and worked on this:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/pachadotdev\/r-source\/commit\/a390ce706e6b14a878739ff28a5850a3809d015f"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIn ‎src\/nmath\/rmultinom.c‎, we can change this:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "{\n    int k;\n    double pp;\n    LDOUBLE p_tot = 0.;\n    \/* This calculation is sensitive to exact values, so we try to\n       ensure that the calculations are as accurate as possible\n       so different platforms are more likely to give the same\n       result. *\/\n\n\n\n#ifdef MATHLIB_STANDALONE\n    if (K < 1) { ML_WARNING(ME_DOMAIN, \"rmultinom\"); return;}\n    if (n < 0)  ML_WARN_ret_NAN(0);\n#else\n    if (K == NA_INTEGER || K < 1) { ML_WARNING(ME_DOMAIN, \"rmultinom\");\nreturn;}\n    if (n == NA_INTEGER || n < 0)  ML_WARN_ret_NAN(0);\n#endif\n\n    \/* Note: prob[K] is only used here for checking  sum_k prob[k] = 1 ;\n     *       Could make loop one shorter and drop that check !\n     *\/\n    for(k = 0; k < K; k++) {\n        pp = prob[k];\n        if (!R_FINITE(pp) || pp < 0. || pp > 1.) ML_WARN_ret_NAN(k);\n        p_tot += pp;\n\n\n\n\n        rN[k] = 0;\n    }\n    if(fabs((double)(p_tot - 1.)) > 1e-7)\n        MATHLIB_ERROR(_(\"rbinom: probability sum should be 1, but is %g\"),\n                      (double) p_tot);\n    if (n == 0) return;\n    if (K == 1 && p_tot == 0.) return;\/* trivial border case: do as rbinom *\/\n\n    \/* Generate the first K-1 obs. via binomials *\/\n\n    for(k = 0; k < K-1; k++) { \/* (p_tot, n) are for \"remaining binomial\" *\/\n        if(prob[k] != 0.) {\n            pp = (double)(prob[k] \/ p_tot);\n            \/* printf(\"[%d] %.17f\\n\", k+1, pp); *\/\n            rN[k] = ((pp < 1.) ? (int) rbinom((double) n,  pp) :\n                     \/*>= 1; > 1 happens because of rounding *\/\n                     n);\n            n -= rN[k];\n        }\n        else rN[k] = 0;\n        if(n <= 0) \/* we have all*\/ return;\n        p_tot -= prob[k]; \/* i.e. = sum(prob[(k+1):K]) *\/\n\n\n\n\n    }\n    rN[K-1] = n;\n    return;\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWith\n\n```\n{\n    int k;\n    double pp;\n    \/* Use Kahan compensated summation for platform-independent accuracy.\n       This avoids relying on LDOUBLE (long double) which varies across\n       platforms (e.g., 80-bit on x86 vs 64-bit on ARM).\n       See Bug#18693. *\/\n    double p_tot = 0.;\n    double p_comp = 0.; \/* Kahan compensation term *\/\n    double y, t;\n\n#ifdef MATHLIB_STANDALONE\n    if (K < 1) { ML_WARNING(ME_DOMAIN, \"rmultinom\"); return;}\n    if (n < 0)  ML_WARN_ret_NAN(0);\n#else\n    if (K == NA_INTEGER || K < 1) { ML_WARNING(ME_DOMAIN, \"rmultinom\");\nreturn;}\n    if (n == NA_INTEGER || n < 0)  ML_WARN_ret_NAN(0);\n#endif\n\n    \/* Note: prob[K] is only used here for checking  sum_k prob[k] = 1 ;\n     *       Could make loop one shorter and drop that check !\n     *\/\n    for(k = 0; k < K; k++) {\n        pp = prob[k];\n        if (!R_FINITE(pp) || pp < 0. || pp > 1.) ML_WARN_ret_NAN(k);\n        \/* Kahan summation: p_tot += pp with compensation *\/\n        y = pp - p_comp;\n        t = p_tot + y;\n        p_comp = (t - p_tot) - y;\n        p_tot = t;\n        rN[k] = 0;\n    }\n    if(fabs(p_tot - 1.) > 1e-7)\n        MATHLIB_ERROR(_(\"rbinom: probability sum should be 1, but is %g\"),\n                      p_tot);\n    if (n == 0) return;"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "    if (K == 1 &amp;&amp; p_tot == 0.) return;\/* trivial border case: do as rbinom *\/\n\n    \/* Generate the first K-1 obs. via binomials *\/\n\n    for(k = 0; k &lt; K-1; k++) { \/* (p_tot, n) are for \"remaining binomial\" *\/\n        if(prob[k] != 0.) {\n            pp = prob[k] \/ p_tot;\n            \/* printf(\"[%d] %.17f\\n\", k+1, pp); *\/\n            rN[k] = ((pp &lt; 1.) ? (int) rbinom((double) n,  pp) :\n                     \/*&gt;= 1; &gt; 1 happens because of rounding *\/\n                     n);\n            n -= rN[k];\n        }\n        else rN[k] = 0;\n        if(n &lt;= 0) \/* we have all*\/ return;\n        \/* Kahan subtraction: p_tot -= prob[k] with compensation *\/\n        y = -prob[k] - p_comp;\n        t = p_tot + y;\n        p_comp = (t - p_tot) - y;\n        p_tot = t;\n    }\n    rN[K-1] = n;\n    return;\n```\n\nI have no idea how to put code side by side here, so I added some extra lines\nto be able to open two windows side by side and see the difference (like the\nGitHub link)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776259249.854999",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Ln2",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "if (K == 1 && p_tot == 0.) return;\/* trivial border case: do as rbinom *\/\n\n    \/* Generate the first K-1 obs. via binomials *\/\n\n    for(k = 0; k < K-1; k++) { \/* (p_tot, n) are for \"remaining binomial\" *\/\n        if(prob[k] != 0.) {\n            pp = prob[k] \/ p_tot;\n            \/* printf(\"[%d] %.17f\\n\", k+1, pp); *\/\n            rN[k] = ((pp < 1.) ? (int) rbinom((double) n,  pp) :\n                     \/"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "= 1; > 1 happens because of rounding ",
+                                "style": {
+                                    "bold": true
+                                }
+                            }
+                        ],
+                        "contains_padding": false
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\/\n                     n);\n            n -= rN[k];\n        }\n        else rN[k] = 0;\n        if(n <= 0) \/"
+                            },
+                            {
+                                "type": "text",
+                                "text": " we have all",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/ return;\n        \/* Kahan subtraction: p_tot -= prob[k] with compensation *\/\n        y = -prob[k] - p_comp;\n        t = p_tot + y;\n        p_comp = (t - p_tot) - y;\n        p_tot = t;\n    }\n    rN[K-1] = n;\n    return;\n```\n\nI have no idea how to put code side by side here, so I added some extra lines\nto be able to open two windows side by side and see the difference (like the\nGitHub link)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19052] New: intToUtf8(-1L) triggers ASAN error*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19052>\n\n            Bug ID: 19052\n           Summary: intToUtf8(-1L) triggers ASAN error\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nFor example:\n\n```\n&gt; intToUtf8(-1L)\nraw.c:366:17: runtime error: index 4 out of bounds for type 'const int[4]'\nSUMMARY: UndefinedBehaviorSanitizer: undefined-behavior raw.c:366:17\n=================================================================\n==7==ERROR: AddressSanitizer: global-buffer-overflow on address 0x7f7945589ad0\nat pc 0x7f794526ddd0 bp 0x7ffca12a3f10 sp 0x7ffca12a3f08\nREAD of size 4 at 0x7f7945589ad0 thread T0\n    #0 0x7f794526ddcf in inttomb \/tmp\/R-devel\/src\/main\/raw.c:366:17\n    #1 0x7f794526c8b6 in do_intToUtf8 \/tmp\/R-devel\/src\/main\/raw.c:427:10\n    #2 0x7f7945034ab6 in bcEval_loop \/tmp\/R-devel\/src\/main\/eval.c:8132:14\n    #3 0x7f7944fe8894 in bcEval \/tmp\/R-devel\/src\/main\/eval.c:7515:16\n    #4 0x7f7944fe6fcf in Rf_eval \/tmp\/R-devel\/src\/main\/eval.c:1167:8\n    #5 0x7f7944ff17fb in R_execClosure \/tmp\/R-devel\/src\/main\/eval.c:2389:22\n    #6 0x7f7944fed0f3 in applyClosure_core \/tmp\/R-devel\/src\/main\/eval.c:2302:16\n    #7 0x7f7944fe794f in Rf_applyClosure \/tmp\/R-devel\/src\/main\/eval.c:2324:16\n    #8 0x7f7944fe794f in Rf_eval \/tmp\/R-devel\/src\/main\/eval.c:1280:12\n    #9 0x7f794512cf45 in Rf_ReplIteration \/tmp\/R-devel\/src\/main\/main.c:264:15\n    #10 0x7f794512fe70 in R_ReplConsole \/tmp\/R-devel\/src\/main\/main.c:317:11\n    #11 0x7f794512fc84 in run_Rmainloop \/tmp\/R-devel\/src\/main\/main.c:1235:5\n    #12 0x7f794512ff6a in Rf_mainloop \/tmp\/R-devel\/src\/main\/main.c:1242:5\n    #13 0x5575b1c46004 in main \/tmp\/R-devel\/src\/main\/Rmain.c:29:5\n    #14 0x7f7944385f76 in __libc_start_call_main\ncsu\/..\/sysdeps\/nptl\/libc_start_call_main.h:58:16\n    #15 0x7f7944386026 in __libc_start_main csu\/..\/csu\/libc-start.c:360:3\n    #16 0x5575b1b5b380 in _start (\/usr\/local\/lib\/R\/bin\/exec\/R+0x2d380)\n(BuildId: 06f7995818cca9e0da5b6c1a9bd0046df9a824b5)\n```\n\nCandidate patch:\n\n```\nIndex: src\/main\/raw.c\n===================================================================\n--- src\/main\/raw.c      (revision 89873)\n+++ src\/main\/raw.c      (working copy)\n@@ -393,6 +393,7 @@\n        for (i = 0; i &lt; nc; i++) {\n            int this = INTEGER(x)[i];\n            if (this == NA_INTEGER\n+               || this &lt; 0\n                || (this &gt;= 0xD800 &amp;&amp; this &lt;= 0xDFFF)\n                || this &gt; 0x10FFFF)\n                SET_STRING_ELT(ans, i, NA_STRING);\n@@ -410,6 +411,7 @@\n            int this = INTEGER(x)[i];\n            if (this == NA_INTEGER\n+               || this &lt; 0\n                || (this &gt;= 0xDC00 &amp;&amp; this &lt;= 0xDFFF)\n                || this &gt; 0x10FFFF) {\n                haveNA = true;\n```\n\n---\n\n```\n&gt; R.version\n               _\nplatform       x86_64-pc-linux-gnu\narch           x86_64\nos             linux-gnu\nsystem         x86_64, linux-gnu\nstatus         Under development (unstable)\nmajor          4\nminor          7.0\nyear           2026\nmonth          04\nday            13\nsvn rev        89874\nlanguage       R\nversion.string R Under development (unstable) (2026-04-13 r89874)\nnickname       Unsuffered Consequences\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776270517.190869",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ZhE0P",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19052] New: intToUtf8(-1L) triggers ASAN error",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19052"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19052\n           Summary: intToUtf8(-1L) triggers ASAN error\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nFor example:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> intToUtf8(-1L)\nraw.c:366:17: runtime error: index 4 out of bounds for type 'const int[4]'\nSUMMARY: UndefinedBehaviorSanitizer: undefined-behavior raw.c:366:17\n=================================================================\n==7==ERROR: AddressSanitizer: global-buffer-overflow on address 0x7f7945589ad0\nat pc 0x7f794526ddd0 bp 0x7ffca12a3f10 sp 0x7ffca12a3f08\nREAD of size 4 at 0x7f7945589ad0 thread T0\n    #0 0x7f794526ddcf in inttomb \/tmp\/R-devel\/src\/main\/raw.c:366:17\n    #1 0x7f794526c8b6 in do_intToUtf8 \/tmp\/R-devel\/src\/main\/raw.c:427:10\n    #2 0x7f7945034ab6 in bcEval_loop \/tmp\/R-devel\/src\/main\/eval.c:8132:14\n    #3 0x7f7944fe8894 in bcEval \/tmp\/R-devel\/src\/main\/eval.c:7515:16\n    #4 0x7f7944fe6fcf in Rf_eval \/tmp\/R-devel\/src\/main\/eval.c:1167:8\n    #5 0x7f7944ff17fb in R_execClosure \/tmp\/R-devel\/src\/main\/eval.c:2389:22\n    #6 0x7f7944fed0f3 in applyClosure_core \/tmp\/R-devel\/src\/main\/eval.c:2302:16\n    #7 0x7f7944fe794f in Rf_applyClosure \/tmp\/R-devel\/src\/main\/eval.c:2324:16\n    #8 0x7f7944fe794f in Rf_eval \/tmp\/R-devel\/src\/main\/eval.c:1280:12\n    #9 0x7f794512cf45 in Rf_ReplIteration \/tmp\/R-devel\/src\/main\/main.c:264:15\n    #10 0x7f794512fe70 in R_ReplConsole \/tmp\/R-devel\/src\/main\/main.c:317:11\n    #11 0x7f794512fc84 in run_Rmainloop \/tmp\/R-devel\/src\/main\/main.c:1235:5\n    #12 0x7f794512ff6a in Rf_mainloop \/tmp\/R-devel\/src\/main\/main.c:1242:5\n    #13 0x5575b1c46004 in main \/tmp\/R-devel\/src\/main\/Rmain.c:29:5\n    #14 0x7f7944385f76 in __libc_start_call_main\ncsu\/..\/sysdeps\/nptl\/libc_start_call_main.h:58:16\n    #15 0x7f7944386026 in __libc_start_main csu\/..\/csu\/libc-start.c:360:3\n    #16 0x5575b1b5b380 in _start (\/usr\/local\/lib\/R\/bin\/exec\/R+0x2d380)\n(BuildId: 06f7995818cca9e0da5b6c1a9bd0046df9a824b5)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nCandidate patch:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/main\/raw.c\n===================================================================\n--- src\/main\/raw.c      (revision 89873)\n+++ src\/main\/raw.c      (working copy)\n@@ -393,6 +393,7 @@\n        for (i = 0; i < nc; i++) {\n            int this = INTEGER(x)[i];\n            if (this == NA_INTEGER\n+               || this < 0\n                || (this >= 0xD800 && this <= 0xDFFF)\n                || this > 0x10FFFF)\n                SET_STRING_ELT(ans, i, NA_STRING);\n@@ -410,6 +411,7 @@\n            int this = INTEGER(x)[i];\n            if (this == NA_INTEGER\n+               || this < 0\n                || (this >= 0xDC00 && this <= 0xDFFF)\n                || this > 0x10FFFF) {\n                haveNA = true;\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n---\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> R.version\n               _\nplatform       x86_64-pc-linux-gnu\narch           x86_64\nos             linux-gnu\nsystem         x86_64, linux-gnu\nstatus         Under development (unstable)\nmajor          4\nminor          7.0\nyear           2026\nmonth          04\nday            13\nsvn rev        89874\nlanguage       R\nversion.string R Under development (unstable) (2026-04-13 r89874)\nnickname       Unsuffered Consequences\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18693] rmultinom()  using LDOUBLE is platform dependent*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18693>\n\n--- Comment #9 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\n(In reply to Mauricio Vargas from comment #8)\n..................\n&gt; I have no idea how to put code side by side here, so I added some extra\n&gt; lines to be able to open two windows side by side and see the difference\n\nPlease **do** attach a patch file -- bugzilla will allow everyone to see the\ntwo versions of the underlying files, side by side (with color coding;  github\nis just *copying* here a feature that existed many decennia before, i.e.\n\"colorized diff\")\n.. and usefully call your patch file something like  `rmultinom_PR-18963.diff`\n(rather than quite a few other bugzilla helpers who use non-sense file names\nsuch as `patch.diff`).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776279196.686269",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "bvddC",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18693] rmultinom()  using LDOUBLE is platform dependent",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18693"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #9 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Mauricio Vargas from comment #8)\n.................."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I have no idea how to put code side by side here, so I added some extra\n lines to be able to open two windows side by side and see the difference"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nPlease **do** attach a patch file -- bugzilla will allow everyone to see the\ntwo versions of the underlying files, side by side (with color coding;  github\nis just "
+                            },
+                            {
+                                "type": "text",
+                                "text": "copying",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " here a feature that existed many decennia before, i.e.\n\"colorized diff\")\n.. and usefully call your patch file something like  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "rmultinom_PR-18963.diff",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n(rather than quite a few other bugzilla helpers who use non-sense file names\nsuch as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "patch.diff",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18693] rmultinom()  using LDOUBLE is platform dependent*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18693>\n\n--- Comment #10 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\n(In reply to Mauricio Vargas from comment #8)\n..................\n&gt; I have no idea how to put code side by side here, so I added some extra\n&gt; lines to be able to open two windows side by side and see the difference\n\nPlease **do** attach a patch file -- bugzilla will allow everyone to see the\ntwo versions of the underlying files, side by side (with color coding;  github\nis just *copying* here a feature that existed many decennia before, i.e.\n\"colorized diff\")\n.. and usefully call your patch file something like  `rmultinom_PR-18963.diff`\n(rather than quite a few other bugzilla helpers who use non-sense file names\nsuch as `patch.diff`).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776279259.632459",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ywtt",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18693] rmultinom()  using LDOUBLE is platform dependent",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18693"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #10 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Mauricio Vargas from comment #8)\n.................."
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I have no idea how to put code side by side here, so I added some extra\n lines to be able to open two windows side by side and see the difference"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nPlease **do** attach a patch file -- bugzilla will allow everyone to see the\ntwo versions of the underlying files, side by side (with color coding;  github\nis just "
+                            },
+                            {
+                                "type": "text",
+                                "text": "copying",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " here a feature that existed many decennia before, i.e.\n\"colorized diff\")\n.. and usefully call your patch file something like  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "rmultinom_PR-18963.diff",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n(rather than quite a few other bugzilla helpers who use non-sense file names\nsuch as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "patch.diff",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19053] New: undefined behavior when emitting EOF in file.choose()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19053>\n\n            Bug ID: 19053\n           Summary: undefined behavior when emitting EOF in file.choose()\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nCreated attachment 3675\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3675&amp;action=edit>\nCheck result of R_ReadConsole in Rstd_ChooseFile.\n\nFor example, if one runs `file.choose()` and then uses `Ctrl + D` to insert an\nEOF:\n\n```\n&gt; file.choose()\nEnter file name:\n                 \/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/unix\/sys-std.c:1384:13:\nruntime error: addition of unsigned offset to 0x7bf3ce48a020 overflowed to\n0x7bf3ce48a01f\n    #0 0x7ff3d3fefa59 in Rstd_ChooseFile\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/unix\/sys-std.c:1384:13\n    #1 0x7ff3d3c660a8 in do_filechoose\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/platform.c:1806:16\n    #2 0x7ff3d3a2e7a7 in bcEval_loop\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:8132:14\n    #3 0x7ff3d3a0de44 in bcEval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:7515:16\n    #4 0x7ff3d3a0bff3 in Rf_eval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:1167:8\n    #5 0x7ff3d3aa3123 in R_execClosure\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2389:22\n    #6 0x7ff3d3aa171f in applyClosure_core\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2302:16\n    #7 0x7ff3d3a0c911 in Rf_applyClosure\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2324:16\n    #8 0x7ff3d3a0c911 in Rf_eval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:1280:12\n    #9 0x7ff3d3ba2844 in Rf_ReplIteration\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c:264:15\n    #10 0x7ff3d3ba87d6 in R_ReplConsole\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c:317:11\n    #11 0x7ff3d3ba8547 in run_Rmainloop\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c:1235:5\n    #12 0x7ff3d3ba2172 in Rf_mainloop\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c:1242:5\n    #13 0x0000004e9f87 in main\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/Rmain.c:29:5\n    #14 0x7ff3d31ec5b4 in __libc_start_call_main (\/lib64\/libc.so.6+0x35b4)\n(BuildId: ff0267465bc3d76e21003b3bc5598fd5ee63e261)\n    #15 0x7ff3d31ec667 in __libc_start_main@GLIBC_2.2.5\n(\/lib64\/libc.so.6+0x3667) (BuildId: ff0267465bc3d76e21003b3bc5598fd5ee63e261)\n    #16 0x0000004007d4 in _start\n(\/home\/kevin\/r-devel\/r-afl\/build\/r-asan-ubsan\/bin\/exec\/R+0x4007d4) (BuildId:\ndfb50a3b7e3b2ee0d562379cf48df52d26a6953c)\n\nSUMMARY: UndefinedBehaviorSanitizer: undefined-behavior\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/unix\/sys-std.c:1384:13\n```\n\n\n---\n\n&gt; R.version\n               _\nplatform       x86_64-pc-linux-gnu\narch           x86_64\nos             linux-gnu\nsystem         x86_64, linux-gnu\nstatus         Under development (unstable)\nmajor          4\nminor          7.0\nyear           2026\nmonth          04\nday            12\nsvn rev        89873\nlanguage       R\nversion.string R Under development (unstable) (2026-04-12 r89873)\nnickname       Unsuffered Consequences",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776285951.611539",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Hc\/",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19053] New: undefined behavior when emitting EOF in file.choose()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19053"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19053\n           Summary: undefined behavior when emitting EOF in file.choose()\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3675\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3675&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3675&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCheck result of R_ReadConsole in Rstd_ChooseFile.\n\nFor example, if one runs "
+                            },
+                            {
+                                "type": "text",
+                                "text": "file.choose()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and then uses "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Ctrl + D",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to insert an\nEOF:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> file.choose()\nEnter file name:\n                 \/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/unix\/sys-std.c:1384:13:\nruntime error: addition of unsigned offset to 0x7bf3ce48a020 overflowed to\n0x7bf3ce48a01f\n    #0 0x7ff3d3fefa59 in Rstd_ChooseFile\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/unix\/sys-std.c:1384:13\n    #1 0x7ff3d3c660a8 in do_filechoose\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/platform.c:1806:16\n    #2 0x7ff3d3a2e7a7 in bcEval_loop\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:8132:14\n    #3 0x7ff3d3a0de44 in bcEval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:7515:16\n    #4 0x7ff3d3a0bff3 in Rf_eval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:1167:8\n    #5 0x7ff3d3aa3123 in R_execClosure\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2389:22\n    #6 0x7ff3d3aa171f in applyClosure_core\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2302:16\n    #7 0x7ff3d3a0c911 in Rf_applyClosure\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2324:16\n    #8 0x7ff3d3a0c911 in Rf_eval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:1280:12\n    #9 0x7ff3d3ba2844 in Rf_ReplIteration\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c:264:15\n    #10 0x7ff3d3ba87d6 in R_ReplConsole\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c:317:11\n    #11 0x7ff3d3ba8547 in run_Rmainloop\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c:1235:5\n    #12 0x7ff3d3ba2172 in Rf_mainloop\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c:1242:5\n    #13 0x0000004e9f87 in main\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/Rmain.c:29:5\n    #14 0x7ff3d31ec5b4 in __libc_start_call_main (\/lib64\/libc.so.6+0x35b4)\n(BuildId: ff0267465bc3d76e21003b3bc5598fd5ee63e261)\n    #15 0x7ff3d31ec667 in __libc_start_main@GLIBC_2.2.5\n(\/lib64\/libc.so.6+0x3667) (BuildId: ff0267465bc3d76e21003b3bc5598fd5ee63e261)\n    #16 0x0000004007d4 in _start\n(\/home\/kevin\/r-devel\/r-afl\/build\/r-asan-ubsan\/bin\/exec\/R+0x4007d4) (BuildId:\ndfb50a3b7e3b2ee0d562379cf48df52d26a6953c)\n\nSUMMARY: UndefinedBehaviorSanitizer: undefined-behavior\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/unix\/sys-std.c:1384:13\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n\n\n---\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "R.version"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "               _\nplatform       x86_64-pc-linux-gnu\narch           x86_64\nos             linux-gnu\nsystem         x86_64, linux-gnu\nstatus         Under development (unstable)\nmajor          4\nminor          7.0\nyear           2026\nmonth          04\nday            12\nsvn rev        89873\nlanguage       R\nversion.string R Under development (unstable) (2026-04-12 r89873)\nnickname       Unsuffered Consequences"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18693] rmultinom()  using LDOUBLE is platform dependent*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18693>\n\n--- Comment #11 from Mauricio Vargas (<mailto:mvargassepulveda@gmail.com|mvargassepulveda@gmail.com>) ---\nCreated attachment 3676\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3676&amp;action=edit>\nuse Kahan summation keeping x86's 80-bit long double bs ARM's 64-bit for the\nsame\n\nI uploaded the proposed patch here following from the thread",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776286020.616349",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "rPqt",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18693] rmultinom()  using LDOUBLE is platform dependent",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18693"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #11 from Mauricio Vargas ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:mvargassepulveda@gmail.com",
+                                "text": "mvargassepulveda@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3676\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3676&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3676&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nuse Kahan summation keeping x86's 80-bit long double bs ARM's 64-bit for the\nsame\n\nI uploaded the proposed patch here following from the thread"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18693] rmultinom()  using LDOUBLE is platform dependent*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18693>\n\n--- Comment #12 from Simon Urbanek (<mailto:simon.urbanek@r-project.org|simon.urbanek@r-project.org>) ---\nYou uploaded a C file not a patch. Please update the patch itself and do not\nchange the extension.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776286196.349559",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "JwaCQ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18693] rmultinom()  using LDOUBLE is platform dependent",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18693"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #12 from Simon Urbanek ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:simon.urbanek@r-project.org",
+                                "text": "simon.urbanek@r-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nYou uploaded a C file not a patch. Please update the patch itself and do not\nchange the extension."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18693] rmultinom()  using LDOUBLE is platform dependent*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18693>\n\nMauricio Vargas (<mailto:mvargassepulveda@gmail.com|mvargassepulveda@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3676|rmultinom-18963.diff.c      |rmultinom-18963.diff\n           filename|                            |\n\n--- Comment #13 from Mauricio Vargas (<mailto:mvargassepulveda@gmail.com|mvargassepulveda@gmail.com>) ---\nComment on attachment 3676\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3676>\nuse Kahan summation keeping x86's 80-bit long double bs ARM's 64-bit for the\nsame\n\nrenamed",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776286288.347659",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "8JmRI",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18693] rmultinom()  using LDOUBLE is platform dependent",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18693"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMauricio Vargas ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:mvargassepulveda@gmail.com",
+                                "text": "mvargassepulveda@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3676|rmultinom-18963.diff.c      |rmultinom-18963.diff\n           filename|                            |\n\n--- Comment #13 from Mauricio Vargas ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:mvargassepulveda@gmail.com",
+                                "text": "mvargassepulveda@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nComment on attachment 3676\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3676"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nuse Kahan summation keeping x86's 80-bit long double bs ARM's 64-bit for the\nsame\n\nrenamed"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18693] rmultinom()  using LDOUBLE is platform dependent*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18693>\n\n--- Comment #14 from Simon Urbanek (<mailto:simon.urbanek@r-project.org|simon.urbanek@r-project.org>) ---\nThe content you uploaded is invalid. Please upload the patch obtained by\nrunning `svn diff` as new attachment.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776286782.906879",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "jdIyP",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18693] rmultinom()  using LDOUBLE is platform dependent",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18693"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #14 from Simon Urbanek ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:simon.urbanek@r-project.org",
+                                "text": "simon.urbanek@r-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe content you uploaded is invalid. Please upload the patch obtained by\nrunning "
+                            },
+                            {
+                                "type": "text",
+                                "text": "svn diff",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as new attachment."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18693] rmultinom()  using LDOUBLE is platform dependent*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18693>\n\nIvan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #15 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nCreated attachment 3677\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3677&amp;action=edit>\nPatch by Mauricio Vargas\n\nDear Mauricio Vargas,\n\nThank you for spending the effort to implement Kahan summation for `rmultinom`!\nHere's how to convert your Git commit to a Subversion patch that would work on\nBugzilla:\n\n1. [Check out the Subversion repository] and make that your current directory\n2. `wget -O-\n<https:\/\/github.com\/pachadotdev\/r-source\/commit\/a390ce706e6b14a878739ff28a5850a3809d015f.diff>\n| patch -p1`\n3. `svn diff src\/nmath\/rmultinom.c &gt; PR18693.patch`\n\n[Check out the Subversion repository]:\n<https:\/\/contributor.r-project.org\/rdevguide\/chapters\/lifecycle_of_a_patch.html#what-tools-are-required-to-submit-a-patch>\n\nActually, I've just checked that if I download the `.diff` file from the URL\nabove, `svn patch $file.diff` works well with it. Since Subversion understands\npatch files produced by `git diff`, can it be acceptable to post Git diffs on\nBugzilla?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776321989.038519",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "thread_ts": "1776321989.038519",
+        "reply_count": 1,
+        "reply_users_count": 1,
+        "latest_reply": "1776324297.488609",
+        "reply_users": [
+            "U01KXU8UNRX"
+        ],
+        "replies": [
+            {
+                "user": "U01KXU8UNRX",
+                "ts": "1776324297.488609"
+            }
+        ],
+        "is_locked": false,
+        "subscribed": false,
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Yij",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18693] rmultinom()  using LDOUBLE is platform dependent",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18693"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIvan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #15 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3677\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3677&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3677&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch by Mauricio Vargas\n\nDear Mauricio Vargas,\n\nThank you for spending the effort to implement Kahan summation for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "rmultinom",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "!\nHere's how to convert your Git commit to a Subversion patch that would work on\nBugzilla:\n\n1. [Check out the Subversion repository] and make that your current directory\n2. `wget -O-\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/pachadotdev\/r-source\/commit\/a390ce706e6b14a878739ff28a5850a3809d015f.diff"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n| patch -p1`\n3. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "svn diff src\/nmath\/rmultinom.c > PR18693.patch",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n[Check out the Subversion repository]:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/contributor.r-project.org\/rdevguide\/chapters\/lifecycle_of_a_patch.html#what-tools-are-required-to-submit-a-patch"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nActually, I've just checked that if I download the "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".diff",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " file from the URL\nabove, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "svn patch $file.diff",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " works well with it. Since Subversion understands\npatch files produced by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "git diff",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", can it be acceptable to post Git diffs on\nBugzilla?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

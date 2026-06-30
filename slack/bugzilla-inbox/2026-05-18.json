@@ -1,0 +1,544 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19071] wilcox.test and precision when detecting zeros*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19071>\n\n--- Comment #8 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\n(In reply to Martin Maechler from comment #5)\nAs a matter of fact, scale-equivariance is not given for really large numbers\nwith the `min.d = 0` default. I have updated the ?zapsmall help page now, soon\nto be visible at\n\n<https:\/\/cran.r-project.org\/doc\/manuals\/r-devel\/packages\/base\/refman\/base.html#zapsmall>\nto say so.\n\nAlso from my experiments, the R regression tests, and some quiet thinking,\nI've now seen that the __robustness__ of `wilcox.test()` to outliers is indeed\nmore important than full scale equivariance, and we actually not only need\n`zapsmall()` but actually `zapsmall(*, digits, mFUN = &lt;robust&gt;)`.  My current\napproach and not-yet-commited R code now using a new (`{stats}` namespace\nhidden)\n\n```\n.zapsmall.r &lt;- function(x, digits)\n    zapsmall(x, digits,\n             mFUN = function(x, ina) {\n                 x &lt;- abs(x[is.finite(x)])\n                 if(length(x &lt;- x[x &gt; 0])) quantile(x, .75, names=FALSE) else 0\n             },\n             min.d = -324)\n```\n(the non-default `min.d` value providing scale-equivariance also for large\n\"scale\" numbers).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1779106496.901789",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "8Rzr",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19071] wilcox.test and precision when detecting zeros",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19071"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #8 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Martin Maechler from comment #5)\nAs a matter of fact, scale-equivariance is not given for really large numbers\nwith the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "min.d = 0",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " default. I have updated the ?zapsmall help page now, soon\nto be visible at\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/cran.r-project.org\/doc\/manuals\/r-devel\/packages\/base\/refman\/base.html#zapsmall"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nto say so.\n\nAlso from my experiments, the R regression tests, and some quiet thinking,\nI've now seen that the __robustness__ of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "wilcox.test()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to outliers is indeed\nmore important than full scale equivariance, and we actually not only need\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "zapsmall()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " but actually "
+                            },
+                            {
+                                "type": "text",
+                                "text": "zapsmall(*, digits, mFUN = <robust>)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  My current\napproach and not-yet-commited R code now using a new ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "{stats}",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " namespace\nhidden)\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": ".zapsmall.r <- function(x, digits)\n    zapsmall(x, digits,\n             mFUN = function(x, ina) {\n                 x <- abs(x[is.finite(x)])\n                 if(length(x <- x[x > 0])) quantile(x, .75, names=FALSE) else 0\n             },\n             min.d = -324)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "(the non-default "
+                            },
+                            {
+                                "type": "text",
+                                "text": "min.d",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " value providing scale-equivariance also for large\n\"scale\" numbers)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17549] When building a package, use inRbuildignore() before copying package contents to Tdir*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17549>\n\nBen Bolker (<mailto:bbolker@gmail.com|bbolker@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |bbolker@gmail.com\n\n--- Comment #4 from Ben Bolker (<mailto:bbolker@gmail.com|bbolker@gmail.com>) ---\nI'll just point out that this continues to be an issue.  There are plenty of\nworkarounds, but it will probably continue to bite people.  (Maybe one tiny\nmitigation would be to issue a \"recursively copying package directory ...\"\nmessage to hint to users what might be happening?)\n\nThread from 2024:\n<https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2024-August\/083610.html>\n\nThread from 2026: <https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2026-May\/084571.html>\n\n(is `rsync` in the list of tools that are expected to be available for R\npackage building ... ??)  I don't think so, as you don't need `Rtools` for a\nsource-only package ... ?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1779132016.049419",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "2A89",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17549] When building a package, use inRbuildignore() before copying package contents to Tdir",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17549"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nBen Bolker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:bbolker@gmail.com",
+                                "text": "bbolker@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |bbolker@gmail.com\n\n--- Comment #4 from Ben Bolker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:bbolker@gmail.com",
+                                "text": "bbolker@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI'll just point out that this continues to be an issue.  There are plenty of\nworkarounds, but it will probably continue to bite people.  (Maybe one tiny\nmitigation would be to issue a \"recursively copying package directory ...\"\nmessage to hint to users what might be happening?)\n\nThread from 2024:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2024-August\/083610.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThread from 2026: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2026-May\/084571.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n(is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "rsync",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in the list of tools that are expected to be available for R\npackage building ... ??)  I don't think so, as you don't need "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rtools",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for a\nsource-only package ... ?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 15189] Copying a Graphics Window Copies All Graphic Elements Rather Than Bitmap*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=15189>\n\nKevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |kevinushey@gmail.com\n\n--- Comment #1 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nCreated attachment 3698\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3698&amp;action=edit>\nSupport additional image formats when copying from Quartz window.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1779135862.307909",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "2DB",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 15189] Copying a Graphics Window Copies All Graphic Elements Rather Than Bitmap",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=15189"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nKevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |kevinushey@gmail.com\n\n--- Comment #1 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3698\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3698&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3698&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nSupport additional image formats when copying from Quartz window."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 15189] Copying a Graphics Window Copies All Graphic Elements Rather Than Bitmap*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=15189>\n\n--- Comment #2 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nIf I understand correctly, this is because the copy handler for images (in\nqdCocoa.m) currently builds a PDF from the graphics device snapshot, and that\nPDF uses individual entities for e.g. points and so would potentially be large\nas suggested.\n\nA potential solution here would be to include a bitmap representation of the\nplot as well, but there are open questions around things like:\n\n- Do we want to render both versions for the Pasteboard? Or just one?\n- If just one, do we want to allow the user to configure this behavior?\n- Do nothing; this is an older bug report and presumably most people are\ncomfortable with the current behavior, or just write plots to file with\nexplicit graphics device invocations where needed.\n\nA quick and dirty patch proposal is included, but is intended to sit only as a\njumping-off point, not a ready-to-merge patch.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1779135893.456239",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "oKJ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 15189] Copying a Graphics Window Copies All Graphic Elements Rather Than Bitmap",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=15189"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nIf I understand correctly, this is because the copy handler for images (in\nqdCocoa.m) currently builds a PDF from the graphics device snapshot, and that\nPDF uses individual entities for e.g. points and so would potentially be large\nas suggested.\n\nA potential solution here would be to include a bitmap representation of the\nplot as well, but there are open questions around things like:\n\n- Do we want to render both versions for the Pasteboard? Or just one?\n- If just one, do we want to allow the user to configure this behavior?\n- Do nothing; this is an older bug report and presumably most people are\ncomfortable with the current behavior, or just write plots to file with\nexplicit graphics device invocations where needed.\n\nA quick and dirty patch proposal is included, but is intended to sit only as a\njumping-off point, not a ready-to-merge patch."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16615] Allow multi-character separator in scan()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16615>\n\nKevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |TRIAGED\n                 CC|                            |kevinushey@gmail.com\n     Ever confirmed|0                           |1\n\n--- Comment #1 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nMaking this change is harder than it looks, unfortunately, and so I think this\nis unlikely to happen. I suspect the simplest change here would be to recommend\nan alternate tool for when one wants to read data using multi-byte separators,\nor to perform some amount of preprocessing and perhaps post-processing to\ntransform separators into a single byte.\n\nSome more analysis below.\n\n---\n\n  The relevant code is src\/main\/scan.c. The inner reader (fillBuffer, lines\n  ~397-456) consumes one byte at a time and tests it against a single int\n  sepchar, with exactly one byte of pushback (LocalData.save, unscanchar at\n  line 231). Allowing a multi-byte separator changes several things at once:\n\n  1. Look-ahead and rollback. On seeing the first byte of sep, we have to\n     read up to N-1 more bytes and either commit (it was the separator) or\n     back out, copying the consumed prefix into the field. The existing\n     1-byte pushback isn't enough.\n\n  2. CSV-style quoting. The current code peeks one byte after a closing\n     quote to decide \"is this the separator or end-of-line?\" That peek\n     becomes a multi-byte compare with the same rollback issue.\n\n  3. DBCS locales. The reader is byte-oriented but treats DBCS lead\/trail\n     bytes specially. A multi-byte separator must not be allowed to straddle\n     a character boundary, which adds another validity check.\n\n  4. strip.white interactions. A separator like \" | \" or \"\\t|\\t\" makes the\n     trim rules ambiguous and needs documented precedence.\n\n  5. Embedded newlines. This is the bigger issue for the use case you\n     describe. scan() unconditionally treats \\n, \\r, and EOF as record\n     terminators (see lines 398-399). Even with a multi-byte field\n     separator, an embedded newline still breaks the record. So multi-byte\n     sep alone wouldn't actually solve the \"arbitrary character content\"\n     problem you mention -- it solves the collision problem, but not the\n     embedded-newline problem.\n\n  None of this is unfixable, but it's a delicate change in a hot,\n  locale-sensitive path, with a wide test surface across scan\/read.table\/\n  read.csv. The bar to land it is high.\n\n\n  Alternatives\n  ------------\n\n  For the \"delimiter unlikely to collide with data\" case, the canonical\n  solution is a single-byte ASCII control character. C0 0x1E (Record\n  Separator) and 0x1F (Unit Separator) were reserved by ASCII for exactly\n  this purpose and never appear in well-formed text:\n\n      sep = \"\\x1f\"   # Unit Separator: between fields\n                     # \\x1e Record Separator: between records\n\n  This works with current scan() and is strictly stronger than a long\n  sentinel string, because the byte is by construction absent from text\n  payloads.\n\n  If the data already arrives with a multi-byte separator and you can't\n  change the producer, substitute before parsing:\n\n      raw &lt;- readChar(path, <http:\/\/file.info|file.info>(path)$size, useBytes = TRUE)\n      raw &lt;- gsub(\"|%$!?MYSEP?!$%|\", \"\\x1f\", raw,\n                  fixed = TRUE, useBytes = TRUE)\n\n  Reading the whole file in one shot (rather than line-at-a-time) avoids\n  the issue that readLines()-based approaches have with embedded newlines.\n\n  If your fields can also contain literal \\n characters that should not\n  terminate a record, you'll need to substitute those too (e.g. to \\x1e)\n  before handing to scan().",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1779136663.399669",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "BaJ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16615] Allow multi-character separator in scan()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16615"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nKevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |TRIAGED\n                 CC|                            |kevinushey@gmail.com\n     Ever confirmed|0                           |1\n\n--- Comment #1 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nMaking this change is harder than it looks, unfortunately, and so I think this\nis unlikely to happen. I suspect the simplest change here would be to recommend\nan alternate tool for when one wants to read data using multi-byte separators,\nor to perform some amount of preprocessing and perhaps post-processing to\ntransform separators into a single byte.\n\nSome more analysis below.\n\n---\n\n  The relevant code is src\/main\/scan.c. The inner reader (fillBuffer, lines\n  ~397-456) consumes one byte at a time and tests it against a single int\n  sepchar, with exactly one byte of pushback (LocalData.save, unscanchar at\n  line 231). Allowing a multi-byte separator changes several things at once:\n\n  1. Look-ahead and rollback. On seeing the first byte of sep, we have to\n     read up to N-1 more bytes and either commit (it was the separator) or\n     back out, copying the consumed prefix into the field. The existing\n     1-byte pushback isn't enough.\n\n  2. CSV-style quoting. The current code peeks one byte after a closing\n     quote to decide \"is this the separator or end-of-line?\" That peek\n     becomes a multi-byte compare with the same rollback issue.\n\n  3. DBCS locales. The reader is byte-oriented but treats DBCS lead\/trail\n     bytes specially. A multi-byte separator must not be allowed to straddle\n     a character boundary, which adds another validity check.\n\n  4. strip.white interactions. A separator like \" | \" or \"\\t|\\t\" makes the\n     trim rules ambiguous and needs documented precedence.\n\n  5. Embedded newlines. This is the bigger issue for the use case you\n     describe. scan() unconditionally treats \\n, \\r, and EOF as record\n     terminators (see lines 398-399). Even with a multi-byte field\n     separator, an embedded newline still breaks the record. So multi-byte\n     sep alone wouldn't actually solve the \"arbitrary character content\"\n     problem you mention -- it solves the collision problem, but not the\n     embedded-newline problem.\n\n  None of this is unfixable, but it's a delicate change in a hot,\n  locale-sensitive path, with a wide test surface across scan\/read.table\/\n  read.csv. The bar to land it is high.\n\n\n\n  Alternatives\n  ------------\n\n  For the \"delimiter unlikely to collide with data\" case, the canonical\n  solution is a single-byte ASCII control character. C0 0x1E (Record\n  Separator) and 0x1F (Unit Separator) were reserved by ASCII for exactly\n  this purpose and never appear in well-formed text:\n\n      sep = \"\\x1f\"   # Unit Separator: between fields\n                     # \\x1e Record Separator: between records\n\n  This works with current scan() and is strictly stronger than a long\n  sentinel string, because the byte is by construction absent from text\n  payloads.\n\n  If the data already arrives with a multi-byte separator and you can't\n  change the producer, substitute before parsing:\n\n      raw <- readChar(path, "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/file.info",
+                                "text": "file.info"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(path)$size, useBytes = TRUE)\n      raw <- gsub(\"|%$!?MYSEP?!$%|\", \"\\x1f\", raw,\n                  fixed = TRUE, useBytes = TRUE)\n\n  Reading the whole file in one shot (rather than line-at-a-time) avoids\n  the issue that readLines()-based approaches have with embedded newlines.\n\n  If your fields can also contain literal \\n characters that should not\n  terminate a record, you'll need to substitute those too (e.g. to \\x1e)\n  before handing to scan()."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18035] a bug in wilcox.test() caused by precision error when there are ties*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18035>\n\n--- Comment #7 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nAidan Lakshman shared a nice relevant blog post:\n\n<https:\/\/aakinshin.net\/posts\/mw-confusing-tie-correction\/>\n\nMy takeaway is it's very likely a bad choice to use `digits.rank=Inf` since it\nwill almost surely give misleading `p`-values, but that there's also nothing\nlike universal agreement about how to fix this, so giving the user full control\nmay be the right compromise.\n\nI was also trying to get Gemini to be my research assistant here to come up\nwith a well-motivated default, and it wrote a very nice-looking report, but I'm\nafraid I don't have the right combination of (1) confidence that it's doing the\nright thing and (2) time to thoroughly vet the claims; to actually pass it\nalong.\n\nFWIW, [SciPy handles this with no rounding and a documentation\nwarning](<https:\/\/docs.scipy.org\/doc\/scipy\/reference\/generated\/scipy.stats.wilcoxon.html>):\n\n&gt; When y is provided, wilcoxon calculates the test statistic based on the ranks of the absolute values of d = x - y. Roundoff error in the subtraction can result in elements of d being assigned different ranks even when they would be tied with exact arithmetic. Rather than passing x and y separately, consider computing the difference x - y, rounding as needed to ensure that only truly unique elements are numerically distinct, and passing the result as x, leaving y at the default (None).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1779139745.956979",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "2CRrl",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18035] a bug in wilcox.test() caused by precision error when there are ties",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18035"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #7 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nAidan Lakshman shared a nice relevant blog post:\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/aakinshin.net\/posts\/mw-confusing-tie-correction\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMy takeaway is it's very likely a bad choice to use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "digits.rank=Inf",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " since it\nwill almost surely give misleading "
+                            },
+                            {
+                                "type": "text",
+                                "text": "p",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "-values, but that there's also nothing\nlike universal agreement about how to fix this, so giving the user full control\nmay be the right compromise.\n\nI was also trying to get Gemini to be my research assistant here to come up\nwith a well-motivated default, and it wrote a very nice-looking report, but I'm\nafraid I don't have the right combination of (1) confidence that it's doing the\nright thing and (2) time to thoroughly vet the claims; to actually pass it\nalong.\n\nFWIW, [SciPy handles this with no rounding and a documentation\nwarning]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/docs.scipy.org\/doc\/scipy\/reference\/generated\/scipy.stats.wilcoxon.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "When y is provided, wilcoxon calculates the test statistic based on the ranks of the absolute values of d = x - y. Roundoff error in the subtraction can result in elements of d being assigned different ranks even when they would be tied with exact arithmetic. Rather than passing x and y separately, consider computing the difference x - y, rounding as needed to ensure that only truly unique elements are numerically distinct, and passing the result as x, leaving y at the default (None)."
+                            }
+                        ],
+                        "contains_padding": true
+                    }
+                ]
+            }
+        ]
+    }
+]

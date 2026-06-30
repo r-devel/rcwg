@@ -1,0 +1,669 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18989] Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989>\n\n--- Comment #20 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\n(In reply to Martin Maechler from comment #13)\n&gt; Created attachment 3665\n&gt; \"Test code R script\"  (MM)\n\nOn '[&lt;-.POSIXlt' and '[[&lt;-.POSIXlt':\n\n\nIn\nx[1:25] &lt;- x25[1:25]\nand\nx.[[i]] &lt;- x25[[i]]\n, 'x', 'x.' and 'x25' have identical 'tzone' attributes.\nThere is no difference from R 4.5.3, direct components subassignments is done.\n\nx[1:25] - x25[1:25]\nall 0\n\nx$sec == x25$sec\nall TRUE\n\nx$wday == x25$wday\nall TRUE\n\nx.[[7]] - x25[[7]]\n0\n\nx.[[25]] - x25[[25]]\n0\n\nx.$sec[c(7, 25)] == x25$sec[c(7, 25)]\nc(TRUE, TRUE)\n\nx.$wday[c(7, 25)] == x25$wday\nc(TRUE, TRUE)\n\n\nSuppose that\n\nlcx. &lt;- lcx\nlcx[1:25] &lt;- x25[1:25]\nlcx.[[7]] &lt;- x25[[7]]\nlcx.[[25]] &lt;- x25[[25]]\n\nis added.\nThe 'tzone' attribute of 'x25' has the same first element as, but different\nlength from the 'tzone' attribute of 'lcx' or 'lcx.', except when 'thtz' is\n\"UTC\".\nR 4.5.3: direct components subassignments\nR 4.6.0:\n- thtz=\"UTC\": direct components subassignments\n- else: as.POSIXlt(as.POSIXct(*), tz = *) first\nr89926: direct components subassignments\n\nlcx[1:25] - x25[1:25]\nall 0\n\nlcx$sec == x25$sec\nR 4.5.3: all TRUE\nR 4.6.0:\n- thtz=\"UTC\": all TRUE\n- else:\ni=1 to i=5: FALSE from 8\ni=6: FALSE from 7\ni=7: FALSE from 6\ni=8: FALSE from 5\ni=9: FALSE from 3\ni=10 to i=11: all FALSE\nr89926: all TRUE\n\nlcx$wday == x25$wday\nR 4.5.3: all TRUE\nR 4.6.0:\n- thtz=\"UTC\": all TRUE\n- else:\ni=1: FALSE from 8\ni=2: all FALSE\ni=3 to i=4: TRUE from 8\ni=5: all FALSE\ni=6: FALSE from 7\ni=7: FALSE from 6\ni=8: FALSE from 5\ni=9: FALSE from 3\ni=10 to i=11: all FALSE\nr89926: all TRUE\n\nlcx.[[7]] - x25[[7]]\n0\n\nlcx.[[25]] - x25[[25]]\n0\n\nlcx.$sec[c(7, 25)] == x25$sec[c(7, 25)]\nR 4.5.3: TRUE TRUE\nR 4.6.0:\n- thtz=\"UTC\": TRUE TRUE\n- else:\ni=1 to i=5: TRUE FALSE\ni=6 to i=11: FALSE FALSE\nr89926: TRUE TRUE\n\nlcx.$wday[c(7, 25)] == x25$wday\nR 4.5.3: TRUE TRUE\nR 4.6.0:\n- thtz=\"UTC\": TRUE TRUE\n- else:\ni=1: TRUE FALSE\ni=2: FALSE FALSE\ni=3 to i=4: FALSE TRUE\ni=5 to i=11: FALSE FALSE\nr89926: TRUE TRUE\n\n\nSuppose that\n\nxU. &lt;- xU &lt;- as.POSIXlt(.POSIXct(numeric(25), tz = \"Etc\/UTC\"))\nxU[1:25] &lt;- x25[1:25]\nxU.[[7]] &lt;- x25[[7]]\nxU.[[25]] &lt;- x25[[25]]\n\nis added.\nThe 'tzone' attribute of 'x25' has different first element from the 'tzone'\nattribute of 'xU' or 'xU.'. The 'tzone' attribute of 'xU' or 'xU.' has length\n3.\nR 4.5.3: direct components subassignments\nR 4.6.0: as.POSIXlt(as.POSIXct(*), tz = *) first\nr89926:\n[&lt;- : as.POSIXlt(as.POSIXct(*), tz = *) then correct sec first\n[[&lt;- : as.POSIXlt(as.POSIXct(*), tz = attr(*, \"tzone\")) then correct sec first,\n*error*\n\nxU[1:25] - x25[1:25]\nR 4.5.3:\n- thtz=\"UTC\": all 0\n- else: all not 0\nR 4.6.0: all 0\nr89926:\ni=1 to i=5: 1 sec at 8 to 23\ni=6: 1 sec at 7 to 23\ni=7: 1 sec at 6 to 23\ni=8: 1 sec at 5 to 23\ni=9: 1 sec at 3 to 23\ni=10: 1 sec at 1 to 23\ni=11: all 0\n*floor sec before as.POSIXct: all 0\n\nxU$sec == x25$sec\nR 4.5.3: all TRUE\nR 4.6.0, r89926:\ni=1 to i=5: FALSE from 8\ni=6: FALSE from 7\ni=7: FALSE from 6\ni=8: FALSE from 5\ni=9: FALSE from 3\ni=10 to i=11: all FALSE\n*floor sec before as.POSIXct:\ni=1 to i=10: FALSE from 24\ni=11: all FALSE\n\nxU$wday == x25$wday\nR 4.5.3: all TRUE\nR 4.6.0, r89926:\n- thtz=\"UTC\":\ni=1: FALSE from 8\ni=2: all FALSE\ni=3 to i=4: TRUE from 8\ni=5: all FALSE\ni=6: FALSE from 7\ni=7: FALSE from 6\ni=8: FALSE from 5\ni=9: FALSE from 3\ni=10 to i=11: all FALSE\n- thtz=\"Europe\/Kyiv\",\"Asia\/Hebron\",\"Asia\/Kolkata\",\"Pacific\/Auckland\":\ni=1: all TRUE\ni=2 to i=5: all FALSE\ni=6 to i=11: all TRUE\n- thtz=\"Canada\/Mountain\",\"Navajo\":\ni=1 to i=2: all FALSE\ni=3 to i=4: all TRUE\ni=5 to i=11: all FALSE\n*floor sec before as.POSIXct:\n- thtz=\"UTC\":\ni=1: FALSE from 24\ni=2: all FALSE\ni=3 to i=4: TRUE from 24\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1777032112.379089",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "HRu",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18989] Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #20 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Martin Maechler from comment #13)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Created attachment 3665\n \"Test code R script\"  (MM)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nOn '[<-.POSIXlt' and '[[<-.POSIXlt':\n\n\n\nIn\nx[1:25] <- x25[1:25]\nand\nx.[[i]] <- x25[[i]]\n, 'x', 'x.' and 'x25' have identical 'tzone' attributes.\nThere is no difference from R 4.5.3, direct components subassignments is done.\n\nx[1:25] - x25[1:25]\nall 0\n\nx$sec == x25$sec\nall TRUE\n\nx$wday == x25$wday\nall TRUE\n\nx.[[7]] - x25[[7]]\n0\n\nx.[[25]] - x25[[25]]\n0\n\nx.$sec[c(7, 25)] == x25$sec[c(7, 25)]\nc(TRUE, TRUE)\n\nx.$wday[c(7, 25)] == x25$wday\nc(TRUE, TRUE)\n\n\n\nSuppose that\n\nlcx. <- lcx\nlcx[1:25] <- x25[1:25]\nlcx.[[7]] <- x25[[7]]\nlcx.[[25]] <- x25[[25]]\n\nis added.\nThe 'tzone' attribute of 'x25' has the same first element as, but different\nlength from the 'tzone' attribute of 'lcx' or 'lcx.', except when 'thtz' is\n\"UTC\".\nR 4.5.3: direct components subassignments\nR 4.6.0:\n- thtz=\"UTC\": direct components subassignments\n- else: as.POSIXlt(as.POSIXct("
+                            },
+                            {
+                                "type": "text",
+                                "text": "), tz = ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") first\nr89926: direct components subassignments\n\nlcx[1:25] - x25[1:25]\nall 0\n\nlcx$sec == x25$sec\nR 4.5.3: all TRUE\nR 4.6.0:\n- thtz=\"UTC\": all TRUE\n- else:\ni=1 to i=5: FALSE from 8\ni=6: FALSE from 7\ni=7: FALSE from 6\ni=8: FALSE from 5\ni=9: FALSE from 3\ni=10 to i=11: all FALSE\nr89926: all TRUE\n\nlcx$wday == x25$wday\nR 4.5.3: all TRUE\nR 4.6.0:\n- thtz=\"UTC\": all TRUE\n- else:\ni=1: FALSE from 8\ni=2: all FALSE\ni=3 to i=4: TRUE from 8\ni=5: all FALSE\ni=6: FALSE from 7\ni=7: FALSE from 6\ni=8: FALSE from 5\ni=9: FALSE from 3\ni=10 to i=11: all FALSE\nr89926: all TRUE\n\nlcx.[[7]] - x25[[7]]\n0\n\nlcx.[[25]] - x25[[25]]\n0\n\nlcx.$sec[c(7, 25)] == x25$sec[c(7, 25)]\nR 4.5.3: TRUE TRUE\nR 4.6.0:\n- thtz=\"UTC\": TRUE TRUE\n- else:\ni=1 to i=5: TRUE FALSE\ni=6 to i=11: FALSE FALSE\nr89926: TRUE TRUE\n\nlcx.$wday[c(7, 25)] == x25$wday\nR 4.5.3: TRUE TRUE\nR 4.6.0:\n- thtz=\"UTC\": TRUE TRUE\n- else:\ni=1: TRUE FALSE\ni=2: FALSE FALSE\ni=3 to i=4: FALSE TRUE\ni=5 to i=11: FALSE FALSE\nr89926: TRUE TRUE\n\n\n\nSuppose that\n\nxU. <- xU <- as.POSIXlt(.POSIXct(numeric(25), tz = \"Etc\/UTC\"))\nxU[1:25] <- x25[1:25]\nxU.[[7]] <- x25[[7]]\nxU.[[25]] <- x25[[25]]\n\nis added.\nThe 'tzone' attribute of 'x25' has different first element from the 'tzone'\nattribute of 'xU' or 'xU.'. The 'tzone' attribute of 'xU' or 'xU.' has length\n3.\nR 4.5.3: direct components subassignments\nR 4.6.0: as.POSIXlt(as.POSIXct("
+                            },
+                            {
+                                "type": "text",
+                                "text": "), tz = ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") first\nr89926:\n[<- : as.POSIXlt(as.POSIXct("
+                            },
+                            {
+                                "type": "text",
+                                "text": "), tz = ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") then correct sec first\n[[<- : as.POSIXlt(as.POSIXct("
+                            },
+                            {
+                                "type": "text",
+                                "text": "), tz = attr(",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", \"tzone\")) then correct sec first,\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "error",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nxU[1:25] - x25[1:25]\nR 4.5.3:\n- thtz=\"UTC\": all 0\n- else: all not 0\nR 4.6.0: all 0\nr89926:\ni=1 to i=5: 1 sec at 8 to 23\ni=6: 1 sec at 7 to 23\ni=7: 1 sec at 6 to 23\ni=8: 1 sec at 5 to 23\ni=9: 1 sec at 3 to 23\ni=10: 1 sec at 1 to 23\ni=11: all 0\n*floor sec before as.POSIXct: all 0\n\nxU$sec == x25$sec\nR 4.5.3: all TRUE\nR 4.6.0, r89926:\ni=1 to i=5: FALSE from 8\ni=6: FALSE from 7\ni=7: FALSE from 6\ni=8: FALSE from 5\ni=9: FALSE from 3\ni=10 to i=11: all FALSE\n*floor sec before as.POSIXct:\ni=1 to i=10: FALSE from 24\ni=11: all FALSE\n\nxU$wday == x25$wday\nR 4.5.3: all TRUE\nR 4.6.0, r89926:\n- thtz=\"UTC\":\ni=1: FALSE from 8\ni=2: all FALSE\ni=3 to i=4: TRUE from 8\ni=5: all FALSE\ni=6: FALSE from 7\ni=7: FALSE from 6\ni=8: FALSE from 5\ni=9: FALSE from 3\ni=10 to i=11: all FALSE\n- thtz=\"Europe\/Kyiv\",\"Asia\/Hebron\",\"Asia\/Kolkata\",\"Pacific\/Auckland\":\ni=1: all TRUE\ni=2 to i=5: all FALSE\ni=6 to i=11: all TRUE\n- thtz=\"Canada\/Mountain\",\"Navajo\":\ni=1 to i=2: all FALSE\ni=3 to i=4: all TRUE\ni=5 to i=11: all FALSE\n*floor sec before as.POSIXct:\n- thtz=\"UTC\":\ni=1: FALSE from 24\ni=2: all FALSE\ni=3 to i=4: TRUE from 24"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "i=5: all FALSE\ni=6 to i=10: FALSE from 24\ni=11: all FALSE\n- thtz=\"Europe\/Kyiv\",\"Asia\/Hebron\",\"Asia\/Kolkata\",\"Pacific\/Auckland\":\ni=1: all TRUE\ni=2 to i=5: all FALSE\ni=6 to i=11: all TRUE\n- thtz=\"Canada\/Mountain\",\"Navajo\":\ni=1 to i=2: all FALSE\ni=3 to i=4: all TRUE\ni=5 to i=11: all FALSE\n\nxU.[[7]] - x25[[7]]\nR 4.5.3:\n- thtz=\"UTC\": 0\n- else: not 0\nR 4.6.0: 0\n\nxU.[[25]] - x25[[25]]\nR 4.5.3:\n- thtz=\"UTC\": 0\n- else: not 0\nR 4.6.0: 0\n\nxU.$sec[c(7, 25)] == x25$sec[c(7, 25)]\nR 4.5.3: TRUE TRUE\nR 4.6.0:\ni=1 to i=5: TRUE FALSE\ni=6 to i=11: FALSE FALSE\n*floor sec before as.POSIXct:\ni=1 to i=10: TRUE FALSE\ni=11: FALSE FALSE\n\nxU.$wday[c(7, 25)] == x25$wday\nR 4.5.3: TRUE TRUE\nR 4.6.0:\n- thtz=\"UTC\":\ni=1: TRUE FALSE\ni=2: FALSE FALSE\ni=3 to i=4: FALSE TRUE\ni=5 to i=11: FALSE FALSE\n- thtz=\"Europe\/Kyiv\",\"Asia\/Hebron\",\"Asia\/Kolkata\",\"Pacific\/Auckland\":\ni=1: TRUE TRUE\ni=2 to i=5: FALSE FALSE\ni=6 to i=11: TRUE TRUE\n- thtz=\"Canada\/Mountain\",\"Navajo\":\ni=1 to i=2: FALSE FALSE\ni=3 to i=4: TRUE TRUE\ni=5 to i=11: FALSE FALSE\n*floor sec before as.POSIXct:\n- thtz=\"UTC\":\ni=1: TRUE FALSE\ni=2: FALSE FALSE\ni=3 to i=4: FALSE TRUE\ni=5 to i=10: TRUE FALSE\ni=11: FALSE FALSE\n- thtz=\"Europe\/Kyiv\",\"Asia\/Hebron\",\"Asia\/Kolkata\",\"Pacific\/Auckland\":\ni=1: TRUE TRUE\ni=2 to i=5: FALSE FALSE\ni=6 to i=11: TRUE TRUE\n- thtz=\"Canada\/Mountain\",\"Navajo\":\ni=1 to i=2: FALSE FALSE\ni=3 to i=4: TRUE TRUE\ni=5 to i=11: FALSE FALSE\n\n\nAddition, modified from example in my E-mail to R-devel mailing list about\nsubassigning a POSIXlt object without 'tzone' attribute,\n<https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2026-April\/084489.html> :\n\n\nx1 &lt;- as.POSIXlt(Sys.time()); attr(x1, \"tzone\") &lt;- NULL; x2 &lt;- x1\nx1[1L] &lt;- y &lt;- Sys.time()\nx2[[1L]] &lt;- y\n\nR 4.5.3: as.POSIXlt(*)\nR 4.6.0: as.POSIXlt(as.POSIXct(*), tz = NULL), *error*\nr89926:\n[&lt;- : as.POSIXlt(as.POSIXct(*), tz = \"\")\n[[&lt;- : as.POSIXlt(as.POSIXct(*), tz = NULL), *error*\n\nx1[1L] - y\nR 4.5.3: 0\nr89926: 0\n\nx2[[1L]] - y\nR 4.5.3: 0\n\n\nx1 &lt;- as.POSIXlt(.POSIXct(numeric(2))); attr(x1, \"tzone\") &lt;- NULL\nx2 &lt;- x1\ny &lt;- list(as.POSIXlt(.POSIXct(0, tz = \"Etc\/UTC\")),\n          as.POSIXlt(.POSIXct(0, tz = \"Pacific\/Auckland\")))\nx1[1L] &lt;- y[[1L]]\nx1[2L] &lt;- y[[2L]]\nx2[[1L]] &lt;- y[[1L]]\nx2[[2L]] &lt;- y[[2L]]\n\nR 4.5.3: direct components subassignment\nR 4.6.0: as.POSIXlt(as.POSIXct(*), tz = NULL) first\nr89926:\n[&lt;- : as.POSIXlt(as.POSIXct(*), tz = \"\") then correct sec first\n[[&lt;- : as.POSIXlt(as.POSIXct(*), tz = NULL) then correct sec first\n\nc(x1[1L] - y[[1L]], x1[2L] - y[[2L]])\nR 4.5.3, R 4.6.0: not all 0\nr89926: all 0\n\nc(identical(c(unclass(x1[1L])), c(unclass(y[[1L]]))),\n  identical(c(unclass(x1[2L])), c(unclass(y[[2L]]))))\n# c(unclass(*)) removes attributes other than names\nR 4.5.3, R 4.6.0: all TRUE\nr89926: not all TRUE\n\nc(x2[[1L]] - y[[1L]], x2[[2L]] - y[[2L]])\nR 4.5.3, R 4.6.0, r89926: not all 0\n*as.POSIXlt(as.POSIXct(*), tz = tz1(x)): all 0\n\nc(identical(c(unclass(x2[[1L]])), c(unclass(y[[1L]]))),\n  identical(c(unclass(x2[[2L]])), c(unclass(y[[2L]]))))\nR 4.5.3, R 4.6.0, r89926: all TRUE\n*as.POSIXlt(as.POSIXct(*), tz = tz1(x)): not all TRUE\n\n\nAddition:\n\n\nx1 &lt;- as.POSIXlt(.POSIXct(numeric(2))); attr(x1, \"tzone\") &lt;- NULL\nx2 &lt;- x1\nx1[1:2] &lt;- y &lt;- c(\"2006-02-20 11:16:16.683000\", \"9999-12-31 23:59:59.999999\")\nx2[[1L]] &lt;- y[[1L]]; x2[[2L]] &lt;- y[[2L]]\n\nR 4.5.3: as.POSIXlt(*)\nR 4.6.0: as.POSIXlt(as.POSIXct(*), tz = NULL)\nr89926:\n[&lt;- :\n- attr(as.POSIXlt(*), \"tzone\")[1] is \"\": as.POSIXlt(*)\n- else: as.POSIXlt(*) then as.POSIXlt(as.POSIXct(*), tz = \"\") then correct sec\n[[&lt;- : as.POSIXlt(as.POSIXct(*), tz = NULL)\n\nx1[1:2] - y\nerror\n\nx1[1:2] == y\nR 4.5.3, R 4.6.0: TRUE TRUE\nr89926:\n- attr(as.POSIXlt(y), \"tzone\")[1] is \"\": TRUE TRUE\n- else: TRUE FALSE\n*floor sec before as.POSIXct: TRUE TRUE\n\nidentical(format(x1, \"%Y-%m-%d %H:%M:%OS6\"), y)\nR 4.5.3: TRUE\nR 4.6.0: FALSE\nr89926:\n- attr(as.POSIXlt(y), \"tzone\")[1] is \"\": TRUE\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1777032112.399259",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Wy7Tx",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "i=5: all FALSE\ni=6 to i=10: FALSE from 24\ni=11: all FALSE\n- thtz=\"Europe\/Kyiv\",\"Asia\/Hebron\",\"Asia\/Kolkata\",\"Pacific\/Auckland\":\ni=1: all TRUE\ni=2 to i=5: all FALSE\ni=6 to i=11: all TRUE\n- thtz=\"Canada\/Mountain\",\"Navajo\":\ni=1 to i=2: all FALSE\ni=3 to i=4: all TRUE\ni=5 to i=11: all FALSE\n\nxU.[[7]] - x25[[7]]\nR 4.5.3:\n- thtz=\"UTC\": 0\n- else: not 0\nR 4.6.0: 0\n\nxU.[[25]] - x25[[25]]\nR 4.5.3:\n- thtz=\"UTC\": 0\n- else: not 0\nR 4.6.0: 0\n\nxU.$sec[c(7, 25)] == x25$sec[c(7, 25)]\nR 4.5.3: TRUE TRUE\nR 4.6.0:\ni=1 to i=5: TRUE FALSE\ni=6 to i=11: FALSE FALSE\n*floor sec before as.POSIXct:\ni=1 to i=10: TRUE FALSE\ni=11: FALSE FALSE\n\nxU.$wday[c(7, 25)] == x25$wday\nR 4.5.3: TRUE TRUE\nR 4.6.0:\n- thtz=\"UTC\":\ni=1: TRUE FALSE\ni=2: FALSE FALSE\ni=3 to i=4: FALSE TRUE\ni=5 to i=11: FALSE FALSE\n- thtz=\"Europe\/Kyiv\",\"Asia\/Hebron\",\"Asia\/Kolkata\",\"Pacific\/Auckland\":\ni=1: TRUE TRUE\ni=2 to i=5: FALSE FALSE\ni=6 to i=11: TRUE TRUE\n- thtz=\"Canada\/Mountain\",\"Navajo\":\ni=1 to i=2: FALSE FALSE\ni=3 to i=4: TRUE TRUE\ni=5 to i=11: FALSE FALSE\n*floor sec before as.POSIXct:\n- thtz=\"UTC\":\ni=1: TRUE FALSE\ni=2: FALSE FALSE\ni=3 to i=4: FALSE TRUE\ni=5 to i=10: TRUE FALSE\ni=11: FALSE FALSE\n- thtz=\"Europe\/Kyiv\",\"Asia\/Hebron\",\"Asia\/Kolkata\",\"Pacific\/Auckland\":\ni=1: TRUE TRUE\ni=2 to i=5: FALSE FALSE\ni=6 to i=11: TRUE TRUE\n- thtz=\"Canada\/Mountain\",\"Navajo\":\ni=1 to i=2: FALSE FALSE\ni=3 to i=4: TRUE TRUE\ni=5 to i=11: FALSE FALSE\n\n\n\nAddition, modified from example in my E-mail to R-devel mailing list about\nsubassigning a POSIXlt object without 'tzone' attribute,\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2026-April\/084489.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": " :\n\n\n\nx1 <- as.POSIXlt(Sys.time()); attr(x1, \"tzone\") <- NULL; x2 <- x1\nx1[1L] <- y <- Sys.time()\nx2[[1L]] <- y\n\nR 4.5.3: as.POSIXlt(*)\nR 4.6.0: as.POSIXlt(as.POSIXct(*), tz = NULL), "
+                            },
+                            {
+                                "type": "text",
+                                "text": "error",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nr89926:\n[<- : as.POSIXlt(as.POSIXct(*), tz = \"\")\n[[<- : as.POSIXlt(as.POSIXct(*), tz = NULL), "
+                            },
+                            {
+                                "type": "text",
+                                "text": "error",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nx1[1L] - y\nR 4.5.3: 0\nr89926: 0\n\nx2[[1L]] - y\nR 4.5.3: 0\n\n\n\nx1 <- as.POSIXlt(.POSIXct(numeric(2))); attr(x1, \"tzone\") <- NULL\nx2 <- x1\ny <- list(as.POSIXlt(.POSIXct(0, tz = \"Etc\/UTC\")),\n          as.POSIXlt(.POSIXct(0, tz = \"Pacific\/Auckland\")))\nx1[1L] <- y[[1L]]\nx1[2L] <- y[[2L]]\nx2[[1L]] <- y[[1L]]\nx2[[2L]] <- y[[2L]]\n\nR 4.5.3: direct components subassignment\nR 4.6.0: as.POSIXlt(as.POSIXct(*), tz = NULL) first\nr89926:\n[<- : as.POSIXlt(as.POSIXct(*), tz = \"\") then correct sec first\n[[<- : as.POSIXlt(as.POSIXct(*), tz = NULL) then correct sec first\n\nc(x1[1L] - y[[1L]], x1[2L] - y[[2L]])\nR 4.5.3, R 4.6.0: not all 0\nr89926: all 0\n\nc(identical(c(unclass(x1[1L])), c(unclass(y[[1L]]))),\n  identical(c(unclass(x1[2L])), c(unclass(y[[2L]]))))\n# c(unclass(*)) removes attributes other than names\nR 4.5.3, R 4.6.0: all TRUE\nr89926: not all TRUE\n\nc(x2[[1L]] - y[[1L]], x2[[2L]] - y[[2L]])\nR 4.5.3, R 4.6.0, r89926: not all 0\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.POSIXlt(as.POSIXct(",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), tz = tz1(x)): all 0\n\nc(identical(c(unclass(x2[[1L]])), c(unclass(y[[1L]]))),\n  identical(c(unclass(x2[[2L]])), c(unclass(y[[2L]]))))\nR 4.5.3, R 4.6.0, r89926: all TRUE\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.POSIXlt(as.POSIXct(",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), tz = tz1(x)): not all TRUE\n\n\n\nAddition:\n\n\n\nx1 <- as.POSIXlt(.POSIXct(numeric(2))); attr(x1, \"tzone\") <- NULL\nx2 <- x1\nx1[1:2] <- y <- c(\"2006-02-20 11:16:16.683000\", \"9999-12-31 23:59:59.999999\")\nx2[[1L]] <- y[[1L]]; x2[[2L]] <- y[[2L]]\n\nR 4.5.3: as.POSIXlt(*)\nR 4.6.0: as.POSIXlt(as.POSIXct(*), tz = NULL)\nr89926:\n[<- :\n- attr(as.POSIXlt("
+                            },
+                            {
+                                "type": "text",
+                                "text": "), \"tzone\")[1] is \"\": as.POSIXlt(",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n- else: as.POSIXlt("
+                            },
+                            {
+                                "type": "text",
+                                "text": ") then as.POSIXlt(as.POSIXct(",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), tz = \"\") then correct sec\n[[<- : as.POSIXlt(as.POSIXct(*), tz = NULL)\n\nx1[1:2] - y\nerror\n\nx1[1:2] == y\nR 4.5.3, R 4.6.0: TRUE TRUE\nr89926:\n- attr(as.POSIXlt(y), \"tzone\")[1] is \"\": TRUE TRUE\n- else: TRUE FALSE\n*floor sec before as.POSIXct: TRUE TRUE\n\nidentical(format(x1, \"%Y-%m-%d %H:%M:%OS6\"), y)\nR 4.5.3: TRUE\nR 4.6.0: FALSE\nr89926:\n- attr(as.POSIXlt(y), \"tzone\")[1] is \"\": TRUE"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "- else: FALSE\n*floor sec before as.POSIXct: TRUE\n\nx2[[1L]] == y[[1L]]\nTRUE\n\nx2[[2L]] == y[[2L]]\nTRUE\n\nidentical(format(x2, \"%Y-%m-%d %H:%M:%OS6\"), y)\nR 4.5.3: TRUE\nR 4.6.0, r89926: FALSE\n*floor sec before as.POSIXct: TRUE\n\n\nx2 &lt;- x1 &lt;- as.POSIXlt(.POSIXct(numeric(2), tz = \"UTC\"))\nx1[1:2] &lt;- y &lt;- c(\"2006-02-20 11:16:16.683000\", \"9999-12-31 23:59:59.999999\")\nx2[[1L]] &lt;- y[[1L]]; x2[[2L]] &lt;- y[[2L]]\n\nR 4.5.3: as.POSIXlt(*)\nR 4.6.0: as.POSIXlt(as.POSIXct(*), tz = *)\nr89926:\n[&lt;- :\n- attr(as.POSIXlt(*), \"tzone\") is \"UTC\": as.POSIXlt(*)\n- else: as.POSIXlt(*) then as.POSIXlt(as.POSIXct(*), tz = *) then correct sec\n[[&lt;- : as.POSIXlt(as.POSIXct(*), tz = *)\n\nx1[1:2] - y\nerror\n\nx1[1:2] == y\nR 4.5.3: FALSE FALSE if current time zone is different from UTC\nR 4.6.0: TRUE TRUE\nr89926:\n- attr(as.POSIXlt(y), \"tzone\") is \"UTC\": TRUE TRUE\n- else: TRUE FALSE\n*floor sec before as.POSIXct: TRUE TRUE\n\nidentical(format(x1, \"%Y-%m-%d %H:%M:%OS6\"), y)\nR 4.5.3: TRUE\nR 4.6.0: FALSE\nr89926:\n- attr(as.POSIXlt(y), \"tzone\") is \"UTC\": TRUE\n- else: FALSE\n*floor sec before as.POSIXct: FALSE if current time zone is different from UTC\n\nx1$sec %% 1 == as.numeric(substring(y, 18)) %% 1\nR 4.5.3: TRUE TRUE\nR 4.6.0: FALSE FALSE\nr89926: TRUE TRUE\n\nx2[[1L]] == y[[1L]]\nR 4.5.3: FALSE if current time zone is different from UTC\nR 4.6.0, r89926: TRUE\n\nx2[[2L]] == y[[2L]]\nR 4.5.3: FALSE if current time zone is different from UTC\nR 4.6.0, r89926: TRUE\n\nidentical(format(x2, \"%Y-%m-%d %H:%M:%OS6\"), y)\nR 4.5.3: TRUE\nR 4.6.0, r89926: FALSE\n*floor sec before as.POSIXct: FALSE if current time zone is different from UTC\n\nx2$sec %% 1 == as.numeric(substring(y, 18)) %% 1\nR 4.5.3: TRUE TRUE\nR 4.6.0, r89926: FALSE FALSE\n*floor sec before as.POSIXct: TRUE TRUE",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1777032112.418309",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "IEF1",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "- else: FALSE\n*floor sec before as.POSIXct: TRUE\n\nx2[[1L]] == y[[1L]]\nTRUE\n\nx2[[2L]] == y[[2L]]\nTRUE\n\nidentical(format(x2, \"%Y-%m-%d %H:%M:%OS6\"), y)\nR 4.5.3: TRUE\nR 4.6.0, r89926: FALSE\n*floor sec before as.POSIXct: TRUE\n\n\n\nx2 <- x1 <- as.POSIXlt(.POSIXct(numeric(2), tz = \"UTC\"))\nx1[1:2] <- y <- c(\"2006-02-20 11:16:16.683000\", \"9999-12-31 23:59:59.999999\")\nx2[[1L]] <- y[[1L]]; x2[[2L]] <- y[[2L]]\n\nR 4.5.3: as.POSIXlt(*)\nR 4.6.0: as.POSIXlt(as.POSIXct("
+                            },
+                            {
+                                "type": "text",
+                                "text": "), tz = ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\nr89926:\n[<- :\n- attr(as.POSIXlt("
+                            },
+                            {
+                                "type": "text",
+                                "text": "), \"tzone\") is \"UTC\": as.POSIXlt(",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n- else: as.POSIXlt("
+                            },
+                            {
+                                "type": "text",
+                                "text": ") then as.POSIXlt(as.POSIXct(",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), tz = *) then correct sec\n[[<- : as.POSIXlt(as.POSIXct("
+                            },
+                            {
+                                "type": "text",
+                                "text": "), tz = ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n\nx1[1:2] - y\nerror\n\nx1[1:2] == y\nR 4.5.3: FALSE FALSE if current time zone is different from UTC\nR 4.6.0: TRUE TRUE\nr89926:\n- attr(as.POSIXlt(y), \"tzone\") is \"UTC\": TRUE TRUE\n- else: TRUE FALSE\n*floor sec before as.POSIXct: TRUE TRUE\n\nidentical(format(x1, \"%Y-%m-%d %H:%M:%OS6\"), y)\nR 4.5.3: TRUE\nR 4.6.0: FALSE\nr89926:\n- attr(as.POSIXlt(y), \"tzone\") is \"UTC\": TRUE\n- else: FALSE\n*floor sec before as.POSIXct: FALSE if current time zone is different from UTC\n\nx1$sec %% 1 == as.numeric(substring(y, 18)) %% 1\nR 4.5.3: TRUE TRUE\nR 4.6.0: FALSE FALSE\nr89926: TRUE TRUE\n\nx2[[1L]] == y[[1L]]\nR 4.5.3: FALSE if current time zone is different from UTC\nR 4.6.0, r89926: TRUE\n\nx2[[2L]] == y[[2L]]\nR 4.5.3: FALSE if current time zone is different from UTC\nR 4.6.0, r89926: TRUE\n\nidentical(format(x2, \"%Y-%m-%d %H:%M:%OS6\"), y)\nR 4.5.3: TRUE\nR 4.6.0, r89926: FALSE\n*floor sec before as.POSIXct: FALSE if current time zone is different from UTC\n\nx2$sec %% 1 == as.numeric(substring(y, 18)) %% 1\nR 4.5.3: TRUE TRUE\nR 4.6.0, r89926: FALSE FALSE\n*floor sec before as.POSIXct: TRUE TRUE"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19058] New: abbreviate() can give unexpected output with non-ASCII input*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19058>\n\n            Bug ID: 19058\n           Summary: abbreviate() can give unexpected output with non-ASCII\n                    input\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nCreated attachment 3681\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3681&amp;action=edit>\nUse iswlower() rather than islower() when determining if a wide character is\nlowercase in the current locale.\n\nThis is perhaps expected given the warning, but given that this is an issue\nthat could be resolved, here's an example:\n\n```\n&gt; abbreviate(\"přístřešek\")\npřístřešek\n    \"přřš\"\nWarning message:\nIn abbreviate(\"přístřešek\") : abbreviate used with non-ASCII chars\n\n&gt; R.version\n               _\nplatform       aarch64-unknown-linux-gnu\narch           aarch64\nos             linux-gnu\nsystem         aarch64, linux-gnu\nstatus         Under development (unstable)\nmajor          4\nminor          7.0\nyear           2026\nmonth          04\nday            23\nsvn rev        89955\nlanguage       R\nversion.string R Under development (unstable) (2026-04-23 r89955)\nnickname       Unsuffered Consequences\n```\n\nCompare with a similar build of R on macOS, and note the difference in behavior\n-- likely owing to different behavior in `islower()` between the two different\nlibc implementations.\n\n```\n&gt; abbreviate(\"přístřešek\")\nWarning in abbreviate(\"přístřešek\") :\n  abbreviate used with non-ASCII chars\npřístřešek\n    \"přst\"\n&gt;\n&gt; R.version\n               _\nplatform       aarch64-apple-darwin25.4.0\narch           aarch64\nos             darwin25.4.0\nsystem         aarch64, darwin25.4.0\nstatus         Under development (unstable)\nmajor          4\nminor          7.0\nyear           2026\nmonth          04\nday            23\nsvn rev        89955\nlanguage       R\nversion.string R Under development (unstable) (2026-04-23 r89955)\nnickname       Unsuffered Consequences\n```\n\nThis comes down to the use of `islower()` rather than `iswlower()` in\n`wstripchars`. A simple patch is attached.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1777046379.524719",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "lM=",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19058] New: abbreviate() can give unexpected output with non-ASCII input",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19058"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19058\n           Summary: abbreviate() can give unexpected output with non-ASCII\n                    input\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3681\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3681&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3681&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nUse iswlower() rather than islower() when determining if a wide character is\nlowercase in the current locale.\n\nThis is perhaps expected given the warning, but given that this is an issue\nthat could be resolved, here's an example:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> abbreviate(\"přístřešek\")\npřístřešek\n    \"přřš\"\nWarning message:\nIn abbreviate(\"přístřešek\") : abbreviate used with non-ASCII chars\n\n> R.version\n               _\nplatform       aarch64-unknown-linux-gnu\narch           aarch64\nos             linux-gnu\nsystem         aarch64, linux-gnu\nstatus         Under development (unstable)\nmajor          4\nminor          7.0\nyear           2026\nmonth          04\nday            23\nsvn rev        89955\nlanguage       R\nversion.string R Under development (unstable) (2026-04-23 r89955)\nnickname       Unsuffered Consequences\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nCompare with a similar build of R on macOS, and note the difference in behavior\n-- likely owing to different behavior in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "islower()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " between the two different\nlibc implementations.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> abbreviate(\"přístřešek\")\nWarning in abbreviate(\"přístřešek\") :\n  abbreviate used with non-ASCII chars\npřístřešek\n    \"přst\"\n>\n> R.version\n               _\nplatform       aarch64-apple-darwin25.4.0\narch           aarch64\nos             darwin25.4.0\nsystem         aarch64, darwin25.4.0\nstatus         Under development (unstable)\nmajor          4\nminor          7.0\nyear           2026\nmonth          04\nday            23\nsvn rev        89955\nlanguage       R\nversion.string R Under development (unstable) (2026-04-23 r89955)\nnickname       Unsuffered Consequences\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis comes down to the use of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "islower()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " rather than "
+                            },
+                            {
+                                "type": "text",
+                                "text": "iswlower()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "wstripchars",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". A simple patch is attached."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19058] abbreviate() can give unexpected output with non-ASCII input*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19058>\n\nKevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3681|0                           |1\n        is obsolete|                            |\n\n--- Comment #1 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nCreated attachment 3682\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3682&amp;action=edit>\nUse iswlower() rather than islower() when determining if a wide character is\nlowercase in the current locale. (proper SVN patch)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1777046553.026269",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Z4eB",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19058] abbreviate() can give unexpected output with non-ASCII input",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19058"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nKevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3681|0                           |1\n        is obsolete|                            |\n\n--- Comment #1 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3682\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3682&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3682&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nUse iswlower() rather than islower() when determining if a wide character is\nlowercase in the current locale. (proper SVN patch)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19059] New: as.data.frame.vector() returns data.frame with missing value in rownames*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19059>\n\n            Bug ID: 19059\n           Summary: as.data.frame.vector() returns data.frame with missing\n                    value in rownames\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Misc\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:hpages.on.github@gmail.com|hpages.on.github@gmail.com>\n\nDuplicates or missing values are in principle not allowed in the rownames of a\ndata.frame but for some reason `as.data.frame.vector()` only checks for\nduplicates and not for missing values (see line 255 in\n`src\/library\/base\/dataframe.R`).\n\nSo for example, this seems to produce the intended result, which is to NOT\npropagate the names on the supplied vector to the rownames of the returned\ndata.frame when they would lead to unacceptable rownames:\n\n    &gt; as.data.frame(setNames(21:24, c(\"a\", \"b\", \"b\", \"d\")), optional=TRUE)\n    1 21\n    2 22\n    3 23\n    4 24\n\nBut in this example:\n\n    &gt; as.data.frame(setNames(21:24, c(\"a\", \"b\", NA, \"d\")), optional=TRUE)   \n    a    21\n    b    22\n    &lt;NA&gt; 23\n    d    24\n\nThe NA made it to the rownames of the data.frame!\n\nNote that trying to smuggle more than one NA to the rownames doesn't work:\n\n    &gt; as.data.frame(setNames(21:24, c(\"a\", NA, NA, \"d\")), optional=TRUE)\n    1 21\n    2 22\n    3 23\n    4 24\n\nbut that's only because of the no-duplicates rule.\n\nAlso note that this issue in `as.data.frame.vector()` leads to the following\nconfusing behavior of the `data.frame()` constructor:\n\n    ## This works:\n    &gt; data.frame(A=11:14, B=setNames(21:24, c(\"a\", NA, NA, \"d\")))\n       A  B\n    1 11 21\n    2 12 22\n    3 13 23\n    4 14 24\n\n    ## but this doesn't:\n    &gt; data.frame(A=11:14, B=setNames(21:24, c(\"a\", \"b\", NA, \"d\")))\n    Error in data.frame(A = 11:14, B = setNames(21:24, c(\"a\", \"b\", NA,  : \n      row names contain missing values\n\nFixing `as.data.frame.vector()` with an explicit check for NAs would make\n`data.frame()` work (and return a data.frame with automatic rownames)\n**whatever** the number of NAs in the names of the `B` variable.\n\nSuggested fix is to replace the check on line 255 in\nsrc\/library\/base\/dataframe.R:\n\n    if(length(row.names &lt;- names(x)) != nrows || anyDuplicated(row.names))\n\nwith:\n\n    if(length(row.names &lt;- names(x)) != nrows || anyDuplicated(row.names) ||\nanyNA(row.names))",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1777060556.556709",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "SWf",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19059] New: as.data.frame.vector() returns data.frame with missing value in rownames",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19059"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19059\n           Summary: as.data.frame.vector() returns data.frame with missing\n                    value in rownames\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Misc\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:hpages.on.github@gmail.com",
+                                "text": "hpages.on.github@gmail.com",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nDuplicates or missing values are in principle not allowed in the rownames of a\ndata.frame but for some reason "
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.data.frame.vector()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " only checks for\nduplicates and not for missing values (see line 255 in\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/library\/base\/dataframe.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\n\nSo for example, this seems to produce the intended result, which is to NOT\npropagate the names on the supplied vector to the rownames of the returned\ndata.frame when they would lead to unacceptable rownames:\n\n    > as.data.frame(setNames(21:24, c(\"a\", \"b\", \"b\", \"d\")), optional=TRUE)\n    1 21\n    2 22\n    3 23\n    4 24\n\nBut in this example:\n\n    > as.data.frame(setNames(21:24, c(\"a\", \"b\", NA, \"d\")), optional=TRUE)   \n    a    21\n    b    22\n    <NA> 23\n    d    24\n\nThe NA made it to the rownames of the data.frame!\n\nNote that trying to smuggle more than one NA to the rownames doesn't work:\n\n    > as.data.frame(setNames(21:24, c(\"a\", NA, NA, \"d\")), optional=TRUE)\n    1 21\n    2 22\n    3 23\n    4 24\n\nbut that's only because of the no-duplicates rule.\n\nAlso note that this issue in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.data.frame.vector()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " leads to the following\nconfusing behavior of the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "data.frame()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " constructor:\n\n    ## This works:\n    > data.frame(A=11:14, B=setNames(21:24, c(\"a\", NA, NA, \"d\")))\n       A  B\n    1 11 21\n    2 12 22\n    3 13 23\n    4 14 24\n\n    ## but this doesn't:\n    > data.frame(A=11:14, B=setNames(21:24, c(\"a\", \"b\", NA, \"d\")))\n    Error in data.frame(A = 11:14, B = setNames(21:24, c(\"a\", \"b\", NA,  : \n      row names contain missing values\n\nFixing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "as.data.frame.vector()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " with an explicit check for NAs would make\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "data.frame()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " work (and return a data.frame with automatic rownames)\n**whatever** the number of NAs in the names of the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "B",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " variable.\n\nSuggested fix is to replace the check on line 255 in\nsrc\/library\/base\/dataframe.R:\n\n    if(length(row.names <- names(x)) != nrows || anyDuplicated(row.names))\n\nwith:\n\n    if(length(row.names <- names(x)) != nrows || anyDuplicated(row.names) ||\nanyNA(row.names))"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

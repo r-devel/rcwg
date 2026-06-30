@@ -1,0 +1,444 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18928] Missing pieces in the C API for environments*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18928>\n\n--- Comment #2 from Lionel Henry (<mailto:lionel.hry@gmail.com|lionel.hry@gmail.com>) ---\nTo support iterating over environments, we'd need one of these additions:\n\n**A symbol-returning variant of `R_lsInternal`**\n\nCurrently `R_lsInternal` returns a character vector, but the environment\nbinding API takes symbols. Once we have the list of symbols, we can iterate\nover it with env accessors. A variant returning a list of symbols would be more\nergonomic. Sorting is not needed for this use case.\n\n**An environment mapper**\n\nThis could be an opaque iterator object (similar to the [dots iterator\nproposal](<https:\/\/gist.github.com\/lionel-\/1ebcbd5ec69c0775d514c329522408a3#iterating-over-dots>)).\nThis would have the advantage that the iterator could pass binding values\ndirectly to avoid redundant lookups. However, a simpler mapper like\n`R_mapAttrib()` would also be fine. The callback would receive the symbol and\nbinding type, then look up the binding value itself:\n\n```\nvoid callback(SEXP sym, R_BindingType type, void* data) {\n    switch (type) {\n    case R_BindingTypeValue:\n        \/\/ Use e.g. Rf_findVarInFrame3()\n        break;\n    case R_BindingTypeDelayed:\n        \/\/ Use e.g. R_DelayedBindingExpression() etc.\n        break;\n    \/\/ ...\n    }\n}\n\nR_mapEnvBindings(env, callback, data);\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1770215185.763199",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "gh5\/",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18928] Missing pieces in the C API for environments",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18928"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Lionel Henry ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:lionel.hry@gmail.com",
+                                "text": "lionel.hry@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nTo support iterating over environments, we'd need one of these additions:\n\n**A symbol-returning variant of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_lsInternal",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "**\n\nCurrently "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_lsInternal",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " returns a character vector, but the environment\nbinding API takes symbols. Once we have the list of symbols, we can iterate\nover it with env accessors. A variant returning a list of symbols would be more\nergonomic. Sorting is not needed for this use case.\n\n**An environment mapper**\n\nThis could be an opaque iterator object (similar to the [dots iterator\nproposal]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/gist.github.com\/lionel-\/1ebcbd5ec69c0775d514c329522408a3#iterating-over-dots"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")).\nThis would have the advantage that the iterator could pass binding values\ndirectly to avoid redundant lookups. However, a simpler mapper like\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_mapAttrib()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " would also be fine. The callback would receive the symbol and\nbinding type, then look up the binding value itself:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "void callback(SEXP sym, R_BindingType type, void* data) {\n    switch (type) {\n    case R_BindingTypeValue:\n        \/\/ Use e.g. Rf_findVarInFrame3()\n        break;\n    case R_BindingTypeDelayed:\n        \/\/ Use e.g. R_DelayedBindingExpression() etc.\n        break;\n    \/\/ ...\n    }\n}\n\nR_mapEnvBindings(env, callback, data);\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18998] New: add Rd macro '\\linkS4methods' parallel to '\\linkS4class'*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18998>\n\n            Bug ID: 18998\n           Summary: add Rd macro '\\linkS4methods' parallel to\n                    '\\linkS4class'\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Wishlist\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>\n\nPackages often document S4 methods in help with `\\alias{genericname-methods}`. \nIf the generic (or made-generic) function lives in a different package, then\npackages often do *not* add `\\alias{genericname}`, so that\n`help(\"genericname\")` remains unambiguous.  Indeed, `methods::promptMethods`\npromotes this convention:\n\n```\n&gt; setGeneric(\"norm\")\n&gt; cat(paste0(promptMethods(\"norm\", NA)$aliases, \"\\n\", collapse = \"\"))\n\\alias{norm-methods}\n\\alias{norm,ANY,ANY-method}\n\\alias{norm,ANY,missing-method}\n```\n\nIt follows that if one wants to link method documentation and not generic\nfunction documentation, then generally one must link `genericname-methods` and\nnot `genericname`.  Very often one does that like so:\n\n```\n\\link[=genericname-methods]{genericname}\n```\n\nThat is a bit too cumbersome for me, so in some S4-using packages I define a\nnew macro\n\n```\n\\newcommand{\\linkS4methods}{\\link[=#1-methods]{#1}}\n```\n\nand I type `\\linkS4methods{genericname}`.\n\nMy wish is that R can start to support `\\linkS4methods` out of the box, exactly\nas it supports `\\linkS4class`.  If people agree, then I could develop a patch\nfor **tools** and WRE.\n\nNote that I ask now because I see:\n\n```\n&gt; db &lt;- news(grepl(\"\\\\linkS4class\", Text))\n&gt; print(db, doBrowse = FALSE)\n                           Changes in R-devel                           \n\nNEW FEATURES\n\n    o   In *.Rd help files, the \\linkS4class macro now also works for\n        links to other packages via \\linkS4class[&lt;pkg&gt;]{&lt;myClass&gt;},\n        much nicer than the \"workaround\"\n        \\link[&lt;pkg&gt;:&lt;myClass&gt;-class]{&lt;myClass&gt;} necessary in earlier\n        versions of R.\n\n        Packages with the new syntax need to formally depend on R &gt;=\n        4.6.0.\n```\n\nIdeally, addition of `\\linkS4methods` would coincide with recent improvements\nto `\\linkS4class`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1770273641.121929",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "lcfy",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18998] New: add Rd macro '\\linkS4methods' parallel to '\\linkS4class'",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18998"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18998\n           Summary: add Rd macro '\\linkS4methods' parallel to\n                    '\\linkS4class'\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Wishlist\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nPackages often document S4 methods in help with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\\alias{genericname-methods}",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". \nIf the generic (or made-generic) function lives in a different package, then\npackages often do "
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " add "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\\alias{genericname}",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", so that\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "help(\"genericname\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " remains unambiguous.  Indeed, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "methods::promptMethods",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\npromotes this convention:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> setGeneric(\"norm\")\n> cat(paste0(promptMethods(\"norm\", NA)$aliases, \"\\n\", collapse = \"\"))\n\\alias{norm-methods}\n\\alias{norm,ANY,ANY-method}\n\\alias{norm,ANY,missing-method}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIt follows that if one wants to link method documentation and not generic\nfunction documentation, then generally one must link "
+                            },
+                            {
+                                "type": "text",
+                                "text": "genericname-methods",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and\nnot "
+                            },
+                            {
+                                "type": "text",
+                                "text": "genericname",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  Very often one does that like so:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\\link[=genericname-methods]{genericname}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThat is a bit too cumbersome for me, so in some S4-using packages I define a\nnew macro\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\\newcommand{\\linkS4methods}{\\link[=#1-methods]{#1}}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nand I type "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\\linkS4methods{genericname}",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nMy wish is that R can start to support "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\\linkS4methods",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " out of the box, exactly\nas it supports "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\\linkS4class",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  If people agree, then I could develop a patch\nfor **tools** and WRE.\n\nNote that I ask now because I see:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> db <- news(grepl(\"\\\\linkS4class\", Text))\n> print(db, doBrowse = FALSE)\n                           Changes in R-devel                           \n\nNEW FEATURES\n\n    o   In *.Rd help files, the \\linkS4class macro now also works for\n        links to other packages via \\linkS4class[<pkg>]{<myClass>},\n        much nicer than the \"workaround\"\n        \\link[<pkg>:<myClass>-class]{<myClass>} necessary in earlier\n        versions of R.\n\n        Packages with the new syntax need to formally depend on R >=\n        4.6.0.\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIdeally, addition of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\\linkS4methods",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " would coincide with recent improvements\nto "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\\linkS4class",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18998] add Rd macro '\\linkS4methods' parallel to '\\linkS4class'*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18998>\n\n--- Comment #1 from Mikael Jagan (<mailto:jaganmn@mcmaster.ca|jaganmn@mcmaster.ca>) ---\n&gt; If people agree, then I could develop a patch for **tools** and WRE.\n\nPlus the \"Parsing Rd files\" document, plus the ESS Rd-mode keywords list, ...",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1770275423.636039",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "X4Af2",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18998] add Rd macro '\\linkS4methods' parallel to '\\linkS4class'",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18998"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn@mcmaster.ca",
+                                "text": "jaganmn@mcmaster.ca"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "If people agree, then I could develop a patch for **tools** and WRE."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nPlus the \"Parsing Rd files\" document, plus the ESS Rd-mode keywords list, ..."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

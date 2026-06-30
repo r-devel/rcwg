@@ -1,0 +1,808 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19051] New: casts from double to R_xlen_t can trigger undefined behaviour*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19051>\n\n            Bug ID: 19051\n           Summary: casts from double to R_xlen_t can trigger undefined\n                    behaviour\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nCreated attachment 3673\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3673&amp;action=edit>\nAdd and use a helper for safe truncation \/ downcasting.\n\nThere are a number of locations where R downcasts values without checking if\nthe casted value would fit the target type. For example (using a version of R\nbuilt with ASAN + UBSAN)\n\n```\n&gt; 1[1e101]\nsubset.c:716:10: runtime error: 1e+101 is outside the range of representable\nvalues of type 'long'\nSUMMARY: UndefinedBehaviorSanitizer: undefined-behavior subset.c:716:10\nsubscript.c:803:28: runtime error: 1e+101 is outside the range of representable\nvalues of type 'long'\nSUMMARY: UndefinedBehaviorSanitizer: undefined-behavior subscript.c:803:28\nsubscript.c:843:27: runtime error: 1e+101 is outside the range of representable\nvalues of type 'long'\nSUMMARY: UndefinedBehaviorSanitizer: undefined-behavior subscript.c:843:27\nsubscript.c:861:24: runtime error: 1e+101 is outside the range of representable\nvalues of type 'long'\nSUMMARY: UndefinedBehaviorSanitizer: undefined-behavior subscript.c:861:24\nsubset.c:145:2: runtime error: 1e+101 is outside the range of representable\nvalues of type 'long'\nSUMMARY: UndefinedBehaviorSanitizer: undefined-behavior subset.c:145:2\n[1] NA\n&gt; R.version\n               _\nplatform       x86_64-pc-linux-gnu\narch           x86_64\nos             linux-gnu\nsystem         x86_64, linux-gnu\nstatus         Under development (unstable)\nmajor          4\nminor          7.0\nyear           2026\nmonth          04\nday            13\nsvn rev        89874\nlanguage       R\nversion.string R Under development (unstable) (2026-04-13 r89874)\nnickname       Unsuffered Consequences\n```\n\nThese are mostly triggered via unnaturally large index vectors (and so\nshouldn't occur in practice, at least not intentionally) but figured I would\nfile for completeness. That said, it's not clear what the correct behavior in\neach scenario is -- e.g. emit an R error, versus silent truncation.\n\n\n      216 +| # | File | Line(s) | Cast |\n      217 +|---|---|---|---|\n      218 +| 1 | `src\/main\/subset.c` | 86 | `(R_xlen_t) (di - 1)` |\n      219 +| 2 | `src\/main\/subset.c` | 716 | `(R_xlen_t) rval` |\n      220 +| 3 | `src\/main\/subscript.c` | 136 | `(R_xlen_t)(dblind - 1)` |\n      221 +| 4 | `src\/main\/subscript.c` | 254 | `(R_xlen_t)(dblind - 1)` |\n      222 +| 5 | `src\/main\/subscript.c` | 803 | `(R_xlen_t) max` |\n      223 +| 6 | `src\/main\/subscript.c` | 805 | `(R_xlen_t) max` |\n      224 +| 7 | `src\/main\/subscript.c` | 840 | `(R_xlen_t) ds` |\n      225 +| 8 | `src\/main\/subscript.c` | 843 | `(R_xlen_t) ds` |\n      226 +| 9 | `src\/main\/subscript.c` | 861 | `(R_xlen_t) ds` |\n      227 +| 10 | `src\/main\/mapply.c` | 52 | `(R_xlen_t) REAL(ans)[0]` |\n      228 +| 11 | `src\/main\/summary.c` | 1181 | `(R_xlen_t)REAL(ans)[i] - 1` |\n      229 +| 12 | `src\/main\/altclasses.c` | 53 | `(R_xlen_t) REAL0(info)[0]` |\n      230 +| 13 | `src\/main\/altclasses.c` | 55 | `(int) REAL0(info)[1]` |\n      231 +| 14 | `src\/main\/altclasses.c` | 57 | `(int) REAL0(info)[2]` |\n      232 +| 15 | `src\/main\/altclasses.c` | 60 | `(R_xlen_t) REAL0(info)[0]` |\n      233 +| 16 | `src\/main\/altclasses.c` | 61 | `(int) REAL0(info)[1]` |\n      234 +| 17 | `src\/main\/altclasses.c` | 62 | `(int) REAL0(info)[2]` |\n      235 +| 18 | `src\/main\/altclasses.c` | 359 | `(R_xlen_t) REAL0(info)[0]` |\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776200979.822029",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "NsxPq",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19051] New: casts from double to R_xlen_t can trigger undefined behaviour",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19051"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19051\n           Summary: casts from double to R_xlen_t can trigger undefined\n                    behaviour\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3673\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3673&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3673&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nAdd and use a helper for safe truncation \/ downcasting.\n\nThere are a number of locations where R downcasts values without checking if\nthe casted value would fit the target type. For example (using a version of R\nbuilt with ASAN + UBSAN)\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> 1[1e101]\nsubset.c:716:10: runtime error: 1e+101 is outside the range of representable\nvalues of type 'long'\nSUMMARY: UndefinedBehaviorSanitizer: undefined-behavior subset.c:716:10\nsubscript.c:803:28: runtime error: 1e+101 is outside the range of representable\nvalues of type 'long'\nSUMMARY: UndefinedBehaviorSanitizer: undefined-behavior subscript.c:803:28\nsubscript.c:843:27: runtime error: 1e+101 is outside the range of representable\nvalues of type 'long'\nSUMMARY: UndefinedBehaviorSanitizer: undefined-behavior subscript.c:843:27\nsubscript.c:861:24: runtime error: 1e+101 is outside the range of representable\nvalues of type 'long'\nSUMMARY: UndefinedBehaviorSanitizer: undefined-behavior subscript.c:861:24\nsubset.c:145:2: runtime error: 1e+101 is outside the range of representable\nvalues of type 'long'\nSUMMARY: UndefinedBehaviorSanitizer: undefined-behavior subset.c:145:2\n[1] NA\n> R.version\n               _\nplatform       x86_64-pc-linux-gnu\narch           x86_64\nos             linux-gnu\nsystem         x86_64, linux-gnu\nstatus         Under development (unstable)\nmajor          4\nminor          7.0\nyear           2026\nmonth          04\nday            13\nsvn rev        89874\nlanguage       R\nversion.string R Under development (unstable) (2026-04-13 r89874)\nnickname       Unsuffered Consequences\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThese are mostly triggered via unnaturally large index vectors (and so\nshouldn't occur in practice, at least not intentionally) but figured I would\nfile for completeness. That said, it's not clear what the correct behavior in\neach scenario is -- e.g. emit an R error, versus silent truncation.\n\n\n\n      216 +| # | File | Line(s) | Cast |\n      217 +|---|---|---|---|\n      218 +| 1 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/subset.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 86 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(R_xlen_t) (di - 1)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      219 +| 2 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/subset.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 716 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(R_xlen_t) rval",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      220 +| 3 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/subscript.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 136 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(R_xlen_t)(dblind - 1)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      221 +| 4 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/subscript.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 254 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(R_xlen_t)(dblind - 1)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      222 +| 5 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/subscript.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 803 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(R_xlen_t) max",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      223 +| 6 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/subscript.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 805 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(R_xlen_t) max",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      224 +| 7 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/subscript.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 840 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(R_xlen_t) ds",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      225 +| 8 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/subscript.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 843 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(R_xlen_t) ds",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      226 +| 9 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/subscript.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 861 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(R_xlen_t) ds",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      227 +| 10 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/mapply.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 52 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(R_xlen_t) REAL(ans)[0]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      228 +| 11 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/summary.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 1181 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(R_xlen_t)REAL(ans)[i] - 1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      229 +| 12 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/altclasses.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 53 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(R_xlen_t) REAL0(info)[0]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      230 +| 13 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/altclasses.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 55 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(int) REAL0(info)[1]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      231 +| 14 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/altclasses.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 57 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(int) REAL0(info)[2]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      232 +| 15 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/altclasses.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 60 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(R_xlen_t) REAL0(info)[0]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      233 +| 16 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/altclasses.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 61 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(int) REAL0(info)[1]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      234 +| 17 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/altclasses.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 62 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(int) REAL0(info)[2]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      235 +| 18 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/altclasses.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 359 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(R_xlen_t) REAL0(info)[0]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "      236 +| 19 | `src\/main\/altclasses.c` | 402 | `(R_xlen_t) REAL_ELT(x, 0)` |\n      237 +| 20 | `src\/library\/stats\/src\/splines.c` | 447 | `(R_xlen_t)\nREAL(x)[0]` |\n      238 +| 21 | `src\/library\/graphics\/src\/plot.c` | 115 | `(int)\nREAL(pch)[i]` |\n      239 +| 22 | `src\/library\/graphics\/src\/plot.c` | 208 | `(int)\nREAL(font)[i]` |\n      240 +| 23 | `src\/library\/graphics\/src\/par-common.c` | 315,317,320 |\n`(int)(REAL(value)[2])` |\n      241 +| 24 | `src\/library\/graphics\/src\/par-common.c` | 352,354,357 |\n`(int)(REAL(value)[2])` |\n      242 +| 25 | `src\/library\/grid\/src\/grid.c` | 5051 | `(int) REAL(pch)[i]` |\n      243 +| 26 | `src\/library\/grDevices\/src\/colors.c` | 1492 | `(int)\nREAL(x)[i]` |\n      244 +| 27 | `src\/library\/methods\/src\/methods_list_dispatch.c` | 344 |\n`(int) REAL(object)[0]` |\n      245 +| 28 | `src\/main\/subscript.c` | 140,261 | `(R_xlen_t) dblind` (safe)\n|\n      246 +| 29 | `src\/main\/seq.c` | 984-989,1024,1044 | `(int)(rfrom + ...)`\n(safe) |\n      247 +| 30 | `src\/main\/grep.c` | 114 | `(int)(xdouble*1024*1024)` (safe) |",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776200979.841539",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Q5pAQ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "236 +| 19 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/altclasses.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 402 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(R_xlen_t) REAL_ELT(x, 0)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      237 +| 20 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/library\/stats\/src\/splines.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 447 | `(R_xlen_t)\nREAL(x)[0]` |\n      238 +| 21 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/library\/graphics\/src\/plot.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 115 | `(int)\nREAL(pch)[i]` |\n      239 +| 22 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/library\/graphics\/src\/plot.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 208 | `(int)\nREAL(font)[i]` |\n      240 +| 23 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/library\/graphics\/src\/par-common.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 315,317,320 |\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(int)(REAL(value)[2])",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      241 +| 24 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/library\/graphics\/src\/par-common.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 352,354,357 |\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(int)(REAL(value)[2])",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      242 +| 25 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/library\/grid\/src\/grid.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 5051 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(int) REAL(pch)[i]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      243 +| 26 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/library\/grDevices\/src\/colors.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 1492 | `(int)\nREAL(x)[i]` |\n      244 +| 27 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/library\/methods\/src\/methods_list_dispatch.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 344 |\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(int) REAL(object)[0]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n      245 +| 28 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/subscript.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 140,261 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(R_xlen_t) dblind",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (safe)\n|\n      246 +| 29 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/seq.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 984-989,1024,1044 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(int)(rfrom + ...)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n(safe) |\n      247 +| 30 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/grep.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 114 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(int)(xdouble*1024*1024)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (safe) |"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19051] casts from double to R_xlen_t can trigger undefined behaviour*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19051>\n\nKevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3673|0                           |1\n        is obsolete|                            |\n\n--- Comment #1 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nCreated attachment 3674\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3674&amp;action=edit>\nPatch.\n\nSome more changes.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776202894.313649",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "JNg",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19051] casts from double to R_xlen_t can trigger undefined behaviour",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19051"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nKevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3673|0                           |1\n        is obsolete|                            |\n\n--- Comment #1 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3674\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3674&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3674&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch.\n\nSome more changes."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

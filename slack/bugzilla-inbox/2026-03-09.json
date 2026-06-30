@@ -1,0 +1,240 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19012] foreign::write.foreign() generates incorrect SAS INPUT statement for character variables*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19012>\n\nTom Abernathy (<mailto:tom.abernathy@gmail.com|tom.abernathy@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tom.abernathy@gmail.com\n\n--- Comment #7 from Tom Abernathy (<mailto:tom.abernathy@gmail.com|tom.abernathy@gmail.com>) ---\nAs already noted the lack of a $ after variable a (or the presence of a $ after\nthe variable c) in the generated INPUT statement has no impact on the execution\nof the data step in SAS.\n\nBut looking at this R function there are a number of Bug\/Issues with the way it\nnow works.\n\n- Includes only the character variables in the LENGTH statement \n  - This changes the order that the variables will appear in the dataset\n- Does not make unique variable names (SAS names are case insensitive)\n- Does not generate valid string literals when value has embedded quotes\n  - In SAS code embedded quotes must be doubled\n- Uses double quotes instead of single quotes for string literals\n  - The SAS macro processor will evaluate strings made using double quotes\n- Does not account for multibyte characters when calculating lengths\n- Does not check if a character variable's length exceeds SAS limit (32K bytes)\n- Does not support VALIDVARNAME=ANY\n- Does not support VALIDFMTNAME=LONG\n- Does not support VALIDMEMNAME=EXTEND \n- Does not prevent using SAS reserved names in data step\n- Uses too small a width on DATETIME format so that century will not print\n- Does not include TRUNCOVER option on the INFILE statement\n- Does not transfer fractional seconds for Datetime (POSIX) values\n- Supports the \"dates\" class from the chron package but not the \"times\" class\n- Does not detect variable types that write.table does not support (\"list\" for\nexample)\n\nI have working code that fixes most of these now, but I cannot find much\nexisting tests for this function.  I am happy to work on making tests also, but\nwould appreciate guidance on best way to structure the tests.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1773072011.039689",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "\/a+",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19012] foreign::write.foreign() generates incorrect SAS INPUT statement for character variables",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19012"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTom Abernathy ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tom.abernathy@gmail.com",
+                                "text": "tom.abernathy@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |tom.abernathy@gmail.com\n\n--- Comment #7 from Tom Abernathy ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tom.abernathy@gmail.com",
+                                "text": "tom.abernathy@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nAs already noted the lack of a $ after variable a (or the presence of a $ after\nthe variable c) in the generated INPUT statement has no impact on the execution\nof the data step in SAS.\n\nBut looking at this R function there are a number of Bug\/Issues with the way it\nnow works.\n\n- Includes only the character variables in the LENGTH statement \n  - This changes the order that the variables will appear in the dataset\n- Does not make unique variable names (SAS names are case insensitive)\n- Does not generate valid string literals when value has embedded quotes\n  - In SAS code embedded quotes must be doubled\n- Uses double quotes instead of single quotes for string literals\n  - The SAS macro processor will evaluate strings made using double quotes\n- Does not account for multibyte characters when calculating lengths\n- Does not check if a character variable's length exceeds SAS limit (32K bytes)\n- Does not support VALIDVARNAME=ANY\n- Does not support VALIDFMTNAME=LONG\n- Does not support VALIDMEMNAME=EXTEND \n- Does not prevent using SAS reserved names in data step\n- Uses too small a width on DATETIME format so that century will not print\n- Does not include TRUNCOVER option on the INFILE statement\n- Does not transfer fractional seconds for Datetime (POSIX) values\n- Supports the \"dates\" class from the chron package but not the \"times\" class\n- Does not detect variable types that write.table does not support (\"list\" for\nexample)\n\nI have working code that fixes most of these now, but I cannot find much\nexisting tests for this function.  I am happy to work on making tests also, but\nwould appreciate guidance on best way to structure the tests."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19016] as.numeric(\"NA\") throws an unnecessary coercion warning*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19016>\n\nBenjamin Tyner (<mailto:btyner@gmail.com|btyner@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |btyner@gmail.com\n\n--- Comment #1 from Benjamin Tyner (<mailto:btyner@gmail.com|btyner@gmail.com>) ---\n(In reply to Dan Chaltiel from comment #0)\nThe existing behavior is as documented, and dictated by the ISO C and POSIX\nstandards for atof,\n\n   <https:\/\/en.cppreference.com\/w\/c\/string\/byte\/atof>\n\nSpecifically, the C99 standard and later added requirements for:\n\n   INF \/ INFINITY: (case-insensitive) Must be parsed as the numeric infinity.\n\n   NAN: (case-insensitive) Must be parsed as the numeric not-a-number.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1773095233.842219",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "IJvA5",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19016] as.numeric(\"NA\") throws an unnecessary coercion warning",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19016"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nBenjamin Tyner ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:btyner@gmail.com",
+                                "text": "btyner@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |btyner@gmail.com\n\n--- Comment #1 from Benjamin Tyner ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:btyner@gmail.com",
+                                "text": "btyner@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Dan Chaltiel from comment #0)\nThe existing behavior is as documented, and dictated by the ISO C and POSIX\nstandards for atof,\n\n   "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/en.cppreference.com\/w\/c\/string\/byte\/atof"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSpecifically, the C99 standard and later added requirements for:\n\n   INF \/ INFINITY: (case-insensitive) Must be parsed as the numeric infinity.\n\n   NAN: (case-insensitive) Must be parsed as the numeric not-a-number."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18989] Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989>\n\n--- Comment #10 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\n(In reply to Suharto Anggono from comment #2)\nShould be\n        if (isUTC) {\n            SET_STRING_ELT(VECTOR_ELT(ans, 9), i, STRING_ELT(stz, 0)); \/\/\nmodified",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1773105696.759499",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "vrhiV",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18989] Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #10 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Suharto Anggono from comment #2)\nShould be\n        if (isUTC) {\n            SET_STRING_ELT(VECTOR_ELT(ans, 9), i, STRING_ELT(stz, 0)); \/\/\nmodified"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18989] Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989>\n\n--- Comment #11 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\n(In reply to Suharto Anggono from comment #10)\nSorry for the noise. The original is also correct.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1773106483.141319",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "JPFdT",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18989] Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #11 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Suharto Anggono from comment #10)\nSorry for the noise. The original is also correct."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

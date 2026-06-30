@@ -1,0 +1,598 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16135] error in: convolve( 1:5, 1, type='filter')*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16135>\n\nMichael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |michaelchirico4@gmail.com\n\n--- Comment #4 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nCreated attachment 3611\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3611&amp;action=edit>\nUpdated convolve patch with ?convolve improvements and tests\n\nA few observations:\n\n`?convolve` has [1]\n\n&gt; numeric sequences _of the same length_ to be convolved.\n\nBut AIUI that is only required for `type=\"circular\"`, e.g. as written just\nbelow [2]:\n\n&gt; If `type == \"circular\"`, [`length(x) = length(y)`] is required\n\nNext, I'm no FFT expert, and I don't have access right now to the Brillinger\ntext linked at the end, but the wording here [3] isn't precise enough for me:\n\n&gt; For `\"open\"` and `\"filter\"`, the sequences are padded with `0`s (from left and right) first; `\"filter\"` returns the middle sub-vector of `\"open\"`, namely, the result of running a weighted mean of `x` with weights `y`.\n\nI think \"middle sub-vector\" in particular is not easily intuited.\n\nThe examples Benjamin provides with `y = rep(1, N)` imply the \"middle\nsub-vector\" is perhaps more easily understood as \"the sub-vector not requiring\n0-padding\" or \"the vector after filtering out those built from 0-padding\" or\nprecisely `k = m, ..., n` when `m&lt;=n` (using the index `k` from the formula\n[4]).\n\nThat would then imply that the wording \"namely, the result of running a\nweighted mean of `x` with weights `y`\" is _only for the `length(x)=length(y)`\ncase_.\n\nWith that preamble in mind, I am inclined to agree with Ben that this example\nis a plain bug -- the result should have length 5, not 3.\n\nThat said, I don't find Ben's patch satisfactory, since it will run into a\nsimilar edge case problem when `length(y) &gt; length(x)`, in which case we should\nreturn `numeric(0)`, because we always rely on 0-padding, as the current code\nachieves:\n\n```\n# under proposed patch\nconvolve(1:5, rep(1,6), type='filter')\n# [1] 15 15\n\n# in r-devel\nconvolve(1:5, rep(1,6), type='filter')\n# numeric(0)\n```\n\nI'm attaching a different patch to solve both problems, as well as taking a\nstab at improving the documentation.\n\nTracked at <https:\/\/github.com\/r-devel\/r-svn\/pull\/235>\n\n[1]\n<https:\/\/github.com\/r-devel\/r-svn\/blob\/5891760c29285562cfb0d1c5513625a93150e2a0\/src\/library\/stats\/man\/convolve.Rd#L17-L18>\n[2]\n<https:\/\/github.com\/r-devel\/r-svn\/blob\/5891760c29285562cfb0d1c5513625a93150e2a0\/src\/library\/stats\/man\/convolve.Rd#L46>\n[3]\n<https:\/\/github.com\/r-devel\/r-svn\/blob\/5891760c29285562cfb0d1c5513625a93150e2a0\/src\/library\/stats\/man\/convolve.Rd#L25-L28>\n[4]\n<https:\/\/github.com\/r-devel\/r-svn\/blob\/5891760c29285562cfb0d1c5513625a93150e2a0\/src\/library\/stats\/man\/convolve.Rd#L42-L44>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1771610044.845189",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "7JSXH",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16135] error in: convolve( 1:5, 1, type='filter')",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16135"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMichael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |michaelchirico4@gmail.com\n\n--- Comment #4 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3611\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3611&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3611&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nUpdated convolve patch with ?convolve improvements and tests\n\nA few observations:\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "?convolve",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has [1]\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "numeric sequences "
+                            },
+                            {
+                                "type": "text",
+                                "text": "of the same length",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to be convolved."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nBut AIUI that is only required for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "type=\"circular\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", e.g. as written just\nbelow [2]:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "If "
+                            },
+                            {
+                                "type": "text",
+                                "text": "type == \"circular\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", ["
+                            },
+                            {
+                                "type": "text",
+                                "text": "length(x) = length(y)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "] is required"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nNext, I'm no FFT expert, and I don't have access right now to the Brillinger\ntext linked at the end, but the wording here [3] isn't precise enough for me:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "For "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"open\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"filter\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", the sequences are padded with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "0",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "s (from left and right) first; "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"filter\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " returns the middle sub-vector of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"open\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", namely, the result of running a weighted mean of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " with weights "
+                            },
+                            {
+                                "type": "text",
+                                "text": "y",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI think \"middle sub-vector\" in particular is not easily intuited.\n\nThe examples Benjamin provides with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "y = rep(1, N)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " imply the \"middle\nsub-vector\" is perhaps more easily understood as \"the sub-vector not requiring\n0-padding\" or \"the vector after filtering out those built from 0-padding\" or\nprecisely "
+                            },
+                            {
+                                "type": "text",
+                                "text": "k = m, ..., n",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " when "
+                            },
+                            {
+                                "type": "text",
+                                "text": "m<=n",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (using the index "
+                            },
+                            {
+                                "type": "text",
+                                "text": "k",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " from the formula\n[4]).\n\nThat would then imply that the wording \"namely, the result of running a\nweighted mean of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " with weights "
+                            },
+                            {
+                                "type": "text",
+                                "text": "y",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\" is _only for the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length(x)=length(y)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ncase_.\n\nWith that preamble in mind, I am inclined to agree with Ben that this example\nis a plain bug -- the result should have length 5, not 3.\n\nThat said, I don't find Ben's patch satisfactory, since it will run into a\nsimilar edge case problem when "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length(y) > length(x)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", in which case we should\nreturn "
+                            },
+                            {
+                                "type": "text",
+                                "text": "numeric(0)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", because we always rely on 0-padding, as the current code\nachieves:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# under proposed patch\nconvolve(1:5, rep(1,6), type='filter')\n# [1] 15 15\n\n# in r-devel\nconvolve(1:5, rep(1,6), type='filter')\n# numeric(0)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI'm attaching a different patch to solve both problems, as well as taking a\nstab at improving the documentation.\n\nTracked at "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/pull\/235"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n[1]\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/5891760c29285562cfb0d1c5513625a93150e2a0\/src\/library\/stats\/man\/convolve.Rd#L17-L18"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n[2]\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/5891760c29285562cfb0d1c5513625a93150e2a0\/src\/library\/stats\/man\/convolve.Rd#L46"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n[3]\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/5891760c29285562cfb0d1c5513625a93150e2a0\/src\/library\/stats\/man\/convolve.Rd#L25-L28"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n[4]\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/5891760c29285562cfb0d1c5513625a93150e2a0\/src\/library\/stats\/man\/convolve.Rd#L42-L44"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19007] New: labels are not parallel to axes in persp() plot on Debian Linux*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19007>\n\n            Bug ID: 19007\n           Summary: labels are not parallel to axes in persp() plot on\n                    Debian Linux\n           Product: R\n           Version: R 4.5.x\n          Hardware: Other\n                OS: Linux-Debian\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Graphics\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:klaus.schliep@gmail.com|klaus.schliep@gmail.com>\n\nCreated attachment 3612\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3612&amp;action=edit>\nsimple persp plot with labels not parallel to the axes\n\nUsually (axis) labels in the `persp()` function are parallel to the axes. \nUnder Debian (I tested Debian trixie, SID and WSL with Debian) the labels are\nnot parallel to the axes (see attachment).\nWindows and WSL with Ubuntu is ok. So this seems mainly a Debian issue. \nI have no idea if the error is hardware dependent, I could only test on amd64. \n\nI compiled R-devel to see if the error is still there, and it is. But compiling\nwas really smooth and fast nowadays, huge compliment!!\n\nThe error seems related with the setting of the configuration variable\n`HAVE_ATAN2PI`. \nI compiled R-devel (R-devel_2026-02-20_r89442.tar.gz) and could fix it locally\nby editing out some lines. In R-devel\/src\/library\/graphics\/src\/plot3d.c  around\nline 806ff are two options and if I leave only the line \n```\nangle = (180. \/ M_PI) * atan2(dy, dx);\n```\nthe labels are parallel.   \n\nKind regards, \nKlaus Schliep",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1771615689.087769",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "5uOIX",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19007] New: labels are not parallel to axes in persp() plot on Debian Linux",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19007"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19007\n           Summary: labels are not parallel to axes in persp() plot on\n                    Debian Linux\n           Product: R\n           Version: R 4.5.x\n          Hardware: Other\n                OS: Linux-Debian\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Graphics\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:klaus.schliep@gmail.com",
+                                "text": "klaus.schliep@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3612\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3612&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3612&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nsimple persp plot with labels not parallel to the axes\n\nUsually (axis) labels in the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "persp()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " function are parallel to the axes. \nUnder Debian (I tested Debian trixie, SID and WSL with Debian) the labels are\nnot parallel to the axes (see attachment).\nWindows and WSL with Ubuntu is ok. So this seems mainly a Debian issue. \nI have no idea if the error is hardware dependent, I could only test on amd64. \n\nI compiled R-devel to see if the error is still there, and it is. But compiling\nwas really smooth and fast nowadays, huge compliment!!\n\nThe error seems related with the setting of the configuration variable\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "HAVE_ATAN2PI",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". \nI compiled R-devel (R-devel_2026-02-20_r89442.tar.gz) and could fix it locally\nby editing out some lines. In R-devel\/src\/library\/graphics\/src\/plot3d.c  around\nline 806ff are two options and if I leave only the line "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "angle = (180. \/ M_PI) * atan2(dy, dx);\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "the labels are parallel.   \n\nKind regards, \nKlaus Schliep"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16135] error in: convolve( 1:5, 1, type='filter')*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16135>\n\nMichael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3611|0                           |1\n        is obsolete|                            |\n\n--- Comment #5 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nCreated attachment 3613\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3613&amp;action=edit>\nUpdated convolve patch with ?convolve improvements and tests",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1771630025.943309",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "UDt1E",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16135] error in: convolve( 1:5, 1, type='filter')",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16135"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMichael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3611|0                           |1\n        is obsolete|                            |\n\n--- Comment #5 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3613\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3613&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3613&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nUpdated convolve patch with ?convolve improvements and tests"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

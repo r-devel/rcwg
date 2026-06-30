@@ -1,0 +1,288 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19029] New: Overly-long dlerror() may corrupt dyn.load() state*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19029>\n\n            Bug ID: 19029\n           Summary: Overly-long dlerror() may corrupt dyn.load() state\n           Product: R\n           Version: R 4.5.x\n          Hardware: All\n                OS: All\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:ikrylov@disroot.org|ikrylov@disroot.org>\n\nCreated attachment 3643\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3643&amp;action=edit>\nSuggested changes\n\nOriginally [discovered by Eric R.\nScott](<https:\/\/github.com\/girke-lab\/ChemmineOB\/issues\/48>). Mostly relevant on\nmacOS, but can be reproduced on Linux as well by overriding `dlerror()`:\n\n```\n#include &lt;string.h&gt;\n\nchar *dlerror(void) {\n        static char error[1009]; \/\/ must exceed 1000\n        memset(error, 'A', sizeof(error) - 1);\n        error[sizeof(error)-1] = '\\0';\n        return error;\n}\n```\n\n```\n$ R_DEFAULT_PACKAGES=NULL LD_PRELOAD=.\/dlerror.so Rscript -e\n'try(dyn.load(\"fail\")); library(Matrix)'\nError in dyn.load(\"fail\") :\n  unable to load shared object '...\/fail':\n \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\nLoading required package: methods\nError: package or namespace load failed for 'methods' in dyn.load(file, DLLpath\n= DLLpath, ...):\n SET_VECTOR_ELT() can only be applied to a 'list', not a 'NULL'\nError: package 'methods' could not be loaded\nExecution halted\n```\n\n(Other failures can be induced by changing the size of the `error` string.)\n\nWith AddressSanitizer, the result is\n\n```\n==20288==ERROR: AddressSanitizer: global-buffer-overflow on address\n0x55c236a19f08 at pc 0x7f8f55e602ca bp 0x7ffd5b9f4680 sp 0x7ffd5b9f3e30\nWRITE of size 1009 at 0x55c236a19f08 thread T0\n    #0 0x7f8f55e602c9 in __interceptor_strcpy\n..\/..\/..\/..\/src\/libsanitizer\/asan\/asan_interceptors.cpp:425\n    #1 0x55c234e06209 in AddDLL ..\/..\/..\/src\/main\/Rdynload.c:877\n    #2 0x55c234e12ebd in do_dynload ..\/..\/..\/src\/main\/Rdynload.c:1248\n&lt;...&gt;\n0x55c236a19f08 is located 56 bytes to the left of global variable\n'Rf_osDynSymbol' defined in '..\/..\/..\/src\/main\/Rdynload.c:139:30'\n(0x55c236a19f40) of size 64\n0x55c236a19f08 is located 0 bytes to the right of global variable 'DLLerror'\ndefined in '..\/..\/..\/src\/main\/Rdynload.c:818:13' (0x55c236a19b20) of size 1000\n```\n\nThe Unix implementation of `getError(char *buf, int len)` ignores the length of\nthe buffer and overwrites it using `strcpy()`, corrupting nearby variables in\nthe process. The Windows implementation ignores `len` as well, but I don't know\nif the overflow is possible given the 4000-byte error buffer.\n\nPatch tested on Linux using `LD_PRELOAD` and on Windows by artificially\nshortening `DLLerrBUFSIZE` in `src\/main\/Rdynload.c`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1774432571.091649",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "P\/Cc",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19029] New: Overly-long dlerror() may corrupt dyn.load() state",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19029"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19029\n           Summary: Overly-long dlerror() may corrupt dyn.load() state\n           Product: R\n           Version: R 4.5.x\n          Hardware: All\n                OS: All\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3643\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3643&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3643&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nSuggested changes\n\nOriginally [discovered by Eric R.\nScott]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/girke-lab\/ChemmineOB\/issues\/48"
+                            },
+                            {
+                                "type": "text",
+                                "text": "). Mostly relevant on\nmacOS, but can be reproduced on Linux as well by overriding "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dlerror()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "#include <string.h>\n\nchar *dlerror(void) {\n        static char error[1009]; \/\/ must exceed 1000\n        memset(error, 'A', sizeof(error) - 1);\n        error[sizeof(error)-1] = '\\0';\n        return error;\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$ R_DEFAULT_PACKAGES=NULL LD_PRELOAD=.\/dlerror.so Rscript -e\n'try(dyn.load(\"fail\")); library(Matrix)'\nError in dyn.load(\"fail\") :\n  unable to load shared object '...\/fail':\n \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\nLoading required package: methods\nError: package or namespace load failed for 'methods' in dyn.load(file, DLLpath\n= DLLpath, ...):\n SET_VECTOR_ELT() can only be applied to a 'list', not a 'NULL'\nError: package 'methods' could not be loaded\nExecution halted\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n(Other failures can be induced by changing the size of the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "error",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " string.)\n\nWith AddressSanitizer, the result is\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "==20288==ERROR: AddressSanitizer: global-buffer-overflow on address\n0x55c236a19f08 at pc 0x7f8f55e602ca bp 0x7ffd5b9f4680 sp 0x7ffd5b9f3e30\nWRITE of size 1009 at 0x55c236a19f08 thread T0\n    #0 0x7f8f55e602c9 in __interceptor_strcpy\n..\/..\/..\/..\/src\/libsanitizer\/asan\/asan_interceptors.cpp:425\n    #1 0x55c234e06209 in AddDLL ..\/..\/..\/src\/main\/Rdynload.c:877\n    #2 0x55c234e12ebd in do_dynload ..\/..\/..\/src\/main\/Rdynload.c:1248\n<...>\n0x55c236a19f08 is located 56 bytes to the left of global variable\n'Rf_osDynSymbol' defined in '..\/..\/..\/src\/main\/Rdynload.c:139:30'\n(0x55c236a19f40) of size 64\n0x55c236a19f08 is located 0 bytes to the right of global variable 'DLLerror'\ndefined in '..\/..\/..\/src\/main\/Rdynload.c:818:13' (0x55c236a19b20) of size 1000\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe Unix implementation of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getError(char *buf, int len)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ignores the length of\nthe buffer and overwrites it using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "strcpy()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", corrupting nearby variables in\nthe process. The Windows implementation ignores "
+                            },
+                            {
+                                "type": "text",
+                                "text": "len",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as well, but I don't know\nif the overflow is possible given the 4000-byte error buffer.\n\nPatch tested on Linux using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "LD_PRELOAD",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and on Windows by artificially\nshortening "
+                            },
+                            {
+                                "type": "text",
+                                "text": "DLLerrBUFSIZE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/Rdynload.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18984] 'match' supporting abstract vector classes (of non-vector type, e.g., \"S4\")*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18984>\n\nKurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |Kurt.Hornik@wu.ac.at\n         Resolution|---                         |FIXED\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #1 from Kurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) ---\nPart A (C level) was taken care of with c89311 in the trunk some time ago.\nPart B (R level) will be left as is for now.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1774447386.946539",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "dmrLR",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18984] 'match' supporting abstract vector classes (of non-vector type, e.g., \"S4\")",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18984"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nKurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |Kurt.Hornik@wu.ac.at\n         Resolution|---                         |FIXED\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #1 from Kurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nPart A (C level) was taken care of with c89311 in the trunk some time ago.\nPart B (R level) will be left as is for now."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

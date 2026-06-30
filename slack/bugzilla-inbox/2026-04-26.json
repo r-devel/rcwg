@@ -1,0 +1,206 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19061] New: wrong size used when allocating for external routines in Rf_registerRoutines*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19061>\n\n            Bug ID: 19061\n           Summary: wrong size used when allocating for external routines\n                    in Rf_registerRoutines\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nCreated attachment 3683\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3683&amp;action=edit>\nUse n_ext rather than n_c for R_ExternalMethodDef.\n\nSee attached patch -- the size `n_c` rather than `n_ext` is used when\nallocating the `externalRoutines` array.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1777241165.406229",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "=Lg",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19061] New: wrong size used when allocating for external routines in Rf_registerRoutines",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19061"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19061\n           Summary: wrong size used when allocating for external routines\n                    in Rf_registerRoutines\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3683\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3683&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3683&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nUse n_ext rather than n_c for R_ExternalMethodDef.\n\nSee attached patch -- the size "
+                            },
+                            {
+                                "type": "text",
+                                "text": "n_c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " rather than "
+                            },
+                            {
+                                "type": "text",
+                                "text": "n_ext",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is used when\nallocating the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "externalRoutines",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " array."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19062] New: do_open does not validate size of 'mode' string*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19062>\n\n            Bug ID: 19062\n           Summary: do_open does not validate size of 'mode' string\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nCreated attachment 3684\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3684&amp;action=edit>\nCandidate patch; ensure user-provided mode fits in buffer.\n\nFor example:\n\n```\n&gt; con &lt;- file(\"\/tmp\/x\", open = \"\")\n&gt; open(con, \"a_long_open_mode_string_here_1234567890\")\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/connections.c:934:21: runtime error:\nindex 32 out of bounds for type 'char[5]'\n    #0 0xe5a0294b4408 in file_open\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/connections.c:934:21\n    #1 0xe5a02946aa94 in do_open\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/connections.c:4099:15\n    #2 0xe5a0296ec400 in bcEval_loop\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:8128:14\n    #3 0xe5a02968986c in bcEval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:7511:16\n    #4 0xe5a029687a14 in Rf_eval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:1167:8\n    #5 0xe5a02969428c in R_execClosure\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2387:22\n    #6 0xe5a02968ef7c in applyClosure_core\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2300:16\n    #7 0xe5a02968c92c in Rf_applyClosure\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2322:16\n    #8 0xe5a02989de10 in dispatchMethod\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/objects.c:473:16\n    #9 0xe5a02989bcc4 in Rf_usemethod\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/objects.c:509:10\n    #10 0xe5a02989f668 in do_usemethod\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/objects.c:579:9\n    #11 0xe5a0296ddb54 in bcEval_loop\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:8148:15\n    #12 0xe5a02968986c in bcEval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:7511:16\n    #13 0xe5a029687a14 in Rf_eval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:1167:8\n    #14 0xe5a02969428c in R_execClosure\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2387:22\n    #15 0xe5a02968ef7c in applyClosure_core\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2300:16\n    #16 0xe5a029688340 in Rf_applyClosure\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2322:16\n    #17 0xe5a029688340 in Rf_eval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:1278:12\n    #18 0xe5a0298214cc in Rf_ReplIteration\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c:264:15\n    #19 0xe5a029826ba0 in R_ReplConsole\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c:317:11\n    #20 0xe5a02982689c in run_Rmainloop\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c:1235:5\n    #21 0xe5a029820d00 in Rf_mainloop\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c:1242:5\n    #22 0xbef6d0d745a8 in main\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/Rmain.c:29:5\n    #23 0xe5a028c184c0 in __libc_start_call_main\ncsu\/..\/sysdeps\/nptl\/libc_start_call_main.h:58:16\n    #24 0xe5a028c18594 in __libc_start_main csu\/..\/csu\/libc-start.c:360:3\n    #25 0xbef6d0c952ec in _start\n(\/home\/kevin\/r-devel\/r-afl\/build\/r-asan-ubsan\/bin\/exec\/R+0x352ec) (BuildId:\n9a71135c5fdab7f61c3c3b8874182e4a42ee0743)\n```\n\n---\n\n```\n&gt; R.version\n               _\nplatform       aarch64-unknown-linux-gnu\narch           aarch64\nos             linux-gnu\nsystem         aarch64, linux-gnu\nstatus         Under development (unstable)\nmajor          4\nminor          7.0\nyear           2026\nmonth          04\nday            22\nsvn rev        89950\nlanguage       R\nversion.string R Under development (unstable) (2026-04-22 r89950)\nnickname       Unsuffered Consequences\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1777242323.580679",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "p+kw",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19062] New: do_open does not validate size of 'mode' string",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19062"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19062\n           Summary: do_open does not validate size of 'mode' string\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3684\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3684&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3684&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCandidate patch; ensure user-provided mode fits in buffer.\n\nFor example:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> con <- file(\"\/tmp\/x\", open = \"\")\n> open(con, \"a_long_open_mode_string_here_1234567890\")\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/connections.c:934:21: runtime error:\nindex 32 out of bounds for type 'char[5]'\n    #0 0xe5a0294b4408 in file_open\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/connections.c:934:21\n    #1 0xe5a02946aa94 in do_open\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/connections.c:4099:15\n    #2 0xe5a0296ec400 in bcEval_loop\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:8128:14\n    #3 0xe5a02968986c in bcEval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:7511:16\n    #4 0xe5a029687a14 in Rf_eval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:1167:8\n    #5 0xe5a02969428c in R_execClosure\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2387:22\n    #6 0xe5a02968ef7c in applyClosure_core\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2300:16\n    #7 0xe5a02968c92c in Rf_applyClosure\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2322:16\n    #8 0xe5a02989de10 in dispatchMethod\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/objects.c:473:16\n    #9 0xe5a02989bcc4 in Rf_usemethod\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/objects.c:509:10\n    #10 0xe5a02989f668 in do_usemethod\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/objects.c:579:9\n    #11 0xe5a0296ddb54 in bcEval_loop\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:8148:15\n    #12 0xe5a02968986c in bcEval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:7511:16\n    #13 0xe5a029687a14 in Rf_eval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:1167:8\n    #14 0xe5a02969428c in R_execClosure\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2387:22\n    #15 0xe5a02968ef7c in applyClosure_core\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2300:16\n    #16 0xe5a029688340 in Rf_applyClosure\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2322:16\n    #17 0xe5a029688340 in Rf_eval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:1278:12\n    #18 0xe5a0298214cc in Rf_ReplIteration\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c:264:15\n    #19 0xe5a029826ba0 in R_ReplConsole\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c:317:11\n    #20 0xe5a02982689c in run_Rmainloop\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c:1235:5\n    #21 0xe5a029820d00 in Rf_mainloop\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c:1242:5\n    #22 0xbef6d0d745a8 in main\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/Rmain.c:29:5\n    #23 0xe5a028c184c0 in __libc_start_call_main\ncsu\/..\/sysdeps\/nptl\/libc_start_call_main.h:58:16\n    #24 0xe5a028c18594 in __libc_start_main csu\/..\/csu\/libc-start.c:360:3\n    #25 0xbef6d0c952ec in _start\n(\/home\/kevin\/r-devel\/r-afl\/build\/r-asan-ubsan\/bin\/exec\/R+0x352ec) (BuildId:\n9a71135c5fdab7f61c3c3b8874182e4a42ee0743)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n---\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> R.version\n               _\nplatform       aarch64-unknown-linux-gnu\narch           aarch64\nos             linux-gnu\nsystem         aarch64, linux-gnu\nstatus         Under development (unstable)\nmajor          4\nminor          7.0\nyear           2026\nmonth          04\nday            22\nsvn rev        89950\nlanguage       R\nversion.string R Under development (unstable) (2026-04-22 r89950)\nnickname       Unsuffered Consequences\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

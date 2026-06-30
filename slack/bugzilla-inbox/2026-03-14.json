@@ -1,0 +1,624 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19020] New: R CMD check may load the old version of package with \\Sexpr[stage=render]{self:::....}*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19020>\n\n            Bug ID: 19020\n           Summary: R CMD check may load the old version of package with\n                    \\Sexpr[stage=render]{self:::....}\n           Product: R\n           Version: R 4.5.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:ikrylov@disroot.org|ikrylov@disroot.org>\n\nCreated attachment 3628\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3628&amp;action=edit>\nTwo ways to reproduce the problem\n\nWhile experimenting with the fix for bug 18191, I found an interesting problem\nthat takes a few coincidences to trigger but is not impossible.\n\nWhen I added a vignette engine to my package, the following NOTE appeared:\n\n```\n* checking package vignettes ... NOTE\nPackage has 'vignettes' subdirectory but apparently no vignettes. Perhaps the\n'VignetteBuilder' information is missing from the DESCRIPTION file?\n```\n\nBy the time `tools:::.check_packages` -&gt; `run_vignettes` calls `pkgVignettes`\n-&gt; `loadVignetteBuilder`, the older version of the package, without the\nvignette builder, is already loaded, and thus `length(vigns$docs)` ends up\nbeing 0.\n\n```\npackageEvent(pkg, 'onLoad') |&gt; setHook(\\(...) sys.calls() |&gt; format() |&gt;\nwriteLines(stderr()))\ntools:::.check_packages(paste0(pkg, '_2.0.tar.gz'))\n```\n\n...reveals that it's `.package_code_using_R_4.x_syntax` -&gt; `Rd2ex` -&gt;\n`prepareRd`.\n\nMoreover, if the \"new\" help page is incompatible with the \"old\" package (e.g.\nbecause it calls a newly introduced function via `\\Sexpr[stage=render]`), its\nexamples are not checked.\n\nThe following seems to fix both the vignette NOTE and the examples being\nskipped:\n\n```\nIndex: src\/library\/tools\/R\/utils.R\n===================================================================\n--- src\/library\/tools\/R\/utils.R (revision 89619)\n+++ src\/library\/tools\/R\/utils.R (working copy)\n@@ -2150,7 +2150,7 @@\n                           ## Need to extract the code in the examples.\n                           ## Rd2ex() does that and more, but provides no\n                           ## output if there are no examples ...\n-                          Rd2ex(u, p)\n+                          Rd2ex(u, p, stages = NULL)\n                           if(file.exists(p))\n                               wrk(p, v)\n                       }, error = function(e) NULL)\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1773484033.961169",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "zP3P",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19020] New: R CMD check may load the old version of package with \\Sexpr[stage=render]{self:::....}",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19020"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19020\n           Summary: R CMD check may load the old version of package with\n                    \\Sexpr[stage=render]{self:::....}\n           Product: R\n           Version: R 4.5.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3628\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3628&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3628&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nTwo ways to reproduce the problem\n\nWhile experimenting with the fix for bug 18191, I found an interesting problem\nthat takes a few coincidences to trigger but is not impossible.\n\nWhen I added a vignette engine to my package, the following NOTE appeared:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "* checking package vignettes ... NOTE\nPackage has 'vignettes' subdirectory but apparently no vignettes. Perhaps the\n'VignetteBuilder' information is missing from the DESCRIPTION file?\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nBy the time "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tools:::.check_packages",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " -> "
+                            },
+                            {
+                                "type": "text",
+                                "text": "run_vignettes",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " calls "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pkgVignettes",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n-> "
+                            },
+                            {
+                                "type": "text",
+                                "text": "loadVignetteBuilder",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", the older version of the package, without the\nvignette builder, is already loaded, and thus "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length(vigns$docs)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ends up\nbeing 0.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "packageEvent(pkg, 'onLoad') |> setHook(\\(...) sys.calls() |> format() |>\nwriteLines(stderr()))\ntools:::.check_packages(paste0(pkg, '_2.0.tar.gz'))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n...reveals that it's "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".package_code_using_R_4.x_syntax",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " -> "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rd2ex",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ->\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "prepareRd",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nMoreover, if the \"new\" help page is incompatible with the \"old\" package (e.g.\nbecause it calls a newly introduced function via "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\\Sexpr[stage=render]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), its\nexamples are not checked.\n\nThe following seems to fix both the vignette NOTE and the examples being\nskipped:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/tools\/R\/utils.R\n===================================================================\n--- src\/library\/tools\/R\/utils.R (revision 89619)\n+++ src\/library\/tools\/R\/utils.R (working copy)\n@@ -2150,7 +2150,7 @@\n                           ## Need to extract the code in the examples.\n                           ## Rd2ex() does that and more, but provides no\n                           ## output if there are no examples ...\n-                          Rd2ex(u, p)\n+                          Rd2ex(u, p, stages = NULL)\n                           if(file.exists(p))\n                               wrk(p, v)\n                       }, error = function(e) NULL)\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18928] Missing pieces in the C API for environments*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18928>\n\n--- Comment #19 from Luke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) ---\nThe dots patch is committed with minor adjustments in r89621 and r89622. I\nbelieve this just leaves adding something like `R_envSymbols()` to get a vector\nof the binding tags.\n\nMany of the inspectors have to do an environment lookup on each call. If this\nturns out to be a practical performance bottleneck we can look into caching\nobtions or adding some form of iterator interface.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1773499082.204159",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "lOX",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18928] Missing pieces in the C API for environments",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18928"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #19 from Luke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe dots patch is committed with minor adjustments in r89621 and r89622. I\nbelieve this just leaves adding something like "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_envSymbols()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to get a vector\nof the binding tags.\n\nMany of the inspectors have to do an environment lookup on each call. If this\nturns out to be a practical performance bottleneck we can look into caching\nobtions or adding some form of iterator interface."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19020] R CMD check may load the old version of package with \\Sexpr[stage=render]{self:::....}*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19020>\n\nSebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |seb.meyer@fau.de\n\n--- Comment #1 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\n&gt; Created attachment 3628\n\n(with a successfully anticipated PR number in the R script file names)\n\nThanks for the detailed derivation. In the recent r89412, I had already\ndisabled (build-stage) \\Sexpr evaluation further above in that function because\nit caused spurious warnings in other checks with packages using the new \\bib*\nmacros. IIRC, the reasons were similar. So the change makes a lot of sense to\nme.\n\nI'll still work through your reproduction scripts before committing the change.\n(BTW, thanks for using `package.skeleton`; one more case where the recent\nimprovements in R-devel -- returning the path and not requiring R objects --\nmake a lot of sense.)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1773502025.716789",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "AFW",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19020] R CMD check may load the old version of package with \\Sexpr[stage=render]{self:::....}",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19020"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |seb.meyer@fau.de\n\n--- Comment #1 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Created attachment 3628"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n(with a successfully anticipated PR number in the R script file names)\n\nThanks for the detailed derivation. In the recent r89412, I had already\ndisabled (build-stage) \\Sexpr evaluation further above in that function because\nit caused spurious warnings in other checks with packages using the new \\bib*\nmacros. IIRC, the reasons were similar. So the change makes a lot of sense to\nme.\n\nI'll still work through your reproduction scripts before committing the change.\n(BTW, thanks for using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "package.skeleton",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "; one more case where the recent\nimprovements in R-devel -- returning the path and not requiring R objects --\nmake a lot of sense.)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19012] foreign::write.foreign() generates incorrect SAS INPUT statement for character variables*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19012>\n\n--- Comment #8 from Tom Abernathy (<mailto:tom.abernathy@gmail.com|tom.abernathy@gmail.com>) ---\nCreated attachment 3630\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3630&amp;action=edit>\nPatch for foreign\n\nChanges to write.foreignSAS",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1773546002.127969",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "wyNf",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19012] foreign::write.foreign() generates incorrect SAS INPUT statement for character variables",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19012"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #8 from Tom Abernathy ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tom.abernathy@gmail.com",
+                                "text": "tom.abernathy@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3630\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3630&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3630&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch for foreign\n\nChanges to write.foreignSAS"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19012] foreign::write.foreign() generates incorrect SAS INPUT statement for character variables*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19012>\n\n--- Comment #9 from Tom Abernathy (<mailto:tom.abernathy@gmail.com|tom.abernathy@gmail.com>) ---\nHere is update to writeForeignSAS function to make it more compatible with\nnewer SAS versions.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1773546113.755569",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "8qYc",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19012] foreign::write.foreign() generates incorrect SAS INPUT statement for character variables",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19012"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #9 from Tom Abernathy ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tom.abernathy@gmail.com",
+                                "text": "tom.abernathy@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nHere is update to writeForeignSAS function to make it more compatible with\nnewer SAS versions."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19019] interaction() should warn when coalescing levels*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19019>\n\nElin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |elin.waring@gmail.com\n\n--- Comment #1 from Elin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) ---\nI wanted to note that \n\n```\nave(3:4, c(\"1.0\", \"1.5\"), c(\"5.5\", \"5.0\"))\n```\n\nreturns 3 4.\n\nAs does\n```\n&gt; ave(3:4, c(\"a\", \"b\"), c(\"c\", \"d\"))\n[1] 3 4\n```\n\nInterestingly \n```\nave(3:4, as.factor(c(1.0, 1.5)), as.factor(c(5.5, 5.0)))\n```   \nreturns 3.5 3.5   \n\n```\n&gt; interaction(c(\"1.0\", \"1.5\"), c(\"5.5\", \"5.0\"))\n[1] 1.0.5.5 1.5.5.0\nLevels: 1.0.5.0 1.5.5.0 1.0.5.5 1.5.5.5\n\n&gt; interaction( as.factor(c(1.0, 1.5)), as.factor(c(5.5, 5.0)))\n[1] 1.5.5 1.5.5\nLevels: 1.5 1.5.5 1.5.5.5\n\n&gt; interaction( c(1.0, 1.5), c(5.5, 5.0))\n[1] 1.5.5 1.5.5\nLevels: 1.5 1.5.5 1.5.5.5\n\n```\n\nWould it solve the problem to cast the grouping variables to character?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1773556107.111369",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "RTYKW",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19019] interaction() should warn when coalescing levels",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19019"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nElin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |elin.waring@gmail.com\n\n--- Comment #1 from Elin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI wanted to note that \n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "ave(3:4, c(\"1.0\", \"1.5\"), c(\"5.5\", \"5.0\"))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nreturns 3 4.\n\nAs does"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> ave(3:4, c(\"a\", \"b\"), c(\"c\", \"d\"))\n[1] 3 4\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nInterestingly "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "ave(3:4, as.factor(c(1.0, 1.5)), as.factor(c(5.5, 5.0)))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "   \nreturns 3.5 3.5   \n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> interaction(c(\"1.0\", \"1.5\"), c(\"5.5\", \"5.0\"))\n[1] 1.0.5.5 1.5.5.0\nLevels: 1.0.5.0 1.5.5.0 1.0.5.5 1.5.5.5\n\n> interaction( as.factor(c(1.0, 1.5)), as.factor(c(5.5, 5.0)))\n[1] 1.5.5 1.5.5\nLevels: 1.5 1.5.5 1.5.5.5\n\n> interaction( c(1.0, 1.5), c(5.5, 5.0))\n[1] 1.5.5 1.5.5\nLevels: 1.5 1.5.5 1.5.5.5\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWould it solve the problem to cast the grouping variables to character?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,323 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18989] Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989>\n\n--- Comment #33 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\nIn tests\/datetime3.R ,\n        show_nonTRUE(\n            xG.$sec[c(7, 25)] == x25$sec[c(7, 25)] )\ncan be replaced with\n        xG.$sec[7] == x25$sec[7]\n.\nTests about 'wday' component can be removed.\n\n\nFrom Comment 20, maybe for additional tests:\n\n\nlcx. &lt;- lcx\nlcx[1:25] &lt;- x25[1:25]\nlcx.[[7]] &lt;- x25[[7]]\nlcx.[[25]] &lt;- x25[[25]]\n\nExpected as is:\nlcx[1:25] - x25[1:25] == 0  # ok in R 4.6.0\nlcx$sec == x25$sec  # not in R 4.6.x, except thtz=\"UTC\"\nlcx$wday == x25$wday  # not in R 4.6.x, except thtz=\"UTC\"\nlcx.[[7]] - x25[[7]] == 0  # ok in R 4.6.0\nlcx.[[25]] - x25[[25]] == 0  # ok in R 4.6.0\nlcx.$sec[c(7, 25)] == x25$sec[c(7, 25)]  # not in R 4.6.x, except thtz=\"UTC\"\nlcx.$wday[c(7, 25)] == x25$wday  # not in R 4.6.x, except thtz=\"UTC\"\n\n\nxU. &lt;- xU &lt;- as.POSIXlt(.POSIXct(numeric(25), tz = \"Etc\/UTC\"))\nxU[1:25] &lt;- x25[1:25]\nxU.[[7]] &lt;- x25[[7]]\n\nIt is like 'xG' and 'xG.', except that \"tzone\" attribute has length 3.\nJust expect success ([[&lt;- failed in r89926). Results are checked in 'xG' and\nxG.'.\nExpected (fulfilled in R 4.6.0):\nxU[1:25] - x25[1:25] == 0\nxU.[[7]] - x25[[7]] == 0\n\n\nnon-large times:\n\n\nx1 &lt;- as.POSIXlt(Sys.time()); attr(x1, \"tzone\") &lt;- NULL; x2 &lt;- x1\nx1[1L] &lt;- y &lt;- Sys.time()\nx2[[1L]] &lt;- y\n\nFailed in R 4.6.0.\nExpected:\nx1[1L] - y == 0\nx2[[1L]] - y == 0\n\n\nx1 &lt;- as.POSIXlt(.POSIXct(numeric(2))); attr(x1, \"tzone\") &lt;- NULL\nx2 &lt;- x1\ny &lt;- list(as.POSIXlt(.POSIXct(0, tz = \"Etc\/UTC\")),\n          as.POSIXlt(.POSIXct(0, tz = \"Pacific\/Auckland\")))\nx1[1L] &lt;- y[[1L]]\nx1[2L] &lt;- y[[2L]]\nx2[[1L]] &lt;- y[[1L]]\nx2[[2L]] &lt;- y[[2L]]\n\nExpected (fulfilled in R 4.6.1):\nc(x1[1L] - y[[1L]], x1[2L] - y[[2L]]) == 0\n!all(identical(c(unclass(x1[1L])), c(unclass(y[[1L]]))),\n     identical(c(unclass(x1[2L])), c(unclass(y[[2L]]))))\n# c(unclass(*)) removes attributes other than names\nc(x2[[1L]] - y[[1L]], x2[[2L]] - y[[2L]]) == 0\n!all(identical(c(unclass(x2[[1L]])), c(unclass(y[[1L]]))),\n     identical(c(unclass(x2[[2L]])), c(unclass(y[[2L]]))))\n\n\ncharacter:\n\n\nx1 &lt;- as.POSIXlt(.POSIXct(numeric(2))); attr(x1, \"tzone\") &lt;- NULL\nx2 &lt;- x1\nx1[1:2] &lt;- y &lt;- c(\"2006-02-20 11:16:16.683000\", \"9999-12-31 23:59:59.999999\")\nx2[[1L]] &lt;- y[[1L]]; x2[[2L]] &lt;- y[[2L]]\n\nExpected:\nx1[1:2] == y\nidentical(format(x1, \"%Y-%m-%d %H:%M:%OS6\"), y)  # not in R 4.6.x\nx2[[1L]] == y[[1L]]\nx2[[2L]] == y[[2L]]\nidentical(format(x2, \"%Y-%m-%d %H:%M:%OS6\"), y)  # not in R 4.6.x\n\n\nx2 &lt;- x1 &lt;- as.POSIXlt(.POSIXct(numeric(2), tz = \"UTC\"))\nx1[1:2] &lt;- y &lt;- c(\"2006-02-20 11:16:16.683000\", \"9999-12-31 23:59:59.999999\")\nx2[[1L]] &lt;- y[[1L]]; x2[[2L]] &lt;- y[[2L]]\n\nExpected:\nx1[1:2] == y  # ok in R 4.6.0\nsubstring(format(x1, \"%OS6\"), 4) == substring(y, 21)  # not in R 4.6.x\nx2[[1L]] == y[[1L]]  # ok in R 4.6.0\nx2[[2L]] == y[[2L]]  # ok in R 4.6.0\nsubstring(format(x2, \"%OS6\"), 4) == substring(y, 21)  # not in R 4.6.x",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782296226.356989",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "1yirJ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18989] Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #33 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nIn tests\/datetime3.R ,\n        show_nonTRUE(\n            xG.$sec[c(7, 25)] == x25$sec[c(7, 25)] )\ncan be replaced with\n        xG.$sec[7] == x25$sec[7]\n.\nTests about 'wday' component can be removed.\n\n\n\nFrom Comment 20, maybe for additional tests:\n\n\n\nlcx. <- lcx\nlcx[1:25] <- x25[1:25]\nlcx.[[7]] <- x25[[7]]\nlcx.[[25]] <- x25[[25]]\n\nExpected as is:\nlcx[1:25] - x25[1:25] == 0  # ok in R 4.6.0\nlcx$sec == x25$sec  # not in R 4.6.x, except thtz=\"UTC\"\nlcx$wday == x25$wday  # not in R 4.6.x, except thtz=\"UTC\"\nlcx.[[7]] - x25[[7]] == 0  # ok in R 4.6.0\nlcx.[[25]] - x25[[25]] == 0  # ok in R 4.6.0\nlcx.$sec[c(7, 25)] == x25$sec[c(7, 25)]  # not in R 4.6.x, except thtz=\"UTC\"\nlcx.$wday[c(7, 25)] == x25$wday  # not in R 4.6.x, except thtz=\"UTC\"\n\n\n\nxU. <- xU <- as.POSIXlt(.POSIXct(numeric(25), tz = \"Etc\/UTC\"))\nxU[1:25] <- x25[1:25]\nxU.[[7]] <- x25[[7]]\n\nIt is like 'xG' and 'xG.', except that \"tzone\" attribute has length 3.\nJust expect success ([[<- failed in r89926). Results are checked in 'xG' and\nxG.'.\nExpected (fulfilled in R 4.6.0):\nxU[1:25] - x25[1:25] == 0\nxU.[[7]] - x25[[7]] == 0\n\n\n\nnon-large times:\n\n\n\nx1 <- as.POSIXlt(Sys.time()); attr(x1, \"tzone\") <- NULL; x2 <- x1\nx1[1L] <- y <- Sys.time()\nx2[[1L]] <- y\n\nFailed in R 4.6.0.\nExpected:\nx1[1L] - y == 0\nx2[[1L]] - y == 0\n\n\n\nx1 <- as.POSIXlt(.POSIXct(numeric(2))); attr(x1, \"tzone\") <- NULL\nx2 <- x1\ny <- list(as.POSIXlt(.POSIXct(0, tz = \"Etc\/UTC\")),\n          as.POSIXlt(.POSIXct(0, tz = \"Pacific\/Auckland\")))\nx1[1L] <- y[[1L]]\nx1[2L] <- y[[2L]]\nx2[[1L]] <- y[[1L]]\nx2[[2L]] <- y[[2L]]\n\nExpected (fulfilled in R 4.6.1):\nc(x1[1L] - y[[1L]], x1[2L] - y[[2L]]) == 0\n!all(identical(c(unclass(x1[1L])), c(unclass(y[[1L]]))),\n     identical(c(unclass(x1[2L])), c(unclass(y[[2L]]))))\n# c(unclass(*)) removes attributes other than names\nc(x2[[1L]] - y[[1L]], x2[[2L]] - y[[2L]]) == 0\n!all(identical(c(unclass(x2[[1L]])), c(unclass(y[[1L]]))),\n     identical(c(unclass(x2[[2L]])), c(unclass(y[[2L]]))))\n\n\n\ncharacter:\n\n\n\nx1 <- as.POSIXlt(.POSIXct(numeric(2))); attr(x1, \"tzone\") <- NULL\nx2 <- x1\nx1[1:2] <- y <- c(\"2006-02-20 11:16:16.683000\", \"9999-12-31 23:59:59.999999\")\nx2[[1L]] <- y[[1L]]; x2[[2L]] <- y[[2L]]\n\nExpected:\nx1[1:2] == y\nidentical(format(x1, \"%Y-%m-%d %H:%M:%OS6\"), y)  # not in R 4.6.x\nx2[[1L]] == y[[1L]]\nx2[[2L]] == y[[2L]]\nidentical(format(x2, \"%Y-%m-%d %H:%M:%OS6\"), y)  # not in R 4.6.x\n\n\n\nx2 <- x1 <- as.POSIXlt(.POSIXct(numeric(2), tz = \"UTC\"))\nx1[1:2] <- y <- c(\"2006-02-20 11:16:16.683000\", \"9999-12-31 23:59:59.999999\")\nx2[[1L]] <- y[[1L]]; x2[[2L]] <- y[[2L]]\n\nExpected:\nx1[1:2] == y  # ok in R 4.6.0\nsubstring(format(x1, \"%OS6\"), 4) == substring(y, 21)  # not in R 4.6.x\nx2[[1L]] == y[[1L]]  # ok in R 4.6.0\nx2[[2L]] == y[[2L]]  # ok in R 4.6.0\nsubstring(format(x2, \"%OS6\"), 4) == substring(y, 21)  # not in R 4.6.x"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18989] Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989>\n\n--- Comment #34 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\n(In reply to Suharto Anggono from comment #33)\n\n!all(identical(c(unclass(.)), c(unclass(.))),\n     identical(c(unclass(.)), c(unclass(.))))\nis not necessary. It is implied by\nc(. - ., . - .) == 0",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782300380.820429",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "xFQC",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18989] Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #34 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Suharto Anggono from comment #33)\n\n!all(identical(c(unclass(.)), c(unclass(.))),\n     identical(c(unclass(.)), c(unclass(.))))\nis not necessary. It is implied by\nc(. - ., . - .) == 0"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18989] Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989>\n\n--- Comment #35 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\n(In reply to Suharto Anggono from comment #31)\nAh, I thought `unCfillPOSIXlt` result always had 11 components. It is not! So,\nwith\n\n    y &lt;- x2 &lt;- x1 &lt;- as.POSIXlt(.POSIXct(0, tz = \"UTC\"))\n    y$zone &lt;- y$gmtoff &lt;- NULL\n\n,\n\n    x2[[1L]] &lt;- y\n\nstill fails.\n\n    x1[1L] &lt;- y\n\nalso fails.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782301717.084279",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "k\/DAr",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18989] Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #35 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Suharto Anggono from comment #31)\nAh, I thought "
+                            },
+                            {
+                                "type": "text",
+                                "text": "unCfillPOSIXlt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " result always had 11 components. It is not! So,\nwith\n\n    y <- x2 <- x1 <- as.POSIXlt(.POSIXct(0, tz = \"UTC\"))\n    y$zone <- y$gmtoff <- NULL\n\n,\n\n    x2[[1L]] <- y\n\nstill fails.\n\n    x1[1L] <- y\n\nalso fails."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17549] When building a package, use inRbuildignore() before copying package contents to Tdir*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17549>\n\n--- Comment #19 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nYes. The pre-copying filtering is very convenient. Maybe with small\nimprovements to `cleanup_pkg()` the post-`prepare_pkg()` filtering may even\nbecome unnecessary, but we don't know what other packages out there have\n`temp_install_pkg()` artefacts in their `.Rbuildignore`. It's safer to keep\nfiltering twice.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782307770.650619",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "MOv",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17549] When building a package, use inRbuildignore() before copying package contents to Tdir",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17549"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #19 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nYes. The pre-copying filtering is very convenient. Maybe with small\nimprovements to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cleanup_pkg()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " the post-"
+                            },
+                            {
+                                "type": "text",
+                                "text": "prepare_pkg()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " filtering may even\nbecome unnecessary, but we don't know what other packages out there have\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "temp_install_pkg()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " artefacts in their "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".Rbuildignore",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". It's safer to keep\nfiltering twice."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17549] When building a package, use inRbuildignore() before copying package contents to Tdir*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17549>\n\n--- Comment #20 from Kurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) ---\nThanks.  So I guess we need a new patch which does the full filtering twice?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782367378.153019",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "\/GQrH",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17549] When building a package, use inRbuildignore() before copying package contents to Tdir",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17549"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #20 from Kurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks.  So I guess we need a new patch which does the full filtering twice?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,1071 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19047] Loading a malicious .rds file can crash R*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19047>\n\nIvan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #1 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nDear Bill Denney,\n\nThank you for the reports! Some of them (e.g. MEM-005) are reproducible and\nworth fixing. (On POSIX this stack overflow is recoverable, but on Windows it's\na crash.) I could not reproduce MEM-006 or MEM-007 on R-devel\/Linux. The bug\nreport is for R-devel (trunk). What was the version of R that you gave Claude\nto review?\n\nIn Bug 19015 Comment 1 you mention that you did not review the AI-generated\npatch because you are not a C coder. In general, [it's best not to submit\nunreviewed bug reports and\npatches](<https:\/\/daniel.haxx.se\/blog\/2025\/07\/14\/death-by-a-thousand-slops\/>),\nwhether they come from a machine learning model or not. Here, Claude didn't\nnotice that `MAXELTSIZE` is not a general-purpose vector size limit in R (it's\nonly 8192, for small buffers) and that `allocVector()` contains a check for the\n(signed) allocation length being negative. Suggested change for `case\nBUILTINSXP:` is not covered in the patch description and misses the fact that\n`R_CheckStack2` already contains a length check.\n\nMEM-006 is likely invalid because a vector length of `-1` is used to mark a\nlong vector; `-1` should be followed by two 4-byte integers signifying the real\nlength up to `R_XLEN_T_MAX` (see the `ReadLENGTH` function). There are only two\nlines containing `length = InInteger(stream)` in current R-devel, and they are\nboth followed by checks on `length`.\n\nMEM-007 is likely invalid as well. While it's true that `ReadBC()` calls\n`allocVector(VECSXP, InInteger(stream))` (there's no line containing\n`allocVector(VECSXP, nreps)` as quoted by Claude in current R-devel) without\nfurther checks on the desired length, `allocVector()` does check its argument\nfor being negative.\n\nWhen writing on Bugzilla, please make use of the Preview tab. Bugzilla speaks\nMarkdown, but does not understand the GitHub syntax extensions such as\nlanguage-marked code blocks (` ```c `). Don't process untrusted serialized data\nobjects in R, [they are dangerous enough without bugs in\n`unserialize()`](<https:\/\/www.youtube.com\/watch?v=gDBbRZXKx1s>).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1775893754.030109",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ef08W",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19047] Loading a malicious .rds file can crash R",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19047"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIvan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #1 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nDear Bill Denney,\n\nThank you for the reports! Some of them (e.g. MEM-005) are reproducible and\nworth fixing. (On POSIX this stack overflow is recoverable, but on Windows it's\na crash.) I could not reproduce MEM-006 or MEM-007 on R-devel\/Linux. The bug\nreport is for R-devel (trunk). What was the version of R that you gave Claude\nto review?\n\nIn Bug 19015 Comment 1 you mention that you did not review the AI-generated\npatch because you are not a C coder. In general, [it's best not to submit\nunreviewed bug reports and\npatches]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/daniel.haxx.se\/blog\/2025\/07\/14\/death-by-a-thousand-slops\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "),\nwhether they come from a machine learning model or not. Here, Claude didn't\nnotice that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "MAXELTSIZE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is not a general-purpose vector size limit in R (it's\nonly 8192, for small buffers) and that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "allocVector()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " contains a check for the\n(signed) allocation length being negative. Suggested change for `case\nBUILTINSXP:` is not covered in the patch description and misses the fact that\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_CheckStack2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " already contains a length check.\n\nMEM-006 is likely invalid because a vector length of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "-1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is used to mark a\nlong vector; "
+                            },
+                            {
+                                "type": "text",
+                                "text": "-1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " should be followed by two 4-byte integers signifying the real\nlength up to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_XLEN_T_MAX",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (see the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ReadLENGTH",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " function). There are only two\nlines containing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length = InInteger(stream)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in current R-devel, and they are\nboth followed by checks on "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nMEM-007 is likely invalid as well. While it's true that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ReadBC()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " calls\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "allocVector(VECSXP, InInteger(stream))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (there's no line containing\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "allocVector(VECSXP, nreps)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as quoted by Claude in current R-devel) without\nfurther checks on the desired length, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "allocVector()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does check its argument\nfor being negative.\n\nWhen writing on Bugzilla, please make use of the Preview tab. Bugzilla speaks\nMarkdown, but does not understand the GitHub syntax extensions such as\nlanguage-marked code blocks ("
+                            },
+                            {
+                                "type": "text",
+                                "text": " ```c ",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "). Don't process untrusted serialized data\nobjects in R, [they are dangerous enough without bugs in\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "unserialize()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/www.youtube.com\/watch?v=gDBbRZXKx1s"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19033] text Chinese with srt gives larger size of character*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19033>\n\n--- Comment #10 from Jinsong Zhao (<mailto:jszhao@yeah.net|jszhao@yeah.net>) ---\n`CairoWin()` can display Chinese and possibly other multibyte characters, but\nonly if a font family that contains the specific character is set.\ntext\n\n```\nlibrary(Cairo)  \nCairoWin()  \npar(family = \"sans\")  # This must be included, because the default family is \"\" \nplot(1, 1, type = \"n\")  \ntext(1, 1, '\\u4e2d\\u6587', pos = 4, srt = 45)  \n```\n\nI could not figure out how to display Chinese in `png(..., type = \"cairo\")`;\nhowever, I found that I could use `Cairo::CairoPNG(...)` instead.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1775895720.440349",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "2pMD",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19033] text Chinese with srt gives larger size of character",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19033"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #10 from Jinsong Zhao ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jszhao@yeah.net",
+                                "text": "jszhao@yeah.net"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "CairoWin()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " can display Chinese and possibly other multibyte characters, but\nonly if a font family that contains the specific character is set.\ntext\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "library(Cairo)  \nCairoWin()  \npar(family = \"sans\")  # This must be included, because the default family is \"\" \nplot(1, 1, type = \"n\")  \ntext(1, 1, '\\u4e2d\\u6587', pos = 4, srt = 45)  \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI could not figure out how to display Chinese in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "png(..., type = \"cairo\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ";\nhowever, I found that I could use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Cairo::CairoPNG(...)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " instead."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19033] text Chinese with srt gives larger size of character*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19033>\n\n--- Comment #11 from Jinsong Zhao (<mailto:jszhao@yeah.net|jszhao@yeah.net>) ---\n`png(..., type = \"cairo\", family = \"SimHei\")` ould display Chinese characters.\nHere, SimHei is a font name that can be found through fc-list or a similar font\nfinder.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1775896969.816599",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "tFkPf",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19033] text Chinese with srt gives larger size of character",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19033"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #11 from Jinsong Zhao ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jszhao@yeah.net",
+                                "text": "jszhao@yeah.net"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "png(..., type = \"cairo\", family = \"SimHei\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ould display Chinese characters.\nHere, SimHei is a font name that can be found through fc-list or a similar font\nfinder."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19046] Reading a specially-crafted Rdata file can crash R*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19046>\n\nIvan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n     Ever confirmed|0                           |1\n             Status|UNCONFIRMED                 |CONFIRMED\n\n--- Comment #1 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nThe reproducer for MEM-002 is invalid because the buffer is already allocated\nby the time a negative-length string is read. The crash will only happen if the\nfirst symbol in the file has a negative length:\n\n```\nwriteLines(c(\n'RDA1',\n'1 0', # one symbol\n'-1 x' # negative length\n), f &lt;- tempfile())\nload(f)\n```\n\nThe reproducer for MEM-033 actually triggers a bug in `InStringXdr`, not\n`InStringBinary`, so there's three bugs in total. In `InStringXdr`,\n`realloc(buf, nbytes + 1 \/* (unsigned)-1 + 1 =&gt; 0 *\/)` frees `buf` and signals\nan error because `realloc()` returns `NULL`, so the next call to `load()`\nresults in a use-after-free.\n\nThe analysis for `InStringBinary()` is correct:\n\n```\ncon &lt;- file(f &lt;- tempfile(), 'wb')\nwriteChar('RDB1\\n', con, eos = NULL)\nwriteBin(c(1L, 0L), con) # one symbol\nwriteBin(-1L, con) # negative length\nwriteChar('a', con, eos = NULL) # enough not to cause EOF on next read\nclose(con)\nload(f)\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1775900695.265219",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "nIhC",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19046] Reading a specially-crafted Rdata file can crash R",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19046"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIvan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n     Ever confirmed|0                           |1\n             Status|UNCONFIRMED                 |CONFIRMED\n\n--- Comment #1 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe reproducer for MEM-002 is invalid because the buffer is already allocated\nby the time a negative-length string is read. The crash will only happen if the\nfirst symbol in the file has a negative length:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "writeLines(c(\n'RDA1',\n'1 0', # one symbol\n'-1 x' # negative length\n), f <- tempfile())\nload(f)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe reproducer for MEM-033 actually triggers a bug in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "InStringXdr",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", not\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "InStringBinary",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", so there's three bugs in total. In "
+                            },
+                            {
+                                "type": "text",
+                                "text": "InStringXdr",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "realloc(buf, nbytes + 1 \/* (unsigned)-1 + 1 => 0 *\/)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " frees "
+                            },
+                            {
+                                "type": "text",
+                                "text": "buf",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and signals\nan error because "
+                            },
+                            {
+                                "type": "text",
+                                "text": "realloc()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " returns "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", so the next call to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "load()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nresults in a use-after-free.\n\nThe analysis for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "InStringBinary()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is correct:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "con <- file(f <- tempfile(), 'wb')\nwriteChar('RDB1\\n', con, eos = NULL)\nwriteBin(c(1L, 0L), con) # one symbol\nwriteBin(-1L, con) # negative length\nwriteChar('a', con, eos = NULL) # enough not to cause EOF on next read\nclose(con)\nload(f)\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19048] textConnection can cause crash with large strings*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19048>\n\nIvan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n     Ever confirmed|0                           |1\n             Status|UNCONFIRMED                 |CONFIRMED\n\n--- Comment #1 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nThe problem is due to `scan()`, not `textConnection()`. The signed integer\noverflows are, of course, worth fixing. It's probably better to make one last\ntry with a buffer of size exactly `INT_MAX` in order to be able to `scan()`\nstrings between 1 and 2 GiB in size. On a non-sanitized build of R,\n`R_AllocStringBuffer()` handles the failing allocation and signals an error\nwithout crashing (although not without leaking memory when assigning the result\nof `realloc()`).\n\nDespite what Claude wrote in the comment, there are no calls to `R_Realloc(buf,\nnbuf, char)` anywhere in R-devel. Closest I was able to find was `buf =\nR_Realloc(buf, need , char);` in `src\/main\/agrep.c`, which indeed contains an\noverflow bug, but Claude didn't say anything about `adist()` in this report.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1775903286.404889",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ROiw",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19048] textConnection can cause crash with large strings",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19048"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIvan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n     Ever confirmed|0                           |1\n             Status|UNCONFIRMED                 |CONFIRMED\n\n--- Comment #1 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe problem is due to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "scan()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", not "
+                            },
+                            {
+                                "type": "text",
+                                "text": "textConnection()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". The signed integer\noverflows are, of course, worth fixing. It's probably better to make one last\ntry with a buffer of size exactly "
+                            },
+                            {
+                                "type": "text",
+                                "text": "INT_MAX",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in order to be able to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "scan()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nstrings between 1 and 2 GiB in size. On a non-sanitized build of R,\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_AllocStringBuffer()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " handles the failing allocation and signals an error\nwithout crashing (although not without leaking memory when assigning the result\nof "
+                            },
+                            {
+                                "type": "text",
+                                "text": "realloc()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\n\nDespite what Claude wrote in the comment, there are no calls to `R_Realloc(buf,\nnbuf, char)` anywhere in R-devel. Closest I was able to find was `buf =\nR_Realloc(buf, need , char);"
+                            },
+                            {
+                                "type": "text",
+                                "text": " in ",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/agrep.c`, which indeed contains an\noverflow bug, but Claude didn't say anything about "
+                            },
+                            {
+                                "type": "text",
+                                "text": "adist()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in this report."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18288] Add support for SHA2 (256-bit) hashing*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18288>\n\n--- Comment #15 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\n`tools::sha256sum()` appeared in R-4.5.0. SHA-256 hashing for packages with\nsignature verification via GnuPG is present in the 4.6.0 beta. I think this\nissue can be considered fixed.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1775904291.469239",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "\/=FX",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18288] Add support for SHA2 (256-bit) hashing",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18288"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #15 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "tools::sha256sum()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " appeared in R-4.5.0. SHA-256 hashing for packages with\nsignature verification via GnuPG is present in the 4.6.0 beta. I think this\nissue can be considered fixed."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16722] Wishlist: API access to connections*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16722>\n\nIvan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #4 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nIn the 4.6.0 beta version and current R-devel, `tools:::nonAPI` no longer\ncontains `R_new_custom_connection`, `R_ReadConnection`, `R_WriteConnection`,\nand `R_GetConnection`; WRE and `tools:::funAPI()` list these functions as\nexperimental. I think this issue can be considered fixed.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1775904706.272769",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "KyoGS",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16722] Wishlist: API access to connections",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16722"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIvan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #4 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nIn the 4.6.0 beta version and current R-devel, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tools:::nonAPI",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " no longer\ncontains "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_new_custom_connection",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_ReadConnection",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_WriteConnection",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\nand "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_GetConnection",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "; WRE and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tools:::funAPI()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " list these functions as\nexperimental. I think this issue can be considered fixed."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19047] Loading a malicious .rds file can crash R*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19047>\n\n--- Comment #2 from Bill Denney (<mailto:bill.r-project@denney.ws|bill.r-project@denney.ws>) ---\nThank you for the review. I had Claude use the current subversion source for R\ndevel, and it was running in Linux.\n\nI apologize for any noise that this generated; I thought that I had verified\nall of the bugs actually crashed R, and I did tell it to filter out minor\nissues that did not cause memory corruption. (I reported several bugs last\nnight, but I filtered out about 40 more that were more minor issues to avoid\nbeing the guy who is overloading the system with nuisance bugs.\n\nI am also aware that you shouldn't load untrusted R saved files, but I'm also\nconfident that not everyone knows that. :)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1775905679.329019",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "B49U",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19047] Loading a malicious .rds file can crash R",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19047"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Bill Denney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:bill.r-project@denney.ws",
+                                "text": "bill.r-project@denney.ws"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you for the review. I had Claude use the current subversion source for R\ndevel, and it was running in Linux.\n\nI apologize for any noise that this generated; I thought that I had verified\nall of the bugs actually crashed R, and I did tell it to filter out minor\nissues that did not cause memory corruption. (I reported several bugs last\nnight, but I filtered out about 40 more that were more minor issues to avoid\nbeing the guy who is overloading the system with nuisance bugs.\n\nI am also aware that you shouldn't load untrusted R saved files, but I'm also\nconfident that not everyone knows that. :)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19039] Error in bytecode that does not appear in interpreter*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19039>\n\nLuke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n                 CC|                            |luke@stat.uiowa.edu\n         Resolution|---                         |INVALID\n\n--- Comment #2 from Luke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) ---\nReplacement function calls as part of complex assignment do not behave like\nordinary function calls. For one, the LHS value will have been evaluated before\nthe call. `substitute()` returns a symbol, but not one that is intended to be\nevaluated or guaranteed to have a value. The way compiled code works is much\nless brittle than the way the interpreter works. Eventually the interpreted\ncode will be brought in line with the compiled code, but it isn't a high\npriority.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1775942717.534489",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "b6Me",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19039] Error in bytecode that does not appear in interpreter",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19039"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nLuke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n                 CC|                            |luke@stat.uiowa.edu\n         Resolution|---                         |INVALID\n\n--- Comment #2 from Luke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nReplacement function calls as part of complex assignment do not behave like\nordinary function calls. For one, the LHS value will have been evaluated before\nthe call. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "substitute()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " returns a symbol, but not one that is intended to be\nevaluated or guaranteed to have a value. The way compiled code works is much\nless brittle than the way the interpreter works. Eventually the interpreted\ncode will be brought in line with the compiled code, but it isn't a high\npriority."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,483 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19013] New: Incorrect computations in mood.test (and ansari.test?) in case of ties*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19013>\n\n            Bug ID: 19013\n           Summary: Incorrect computations in mood.test (and ansari.test?)\n                    in case of ties\n           Product: R\n           Version: R 4.5.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Accuracy\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:robert.schlicht@tu-dresden.de|robert.schlicht@tu-dresden.de>\n\nThe implementation of Mood's test for difference in scale parameters\n(src\/library\/stats\/R\/mood.test.R) seems to follow the reference\n<https:\/\/doi.org\/10.2307\/1266427>, but contains a sign error in the computation\nwith ties. Namely, the expression (N-S_{i}-S_{i-1})^2 from the article has been\nmistranslated as `(N - t) ^ 2` instead of (for example) `(N - 2*cumsum(t) + t)\n^ 2`. Only after correcting this,\n```\nd &lt;- data.frame(grp = factor(c(\"A\",\"A\",\"A\",\"B\",\"B\",\"B\")), y = c(3,2,3,4,1,5))\nmood.test(y ~ grp, data = d)\n```\nreturns the (presumably correct) p-value also returned by the following\nfunction from the `coin` package:\n```\ncoin::mood_test(y ~ grp, data = d,\n  ties.method = \"average-scores\", distribution = \"asymptotic\")\n```\n\nThe implementation of the Ansari-Bradley test\n(src\/library\/stats\/R\/ansari.test.R) appears to inconsistently combine mid-ranks\n(in `r &lt;- rank(c(x, y))`) with moment calculations for average scores as\nexplained in Hollander, Wolfe, Chicken, *Nonparametric Statistical Methods*\n(3rd ed., 2014), Chapter 5.1, in particular page 156. So the result of\n```\nansari.test(y ~ grp, data = d, exact = FALSE)\n```\ncorresponds to neither of:\n```\ncoin::ansari_test(y ~ grp, data = d,\n  ties.method = \"average-scores\", distribution = \"asymptotic\")\ncoin::ansari_test(y ~ grp, data = d,\n  ties.method = \"mid-ranks\", distribution = \"asymptotic\")\n```\nIn fact, the help page for `ansari.test` (section \"See Also\") points out the\ndifferent computations in `ansari_test`, although I am not sure it gives the\ncorrect reason.\n\nA final comment: The data in both Examples sections, taken from Example 5.1 in\nthe book (or ultimately <https:\/\/doi.org\/10.1093\/ajcp\/54.6.813>), look\nsuspiciously like paired samples that might not be ideal candidates for those\ntests; of course, this does not matter here.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1772271887.535779",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "S2G",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19013] New: Incorrect computations in mood.test (and ansari.test?) in case of ties",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19013"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19013\n           Summary: Incorrect computations in mood.test (and ansari.test?)\n                    in case of ties\n           Product: R\n           Version: R 4.5.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Accuracy\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:robert.schlicht@tu-dresden.de",
+                                "text": "robert.schlicht@tu-dresden.de",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThe implementation of Mood's test for difference in scale parameters\n(src\/library\/stats\/R\/mood.test.R) seems to follow the reference\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/doi.org\/10.2307\/1266427"
+                            },
+                            {
+                                "type": "text",
+                                "text": ", but contains a sign error in the computation\nwith ties. Namely, the expression (N-S_{i}-S_{i-1})^2 from the article has been\nmistranslated as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(N - t) ^ 2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " instead of (for example) `(N - 2*cumsum(t) + t)\n^ 2`. Only after correcting this,"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "d <- data.frame(grp = factor(c(\"A\",\"A\",\"A\",\"B\",\"B\",\"B\")), y = c(3,2,3,4,1,5))\nmood.test(y ~ grp, data = d)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "returns the (presumably correct) p-value also returned by the following\nfunction from the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "coin",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " package:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "coin::mood_test(y ~ grp, data = d,\n  ties.method = \"average-scores\", distribution = \"asymptotic\")\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe implementation of the Ansari-Bradley test\n(src\/library\/stats\/R\/ansari.test.R) appears to inconsistently combine mid-ranks\n(in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "r <- rank(c(x, y))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") with moment calculations for average scores as\nexplained in Hollander, Wolfe, Chicken, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Nonparametric Statistical Methods",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n(3rd ed., 2014), Chapter 5.1, in particular page 156. So the result of"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "ansari.test(y ~ grp, data = d, exact = FALSE)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "corresponds to neither of:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "coin::ansari_test(y ~ grp, data = d,\n  ties.method = \"average-scores\", distribution = \"asymptotic\")\ncoin::ansari_test(y ~ grp, data = d,\n  ties.method = \"mid-ranks\", distribution = \"asymptotic\")\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "In fact, the help page for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ansari.test",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (section \"See Also\") points out the\ndifferent computations in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ansari_test",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", although I am not sure it gives the\ncorrect reason.\n\nA final comment: The data in both Examples sections, taken from Example 5.1 in\nthe book (or ultimately "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/doi.org\/10.1093\/ajcp\/54.6.813"
+                            },
+                            {
+                                "type": "text",
+                                "text": "), look\nsuspiciously like paired samples that might not be ideal candidates for those\ntests; of course, this does not matter here."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19012] foreign::write.foreign() generates incorrect SAS INPUT statement for character variables*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19012>\n\nElin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |elin.waring@gmail.com\n\n--- Comment #1 from Elin Waring (<mailto:elin.waring@gmail.com|elin.waring@gmail.com>) ---\nHaving a `$` after \"a\" is not needed because `a` is already defined as a\ncharacter by the `LENGTH` statement.  You don't need the `$` for `c` for the\nsame reason. \n\nThe `$` is not hurting anything but is poor SAS style, and it is confusing to\nhave it for one and not the other.  \n\nThis comment was dictate do me by <https:\/\/stackoverflow.com\/users\/4965549\/tom>.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1772313674.642439",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "PAS0c",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19012] foreign::write.foreign() generates incorrect SAS INPUT statement for character variables",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19012"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nElin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |elin.waring@gmail.com\n\n--- Comment #1 from Elin Waring ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:elin.waring@gmail.com",
+                                "text": "elin.waring@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nHaving a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "$",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " after \"a\" is not needed because "
+                            },
+                            {
+                                "type": "text",
+                                "text": "a",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is already defined as a\ncharacter by the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "LENGTH",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " statement.  You don't need the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "$",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for the\nsame reason. \n\nThe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "$",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is not hurting anything but is poor SAS style, and it is confusing to\nhave it for one and not the other.  \n\nThis comment was dictate do me by "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stackoverflow.com\/users\/4965549\/tom"
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18989] Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989>\n\n--- Comment #5 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\n(In reply to Suharto Anggono from comment #4)\nI've committed such a `c.POSIXlt()` to R-devel, in svn r 89501  earlier today.\n\nFurther improvements wished for, notably, the main wish for keeping the full\nsubsecond accuracy in other POSIXlt methods which act via POSIXct, i.e.,\nconceptually\n```\n&lt;FUN&gt;.POSIXlt &lt;- function(x, &lt;more&gt;) \n   as.POSIXlt(&lt;FUN&gt;(as.POSIXct(x, &lt;more_1&gt;), &lt;more_2&gt;, x$sec)\n```\nhowever has not been done.\nR level code functions this *could* be done in are e.g.,\n`+.POSIXt`, `-.POSIXt` and `Ops.POSIXt` ... but certainly there are more.\nHence, this PR remains open.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1772350149.477369",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "JYmx",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18989] Wishlist: provide conversion of POSIXlt time zone retaining sub-second accuracy",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18989"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Suharto Anggono from comment #4)\nI've committed such a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "c.POSIXlt()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to R-devel, in svn r 89501  earlier today.\n\nFurther improvements wished for, notably, the main wish for keeping the full\nsubsecond accuracy in other POSIXlt methods which act via POSIXct, i.e.,\nconceptually"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "<FUN>.POSIXlt <- function(x, <more>) \n   as.POSIXlt(<FUN>(as.POSIXct(x, <more_1>), <more_2>, x$sec)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "however has not been done.\nR level code functions this "
+                            },
+                            {
+                                "type": "text",
+                                "text": "could",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " be done in are e.g.,\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "+.POSIXt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "-.POSIXt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Ops.POSIXt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ... but certainly there are more.\nHence, this PR remains open."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

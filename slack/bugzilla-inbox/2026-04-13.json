@@ -1,0 +1,730 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19050] New: float-to-int overflow in R parser*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19050>\n\n            Bug ID: 19050\n           Summary: float-to-int overflow in R parser\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nCreated attachment 3672\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3672&amp;action=edit>\nPatch.\n\nWhen R parses an integer literal suffixed with L whose value exceeds the range\nof int, the function NumericValue() in src\/main\/gram.c performs an unchecked\n(int) a cast at line 4973 where a is the double result of R_atof(). If a is\noutside [INT_MIN, INT_MAX], this cast is undefined behavior per C11 6.3.1.4.\n\nR already detects this case and falls back to a numeric value (the a !=\n(double) b check at line 4978), but the UB has already occurred by line 4973\nbefore that check runs. In practice the value of b is indeterminate after the\noverflow, so the comparison may or may not work depending on the compiler.\n\nReproducer:\n\nparse(text = \"99999999999999999999L\")\n\nOr with a hex literal:\n\nparse(text = \"0XEEEEEEEEEEEEEEEEEEEEEEEEEL\")\n\nBoth trigger the following UBSAN diagnostic when R is built with\n-fsanitize=undefined:\n\ngram.c:4973:10: runtime error: 1e+20 is outside the range of representable\nvalues of type 'int'\n\n---\n\n&gt; parse(text = \"0XEEEEEEEEEEEEEEEEEEEEEEEEEL\")\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/gram.c:4973:10: runtime error:\n1.18314e+30 is outside the range of representable values of type 'int'\n    #0 0x7f6f8d153e3f in NumericValue\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/gram.c:4973:10\n    #1 0x7f6f8d1502a9 in token\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/gram.c:5854:28\n    #2 0x7f6f8d1502a9 in token_\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/gram.c:6092:15\n    #3 0x7f6f8d13e23e in yylex\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/gram.c:6118:11\n    #4 0x7f6f8d13e23e in Rf_yyparse\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/gram.c:2186:16\n    #5 0x7f6f8d16722b in R_Parse1\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/gram.c:4043:12\n    #6 0x7f6f8d168b64 in R_Parse\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/gram.c:4202:9\n    #7 0x7f6f8d16d9d6 in R_ParseVector\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/gram.c:4290:12\n    #8 0x7f6f8d40e750 in do_parse\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/source.c:286:6\n    #9 0x7f6f8d07bb65 in bcEval_loop\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:8132:14\n    #10 0x7f6f8d060983 in bcEval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:7515:16\n    #11 0x7f6f8d05e8dd in Rf_eval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:1167:8\n    #12 0x7f6f8d0fdffd in R_execClosure\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2389:22\n    #13 0x7f6f8d0fcb4a in applyClosure_core\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2302:16\n    #14 0x7f6f8d05f440 in Rf_applyClosure\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:2324:16\n    #15 0x7f6f8d05f440 in Rf_eval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c:1280:12\n    #16 0x7f6f8d1d36f6 in Rf_ReplIteration\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c:264:15\n    #17 0x7f6f8d1d77a0 in R_ReplConsole\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c:317:11\n    #18 0x7f6f8d1d75cc in run_Rmainloop\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c:1235:5\n    #19 0x7f6f8d1d7892 in Rf_mainloop\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c:1242:5\n    #20 0x0000004e9e8c in main\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/Rmain.c:29:5\n    #21 0x7f6f8c8e15b4 in __libc_start_call_main (\/lib64\/libc.so.6+0x35b4)\n(BuildId: ff0267465bc3d76e21003b3bc5598fd5ee63e261)\n    #22 0x7f6f8c8e1667 in __libc_start_main@GLIBC_2.2.5\n(\/lib64\/libc.so.6+0x3667) (BuildId: ff0267465bc3d76e21003b3bc5598fd5ee63e261)\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776065762.185289",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "siMUQ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19050] New: float-to-int overflow in R parser",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19050"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19050\n           Summary: float-to-int overflow in R parser\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3672\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3672&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3672&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch.\n\nWhen R parses an integer literal suffixed with L whose value exceeds the range\nof int, the function NumericValue() in src\/main\/gram.c performs an unchecked\n(int) a cast at line 4973 where a is the double result of R_atof(). If a is\noutside [INT_MIN, INT_MAX], this cast is undefined behavior per C11 6.3.1.4.\n\nR already detects this case and falls back to a numeric value (the a !=\n(double) b check at line 4978), but the UB has already occurred by line 4973\nbefore that check runs. In practice the value of b is indeterminate after the\noverflow, so the comparison may or may not work depending on the compiler.\n\nReproducer:\n\nparse(text = \"99999999999999999999L\")\n\nOr with a hex literal:\n\nparse(text = \"0XEEEEEEEEEEEEEEEEEEEEEEEEEL\")\n\nBoth trigger the following UBSAN diagnostic when R is built with\n-fsanitize=undefined:\n\ngram.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "4973"
+                            },
+                            {
+                                "type": "text",
+                                "text": "10: runtime error: 1e+20 is outside the range of representable\nvalues of type 'int'\n\n---\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "parse(text = \"0XEEEEEEEEEEEEEEEEEEEEEEEEEL\")"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/gram.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "4973"
+                            },
+                            {
+                                "type": "text",
+                                "text": "10: runtime error:\n1.18314e+30 is outside the range of representable values of type 'int'\n    #0 0x7f6f8d153e3f in NumericValue\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/gram.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "4973"
+                            },
+                            {
+                                "type": "text",
+                                "text": "10\n    #1 0x7f6f8d1502a9 in token\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/gram.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "5854"
+                            },
+                            {
+                                "type": "text",
+                                "text": "28\n    #2 0x7f6f8d1502a9 in token_\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/gram.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "6092"
+                            },
+                            {
+                                "type": "text",
+                                "text": "15\n    #3 0x7f6f8d13e23e in yylex\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/gram.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "6118"
+                            },
+                            {
+                                "type": "text",
+                                "text": "11\n    #4 0x7f6f8d13e23e in Rf_yyparse\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/gram.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "2186"
+                            },
+                            {
+                                "type": "text",
+                                "text": "16\n    #5 0x7f6f8d16722b in R_Parse1\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/gram.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "4043"
+                            },
+                            {
+                                "type": "text",
+                                "text": "12\n    #6 0x7f6f8d168b64 in R_Parse\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/gram.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "4202"
+                            },
+                            {
+                                "type": "text",
+                                "text": "9\n    #7 0x7f6f8d16d9d6 in R_ParseVector\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/gram.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "4290"
+                            },
+                            {
+                                "type": "text",
+                                "text": "12\n    #8 0x7f6f8d40e750 in do_parse\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/source.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "286"
+                            },
+                            {
+                                "type": "text",
+                                "text": "6\n    #9 0x7f6f8d07bb65 in bcEval_loop\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "8132"
+                            },
+                            {
+                                "type": "text",
+                                "text": "14\n    #10 0x7f6f8d060983 in bcEval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "7515"
+                            },
+                            {
+                                "type": "text",
+                                "text": "16\n    #11 0x7f6f8d05e8dd in Rf_eval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "1167"
+                            },
+                            {
+                                "type": "text",
+                                "text": "8\n    #12 0x7f6f8d0fdffd in R_execClosure\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "2389"
+                            },
+                            {
+                                "type": "text",
+                                "text": "22\n    #13 0x7f6f8d0fcb4a in applyClosure_core\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "2302"
+                            },
+                            {
+                                "type": "text",
+                                "text": "16\n    #14 0x7f6f8d05f440 in Rf_applyClosure\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "2324"
+                            },
+                            {
+                                "type": "text",
+                                "text": "16\n    #15 0x7f6f8d05f440 in Rf_eval\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/eval.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "1280"
+                            },
+                            {
+                                "type": "text",
+                                "text": "12\n    #16 0x7f6f8d1d36f6 in Rf_ReplIteration\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "264"
+                            },
+                            {
+                                "type": "text",
+                                "text": "15\n    #17 0x7f6f8d1d77a0 in R_ReplConsole\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "317"
+                            },
+                            {
+                                "type": "text",
+                                "text": "11\n    #18 0x7f6f8d1d75cc in run_Rmainloop\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "1235"
+                            },
+                            {
+                                "type": "text",
+                                "text": "5\n    #19 0x7f6f8d1d7892 in Rf_mainloop\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/main.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "1242"
+                            },
+                            {
+                                "type": "text",
+                                "text": "5\n    #20 0x0000004e9e8c in main\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/Rmain.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "29"
+                            },
+                            {
+                                "type": "text",
+                                "text": "5\n    #21 0x7f6f8c8e15b4 in __libc_start_call_main (\/lib64\/libc.so.6+0x35b4)\n(BuildId: ff0267465bc3d76e21003b3bc5598fd5ee63e261)\n    #22 0x7f6f8c8e1667 in __libc_start_main@GLIBC_2.2.5\n(\/lib64\/libc.so.6+0x3667) (BuildId: ff0267465bc3d76e21003b3bc5598fd5ee63e261)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "    #23 0x000000400704 in _start\n(\/home\/kevin\/r-devel\/r-afl\/build\/r-triage\/bin\/exec\/R+0x400704) (BuildId:\n2ed5596344c88077fa080eaacb0d1386f4be84a8)\n\nSUMMARY: UndefinedBehaviorSanitizer: undefined-behavior\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/gram.c:4973:10\nWarning in parse(text = \"0XEEEEEEEEEEEEEEEEEEEEEEEEEL\") :\n  non-integer value 0XEEEEEEEEEEEEEEEEEEEEEEEEEL qualified with L; using\nnumeric value\nexpression(0XEEEEEEEEEEEEEEEEEEEEEEEEEL)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776065762.205389",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "lee",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "#23 0x000000400704 in _start\n(\/home\/kevin\/r-devel\/r-afl\/build\/r-triage\/bin\/exec\/R+0x400704) (BuildId:\n2ed5596344c88077fa080eaacb0d1386f4be84a8)\n\nSUMMARY: UndefinedBehaviorSanitizer: undefined-behavior\n\/home\/kevin\/r-devel\/r-afl\/r-svn\/src\/main\/gram.c"
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "4973"
+                            },
+                            {
+                                "type": "text",
+                                "text": "10\nWarning in parse(text = \"0XEEEEEEEEEEEEEEEEEEEEEEEEEL\") :\n  non-integer value 0XEEEEEEEEEEEEEEEEEEEEEEEEEL qualified with L; using\nnumeric value\nexpression(0XEEEEEEEEEEEEEEEEEEEEEEEEEL)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19049] btpe implementation rbinom has incorrect signs for error terms in Stirling approximation*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19049>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #1 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nMakes a lot of sense, notably also the link to the gsl (C library) source code\nwith its extended comments.\nThere, it is mentioned that they did not find *one* single case where the\nchange made a difference.\nMaybe that's easier to find using R simulations .. ?\n\nIt's good you found this here too, and the original double typo in the 1988\npublication code will finally be fixed in other FOSS projects, too.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776095710.157779",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "H4\/",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19049] btpe implementation rbinom has incorrect signs for error terms in Stirling approximation",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19049"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #1 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nMakes a lot of sense, notably also the link to the gsl (C library) source code\nwith its extended comments.\nThere, it is mentioned that they did not find "
+                            },
+                            {
+                                "type": "text",
+                                "text": "one",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " single case where the\nchange made a difference.\nMaybe that's easier to find using R simulations .. ?\n\nIt's good you found this here too, and the original double typo in the 1988\npublication code will finally be fixed in other FOSS projects, too."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17702] Assignment to data.frame column (`$&lt;-` or `[[&lt;-`) should convert POSIXlt to POSIXct*\nhttps:\/\/bugs.r-project.org\/show_bug.cgi?id=17702\n\nGabriel Becker (gabembecker@gmail.com) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |gabembecker@gmail.com\n\n--- Comment #1 from Gabriel Becker (gabembecker@gmail.com) ---\nI can confirm that this behavior remains in a recent R-devel.\n\nThis appears to be happening because `data.frame` converts its arguments to\ndata.frames before combining them, which is where the conversion from `POSIXlt`\nto `POSIXct` is occuring.\n\n```\n&gt; df &lt;- as.data.frame(as.POSIXlt(runif(10, 1.4e9, 1.7e9), origin='1970-1-1'))\n&gt; lapply(df, class)\n$`as.POSIXlt(runif(10, 1.4e+09, 1.7e+09), origin = \"1970-1-1\")`\n[1] \"POSIXct\" \"POSIXt\" \n```\n\nAccording to the documentation for `$&lt;-.data.frame`:\n\n&gt; There is no ‘data.frame’ method for ‘$’, so ‘x$name’ uses the default method which treats ‘x’ as a list (with partial matching of column names if the match is unique, see ‘Extract’).  The replacement method (for ‘$’) checks ‘value’ for the correct number of rows, and replicates it if necessary. \n\nThis matches the actual code for `$&lt;-.data.frame` which strips the class off of\n`x`, checks the number of rows in `value`, reps `value` out as needed, assigns\ninto `x` while it's still a list, then reapply's `x`'s class. \n\nThus this is working as documented, at least. \n\nThat said I'm sympathetic to wanting the behaviors to match. We don't have dual\ndispatch for S3 methods, so the only ways I can think of to implement this\nchange (if desired) would be \n\n1. have `$&lt;-.data.frame` convert `value` to a data.frame before shoving it into\n`x`, or \n2. hard-code a special case for value being `POSIXlt` to convert it to\n`POSIXct`.\n\nApproach 1 seems *way* too fundamental a shift for this level of behavior\nchange, and the amount of testing we'd need to do to make sure this didn't\nbreak anything else seems.. daunting to say the least.\n\nApproach 2 is doable, if a bit hacky, if desired. Happy to prepare a patch,\nthough I suspect if a member of R-core wants to put that change in it'd be\neasier for them to just do it themselves.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776113043.331079",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "W+8p\/",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17702] Assignment to data.frame column (",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "$<-",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "[[<-",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") should convert POSIXlt to POSIXct",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nhttps:\/\/bugs.r-project.org\/show_bug.cgi?id=17702\n\nGabriel Becker (gabembecker@gmail.com) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |gabembecker@gmail.com\n\n--- Comment #1 from Gabriel Becker (gabembecker@gmail.com) ---\nI can confirm that this behavior remains in a recent R-devel.\n\nThis appears to be happening because "
+                            },
+                            {
+                                "type": "text",
+                                "text": "data.frame",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " converts its arguments to\ndata.frames before combining them, which is where the conversion from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "POSIXlt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nto "
+                            },
+                            {
+                                "type": "text",
+                                "text": "POSIXct",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is occuring.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> df <- as.data.frame(as.POSIXlt(runif(10, 1.4e9, 1.7e9), origin='1970-1-1'))\n> lapply(df, class)\n$`as.POSIXlt(runif(10, 1.4e+09, 1.7e+09), origin = \"1970-1-1\")`\n[1] \"POSIXct\" \"POSIXt\" \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nAccording to the documentation for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "$<-.data.frame",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "There is no ‘data.frame’ method for ‘$’, so ‘x$name’ uses the default method which treats ‘x’ as a list (with partial matching of column names if the match is unique, see ‘Extract’).  The replacement method (for ‘$’) checks ‘value’ for the correct number of rows, and replicates it if necessary. "
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis matches the actual code for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "$<-.data.frame",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " which strips the class off of\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", checks the number of rows in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "value",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", reps "
+                            },
+                            {
+                                "type": "text",
+                                "text": "value",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " out as needed, assigns\ninto "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " while it's still a list, then reapply's "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "'s class. \n\nThus this is working as documented, at least. \n\nThat said I'm sympathetic to wanting the behaviors to match. We don't have dual\ndispatch for S3 methods, so the only ways I can think of to implement this\nchange (if desired) would be \n\n1. have "
+                            },
+                            {
+                                "type": "text",
+                                "text": "$<-.data.frame",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " convert "
+                            },
+                            {
+                                "type": "text",
+                                "text": "value",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to a data.frame before shoving it into\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", or \n2. hard-code a special case for value being "
+                            },
+                            {
+                                "type": "text",
+                                "text": "POSIXlt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to convert it to\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "POSIXct",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nApproach 1 seems "
+                            },
+                            {
+                                "type": "text",
+                                "text": "way",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " too fundamental a shift for this level of behavior\nchange, and the amount of testing we'd need to do to make sure this didn't\nbreak anything else seems.. daunting to say the least.\n\nApproach 2 is doable, if a bit hacky, if desired. Happy to prepare a patch,\nthough I suspect if a member of R-core wants to put that change in it'd be\neasier for them to just do it themselves."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 15715] make call() more flexible*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=15715>\n\nGabriel Becker (<mailto:gabembecker@gmail.com|gabembecker@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|1                           |0\n                 CC|                            |gabembecker@gmail.com\n             Status|NEW                         |UNCONFIRMED\n\n--- Comment #4 from Gabriel Becker (<mailto:gabembecker@gmail.com|gabembecker@gmail.com>) ---\nIIUC the only difference between leaving it a special and making it a builtin\nis that for invalid first arguments that throw that error, the remaining\narguments currently are not evaluated (because as Michael said they are\nevaluated anyway but it's after the error).\n\nChanging it to a builtin would mean they are evaluated right away, and thus\nwill be evaluated even in the case of an invalid first argument.\n\nI suppose given that knowledge I could write code that would give different\nresults before and after the change, but it would be pretty gross and highly\ntargeted. \n\nThat said, maybe the byte code compiler would (or would need to) handle it\ndifferently. I don't know much about what it is doing.\n\nSeems like it'd be easy to put in support for the symbols, as that was\nuncontroversial, but we've gone 12 years (almost exactly at time of writing)\nwithout the change so maybe its not necessary and could the issue could be\nclosed?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776119061.260679",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "TgCP",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 15715] make call() more flexible",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=15715"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nGabriel Becker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:gabembecker@gmail.com",
+                                "text": "gabembecker@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|1                           |0\n                 CC|                            |gabembecker@gmail.com\n             Status|NEW                         |UNCONFIRMED\n\n--- Comment #4 from Gabriel Becker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:gabembecker@gmail.com",
+                                "text": "gabembecker@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nIIUC the only difference between leaving it a special and making it a builtin\nis that for invalid first arguments that throw that error, the remaining\narguments currently are not evaluated (because as Michael said they are\nevaluated anyway but it's after the error).\n\nChanging it to a builtin would mean they are evaluated right away, and thus\nwill be evaluated even in the case of an invalid first argument.\n\nI suppose given that knowledge I could write code that would give different\nresults before and after the change, but it would be pretty gross and highly\ntargeted. \n\nThat said, maybe the byte code compiler would (or would need to) handle it\ndifferently. I don't know much about what it is doing.\n\nSeems like it'd be easy to put in support for the symbols, as that was\nuncontroversial, but we've gone 12 years (almost exactly at time of writing)\nwithout the change so maybe its not necessary and could the issue could be\nclosed?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

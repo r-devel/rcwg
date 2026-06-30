@@ -1,0 +1,181 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19008] on.exit() at top level is a silent no-op*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19008>\n\n--- Comment #2 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nThinking about this a bit more, execution of top-level `on.exit()` invocations\non exit would almost certainly be undesired in interactive sessions -- one\nmight interactively run the same `on.exit()` calls multiple times in an\ninteractive session while e.g. debugging code \/ stepping through tests, and the\nactual time at which the user would intend those `on.exit()` expressions to be\nrun isn't very well defined. Relatedly, any sort of message \/ warning output\nwould likely be annoying in this scenario.\n\nFor non-interactive sessions, it might make more sense to run top-level\nhandlers on process exit at some appropriate time, but it's hard for me to\nargue it's worth the effort when the user could just do something like `main &lt;-\nfunction(...) {}; main()`, and put their exit handlers in the `main` function.\n\nTo wit, I think I agree on the balance it's best to keep the code as-is. I\nstill think it's worth documenting this explicitly though. Some proposals:\n\n```\n--- src\/library\/base\/man\/on.exit.Rd\n+++ src\/library\/base\/man\/on.exit.Rd\n@@ -41,6 +41,8 @@ on.exit(expr = NULL, add = FALSE, after = TRUE)\n   If multiple \\code{on.exit} expressions are set using \\code{add = TRUE}\n   then all expressions will be run even if one signals an error.\n\n+  Top-level \\code{on.exit} invocations are silently discarded.\n+\n   This is a \\sQuote{special} \\link{primitive} function: it only\n   evaluates the arguments \\code{add} and \\code{after}.\n```\n\nOr\n\n```\n--- src\/library\/base\/man\/on.exit.Rd\n+++ src\/library\/base\/man\/on.exit.Rd\n@@ -41,6 +41,9 @@ on.exit(expr = NULL, add = FALSE, after = TRUE)\n   If multiple \\code{on.exit} expressions are set using \\code{add = TRUE}\n   then all expressions will be run even if one signals an error.\n\n+  Top-level \\code{on.exit} invocations are silently discarded, as there\n+  is no evaluation frame with which to associate the provided \\code{expr}.\n+\n   This is a \\sQuote{special} \\link{primitive} function: it only\n   evaluates the arguments \\code{add} and \\code{after}.\n```\n\nsince IMHO this fact is not immediately obvious to non-experts.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1771961890.999519",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "+M8uT",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19008] on.exit() at top level is a silent no-op",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19008"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThinking about this a bit more, execution of top-level "
+                            },
+                            {
+                                "type": "text",
+                                "text": "on.exit()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " invocations\non exit would almost certainly be undesired in interactive sessions -- one\nmight interactively run the same "
+                            },
+                            {
+                                "type": "text",
+                                "text": "on.exit()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " calls multiple times in an\ninteractive session while e.g. debugging code \/ stepping through tests, and the\nactual time at which the user would intend those "
+                            },
+                            {
+                                "type": "text",
+                                "text": "on.exit()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " expressions to be\nrun isn't very well defined. Relatedly, any sort of message \/ warning output\nwould likely be annoying in this scenario.\n\nFor non-interactive sessions, it might make more sense to run top-level\nhandlers on process exit at some appropriate time, but it's hard for me to\nargue it's worth the effort when the user could just do something like `main <-\nfunction(...) {}; main()`, and put their exit handlers in the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "main",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " function.\n\nTo wit, I think I agree on the balance it's best to keep the code as-is. I\nstill think it's worth documenting this explicitly though. Some proposals:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "--- src\/library\/base\/man\/on.exit.Rd\n+++ src\/library\/base\/man\/on.exit.Rd\n@@ -41,6 +41,8 @@ on.exit(expr = NULL, add = FALSE, after = TRUE)\n   If multiple \\code{on.exit} expressions are set using \\code{add = TRUE}\n   then all expressions will be run even if one signals an error.\n\n+  Top-level \\code{on.exit} invocations are silently discarded.\n+\n   This is a \\sQuote{special} \\link{primitive} function: it only\n   evaluates the arguments \\code{add} and \\code{after}.\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nOr\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "--- src\/library\/base\/man\/on.exit.Rd\n+++ src\/library\/base\/man\/on.exit.Rd\n@@ -41,6 +41,9 @@ on.exit(expr = NULL, add = FALSE, after = TRUE)\n   If multiple \\code{on.exit} expressions are set using \\code{add = TRUE}\n   then all expressions will be run even if one signals an error.\n\n+  Top-level \\code{on.exit} invocations are silently discarded, as there\n+  is no evaluation frame with which to associate the provided \\code{expr}.\n+\n   This is a \\sQuote{special} \\link{primitive} function: it only\n   evaluates the arguments \\code{add} and \\code{after}.\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nsince IMHO this fact is not immediately obvious to non-experts."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18972] diff(x=&lt;m-by-n&gt;, l, d) drops dimensions when l*d &gt;= m*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18972>\n\n--- Comment #11 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\n(In reply to Suharto Anggono from comment #10)\n    r[-nrow(r):-max(nrow(r) - lag + 1L, 0L), , drop = FALSE]\n\nand\n\n    r[-length(r):-max(length(r) - lag + 1L, 0L)]\n\nare also correct and avoid sequence direction reversal.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1771962944.303929",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "sjXa",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "*[Bug 18972] diff(x=<m-by-n>, l, d) drops dimensions when l*d >= m*\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18972"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #11 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Suharto Anggono from comment #10)\n    r[-nrow(r):-max(nrow(r) - lag + 1L, 0L), , drop = FALSE]\n\nand\n\n    r[-length(r):-max(length(r) - lag + 1L, 0L)]\n\nare also correct and avoid sequence direction reversal."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

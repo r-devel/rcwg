@@ -1,0 +1,357 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18928] Missing pieces in the C API for environments*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18928>\n\n--- Comment #25 from Luke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) ---\nI modified `R_DotsExist` to only return true if the value is a `DOTSXP`.\n\nIn reviewing this I noticed that the binding functions all work on the top\nframe, but the `...` functions search parent frames as well. This is consistent\nwith R-level `...length`, `...names`, and `...elt`. Not sure if this is what we\nwant. We could\n\n- leave as is\n- change `R_DotsExists` and friends to only look at the top frame\n- add an `inherits` argument\n\nI have a slight preference for the third option, but can live with any of them.\nIn any case, if we want to make a change this is the time. Thoughts?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1773852155.679569",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "FNwd5",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18928] Missing pieces in the C API for environments",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18928"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #25 from Luke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI modified "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_DotsExist",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to only return true if the value is a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "DOTSXP",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nIn reviewing this I noticed that the binding functions all work on the top\nframe, but the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "...",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " functions search parent frames as well. This is consistent\nwith R-level "
+                            },
+                            {
+                                "type": "text",
+                                "text": "...length",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "...names",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "...elt",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". Not sure if this is what we\nwant. We could\n\n- leave as is\n- change "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_DotsExists",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and friends to only look at the top frame\n- add an "
+                            },
+                            {
+                                "type": "text",
+                                "text": "inherits",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " argument\n\nI have a slight preference for the third option, but can live with any of them.\nIn any case, if we want to make a change this is the time. Thoughts?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18928] Missing pieces in the C API for environments*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18928>\n\n--- Comment #26 from Lionel Henry (<mailto:lionel.hry@gmail.com|lionel.hry@gmail.com>) ---\nCreated attachment 3634\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3634&amp;action=edit>\nFix R_DotsExist with missing dots\n\nRegarding scoping in the dots API, good question. The current implementation\nwith `inherits = TRUE` is aligned with how we use it in rlang, but I agree it's\nnot ideal because ambiguous.\n\nIf we hardcode `inherits = FALSE`, then it's more in line with the environment\nbindings API. We can implement the inherit behaviour ourselves with a search.\nArguments for not having `inherits`:\n\n- It would be a bit weird with the accessor variants.\n\n- Another argument pointed out by Davis is that it forces you to first find the\nrelevant frame, then access it, and that prevents reclimbing multiple times\nacross multiple uses of e.g. `R_DotsElt()`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1773855087.499099",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "2Pr1t",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18928] Missing pieces in the C API for environments",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18928"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #26 from Lionel Henry ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:lionel.hry@gmail.com",
+                                "text": "lionel.hry@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3634\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3634&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3634&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nFix R_DotsExist with missing dots\n\nRegarding scoping in the dots API, good question. The current implementation\nwith "
+                            },
+                            {
+                                "type": "text",
+                                "text": "inherits = TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is aligned with how we use it in rlang, but I agree it's\nnot ideal because ambiguous.\n\nIf we hardcode "
+                            },
+                            {
+                                "type": "text",
+                                "text": "inherits = FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", then it's more in line with the environment\nbindings API. We can implement the inherit behaviour ourselves with a search.\nArguments for not having "
+                            },
+                            {
+                                "type": "text",
+                                "text": "inherits",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n- It would be a bit weird with the accessor variants.\n\n- Another argument pointed out by Davis is that it forces you to first find the\nrelevant frame, then access it, and that prevents reclimbing multiple times\nacross multiple uses of e.g. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_DotsElt()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18928] Missing pieces in the C API for environments*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18928>\n\n--- Comment #27 from Luke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) ---\nThanks; committed in r89649.\n\nLet's leave the scoping as is for now.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1773861008.715569",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "1kE17",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18928] Missing pieces in the C API for environments",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18928"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #27 from Luke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks; committed in r89649.\n\nLet's leave the scoping as is for now."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18928] Missing pieces in the C API for environments*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18928>\n\n--- Comment #28 from Lionel Henry (<mailto:lionel.hry@gmail.com|lionel.hry@gmail.com>) ---\nNot sure if my comment was clear so just in case: we're in favour of changing\nthe scoping of dots functions to only look in the top frame (and can provide a\npatch for this).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1773899763.626369",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "9kMu",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18928] Missing pieces in the C API for environments",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18928"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #28 from Lionel Henry ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:lionel.hry@gmail.com",
+                                "text": "lionel.hry@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nNot sure if my comment was clear so just in case: we're in favour of changing\nthe scoping of dots functions to only look in the top frame (and can provide a\npatch for this)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

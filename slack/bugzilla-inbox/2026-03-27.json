@@ -1,0 +1,1324 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19032] New: SETVAR does not prime the smallcache binding cache*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19032>\n\n            Bug ID: 19032\n           Summary: SETVAR does not prime the smallcache binding cache\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nCreated attachment 3646\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3646&amp;action=edit>\nPatch.\n\nGETVAR has a fallback to GET_BINDING_CELL_CACHE when the smallcache slot is\nR_NilValue (eval.c line 5896), but SETVAR lacks the equivalent. This means\nSETVAR relies on a prior GETVAR to prime the cache. When no GETVAR has done so,\nevery SETVAR falls through to defineVar.\n\nThe patch adds the same R_NilValue fallback to SETVAR's smallcache path, and a\nSET_CACHED_BINDING call after the defineVar fallback to prime the cache on\nfirst binding creation.\n\nThis gives a small but meaningful optimization for loop bodies of the form:\n\n```\nfor (i in 1:n) {\n\n  # assign variables (SETVAR before GETVAR)\n  x &lt;- 1\n  y &lt;- 2\n\n  # use variables (GETVAR)\n  z &lt;- x + y\n\n}\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1774595660.954469",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "bGz3",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19032] New: SETVAR does not prime the smallcache binding cache",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19032"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19032\n           Summary: SETVAR does not prime the smallcache binding cache\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3646\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3646&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3646&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch.\n\nGETVAR has a fallback to GET_BINDING_CELL_CACHE when the smallcache slot is\nR_NilValue (eval.c line 5896), but SETVAR lacks the equivalent. This means\nSETVAR relies on a prior GETVAR to prime the cache. When no GETVAR has done so,\nevery SETVAR falls through to defineVar.\n\nThe patch adds the same R_NilValue fallback to SETVAR's smallcache path, and a\nSET_CACHED_BINDING call after the defineVar fallback to prime the cache on\nfirst binding creation.\n\nThis gives a small but meaningful optimization for loop bodies of the form:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "for (i in 1:n) {\n\n  # assign variables (SETVAR before GETVAR)\n  x <- 1\n  y <- 2\n\n  # use variables (GETVAR)\n  z <- x + y\n\n}\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19032] SETVAR does not prime the smallcache binding cache*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19032>\n\nKevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3646|0                           |1\n        is obsolete|                            |\n\n--- Comment #1 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nCreated attachment 3647\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3647&amp;action=edit>\nPatch. (Attached as file so a diff can be shown.)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1774595730.059929",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "3e1t",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19032] SETVAR does not prime the smallcache binding cache",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19032"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nKevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3646|0                           |1\n        is obsolete|                            |\n\n--- Comment #1 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3647\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3647&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3647&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch. (Attached as file so a diff can be shown.)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19033] New: text Chinese with srt gives larger size of character*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19033>\n\n            Bug ID: 19033\n           Summary: text Chinese with srt gives larger size of character\n           Product: R\n           Version: R 4.5.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Graphics\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:jszhao@yeah.net|jszhao@yeah.net>\n\nCreated attachment 3648\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3648&amp;action=edit>\nsrt in  text() cause larger size of Chinese characters\n\nHi there,\n\nIn the following code, you'll notice that when srt is not 0 or a multiple of 90\n(e.g., 45), Chinese characters rendered by text() appear significantly larger.\nEnglish characters are unaffected.\n\n```\n#png(\"abc.png\", width = 7*600, height=7*600, res = 600, pointsize = 10)\nplot(1:5, 1:5, type = \"n\")\ntext(2,2, \"中文 English srt = 0\", srt = 0, pos = 1)\ntext(2,2, \"中文 English srt = 180\", srt = 180, pos = 3)\ntext(3,3, \"中文 English srt = 45\", srt = 45)\ntext(3,4, \"中文 English srt = 15\", srt = 15)\ntext(4,4, \"中文 English srt = 90\", srt = 90, pos = 2)\ntext(4,4, \"中文 English srt = -90\", srt = -90, pos = 4)\n#dev.off()\n```\n\n```\n&gt; sessionInfo()\nR version 4.5.3 (2026-03-11 ucrt)\nPlatform: x86_64-w64-mingw32\/x64\nRunning under: Windows 10 x64 (build 19045)\n\nMatrix products: default\n  LAPACK version 3.12.1\n\nlocale:\n[1] LC_COLLATE=Chinese (Simplified)_China.utf8 \n[2] LC_CTYPE=Chinese (Simplified)_China.utf8   \n[3] LC_MONETARY=Chinese (Simplified)_China.utf8\n[4] LC_NUMERIC=C                               \n[5] LC_TIME=Chinese (Simplified)_China.utf8    \n\ntime zone: Asia\/Shanghai\ntzcode source: internal\n\nattached base packages:\n[1] stats     graphics  grDevices utils     datasets  methods   base     \n\nloaded via a namespace (and not attached):\n[1] compiler_4.5.3\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1774617591.656119",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "oi=",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19033] New: text Chinese with srt gives larger size of character",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19033"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19033\n           Summary: text Chinese with srt gives larger size of character\n           Product: R\n           Version: R 4.5.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Graphics\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jszhao@yeah.net",
+                                "text": "jszhao@yeah.net"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3648\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3648&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3648&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nsrt in  text() cause larger size of Chinese characters\n\nHi there,\n\nIn the following code, you'll notice that when srt is not 0 or a multiple of 90\n(e.g., 45), Chinese characters rendered by text() appear significantly larger.\nEnglish characters are unaffected.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "#png(\"abc.png\", width = 7*600, height=7*600, res = 600, pointsize = 10)\nplot(1:5, 1:5, type = \"n\")\ntext(2,2, \"中文 English srt = 0\", srt = 0, pos = 1)\ntext(2,2, \"中文 English srt = 180\", srt = 180, pos = 3)\ntext(3,3, \"中文 English srt = 45\", srt = 45)\ntext(3,4, \"中文 English srt = 15\", srt = 15)\ntext(4,4, \"中文 English srt = 90\", srt = 90, pos = 2)\ntext(4,4, \"中文 English srt = -90\", srt = -90, pos = 4)\n#dev.off()\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> sessionInfo()\nR version 4.5.3 (2026-03-11 ucrt)\nPlatform: x86_64-w64-mingw32\/x64\nRunning under: Windows 10 x64 (build 19045)\n\nMatrix products: default\n  LAPACK version 3.12.1\n\nlocale:\n[1] LC_COLLATE=Chinese (Simplified)_China.utf8 \n[2] LC_CTYPE=Chinese (Simplified)_China.utf8   \n[3] LC_MONETARY=Chinese (Simplified)_China.utf8\n[4] LC_NUMERIC=C                               \n[5] LC_TIME=Chinese (Simplified)_China.utf8    \n\ntime zone: Asia\/Shanghai\ntzcode source: internal\n\nattached base packages:\n[1] stats     graphics  grDevices utils     datasets  methods   base     \n\nloaded via a namespace (and not attached):\n[1] compiler_4.5.3\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19033] text Chinese with srt gives larger size of character*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19033>\n\n--- Comment #1 from Jinsong Zhao (<mailto:jszhao@yeah.net|jszhao@yeah.net>) ---\nHowever, if I set a specific font for the Chinese (and also the English)\ncharacters, everything works as expected:\n\n```\nwindowsFonts(song = windowsFont(\"SourceHanSerifSC-Regular\"))\n\npng(\"abc.png\", width = 7*600, height=7*600, res = 600, pointsize = 10, family =\n\"song\")\n...\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1774619087.381579",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ZDxM",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19033] text Chinese with srt gives larger size of character",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19033"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Jinsong Zhao ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jszhao@yeah.net",
+                                "text": "jszhao@yeah.net"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nHowever, if I set a specific font for the Chinese (and also the English)\ncharacters, everything works as expected:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "windowsFonts(song = windowsFont(\"SourceHanSerifSC-Regular\"))\n\npng(\"abc.png\", width = 7*600, height=7*600, res = 600, pointsize = 10, family =\n\"song\")\n...\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19034] New: R fails to install packages with \"Error in if (custom.bin) { : argument is of length zero\" (possibly under tools:::.install_packages)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19034>\n\n            Bug ID: 19034\n           Summary: R fails to install packages with \"Error in if\n                    (custom.bin) { : argument is of length zero\" (possibly\n                    under tools:::.install_packages)\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: arm64\/M1\n                OS: macOS\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Mac GUI \/ Mac specific\n          Assignee: <mailto:simon.urbanek@r-project.org|simon.urbanek@r-project.org>\n          Reporter: <mailto:g.vegayon@gmail.com|g.vegayon@gmail.com>\n                CC: <mailto:R-core@R-project.org|R-core@R-project.org>\n\nCreated attachment 3649\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3649&amp;action=edit>\nLog installation from epiworldR\n\n## Description\n\nI have faced this issue on GitHub actions with a couple of packages already.\nThese happened on using\n[`rhub\/actions\/r-check@v1`](<https:\/\/github.com\/UofUEpiBio\/epiworldR\/actions\/runs\/23613653084\/job\/68778498169>)\nand\n[`r-lib\/actions\/r-setup-dependencies@v2`](<https:\/\/github.com\/USCCANA\/netdiffuseR\/actions\/runs\/23659778933\/job\/68926663664?pr=74>)\nusing R-devel on MacOS arm64. These are the last few lines I got from each:\n\nrhub\/actions\n\n\n  ** R\n  ** inst\n  ** byte-compile and prepare package for lazy loading\n  ** help\n  *** installing help indices\n  *** copying figures\n  ** building package indices\n  ** installing vignettes\n  ** testing if installed package can be loaded from temporary location\n  ** checking absolute paths in shared objects and dynamic libraries\n  ** testing if installed package can be loaded from final location\n  ** testing if installed package keeps a record of temporary installation path\n  * SHA256 sums\n  * creating tarball\n  Error in if (custom.bin) { : argument is of length zero\n  * removing\n‘\/Users\/runner\/work\/epiworldR\/epiworldR\/check\/epiworldR.Rcheck\/epiworldR’\n\n\nr-lib\/actions\n\n\n  ** R\n  ** byte-compile and prepare package for lazy loading\n  ** help\n  *** installing help indices\n  ** building package indices\n  ** testing if installed package can be loaded\n  * SHA256 sums\n  * creating tarball\n  Error: Error in if (custom.bin) { : argument is of length zero\n\n## Location\n\nI have tracked down the message to the `tools:::.install.packages()` function\n[here](<https:\/\/github.com\/r-devel\/r-svn\/blob\/27f30b343dc2fc2c6c889c949a0a24ca0f4278b3\/src\/library\/tools\/R\/install.R#L469-L470>):\n\n  custom.bin &lt;- .pkg.type(.Platform$pkgType) == \"other.binary\"\n  filename &lt;- if (custom.bin) {\n\nUsure what could be causing it. I'm attaching the installation log from\n`epiworldR`. The log for netdiffuseR is available on the link.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1774635206.665619",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "TCKcJ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19034] New: R fails to install packages with \"Error in if (custom.bin) { : argument is of length zero\" (possibly under tools:::.install_packages)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19034"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19034\n           Summary: R fails to install packages with \"Error in if\n                    (custom.bin) { : argument is of length zero\" (possibly\n                    under tools:::.install_packages)\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: arm64\/M1\n                OS: macOS\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Mac GUI \/ Mac specific\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:simon.urbanek@r-project.org",
+                                "text": "simon.urbanek@r-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:g.vegayon@gmail.com",
+                                "text": "g.vegayon@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n                CC: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3649\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3649&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3649&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nLog installation from epiworldR\n\n## Description\n\nI have faced this issue on GitHub actions with a couple of packages already.\nThese happened on using\n["
+                            },
+                            {
+                                "type": "text",
+                                "text": "rhub\/actions\/r-check@v1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/UofUEpiBio\/epiworldR\/actions\/runs\/23613653084\/job\/68778498169"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\nand\n["
+                            },
+                            {
+                                "type": "text",
+                                "text": "r-lib\/actions\/r-setup-dependencies@v2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/USCCANA\/netdiffuseR\/actions\/runs\/23659778933\/job\/68926663664?pr=74"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\nusing R-devel on MacOS arm64. These are the last few lines I got from each:\n\nrhub\/actions\n\n\n\n  ** R\n  ** inst\n  ** byte-compile and prepare package for lazy loading\n  ** help\n  *** installing help indices\n  *** copying figures\n  ** building package indices\n  ** installing vignettes\n  ** testing if installed package can be loaded from temporary location\n  ** checking absolute paths in shared objects and dynamic libraries\n  ** testing if installed package can be loaded from final location\n  ** testing if installed package keeps a record of temporary installation path\n  * SHA256 sums\n  * creating tarball\n  Error in if (custom.bin) { : argument is of length zero\n  * removing\n‘\/Users\/runner\/work\/epiworldR\/epiworldR\/check\/epiworldR.Rcheck\/epiworldR’\n\n\n\nr-lib\/actions\n\n\n\n  ** R\n  ** byte-compile and prepare package for lazy loading\n  ** help\n  *** installing help indices\n  ** building package indices\n  ** testing if installed package can be loaded\n  * SHA256 sums\n  * creating tarball\n  Error: Error in if (custom.bin) { : argument is of length zero\n\n## Location\n\nI have tracked down the message to the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tools:::.install.packages()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " function\n[here]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/27f30b343dc2fc2c6c889c949a0a24ca0f4278b3\/src\/library\/tools\/R\/install.R#L469-L470"
+                            },
+                            {
+                                "type": "text",
+                                "text": "):\n\n  custom.bin <- .pkg.type(.Platform$pkgType) == \"other.binary\"\n  filename <- if (custom.bin) {\n\nUsure what could be causing it. I'm attaching the installation log from\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "epiworldR",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". The log for netdiffuseR is available on the link."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19035] New: postscript(): PS_Open() is too pessimistic wrt R_popen(), failing in Docker on GitHub Actions*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19035>\n\n            Bug ID: 19035\n           Summary: postscript(): PS_Open() is too pessimistic wrt\n                    R_popen(), failing in Docker on GitHub Actions\n           Product: R\n           Version: R 4.5.x\n          Hardware: All\n                OS: Linux\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Graphics\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:ikrylov@disroot.org|ikrylov@disroot.org>\n\nCreated attachment 3650\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3650&amp;action=edit>\nSuggested fix\n\nOriginally [discovered by Jeroen\nOoms](<https:\/\/stat.ethz.ch\/pipermail\/r-package-devel\/2026q1\/012328.html>):\n\nIn certain Linux container environments (e.g. Docker on GitHub Actions) the\n`clone3()` system call doesn't work (fails with `ENOSYS`). `libc` is ready for\nthat and retries the operation with a call to `clone()` instead. With certain\n`libc` versions (e.g. `libc6` version 2.42-13 in current Debian testing), when\n`popen` first calls `clone3()`, sees it fail, retries with `clone()`, and then\nsucceeds, `errno` is non-zero upon return despite the `FILE*` has been\nsuccessfully opened. `PS_Open()` considers such an `R_popen()` call to fail\nbecause it checks for a non-zero `errno` separately from a `NULL` return value.\nThis causes the `bitmap()` graphical device to fail:\n\n```\n$ Rscript -e 'bitmap(\"\/dev\/null\")'\n$ strace -f -o \/dev\/null --fault=clone3 Rscript -e 'bitmap(\"\/dev\/null\")'\nError in postscript(file = cmd, width = width, height = height, pointsize =\npointsize,  : \n  cannot open 'postscript' pipe to ''\/usr\/bin\/gs' -dNOPAUSE -dBATCH -q\n-sDEVICE=png16m -r72 -dAutoRotatePages=\/None -g504x504 -sOutputFile='\/dev\/null'\n-'\nCalls: bitmap -&gt; postscript\nExecution halted\n```\n\n```\n$ R -d gdb\n...\n(gdb) b PS_Open\n(gdb) c\n&gt; bitmap(\"\/dev\/null\")\nBreakpoint 1, PS_Open (dd=dd@entry=0x558f7a8b9f80, pd=pd@entry=0x558f7a8bb0a0)\nat .\/src\/library\/grDevices\/src\/devPS.c:3723\n3723    {\n(gdb) tcatch syscall clone3\nCatchpoint 2 (syscall 'clone3' [435])\n(gdb) c\nTemporary catchpoint 2 (call to syscall clone3), __GI___clone3 () at\n..\/sysdeps\/unix\/sysv\/linux\/x86_64\/clone3.S:62\n62              test    %RAX_LP, %RAX_LP\n# poor man's fault injection: jump over the syscall instruction, making it look\nlike it failed\n(gdb) tbreak *$pc\n(gdb) jump *$pc\n(gdb) fini\n#0  0x00007f86a9a18b4b in __spawnix (pid=pid@entry=0x5565da305c50,\nfile=file@entry=0x7f86a9ac6ea4 \"\/bin\/sh\",\nfile_actions=file_actions@entry=0x7ffc9fe71e10, \n    attrp=attrp@entry=0x0, argv=argv@entry=0x7ffc9fe71de0, envp=0x5565d77dc120,\nxflags=0, exec=0x7f86a99fd090 &lt;__GI_execve&gt;) at\n..\/sysdeps\/unix\/sysv\/linux\/spawni.c:421\n421       new_pid = __clone3 (&amp;clone_args, sizeof (clone_args), __spawni_child,\n(gdb) n\n424       if (new_pid == -1 &amp;&amp; (errno == ENOSYS || errno == EINVAL))\n(gdb) p new_pid\n$1 = -1\n(gdb) p errno\n$2 = 38 # &lt;-- ENOSYS\n...\n(gdb) n\n427           args.use_clone3 = false;\n...\n429             new_pid = __clone_internal_fallback (&amp;clone_args,\n__spawni_child,\n...\n# eventually:\nPS_Open (dd=dd@entry=0x555d3dedaf80, pd=pd@entry=0x555d3df86340) at\n.\/src\/library\/grDevices\/src\/devPS.c:3745\n3745            if (!pd-&gt;psfp || errno != 0) {\n(gdb) p pd-&gt;psfp\n$18 = (FILE *) 0x555d3df2c9f0 # popen() succeeded...\n(gdb) p errno\n$19 = 38 # ...but with a non-zero errno...\n# so R calls error(...)\n```\n\nThis failure is not reproducible on an older system (Debian oldstable).\nApparently, `popen` used to set `errno` to 0 even if `clone3` initially failed.\nTechnically, neither [Linux\nmanpages](<https:\/\/man7.org\/linux\/man-pages\/man3\/popen.3.html>) nor\n[POSIX](<https:\/\/pubs.opengroup.org\/onlinepubs\/9799919799\/functions\/popen.html>)\nsay what `errno` is going to be set to upon success. The suggested fix is to\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1774639790.385989",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "QO1",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19035] New: postscript(): PS_Open() is too pessimistic wrt R_popen(), failing in Docker on GitHub Actions",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19035"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19035\n           Summary: postscript(): PS_Open() is too pessimistic wrt\n                    R_popen(), failing in Docker on GitHub Actions\n           Product: R\n           Version: R 4.5.x\n          Hardware: All\n                OS: Linux\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Graphics\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3650\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3650&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3650&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nSuggested fix\n\nOriginally [discovered by Jeroen\nOoms]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-package-devel\/2026q1\/012328.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "):\n\nIn certain Linux container environments (e.g. Docker on GitHub Actions) the\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "clone3()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " system call doesn't work (fails with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ENOSYS",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "). "
+                            },
+                            {
+                                "type": "text",
+                                "text": "libc",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is ready for\nthat and retries the operation with a call to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "clone()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " instead. With certain\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "libc",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " versions (e.g. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "libc6",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " version 2.42-13 in current Debian testing), when\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "popen",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " first calls "
+                            },
+                            {
+                                "type": "text",
+                                "text": "clone3()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", sees it fail, retries with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "clone()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and then\nsucceeds, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "errno",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is non-zero upon return despite the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "FILE*",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has been\nsuccessfully opened. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "PS_Open()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " considers such an "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_popen()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " call to fail\nbecause it checks for a non-zero "
+                            },
+                            {
+                                "type": "text",
+                                "text": "errno",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " separately from a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " return value.\nThis causes the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "bitmap()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " graphical device to fail:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$ Rscript -e 'bitmap(\"\/dev\/null\")'\n$ strace -f -o \/dev\/null --fault=clone3 Rscript -e 'bitmap(\"\/dev\/null\")'\nError in postscript(file = cmd, width = width, height = height, pointsize =\npointsize,  : \n  cannot open 'postscript' pipe to ''\/usr\/bin\/gs' -dNOPAUSE -dBATCH -q\n-sDEVICE=png16m -r72 -dAutoRotatePages=\/None -g504x504 -sOutputFile='\/dev\/null'\n-'\nCalls: bitmap -> postscript\nExecution halted\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$ R -d gdb\n...\n(gdb) b PS_Open\n(gdb) c\n> bitmap(\"\/dev\/null\")\nBreakpoint 1, PS_Open (dd=dd@entry=0x558f7a8b9f80, pd=pd@entry=0x558f7a8bb0a0)\nat .\/src\/library\/grDevices\/src\/devPS.c:3723\n3723    {\n(gdb) tcatch syscall clone3\nCatchpoint 2 (syscall 'clone3' [435])\n(gdb) c\nTemporary catchpoint 2 (call to syscall clone3), __GI___clone3 () at\n..\/sysdeps\/unix\/sysv\/linux\/x86_64\/clone3.S:62\n62              test    %RAX_LP, %RAX_LP\n# poor man's fault injection: jump over the syscall instruction, making it look\nlike it failed\n(gdb) tbreak *$pc\n(gdb) jump *$pc\n(gdb) fini\n#0  0x00007f86a9a18b4b in __spawnix (pid=pid@entry=0x5565da305c50,\nfile=file@entry=0x7f86a9ac6ea4 \"\/bin\/sh\",\nfile_actions=file_actions@entry=0x7ffc9fe71e10, \n    attrp=attrp@entry=0x0, argv=argv@entry=0x7ffc9fe71de0, envp=0x5565d77dc120,\nxflags=0, exec=0x7f86a99fd090 <__GI_execve>) at\n..\/sysdeps\/unix\/sysv\/linux\/spawni.c:421\n421       new_pid = __clone3 (&clone_args, sizeof (clone_args), __spawni_child,\n(gdb) n\n424       if (new_pid == -1 && (errno == ENOSYS || errno == EINVAL))\n(gdb) p new_pid\n$1 = -1\n(gdb) p errno\n$2 = 38 # <-- ENOSYS\n...\n(gdb) n\n427           args.use_clone3 = false;\n...\n429             new_pid = __clone_internal_fallback (&clone_args,\n__spawni_child,\n...\n# eventually:\nPS_Open (dd=dd@entry=0x555d3dedaf80, pd=pd@entry=0x555d3df86340) at\n.\/src\/library\/grDevices\/src\/devPS.c:3745\n3745            if (!pd->psfp || errno != 0) {\n(gdb) p pd->psfp\n$18 = (FILE *) 0x555d3df2c9f0 # popen() succeeded...\n(gdb) p errno\n$19 = 38 # ...but with a non-zero errno...\n# so R calls error(...)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis failure is not reproducible on an older system (Debian oldstable).\nApparently, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "popen",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " used to set "
+                            },
+                            {
+                                "type": "text",
+                                "text": "errno",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to 0 even if "
+                            },
+                            {
+                                "type": "text",
+                                "text": "clone3",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " initially failed.\nTechnically, neither [Linux\nmanpages]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/man7.org\/linux\/man-pages\/man3\/popen.3.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") nor\n[POSIX]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/pubs.opengroup.org\/onlinepubs\/9799919799\/functions\/popen.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\nsay what "
+                            },
+                            {
+                                "type": "text",
+                                "text": "errno",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is going to be set to upon success. The suggested fix is to"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "only look at `pd-&gt;psfp` when trying to determine whether `R_popen()` succeeded.\nPatched R tested with and without `strace -f -o \/dev\/null --fault=clone3` on\nDebian testing.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1774639790.415929",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "HvlOV",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "only look at "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pd->psfp",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " when trying to determine whether "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_popen()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " succeeded.\nPatched R tested with and without "
+                            },
+                            {
+                                "type": "text",
+                                "text": "strace -f -o \/dev\/null --fault=clone3",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " on\nDebian testing."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18994] ASAN error with contextstack overflows*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18994>\n\n--- Comment #2 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nHi! I happened to see this in the NEWS:\n\n&gt; Parsing deeply nested expressions no longer should segfault in certain circumstances, fixing five different checks on context stack size thanks to Michael Chirico's report and patch in PR#18994.\n\nI guess this can be closed, then: r89731.\n\n(small note that the report is Kevin's :sweat_smile:)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1774644309.607269",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "rXhz",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18994] ASAN error with contextstack overflows",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18994"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nHi! I happened to see this in the NEWS:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Parsing deeply nested expressions no longer should segfault in certain circumstances, fixing five different checks on context stack size thanks to Michael Chirico's report and patch in PR#18994."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI guess this can be closed, then: r89731.\n\n(small note that the report is Kevin's "
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "sweat_smile",
+                                "unicode": "1f605"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19034] R fails to install packages with \"Error in if (custom.bin) { : argument is of length zero\" (possibly under tools:::.install_packages)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19034>\n\n--- Comment #1 from Simon Urbanek (<mailto:simon.urbanek@r-project.org|simon.urbanek@r-project.org>) ---\nHave you tried latest R? AFAIK this has been fixed in r89726, but you didn't\nsupply `sessionInfo()` so we don't know what you actually tested.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1774645586.882689",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Sb8",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19034] R fails to install packages with \"Error in if (custom.bin) { : argument is of length zero\" (possibly under tools:::.install_packages)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19034"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Simon Urbanek ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:simon.urbanek@r-project.org",
+                                "text": "simon.urbanek@r-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nHave you tried latest R? AFAIK this has been fixed in r89726, but you didn't\nsupply "
+                            },
+                            {
+                                "type": "text",
+                                "text": "sessionInfo()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " so we don't know what you actually tested."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19034] R fails to install packages with \"Error in if (custom.bin) { : argument is of length zero\" (possibly under tools:::.install_packages)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19034>\n\n--- Comment #3 from George Vega (<mailto:g.vegayon@gmail.com|g.vegayon@gmail.com>) ---\n(In reply to Simon Urbanek from comment #2)\n&gt; (Sorry, I meant r89718: `fix tools:::.pkg.type`)\n\nNot yet. I was using r89710 (yesterday's). I will try to run it again and\nreport back ASAP.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1774646466.730489",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "QqWPy",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19034] R fails to install packages with \"Error in if (custom.bin) { : argument is of length zero\" (possibly under tools:::.install_packages)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19034"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from George Vega ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:g.vegayon@gmail.com",
+                                "text": "g.vegayon@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Simon Urbanek from comment #2)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "(Sorry, I meant r89718: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "fix tools:::.pkg.type",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nNot yet. I was using r89710 (yesterday's). I will try to run it again and\nreport back ASAP."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19034] R fails to install packages with \"Error in if (custom.bin) { : argument is of length zero\" (possibly under tools:::.install_packages)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19034>\n\n--- Comment #3 from George Vega (<mailto:g.vegayon@gmail.com|g.vegayon@gmail.com>) ---\n(In reply to Simon Urbanek from comment #2)\n&gt; (Sorry, I meant r89718: `fix tools:::.pkg.type`)\n\nNot yet. I was using r89710 (yesterday's). I will try to run it again and\nreport back ASAP.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1774647071.091359",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "9A4M",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19034] R fails to install packages with \"Error in if (custom.bin) { : argument is of length zero\" (possibly under tools:::.install_packages)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19034"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from George Vega ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:g.vegayon@gmail.com",
+                                "text": "g.vegayon@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Simon Urbanek from comment #2)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "(Sorry, I meant r89718: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "fix tools:::.pkg.type",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nNot yet. I was using r89710 (yesterday's). I will try to run it again and\nreport back ASAP."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18035] a bug in wilcox.test() caused by precision error when there are ties*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18035>\n\nMichael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |michaelchirico4@gmail.com\n\n--- Comment #4 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nI agree with Elin that this is working exactly as documented. I am sympathetic\nto the argument that a more \"natural\" default for `digits.rank` might be\nadvisable. In this case even `digits.rank=14` would have given the expected\nresult:\n\n```\ndata.frame(\n  digits = 0:20,\n  V = sapply(0:20, \\(dig) unname(wilcox.test(after-before,\ndigits.rank=dig)$statistic))\n)\n#    digits   V\n# 1       0 6.5\n# 2       1 6.5\n# 3       2 6.5\n# 4       3 6.5\n# 5       4 6.5\n# 6       5 6.5\n# 7       6 6.5\n# 8       7 6.5\n# 9       8 6.5\n# 10      9 6.5\n# 11     10 6.5\n# 12     11 6.5\n# 13     12 6.5\n# 14     13 6.5\n# 15     14 6.0\n# 16     15 5.5\n# 17     16 5.5\n# 18     17 5.5\n# 19     18 5.5\n# 20     19 5.5\n# 21     20 5.5\n```\n\nWith regards to back-compatibility, my suspicion is any analysis that differs\nsubstantially between `digits.rank=Inf` and `digits.rank=10L` is \"more correct\"\nfrom the analyst's point-of-view for the latter choice, but it would be worth\nevaluating on CRAN packages.\n\nThere are not too many packages using it on CRAN, only about 100:\n<https:\/\/github.com\/search?q=org%3Acran+%2Fwilcox%5C.test%5C%28%2F&amp;type=code>\n\nIf such an analysis is of interest I can have a go at it.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1774650808.199119",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "BIn",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18035] a bug in wilcox.test() caused by precision error when there are ties",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18035"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMichael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |michaelchirico4@gmail.com\n\n--- Comment #4 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI agree with Elin that this is working exactly as documented. I am sympathetic\nto the argument that a more \"natural\" default for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "digits.rank",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " might be\nadvisable. In this case even "
+                            },
+                            {
+                                "type": "text",
+                                "text": "digits.rank=14",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " would have given the expected\nresult:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "data.frame(\n  digits = 0:20,\n  V = sapply(0:20, \\(dig) unname(wilcox.test(after-before,\ndigits.rank=dig)$statistic))\n)\n#    digits   V\n# 1       0 6.5\n# 2       1 6.5\n# 3       2 6.5\n# 4       3 6.5\n# 5       4 6.5\n# 6       5 6.5\n# 7       6 6.5\n# 8       7 6.5\n# 9       8 6.5\n# 10      9 6.5\n# 11     10 6.5\n# 12     11 6.5\n# 13     12 6.5\n# 14     13 6.5\n# 15     14 6.0\n# 16     15 5.5\n# 17     16 5.5\n# 18     17 5.5\n# 19     18 5.5\n# 20     19 5.5\n# 21     20 5.5\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWith regards to back-compatibility, my suspicion is any analysis that differs\nsubstantially between "
+                            },
+                            {
+                                "type": "text",
+                                "text": "digits.rank=Inf",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "digits.rank=10L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is \"more correct\"\nfrom the analyst's point-of-view for the latter choice, but it would be worth\nevaluating on CRAN packages.\n\nThere are not too many packages using it on CRAN, only about 100:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/search?q=org%3Acran+%2Fwilcox%5C.test%5C%28%2F&amp;type=code",
+                                "text": "https:\/\/github.com\/search?q=org%3Acran+%2Fwilcox%5C.test%5C%28%2F&type=code"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIf such an analysis is of interest I can have a go at it."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

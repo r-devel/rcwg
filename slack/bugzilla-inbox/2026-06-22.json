@@ -1,0 +1,1422 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17549] When building a package, use inRbuildignore() before copying package contents to Tdir*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17549>\n\n--- Comment #16 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nCreated attachment 3733\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3733&amp;action=edit>\nExclude top-level files first, filter more completely after preparing\n\nHere's a patch that filters top-level entries first, then, after preparing the\npackage, unlinks all files and directories that must be excluded. It passes the\nfollowing tests:\n\n```\nsetwd(tempdir())\npackage.skeleton('foo')\nunlink('foo\/man', recursive = TRUE)\n# a package with no directories should build\nstopifnot(!<http:\/\/file.info|file.info>(list.files('foo', full.names = TRUE))$isdir)\nstopifnot(tools::Rcmd('build foo') == 0)\n\nfile.symlink('\/does\/not\/exist', 'foo\/broken_symlink')\nstopifnot(tools::Rcmd('build foo') != 0) # should fail\nwriteLines('^broken_symlink$', 'foo\/.Rbuildignore')\n# ignored *top-level* broken symlinks should not fail R CMD build\nstopifnot(tools::Rcmd('build foo') == 0)\nunlink('foo\/broken_symlink')\n\ndir.create('foo\/src')\nwriteLines(c(\n 'all:', paste0('\\t', c(\n  'mkdir -p foo\/bar\/baz',\n  'touch foo\/bar\/baz\/quux'\n ))\n), 'foo\/src\/Makefile')\nwriteLines('quux', 'foo\/.Rbuildignore')\ntools::Rcmd('build foo')\n(f &lt;- untar('foo_1.0.tar.gz', list = TRUE))\n# files created during installation while preparing package should be ignored\nas well\nstopifnot(!grepl('quux', f))\n```\n\n(also: building and checking `Matrix` (except for one test in `matr-exp.R` on\ntrunk, which is unrelated); building and checking `data.table`)\n\nShould it revert more of r90101 and bring `cp -L` back?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782142056.943959",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "wJAhW",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17549] When building a package, use inRbuildignore() before copying package contents to Tdir",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17549"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #16 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3733\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3733&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3733&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nExclude top-level files first, filter more completely after preparing\n\nHere's a patch that filters top-level entries first, then, after preparing the\npackage, unlinks all files and directories that must be excluded. It passes the\nfollowing tests:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "setwd(tempdir())\npackage.skeleton('foo')\nunlink('foo\/man', recursive = TRUE)\n# a package with no directories should build\nstopifnot(!"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/file.info",
+                                "text": "file.info"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(list.files('foo', full.names = TRUE))$isdir)\nstopifnot(tools::Rcmd('build foo') == 0)\n\nfile.symlink('\/does\/not\/exist', 'foo\/broken_symlink')\nstopifnot(tools::Rcmd('build foo') != 0) # should fail\nwriteLines('^broken_symlink$', 'foo\/.Rbuildignore')\n# ignored *top-level* broken symlinks should not fail R CMD build\nstopifnot(tools::Rcmd('build foo') == 0)\nunlink('foo\/broken_symlink')\n\ndir.create('foo\/src')\nwriteLines(c(\n 'all:', paste0('\\t', c(\n  'mkdir -p foo\/bar\/baz',\n  'touch foo\/bar\/baz\/quux'\n ))\n), 'foo\/src\/Makefile')\nwriteLines('quux', 'foo\/.Rbuildignore')\ntools::Rcmd('build foo')\n(f <- untar('foo_1.0.tar.gz', list = TRUE))\n# files created during installation while preparing package should be ignored\nas well\nstopifnot(!grepl('quux', f))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n(also: building and checking "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Matrix",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (except for one test in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "matr-exp.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " on\ntrunk, which is unrelated); building and checking "
+                            },
+                            {
+                                "type": "text",
+                                "text": "data.table",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n\nShould it revert more of r90101 and bring "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cp -L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " back?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17549] When building a package, use inRbuildignore() before copying package contents to Tdir*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17549>\n\n--- Comment #17 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nCreated attachment 3734\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3734&amp;action=edit>\nExclude files to copy, then unlink extraneous files again\n\nFiltering only top-level entries before copying the files would reintroduce\nsome parts of the problem mentioned in Bug 18186 comment 3. Here's a broken\nsymlink under `R\/`, not a top-level entry:\n\n```\nsetwd(tempdir())\npackage.skeleton('foo')\n\n# PR18186 comment 3: ignored broken symlink in R\/\ndir.create('foo\/R')\nstopifnot(file.symlink('\/does\/not\/exist', 'foo\/R\/misc.R'))\nwriteLines('misc[.]R', 'foo\/.Rbuildignore')\nstopifnot(tools::Rcmd('build foo') == 0)\n```\n\nNot sure if it's something that real-life developers would desire. It's almost\neasier to filter the files twice instead of filtering top-level entries first\nand the complete list second.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782143236.886559",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "2RRTt",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17549] When building a package, use inRbuildignore() before copying package contents to Tdir",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17549"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #17 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3734\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3734&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3734&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nExclude files to copy, then unlink extraneous files again\n\nFiltering only top-level entries before copying the files would reintroduce\nsome parts of the problem mentioned in Bug 18186 comment 3. Here's a broken\nsymlink under "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R\/",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", not a top-level entry:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "setwd(tempdir())\npackage.skeleton('foo')\n\n# PR18186 comment 3: ignored broken symlink in R\/\ndir.create('foo\/R')\nstopifnot(file.symlink('\/does\/not\/exist', 'foo\/R\/misc.R'))\nwriteLines('misc[.]R', 'foo\/.Rbuildignore')\nstopifnot(tools::Rcmd('build foo') == 0)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nNot sure if it's something that real-life developers would desire. It's almost\neasier to filter the files twice instead of filtering top-level entries first\nand the complete list second."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19083] setGeneric(\"f\", \\(x) { standardGeneric(\"x\") }) makes generic with class 'nonstandardGenericFunction'*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19083>\n\n--- Comment #4 from Mikael Jagan (<mailto:jaganmn2@gmail.com|jaganmn2@gmail.com>) ---\nCreated attachment 3735\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3735&amp;action=edit>\nprune subclasses of \"genericFunction\"\n\nTo help R contributors thinking about patches for CRAN\/BioC packages, this\npatch implements the proposal for simplification mentioned in comment 3.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782151465.672629",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "qxi",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19083] setGeneric(\"f\", \\(x) { standardGeneric(\"x\") }) makes generic with class 'nonstandardGenericFunction'",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19083"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn2@gmail.com",
+                                "text": "jaganmn2@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3735\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3735&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3735&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nprune subclasses of \"genericFunction\"\n\nTo help R contributors thinking about patches for CRAN\/BioC packages, this\npatch implements the proposal for simplification mentioned in comment 3."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19092] New: `R CMD config --ldflags` is incomplete for `--enable-R-static-lib` on macOS*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19092>\n\n            Bug ID: 19092\n           Summary: `R CMD config --ldflags` is incomplete for\n                    `--enable-R-static-lib` on macOS\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Mac GUI \/ Mac specific\n          Assignee: <mailto:simon.urbanek@r-project.org|simon.urbanek@r-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n                CC: <mailto:R-core@R-project.org|R-core@R-project.org>\n\nCreated attachment 3736\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3736&amp;action=edit>\nCandidate patch.\n\nOn macOS, `R CMD config --ldflags` does not emit a usable link line for a\nfront-end built against the static `libR.a` (`--enable-R-static-lib`).\nThe line it prints is missing several libraries that `libR.a` depends on,\nand lacks the linker flags needed to pull the whole archive in, so linking\nan embedding application against `libR.a` fails outright (or links but then\nfails to load R's modules at run time).\n\nThis affects only `--enable-R-static-lib` builds on macOS. Shared\n(`--enable-R-shlib`)\nand framework builds are unaffected, and the change below is a no-op on\nnon-macOS platforms.\n\n## How to reproduce\n\nConfigure and build R as a static library:\n\n```sh\n.\/configure --enable-R-static-lib\nmake\n```\n\nThen ask R how to link a front-end against it:\n\n```sh\nR CMD config --ldflags\n```\n\nand try to use that line to link any program that embeds R (e.g. a trivial\n`Rf_initEmbeddedR()` driver). The link fails with undefined symbols, e.g.:\n\n```\n\"_pcre2_match_8\", referenced from:\n    _do_grep in libR.a[..](grep.o)\n...\n\"_libintl_setlocale\", referenced from:\n    _setup_Rmainloop in libR.a[..](main.o)\n...\nld: symbol(s) not found for architecture arm64\n```\n\n## Root cause\n\n`STATIC_LIBR` in `etc\/Makeconf.in` is built from the *package* flavours of\nthe library lists rather than the full ones:\n\n```make\nSTATIC_LIBR = @WANT_R_STATIC_TRUE@ @STATICR1@ \"$(R_HOME)\/lib$(R_ARCH)\/libR.a\"\n@STATICR2@ \\\n    $(BLAS_LIBS) $(FLIBS) @R_XTRA_LIBS@ $(LIBINTL) @READLINE_LIBS@ $(LIBS)\n```\n\n`$(LIBS)` is `@LIBS_PKGS@` and `$(LIBINTL)` is `@LIBINTL_PKGS@`. On macOS,\nconfigure intentionally trims those two for *package* use:\n\n- `LIBS_PKGS` drops `-lpcre2-8 -ldeflate -lzstd -llzma` (<http:\/\/configure.ac|configure.ac>, the\n  `darwin*` case around the `AC_SUBST(LIBS_PKGS)`), and\n- `LIBINTL_PKGS` is blanked, with the comment *\"On a macOS build which uses\n  static libraries, libintl_dgettext etc are provided by libR.dylib.\"*\n\nThat assumption is correct for a **shared** `libR.dylib` (it carries those\nsymbols, so packages need not relink them), but it is exactly wrong for\n`libR.a`: there is no `libR.dylib`, so the front-end linking `libR.a` must\nprovide pcre2\/lzma\/zstd\/deflate and libintl itself. Hence the undefined\nsymbols.\n\nThere is also a second, related gap. On ELF platforms `STATIC_LIBR` wraps\n`libR.a` in `--whole-archive`\/`--no-whole-archive` (via `STATICR1`\/`STATICR2`)\nand `MAIN_LDFLAGS` carries `--export-dynamic`, so that all of R's symbols end\nup in the executable and are visible to the modules R `dlopen()`s at run time.\nmacOS sets neither `STATICR1`\/`STATICR2` nor `-export_dynamic`, so a static\nfront-end can be left without symbols that those modules need.\n\n## Fix\n\nMake `STATIC_LIBR` use the full, untrimmed lists, and give macOS the\nequivalent of the ELF whole-archive\/export-dynamic treatment.\n\n`etc\/Makeconf.in`: use `@LIBINTL@`\/`@LIBS@` instead of the\n`$(LIBINTL)`\/`$(LIBS)`\npackage variants, and drop the spaces around the archive so macOS can use the\nno-space `-Wl,-force_load,&lt;archive&gt;` form.\n\n`<http:\/\/configure.ac|configure.ac>` (the `darwin*` case): set\n\n```sh\nSTATICR1=\"-Wl,-force_load,\"\nSTATICR2=\" -Wl,-export_dynamic\"\n```\n\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782181288.247109",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Og1",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19092] New: ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "R CMD config --ldflags",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is incomplete for ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "--enable-R-static-lib",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " on macOS",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19092"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19092\n           Summary: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R CMD config --ldflags",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is incomplete for\n                    "
+                            },
+                            {
+                                "type": "text",
+                                "text": "--enable-R-static-lib",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " on macOS\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Mac GUI \/ Mac specific\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:simon.urbanek@r-project.org",
+                                "text": "simon.urbanek@r-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n                CC: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3736\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3736&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3736&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCandidate patch.\n\nOn macOS, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R CMD config --ldflags",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does not emit a usable link line for a\nfront-end built against the static "
+                            },
+                            {
+                                "type": "text",
+                                "text": "libR.a",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "--enable-R-static-lib",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\nThe line it prints is missing several libraries that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "libR.a",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " depends on,\nand lacks the linker flags needed to pull the whole archive in, so linking\nan embedding application against "
+                            },
+                            {
+                                "type": "text",
+                                "text": "libR.a",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " fails outright (or links but then\nfails to load R's modules at run time).\n\nThis affects only "
+                            },
+                            {
+                                "type": "text",
+                                "text": "--enable-R-static-lib",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " builds on macOS. Shared\n("
+                            },
+                            {
+                                "type": "text",
+                                "text": "--enable-R-shlib",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\nand framework builds are unaffected, and the change below is a no-op on\nnon-macOS platforms.\n\n## How to reproduce\n\nConfigure and build R as a static library:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "sh\n.\/configure --enable-R-static-lib\nmake\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThen ask R how to link a front-end against it:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "sh\nR CMD config --ldflags\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nand try to use that line to link any program that embeds R (e.g. a trivial\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rf_initEmbeddedR()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " driver). The link fails with undefined symbols, e.g.:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\"_pcre2_match_8\", referenced from:\n    _do_grep in libR.a[..](grep.o)\n...\n\"_libintl_setlocale\", referenced from:\n    _setup_Rmainloop in libR.a[..](main.o)\n...\nld: symbol(s) not found for architecture arm64\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n## Root cause\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "STATIC_LIBR",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "etc\/Makeconf.in",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is built from the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "package",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " flavours of\nthe library lists rather than the full ones:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "make\nSTATIC_LIBR = @WANT_R_STATIC_TRUE@ @STATICR1@ \"$(R_HOME)\/lib$(R_ARCH)\/libR.a\"\n@STATICR2@ \\\n    $(BLAS_LIBS) $(FLIBS) @R_XTRA_LIBS@ $(LIBINTL) @READLINE_LIBS@ $(LIBS)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "$(LIBS)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "@LIBS_PKGS@",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "$(LIBINTL)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "@LIBINTL_PKGS@",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". On macOS,\nconfigure intentionally trims those two for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "package",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " use:\n\n- "
+                            },
+                            {
+                                "type": "text",
+                                "text": "LIBS_PKGS",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " drops "
+                            },
+                            {
+                                "type": "text",
+                                "text": "-lpcre2-8 -ldeflate -lzstd -llzma",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/configure.ac",
+                                "text": "configure.ac"
+                            },
+                            {
+                                "type": "text",
+                                "text": ", the\n  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "darwin*",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " case around the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "AC_SUBST(LIBS_PKGS)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), and\n- "
+                            },
+                            {
+                                "type": "text",
+                                "text": "LIBINTL_PKGS",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is blanked, with the comment *\"On a macOS build which uses\n  static libraries, libintl_dgettext etc are provided by libR.dylib.\"*\n\nThat assumption is correct for a **shared** "
+                            },
+                            {
+                                "type": "text",
+                                "text": "libR.dylib",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (it carries those\nsymbols, so packages need not relink them), but it is exactly wrong for\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "libR.a",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ": there is no "
+                            },
+                            {
+                                "type": "text",
+                                "text": "libR.dylib",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", so the front-end linking "
+                            },
+                            {
+                                "type": "text",
+                                "text": "libR.a",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " must\nprovide pcre2\/lzma\/zstd\/deflate and libintl itself. Hence the undefined\nsymbols.\n\nThere is also a second, related gap. On ELF platforms "
+                            },
+                            {
+                                "type": "text",
+                                "text": "STATIC_LIBR",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " wraps\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "libR.a",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "--whole-archive",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "--no-whole-archive",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (via "
+                            },
+                            {
+                                "type": "text",
+                                "text": "STATICR1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "STATICR2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\nand "
+                            },
+                            {
+                                "type": "text",
+                                "text": "MAIN_LDFLAGS",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " carries "
+                            },
+                            {
+                                "type": "text",
+                                "text": "--export-dynamic",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", so that all of R's symbols end\nup in the executable and are visible to the modules R "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dlopen()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "s at run time.\nmacOS sets neither "
+                            },
+                            {
+                                "type": "text",
+                                "text": "STATICR1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "STATICR2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " nor "
+                            },
+                            {
+                                "type": "text",
+                                "text": "-export_dynamic",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", so a static\nfront-end can be left without symbols that those modules need.\n\n## Fix\n\nMake "
+                            },
+                            {
+                                "type": "text",
+                                "text": "STATIC_LIBR",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " use the full, untrimmed lists, and give macOS the\nequivalent of the ELF whole-archive\/export-dynamic treatment.\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "etc\/Makeconf.in",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ": use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "@LIBINTL@",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "@LIBS@",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " instead of the\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "$(LIBINTL)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "$(LIBS)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\npackage variants, and drop the spaces around the archive so macOS can use the\nno-space "
+                            },
+                            {
+                                "type": "text",
+                                "text": "-Wl,-force_load,<archive>",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " form.\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/configure.ac",
+                                "text": "configure.ac",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "darwin*",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " case): set\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "sh\nSTATICR1=\"-Wl,-force_load,\"\nSTATICR2=\" -Wl,-export_dynamic\"\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "`-force_load` is the macOS counterpart of `--whole-archive`, and\n`-export_dynamic` keeps R's symbols in the dynamic symbol table for the\n`dlopen()`ed modules. The existing GNU-ld values just carry their own\nsurrounding whitespace now (so the shared template works for both linkers):\n\n```sh\nSTATICR1=\"-Wl,--whole-archive \"\nSTATICR2=\" -Wl,--no-whole-archive\"\n```\n\nThe patch is in `r-static-ldflags.patch` (against `<http:\/\/configure.ac|configure.ac>` and\n`etc\/Makeconf.in`; `configure` is regenerated with autoconf).\n\n## Why this is safe \/ scope\n\n- `STATICR1`\/`STATICR2` are used *only* in `STATIC_LIBR`, and `STATIC_LIBR`\n  is emitted only when `WANT_R_STATIC` is true. So nothing outside\n  `--enable-R-static-lib` is touched -- shared and framework builds are\n  unaffected on every platform.\n- On non-macOS platforms the change is a literal no-op: `LIBS_PKGS == LIBS`\n  and `LIBINTL_PKGS == LIBINTL` there (the trimming is `darwin*`-only), and\n  moving the whitespace into `STATICR1`\/`STATICR2` reproduces the identical\n  `--whole-archive ... --no-whole-archive` string.\n- The only behavioural change is for `--enable-R-static-lib` on macOS, which\n  is the broken case.\n\n## Testing\n\nOn aarch64-apple-darwin25.5.0:\n\n- Built R with `.\/configure --enable-R-static-lib` (default shared BLAS).\n- `R CMD config --ldflags` now prints a complete line:\n\n  ```\n  -Wl,-headerpad_max_install_names ... -Wl,-force_load,&lt;R_HOME&gt;\/lib\/libR.a \\\n  -Wl,-export_dynamic -L&lt;R_HOME&gt;\/lib -lRblas &lt;FLIBS&gt; \\\n  -L&lt;prefix&gt;\/lib -lintl -Wl,-framework -Wl,CoreFoundation -lreadline \\\n  -lpcre2-8 -ldeflate -lzstd -llzma -lbz2 -lz -licucore -ldl -lm -liconv\n  ```\n\n- A front-end that embeds R (`Rf_initEmbeddedR()` + evaluation) links with\n  just `R CMD config --cppflags`\/`--ldflags`, runs, and loads R's base\n  packages. `otool -L` confirms the binary has no `libR.dylib` dependency\n  (R is statically linked in).\n- Re-checked that a `--enable-R-shlib` build still produces the same\n  `--ldflags` as before (the static branch is not taken).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782181288.270749",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "mmk",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "-force_load",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is the macOS counterpart of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "--whole-archive",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "-export_dynamic",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " keeps R's symbols in the dynamic symbol table for the\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "dlopen()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "ed modules. The existing GNU-ld values just carry their own\nsurrounding whitespace now (so the shared template works for both linkers):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "sh\nSTATICR1=\"-Wl,--whole-archive \"\nSTATICR2=\" -Wl,--no-whole-archive\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe patch is in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "r-static-ldflags.patch",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (against "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/configure.ac",
+                                "text": "configure.ac",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "etc\/Makeconf.in",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "; "
+                            },
+                            {
+                                "type": "text",
+                                "text": "configure",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is regenerated with autoconf).\n\n## Why this is safe \/ scope\n\n- "
+                            },
+                            {
+                                "type": "text",
+                                "text": "STATICR1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "STATICR2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " are used "
+                            },
+                            {
+                                "type": "text",
+                                "text": "only",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "STATIC_LIBR",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "STATIC_LIBR",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n  is emitted only when "
+                            },
+                            {
+                                "type": "text",
+                                "text": "WANT_R_STATIC",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is true. So nothing outside\n  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "--enable-R-static-lib",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is touched -- shared and framework builds are\n  unaffected on every platform.\n- On non-macOS platforms the change is a literal no-op: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "LIBS_PKGS == LIBS",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n  and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "LIBINTL_PKGS == LIBINTL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " there (the trimming is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "darwin*",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "-only), and\n  moving the whitespace into "
+                            },
+                            {
+                                "type": "text",
+                                "text": "STATICR1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "STATICR2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " reproduces the identical\n  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "--whole-archive ... --no-whole-archive",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " string.\n- The only behavioural change is for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "--enable-R-static-lib",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " on macOS, which\n  is the broken case.\n\n## Testing\n\nOn aarch64-apple-darwin25.5.0:\n\n- Built R with "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\/configure --enable-R-static-lib",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (default shared BLAS).\n- "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R CMD config --ldflags",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " now prints a complete line:\n\n  "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "  -Wl,-headerpad_max_install_names ... -Wl,-force_load,<R_HOME>\/lib\/libR.a \\\n  -Wl,-export_dynamic -L<R_HOME>\/lib -lRblas <FLIBS> \\\n  -L<prefix>\/lib -lintl -Wl,-framework -Wl,CoreFoundation -lreadline \\\n  -lpcre2-8 -ldeflate -lzstd -llzma -lbz2 -lz -licucore -ldl -lm -liconv\n  "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n- A front-end that embeds R ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rf_initEmbeddedR()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " + evaluation) links with\n  just "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R CMD config --cppflags",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "--ldflags",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", runs, and loads R's base\n  packages. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "otool -L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " confirms the binary has no "
+                            },
+                            {
+                                "type": "text",
+                                "text": "libR.dylib",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " dependency\n  (R is statically linked in).\n- Re-checked that a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "--enable-R-shlib",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " build still produces the same\n  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "--ldflags",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as before (the static branch is not taken)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

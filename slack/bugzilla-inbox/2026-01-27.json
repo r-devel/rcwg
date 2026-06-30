@@ -1,0 +1,128 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18996] New: type of toeplitz(x=, r=) does not reflect type of 'r' when length(r) &lt; 2*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18996>\n\n            Bug ID: 18996\n           Summary: type of toeplitz(x=, r=) does not reflect type of 'r'\n                    when length(r) &lt; 2\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Language\n          Assignee: R-core@R-project.org\n          Reporter: jaganmn@mcmaster.ca\n\nA mishandled edge case that I notice while working on **Matrix**:\n\nThe type of `toeplitz(x=, r=)` should be the more general of the types of `x`\nand `r`, even if no element of `r` is used (because `length(r)` is 0 or 1).\n\n```\nIndex: src\/library\/stats\/R\/diffinv.R\n===================================================================\n--- src\/library\/stats\/R\/diffinv.R       (revision 89337)\n+++ src\/library\/stats\/R\/diffinv.R       (working copy)\n@@ -86,7 +86,7 @@\n             warning(\"x[1] != r[1]; using x[1] for diagonal\")\n         ## toeplitz2(c(if(nc &gt;= 2L) r[nc:2L], x), n, nc) :\n         d &lt;- c(n, nc)\n-        array(c(if(nc &gt;= 2L) r[nc:2L], x)[nc - .col(d) + .row(d)], d)\n+        array(c(r[if(nc &gt;= 2L) nc:2L else 0L], x)[nc - .col(d) + .row(d)], d)\n     }\n }\n\n```\n\nI would test along these lines:\n\n```\nF &lt;- function(tx, lx, tr, lr) {\n    x &lt;- vector(tx, lx)\n    r &lt;- vector(tr, lr)\n    identical(toeplitz(x, r), matrix(c(FALSE, x[0L], r[0L]), lx, lr))\n}\nt3 &lt;- c(\"integer\", \"double\", \"complex\")\nl3 &lt;- 0L:2L\nL &lt;- expand.grid(tx=t3, lx=l3, tr=t3, lr=l3, stringsAsFactors=FALSE)\nstopifnot(all(unlist(.mapply(F, L, NULL))))\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1769574525.657229",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "VY\/",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18996] New: type of toeplitz(x=, r=) does not reflect type of 'r' when length(r) < 2",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18996"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18996\n           Summary: type of toeplitz(x=, r=) does not reflect type of 'r'\n                    when length(r) < 2\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Language\n          Assignee: R-core@R-project.org\n          Reporter: jaganmn@mcmaster.ca\n\nA mishandled edge case that I notice while working on **Matrix**:\n\nThe type of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "toeplitz(x=, r=)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " should be the more general of the types of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nand "
+                            },
+                            {
+                                "type": "text",
+                                "text": "r",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", even if no element of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "r",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is used (because "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length(r)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is 0 or 1).\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/stats\/R\/diffinv.R\n===================================================================\n--- src\/library\/stats\/R\/diffinv.R       (revision 89337)\n+++ src\/library\/stats\/R\/diffinv.R       (working copy)\n@@ -86,7 +86,7 @@\n             warning(\"x[1] != r[1]; using x[1] for diagonal\")\n         ## toeplitz2(c(if(nc >= 2L) r[nc:2L], x), n, nc) :\n         d <- c(n, nc)\n-        array(c(if(nc >= 2L) r[nc:2L], x)[nc - .col(d) + .row(d)], d)\n+        array(c(r[if(nc >= 2L) nc:2L else 0L], x)[nc - .col(d) + .row(d)], d)\n     }\n }\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI would test along these lines:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "F <- function(tx, lx, tr, lr) {\n    x <- vector(tx, lx)\n    r <- vector(tr, lr)\n    identical(toeplitz(x, r), matrix(c(FALSE, x[0L], r[0L]), lx, lr))\n}\nt3 <- c(\"integer\", \"double\", \"complex\")\nl3 <- 0L:2L\nL <- expand.grid(tx=t3, lx=l3, tr=t3, lr=l3, stringsAsFactors=FALSE)\nstopifnot(all(unlist(.mapply(F, L, NULL))))\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

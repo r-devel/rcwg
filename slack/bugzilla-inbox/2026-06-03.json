@@ -1,0 +1,1458 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17549] When building a package, use inRbuildignore() before copying package contents to Tdir*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17549>\n\n--- Comment #8 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nYes. Bug 18186 was about broken symlinks, even when in `.Rbuildignore`,\npreventing `R CMD build` from working. With r90095, we get:\n\n```\nsetwd(tempdir())\npackage.skeleton('foo', list = character())\nfile.symlink('\/does\/not\/exist', 'foo\/broken_symlink')\n# [1] TRUE\ntools::Rcmd('build foo') # fails, as it should\n# * checking for file ‘foo\/DESCRIPTION’ ... OK\n#  ERROR\n# copying to build directory failed\nwriteLines('^broken_symlink$', 'foo\/.Rbuildignore')\ntools::Rcmd('build foo') # now succeeds, as desired\n# * checking for file ‘foo\/DESCRIPTION’ ... OK\n# * preparing ‘foo’:\n# * checking DESCRIPTION meta-information ... OK\n# * installing the package (it is needed to process help pages)\n# * saving partial Rd database\n# * checking for LF line-endings in source and make files and shell scripts\n# * checking for empty or unneeded directories\n# * building ‘foo_1.0.tar.gz’\n```\n\n(Previously confirmed by Jennifer Bryan in Bug 18186 Comment 7.)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1780487659.391329",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "DGbcX",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17549] When building a package, use inRbuildignore() before copying package contents to Tdir",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17549"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #8 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nYes. Bug 18186 was about broken symlinks, even when in "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".Rbuildignore",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\npreventing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R CMD build",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " from working. With r90095, we get:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "setwd(tempdir())\npackage.skeleton('foo', list = character())\nfile.symlink('\/does\/not\/exist', 'foo\/broken_symlink')\n# [1] TRUE\ntools::Rcmd('build foo') # fails, as it should\n# * checking for file 'foo\/DESCRIPTION' ... OK\n#  ERROR\n# copying to build directory failed\nwriteLines('^broken_symlink$', 'foo\/.Rbuildignore')\ntools::Rcmd('build foo') # now succeeds, as desired\n# * checking for file 'foo\/DESCRIPTION' ... OK\n# * preparing 'foo':\n# * checking DESCRIPTION meta-information ... OK\n# * installing the package (it is needed to process help pages)\n# * saving partial Rd database\n# * checking for LF line-endings in source and make files and shell scripts\n# * checking for empty or unneeded directories\n# * building 'foo_1.0.tar.gz'\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n(Previously confirmed by Jennifer Bryan in Bug 18186 Comment 7.)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19082] New: `windows()` keyboard events doesn't correctly handle \"Esc\", \"Backspace\", \"Tab\", \"Enter\", Ctrl+M, F11, F12*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19082>\n\n            Bug ID: 19082\n           Summary: `windows()` keyboard events doesn't correctly handle\n                    \"Esc\", \"Backspace\", \"Tab\", \"Enter\", Ctrl+M, F11, F12\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Windows GUI \/ Window specific\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:trevor.l.davis@gmail.com|trevor.l.davis@gmail.com>\n\nCreated attachment 3720\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3720&amp;action=edit>\nCorrectly handle Esc, Backspace, Tab, Enter, Ctrl+M, F11, F12\n\nThe following code helps test keyboard events in interactive x11() and\nwindows() devices:\n\n```\nkeystroke &lt;- function(key) {\n    cp &lt;- utf8ToInt(key)\n    if (length(cp) == 1L) {\n        if (grepl(\"[[:space:][:cntrl:]]\", key)) {\n            cat(sprintf(\"keystroke   (U+%04X)\\n\", cp))\n        } else {\n            cat(sprintf(\"keystroke   key=%s  (U+%04X)\\n\", key, cp))\n        }\n    } else {\n        cat(sprintf(\"keystroke   key=%s\\n\", key))\n    }\n    NULL\n}\nif (identical(.Platform$OS.type, \"unix\")) {\n    x11(type = \"Xlib\")\n} else {\n    windows()\n}\npar(mar = c(0, 0, 0, 0))\nplot.new()\ngetGraphicsEvent(prompt = \"Press keys to test (close window to quit)\",\n                 onKeybd = keystroke)\n```\n\nI observe the following issues when testing the keyboard events in `windows()`:\n\n1. \"Esc\", \"Backspace\", \"Tab\", and \"Enter\" currently return \"ctrl-\" values that\nmatch and obscure actual \"ctrl-\" values and don't match what `x11()` returns. \nFor example \"Tab\" currently returns \"ctrl-I\" which is also what Control-I also\nreturns whereas `x11()` returns `\"\\t\"`.\n2. Currently F11 and F12 don't emit an event on `windows()` while they do on\n`x11()`\n3. Currently Control-M returns \"ctrl-J\" instead of \"ctrl-M\" whereas on `x11()`\nit returns \"ctrl-M\".\n\nA summary of proposed changes as a table:\n\n| Key | `windows()` pre-patch | `windows()` post-patch | `x11()` |\n|---|---|---|---|\n| Esc | `\"ctrl-[\"` | `\"\\x1b\"` | `\"\\x1b\"` |\n| Ctrl+[ | `\"ctrl-[\"` | `\"ctrl-[\"` | `\"ctrl-{\"` |\n| Backspace | `\"ctrl-H\"` | `\"\\b\"` | `\"\\b\"` |\n| Ctrl+H | `\"ctrl-H\"` | `\"ctrl-H\"` | `\"ctrl-H\"` |\n| Tab | `\"ctrl-I\"` | `\"\\t\"` | `\"\\t\"` |\n| Ctrl+I | `\"ctrl-I\"` | `\"ctrl-I\"` | `\"ctrl-I\"` |\n| Enter | `\"ctrl-J\"` | `\"\\r\"` | `\"\\r\"` |\n| Ctrl+J | `\"ctrl-J\"` | `\"ctrl-J\"` | `\"ctrl-J\"` |\n| Ctrl+M | `\"ctrl-J\"` | `\"ctrl-M\"` | `\"ctrl-M\"` |\n| F11 | (dropped) | `\"F11\"` | `\"F11\"` |\n| F12 | (dropped) | `\"F12\"` | `\"F12\"` |\n\nNote as a side effect of this patch you may no longer use Control-M as an alias\nfor Enter and Control-J for entering newlines in the R GUI.  I'm not entirely\nsure who (if any) uses Control-M instead of the Enter key (or Control-J) to\npress enter in the R GUI but theoretically this may be considered a breaking\nchange.\n\nNote if you look at the Control+[ line that `x11()` actually returns `\"ctrl-{\"`\ninstead of `\"ctrl-[\"`.  It seems this is because in `x11()` Control characters\ncurrently always get a \"Shift\" applied to them so for example Control+a becomes\n\"ctrl-A\" and Control+2 becomes \"ctrl-@\".",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1780523937.565609",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "S5L",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19082] New: ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "windows()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " keyboard events doesn't correctly handle \"Esc\", \"Backspace\", \"Tab\", \"Enter\", Ctrl+M, F11, F12",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19082"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19082\n           Summary: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "windows()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " keyboard events doesn't correctly handle\n                    \"Esc\", \"Backspace\", \"Tab\", \"Enter\", Ctrl+M, F11, F12\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Windows GUI \/ Window specific\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:trevor.l.davis@gmail.com",
+                                "text": "trevor.l.davis@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3720\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3720&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3720&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCorrectly handle Esc, Backspace, Tab, Enter, Ctrl+M, F11, F12\n\nThe following code helps test keyboard events in interactive x11() and\nwindows() devices:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "keystroke <- function(key) {\n    cp <- utf8ToInt(key)\n    if (length(cp) == 1L) {\n        if (grepl(\"[[:space:][:cntrl:]]\", key)) {\n            cat(sprintf(\"keystroke   (U+%04X)\\n\", cp))\n        } else {\n            cat(sprintf(\"keystroke   key=%s  (U+%04X)\\n\", key, cp))\n        }\n    } else {\n        cat(sprintf(\"keystroke   key=%s\\n\", key))\n    }\n    NULL\n}\nif (identical(.Platform$OS.type, \"unix\")) {\n    x11(type = \"Xlib\")\n} else {\n    windows()\n}\npar(mar = c(0, 0, 0, 0))\nplot.new()\ngetGraphicsEvent(prompt = \"Press keys to test (close window to quit)\",\n                 onKeybd = keystroke)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI observe the following issues when testing the keyboard events in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "windows()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n1. \"Esc\", \"Backspace\", \"Tab\", and \"Enter\" currently return \"ctrl-\" values that\nmatch and obscure actual \"ctrl-\" values and don't match what "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x11()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " returns. \nFor example \"Tab\" currently returns \"ctrl-I\" which is also what Control-I also\nreturns whereas "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x11()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " returns "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"\\t\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n2. Currently F11 and F12 don't emit an event on "
+                            },
+                            {
+                                "type": "text",
+                                "text": "windows()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " while they do on\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "x11()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n3. Currently Control-M returns \"ctrl-J\" instead of \"ctrl-M\" whereas on "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x11()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nit returns \"ctrl-M\".\n\nA summary of proposed changes as a table:\n\n| Key | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "windows()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " pre-patch | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "windows()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " post-patch | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x11()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n|---|---|---|---|\n| Esc | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-[\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"\\x1b\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"\\x1b\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| Ctrl+[ | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-[\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-[\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-{\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| Backspace | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-H\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"\\b\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"\\b\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| Ctrl+H | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-H\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-H\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-H\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| Tab | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-I\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"\\t\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"\\t\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| Ctrl+I | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-I\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-I\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-I\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| Enter | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-J\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"\\r\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"\\r\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| Ctrl+J | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-J\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-J\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-J\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| Ctrl+M | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-J\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-M\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-M\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| F11 | (dropped) | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"F11\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"F11\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| F12 | (dropped) | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"F12\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"F12\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n\nNote as a side effect of this patch you may no longer use Control-M as an alias\nfor Enter and Control-J for entering newlines in the R GUI.  I'm not entirely\nsure who (if any) uses Control-M instead of the Enter key (or Control-J) to\npress enter in the R GUI but theoretically this may be considered a breaking\nchange.\n\nNote if you look at the Control+[ line that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x11()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " actually returns "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-{\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ninstead of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-[\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  It seems this is because in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x11()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " Control characters\ncurrently always get a \"Shift\" applied to them so for example Control+a becomes\n\"ctrl-A\" and Control+2 becomes \"ctrl-@\"."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19080] getGenerics() can return package names in addition to generics*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19080>\n\nMikael Jagan (<mailto:jaganmn2@gmail.com|jaganmn2@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jaganmn2@gmail.com\n\n--- Comment #3 from Mikael Jagan (<mailto:jaganmn2@gmail.com|jaganmn2@gmail.com>) ---\nBefore Martin's reply, I spent a moment looking at the patch (attachment 3718).\n I would prefer a test limited to the running process, being more\ncontained\/expository.  Can we not just modify and revert `.genericTable` and\ntest in between?\n\n```\ngT &lt;- methods:::.genericTable\ngnm &lt;- \"zzz\"\npnm &lt;- c(\"pkg1\", \"pkg2\")\ngF &lt;- sapply(pnm,\n             function(.) makeGeneric(gnm, fdefault = identity, package = .),\n             simplify = FALSE)\nstr(gF, max.level = 3L)\nstopifnot(vapply(gF, is, FALSE, \"genericFunction\"),\n          vapply(gF, slot, \"\", \"generic\") == gnm,\n          vapply(gF, slot, \"\", \"package\") == pnm)\ngT[[gnm]] &lt;- gF\nowp &lt;- getGenerics()\nstopifnot(is(owp, \"ObjectsWithPackage\"),\n          (m &lt;- match(pnm, owp@package, 0L)) &gt; 0L,\n          owp[m] == gnm) # previously, owp[m] == pnm\ngT[[gnm]] &lt;- NULL\n```\n\nAside: `str(z &lt;- getGenerics())` shows that `getGenerics` can set `names(z)`\nand `names(z@package)`.  These attributes seem superfluous, and they are not\nmentioned by `help(\"ObjectsWithPackage-class\")`.  Could they be a kludge to\nhelp with subsetting?  In that case, maybe **methods** should do\n`setMethod(\"[\", c(x = \"ObjectsWithPackage\"), ...)`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1780532312.754099",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Yki",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19080] getGenerics() can return package names in addition to generics",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19080"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn2@gmail.com",
+                                "text": "jaganmn2@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |jaganmn2@gmail.com\n\n--- Comment #3 from Mikael Jagan ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:jaganmn2@gmail.com",
+                                "text": "jaganmn2@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nBefore Martin's reply, I spent a moment looking at the patch (attachment 3718).\n I would prefer a test limited to the running process, being more\ncontained\/expository.  Can we not just modify and revert "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".genericTable",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and\ntest in between?\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "gT <- methods:::.genericTable\ngnm <- \"zzz\"\npnm <- c(\"pkg1\", \"pkg2\")\ngF <- sapply(pnm,\n             function(.) makeGeneric(gnm, fdefault = identity, package = .),\n             simplify = FALSE)\nstr(gF, max.level = 3L)\nstopifnot(vapply(gF, is, FALSE, \"genericFunction\"),\n          vapply(gF, slot, \"\", \"generic\") == gnm,\n          vapply(gF, slot, \"\", \"package\") == pnm)\ngT[[gnm]] <- gF\nowp <- getGenerics()\nstopifnot(is(owp, \"ObjectsWithPackage\"),\n          (m <- match(pnm, owp@package, 0L)) > 0L,\n          owp[m] == gnm) # previously, owp[m] == pnm\ngT[[gnm]] <- NULL\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nAside: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "str(z <- getGenerics())",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " shows that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getGenerics",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " can set "
+                            },
+                            {
+                                "type": "text",
+                                "text": "names(z)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nand "
+                            },
+                            {
+                                "type": "text",
+                                "text": "names(z@package)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  These attributes seem superfluous, and they are not\nmentioned by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "help(\"ObjectsWithPackage-class\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  Could they be a kludge to\nhelp with subsetting?  In that case, maybe **methods** should do\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "setMethod(\"[\", c(x = \"ObjectsWithPackage\"), ...)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19081] `x11()` keyboard events doesn't correctly handle \"Home\", \"Delete\", and Keypad when Num Lock is off*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19081>\n\n--- Comment #1 from Trevor Davis (<mailto:trevor.l.davis@gmail.com|trevor.l.davis@gmail.com>) ---\nCreated attachment 3721\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3721&amp;action=edit>\nFix CTRL keyboard events for non-letters\n\nWhile working on bug#19082 I noticed another bug in `x11()` keyboard event\nhandling: when combining a CONTROL with a non-letter character it would always\nbe \"shifted\" i.e. CONTROL+[ would return \"Ctrl-{\" instead of \"Ctrl-[\".  This\npatch should fix this.\n\nHere are some examples of how behaviour changes pre\/post patch:\n\n| Key (US keyboard) | `x11()` pre-patch | `x11()` post-patch |\n|---|---|---|\n| Ctrl+A -- Ctrl+Z | `\"ctrl-A\"` -- `\"ctrl-Z\"` | `\"ctrl-A\"`-- `\"ctrl-Z\"` |\n| Ctrl+1 | `\"ctrl-!\"` | `\"ctrl-1\"` |\n| Ctrl+2 | `\"ctrl-@\"` | `\"ctrl-2\"` |\n| Ctrl+Shift+2 | `\"ctrl-@\"` | `\"ctrl-@\"` |\n| Ctrl+[ | `\"ctrl-{\"` | `\"ctrl-[\"` |\n| Ctrl+Shift+[ | `\"ctrl-{\"` | `\"ctrl-{\"`|",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1780532755.796439",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "J0Gc",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19081] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "x11()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " keyboard events doesn't correctly handle \"Home\", \"Delete\", and Keypad when Num Lock is off",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19081"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Trevor Davis ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:trevor.l.davis@gmail.com",
+                                "text": "trevor.l.davis@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3721\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3721&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3721&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nFix CTRL keyboard events for non-letters\n\nWhile working on bug#19082 I noticed another bug in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x11()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " keyboard event\nhandling: when combining a CONTROL with a non-letter character it would always\nbe \"shifted\" i.e. CONTROL+[ would return \"Ctrl-{\" instead of \"Ctrl-[\".  This\npatch should fix this.\n\nHere are some examples of how behaviour changes pre\/post patch:\n\n| Key (US keyboard) | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x11()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " pre-patch | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x11()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " post-patch |\n|---|---|---|\n| Ctrl+A -- Ctrl+Z | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-A\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " -- "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-Z\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-A\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "-- "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-Z\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| Ctrl+1 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-!\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-1\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| Ctrl+2 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-@\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-2\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| Ctrl+Shift+2 | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-@\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-@\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| Ctrl+[ | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-{\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-[\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " |\n| Ctrl+Shift+[ | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-{\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"ctrl-{\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "|"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18874] Nested grid viewports with null produce incorrect grob rendering on small windows*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18874>\n\n--- Comment #3 from Paul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) ---\nCreated attachment 3722\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3722&amp;action=edit>\npatch for possible fix\n\nThis may just be a thinko (returning a TRUE instead of a FALSE - see the\nsuggested patch attached).\n\nThis simple change produces more defensible behaviour for the example in the\noriginal report.\n\nI will follow up with example code that I think demonstrates the old bug\nbehaviour and the new better behaviour more clearly.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1780535225.027159",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "LO3",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18874] Nested grid viewports with null produce incorrect grob rendering on small windows",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18874"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Paul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3722\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3722&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3722&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\npatch for possible fix\n\nThis may just be a thinko (returning a TRUE instead of a FALSE - see the\nsuggested patch attached).\n\nThis simple change produces more defensible behaviour for the example in the\noriginal report.\n\nI will follow up with example code that I think demonstrates the old bug\nbehaviour and the new better behaviour more clearly."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18874] Nested grid viewports with null produce incorrect grob rendering on small windows*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18874>\n\n--- Comment #4 from Paul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) ---\nCreated attachment 3723\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3723&amp;action=edit>\ndemonstration of problem and fix\n\nThis code demonstrates layouts within a parent viewport that is smaller than\nthe page\/window, so it is possible to see the layout extending beyond the\nparent when the absolute size of the layout exceeds the absolute size of the\nparent.\n\nThe basic idea is that absolute layout widths\/heights are allocated regardless\nof the size of the parent, so may extend beyond the parent (with the layout\njustification controlling how that extension occurs), BUT relative\nwidths\/heights should be zero if there is no width\/height left after allocating\nthe absolute widths\/heights.\n\nIn the nested case, the parent has zero width (in these examples), so the\nabsolute widths exceed this parent (details controlled by justification) and\nthe relative widths are zero.\n\nThe PROBLEM examples are all fixed by the patch suggested in the previous\ncomment.\n\nIf it is agreed that the patch behaviour is an improvement, further testing is\nrequired, at least involving regression testing to ensure that the patch does\nnot break any existing behaviour, especially in {ggplot2} and {lattice}.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1780535665.614199",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "\/AiF",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18874] Nested grid viewports with null produce incorrect grob rendering on small windows",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18874"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Paul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3723\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3723&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3723&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ndemonstration of problem and fix\n\nThis code demonstrates layouts within a parent viewport that is smaller than\nthe page\/window, so it is possible to see the layout extending beyond the\nparent when the absolute size of the layout exceeds the absolute size of the\nparent.\n\nThe basic idea is that absolute layout widths\/heights are allocated regardless\nof the size of the parent, so may extend beyond the parent (with the layout\njustification controlling how that extension occurs), BUT relative\nwidths\/heights should be zero if there is no width\/height left after allocating\nthe absolute widths\/heights.\n\nIn the nested case, the parent has zero width (in these examples), so the\nabsolute widths exceed this parent (details controlled by justification) and\nthe relative widths are zero.\n\nThe PROBLEM examples are all fixed by the patch suggested in the previous\ncomment.\n\nIf it is agreed that the patch behaviour is an improvement, further testing is\nrequired, at least involving regression testing to ensure that the patch does\nnot break any existing behaviour, especially in {ggplot2} and {lattice}."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18874] Nested grid viewports with null produce incorrect grob rendering on small windows*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18874>\n\n--- Comment #5 from Paul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) ---\nThe content of attachment 3723 has been deleted for the following reason:\n\nincorrect file version",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1780535750.237829",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "yJo",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18874] Nested grid viewports with null produce incorrect grob rendering on small windows",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18874"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Paul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe content of attachment 3723 has been deleted for the following reason:\n\nincorrect file version"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18874] Nested grid viewports with null produce incorrect grob rendering on small windows*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18874>\n\n--- Comment #6 from Paul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) ---\nCreated attachment 3724\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3724&amp;action=edit>\ndemonstration of problem and fix\n\ncorrect version of test file",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1780535816.562629",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Om7",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18874] Nested grid viewports with null produce incorrect grob rendering on small windows",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18874"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #6 from Paul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3724\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3724&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3724&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ndemonstration of problem and fix\n\ncorrect version of test file"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19080] getGenerics() can return package names in addition to generics*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19080>\n\n--- Comment #4 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nMy own preference is to write tests on the public API. An earlier version of\nthe patch indeed edited .genericTable, but that's just an implementation\ndetail, and thus to be avoided following, e.g.\n\n<https:\/\/stackoverflow.com\/questions\/105007\/should-i-test-private-methods-or-only-public-ones>\n\n<https:\/\/www.ibm.com\/think\/insights\/unit-testing-best-practices>\n\n<https:\/\/enterprisecraftsmanship.com\/posts\/unit-testing-private-methods\/>\n\nOf course, maybe we're exposing a need for a new piece of public code that\nwould help in contexts besides just unit testing, or would help write unit\ntests for other S4 packages.\n\n(admittedly, my current test _does_ **use** the private API, but the \"actual\ntest logic\", being done in the subprocess, does manage to be more hermetic. if\npushed I think we could run package.skeleton itself on a subprocess and avoid\nthis)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1780536450.183779",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "dfK5",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19080] getGenerics() can return package names in addition to generics",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19080"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nMy own preference is to write tests on the public API. An earlier version of\nthe patch indeed edited .genericTable, but that's just an implementation\ndetail, and thus to be avoided following, e.g.\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stackoverflow.com\/questions\/105007\/should-i-test-private-methods-or-only-public-ones"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/www.ibm.com\/think\/insights\/unit-testing-best-practices"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/enterprisecraftsmanship.com\/posts\/unit-testing-private-methods\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nOf course, maybe we're exposing a need for a new piece of public code that\nwould help in contexts besides just unit testing, or would help write unit\ntests for other S4 packages.\n\n(admittedly, my current test "
+                            },
+                            {
+                                "type": "text",
+                                "text": "does",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " **use** the private API, but the \"actual\ntest logic\", being done in the subprocess, does manage to be more hermetic. if\npushed I think we could run package.skeleton itself on a subprocess and avoid\nthis)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,614 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18999] New: <http:\/\/rep.int|rep.int> and rep_len on factor do not drop names attribute*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18999>\n\n            Bug ID: 18999\n           Summary: <http:\/\/rep.int|rep.int> and rep_len on factor do not drop names\n                    attribute\n           Product: R\n           Version: R 4.5.x\n          Hardware: All\n               URL: <https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2026-January\/08>\n                    4347.html\n                OS: All\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Misc\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>\n\nIn <https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2026-January\/084347.html> by Rui\nBarradas:\n\nIn the documentation for ?rep, sections Value and Note say that\n\n\n &gt; Value\n &gt; An object of the same type as x.\n\n &gt; <http:\/\/rep.int|rep.int> and rep_len return no attributes (except the class if \nreturning a factor).\n\n &gt; The default method of rep gives the result names (which will almost \nalways contain duplicates) if x had names, but retains no other \nattributes.\n\n\n &gt; Note\n &gt; Function <http:\/\/rep.int|rep.int> is a simple case which was provided as a separate \nfunction partly for S compatibility and partly for speed (especially \nwhen names can be dropped). The performance of rep has been improved \nsince, but <http:\/\/rep.int|rep.int> is still at least twice as fast when x has names.\n\n\nAnd this works as documented.\n\n\ny &lt;- 1:4\nnames(y) &lt;- letters[1:4]\nclass(y) &lt;- \"new_class\"\nattr(y, \"this\") &lt;- \"that\"\n\ny\n#&gt; a b c d\n#&gt; 1 2 3 4\n#&gt; attr(,\"class\")\n#&gt; [1] \"new_class\"\n#&gt; attr(,\"this\")\n#&gt; [1] \"that\"\n\nrep(y, 2)      # keeps names only\n#&gt; a b c d a b c d\n#&gt; 1 2 3 4 1 2 3 4\n\n<http:\/\/rep.int|rep.int>(y, 2)  # no names and no other attributes\n#&gt; [1] 1 2 3 4 1 2 3 4\n\nrep_len(y, 2)  # no names and no other attributes\n#&gt; [1] 1 2\n\n\n\nBut in the documentation's last example, the factor example, the names \nattribute is not dropped.\n\n\n\n## named factor\nx &lt;- factor(LETTERS[1:4]); names(x) &lt;- letters[1:4]\nx\n#&gt; a b c d\n#&gt; A B C D\n#&gt; Levels: A B C D\n\nrep(x, 2)\n#&gt; a b c d a b c d\n#&gt; A B C D A B C D\n#&gt; Levels: A B C D\n\nrep(x, each = 2)\n#&gt; a a b b c c d d\n#&gt; A A B B C C D D\n#&gt; Levels: A B C D\n\n<http:\/\/rep.int|rep.int>(x, 2)  # no names  &lt;--- Wrong comment\n#&gt; a b c d a b c d\n#&gt; A B C D A B C D\n#&gt; Levels: A B C D\n\nrep_len(x, 10)\n#&gt; a b c d a b c d a b\n#&gt; A B C D A B C D A B\n#&gt; Levels: A B C D\n\n\n\nFurther test with attributes()\n\n\n\n<http:\/\/rep.int|rep.int>(x, 2) |&gt; attributes()\n#&gt; $names\n#&gt; [1] \"a\" \"b\" \"c\" \"d\" \"a\" \"b\" \"c\" \"d\"\n#&gt;\n#&gt; $class\n#&gt; [1] \"factor\"\n#&gt;\n#&gt; $levels\n#&gt; [1] \"A\" \"B\" \"C\" \"D\"\n\nrep_len(x, 10) |&gt; attributes()\n#&gt; $names\n#&gt;  [1] \"a\" \"b\" \"c\" \"d\" \"a\" \"b\" \"c\" \"d\" \"a\" \"b\"\n#&gt;\n#&gt; $class\n#&gt; [1] \"factor\"\n#&gt;\n#&gt; $levels\n#&gt; [1] \"A\" \"B\" \"C\" \"D\"\n\n\n\nIf I'm reading the docs right, this is wrong, isn't it?\n\n\n=====================\nIn <https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2026-January\/084356.html> by Sebastian\nMeyer:\n\nThis is a consequence of the following change in R 4.0.0 (r77905):\n\n     • When internal dispatch for ‘<http:\/\/rep.int|rep.int>()’ and ‘rep_len()’\n       fails, there is an attempt to dispatch on the equivalent\n       call to ‘rep()’.\n\nI believe it wasn't intended to change the handling of factors and I \nthink it would be desirable to restore the original (and still \ndocumented) behavior of dropping names for <http:\/\/rep.int|rep.int>(&lt;factor&gt;) and \nrep_len(&lt;factor&gt;), so skip the (early) 'rep' fallback if `inherits(s, \n\"factor\")`.\n\n.... \nAt a first glance the patch looks simple (and should include a \nregression test).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1770464216.613999",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "S1dV",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18999] New: ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/rep.int",
+                                "text": "rep.int",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and rep_len on factor do not drop names attribute",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18999"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 18999\n           Summary: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/rep.int",
+                                "text": "rep.int"
+                            },
+                            {
+                                "type": "text",
+                                "text": " and rep_len on factor do not drop names\n                    attribute\n           Product: R\n           Version: R 4.5.x\n          Hardware: All\n               URL: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2026-January\/08"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n                    4347.html\n                OS: All\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Misc\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIn "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2026-January\/084347.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": " by Rui\nBarradas:\n\nIn the documentation for ?rep, sections Value and Note say that\n\n\n\n > Value\n > An object of the same type as x.\n\n > "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/rep.int",
+                                "text": "rep.int"
+                            },
+                            {
+                                "type": "text",
+                                "text": " and rep_len return no attributes (except the class if \nreturning a factor).\n\n > The default method of rep gives the result names (which will almost \nalways contain duplicates) if x had names, but retains no other \nattributes.\n\n\n\n > Note\n > Function "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/rep.int",
+                                "text": "rep.int"
+                            },
+                            {
+                                "type": "text",
+                                "text": " is a simple case which was provided as a separate \nfunction partly for S compatibility and partly for speed (especially \nwhen names can be dropped). The performance of rep has been improved \nsince, but "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/rep.int",
+                                "text": "rep.int"
+                            },
+                            {
+                                "type": "text",
+                                "text": " is still at least twice as fast when x has names.\n\n\n\nAnd this works as documented.\n\n\n\ny <- 1:4\nnames(y) <- letters[1:4]\nclass(y) <- \"new_class\"\nattr(y, \"this\") <- \"that\"\n\ny\n#> a b c d\n#> 1 2 3 4\n#> attr(,\"class\")\n#> [1] \"new_class\"\n#> attr(,\"this\")\n#> [1] \"that\"\n\nrep(y, 2)      # keeps names only\n#> a b c d a b c d\n#> 1 2 3 4 1 2 3 4\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/rep.int",
+                                "text": "rep.int"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(y, 2)  # no names and no other attributes\n#> [1] 1 2 3 4 1 2 3 4\n\nrep_len(y, 2)  # no names and no other attributes\n#> [1] 1 2\n\n\n\n\n\nBut in the documentation's last example, the factor example, the names \nattribute is not dropped.\n\n\n\n\n\n## named factor\nx <- factor(LETTERS[1:4]); names(x) <- letters[1:4]\nx\n#> a b c d\n#> A B C D\n#> Levels: A B C D\n\nrep(x, 2)\n#> a b c d a b c d\n#> A B C D A B C D\n#> Levels: A B C D\n\nrep(x, each = 2)\n#> a a b b c c d d\n#> A A B B C C D D\n#> Levels: A B C D\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/rep.int",
+                                "text": "rep.int"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(x, 2)  # no names  <--- Wrong comment\n#> a b c d a b c d\n#> A B C D A B C D\n#> Levels: A B C D\n\nrep_len(x, 10)\n#> a b c d a b c d a b\n#> A B C D A B C D A B\n#> Levels: A B C D\n\n\n\n\n\nFurther test with attributes()\n\n\n\n\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/rep.int",
+                                "text": "rep.int"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(x, 2) |> attributes()\n#> $names\n#> [1] \"a\" \"b\" \"c\" \"d\" \"a\" \"b\" \"c\" \"d\"\n#>\n#> $class\n#> [1] \"factor\"\n#>\n#> $levels\n#> [1] \"A\" \"B\" \"C\" \"D\"\n\nrep_len(x, 10) |> attributes()\n#> $names\n#>  [1] \"a\" \"b\" \"c\" \"d\" \"a\" \"b\" \"c\" \"d\" \"a\" \"b\"\n#>\n#> $class\n#> [1] \"factor\"\n#>\n#> $levels\n#> [1] \"A\" \"B\" \"C\" \"D\"\n\n\n\n\n\nIf I'm reading the docs right, this is wrong, isn't it?\n\n\n\n=====================\nIn "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2026-January\/084356.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": " by Sebastian\nMeyer:\n\nThis is a consequence of the following change in R 4.0.0 (r77905):\n\n     • When internal dispatch for ‘"
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/rep.int",
+                                "text": "rep.int"
+                            },
+                            {
+                                "type": "text",
+                                "text": "()’ and ‘rep_len()’\n       fails, there is an attempt to dispatch on the equivalent\n       call to ‘rep()’.\n\nI believe it wasn't intended to change the handling of factors and I \nthink it would be desirable to restore the original (and still \ndocumented) behavior of dropping names for "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/rep.int",
+                                "text": "rep.int"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(<factor>) and \nrep_len(<factor>), so skip the (early) 'rep' fallback if `inherits(s, \n\"factor\")`.\n\n.... \nAt a first glance the patch looks simple (and should include a \nregression test)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18999] <http:\/\/rep.int|rep.int> and rep_len on factor do not drop names attribute*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18999>\n\n--- Comment #1 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\nCreated attachment 3605\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3605&amp;action=edit>\nSkip the rep fallback for factor\n\nTo `?rep`, this also adds a statement about the fallback of `<http:\/\/rep.int|rep.int>` and\n`rep_len` to `rep` method.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1770465648.128879",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ZPe",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18999] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/rep.int",
+                                "text": "rep.int",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and rep_len on factor do not drop names attribute",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18999"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3605\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3605&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3605&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nSkip the rep fallback for factor\n\nTo "
+                            },
+                            {
+                                "type": "text",
+                                "text": "?rep",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", this also adds a statement about the fallback of "
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/rep.int",
+                                "text": "rep.int",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "rep_len",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "rep",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18999] <http:\/\/rep.int|rep.int> and rep_len on factor do not drop names attribute*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18999>\n\nSebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |seb.meyer@fau.de\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #2 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\nYes, this is the patch that I had in mind; thanks for also including the\n\"(except the class *and levels* if returning a factor)\" clarification and a\nregression test.\n\nThis looks good to me. Will run some more checks and commit if nothing comes\nup.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1770486630.704839",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "F+d",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18999] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/rep.int",
+                                "text": "rep.int",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and rep_len on factor do not drop names attribute",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18999"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |seb.meyer@fau.de\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #2 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nYes, this is the patch that I had in mind; thanks for also including the\n\"(except the class "
+                            },
+                            {
+                                "type": "text",
+                                "text": "and levels",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " if returning a factor)\" clarification and a\nregression test.\n\nThis looks good to me. Will run some more checks and commit if nothing comes\nup."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19000] New: max\/min\/range for numeric_version doesn't respect na.rm = TRUE*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19000>\n\n            Bug ID: 19000\n           Summary: max\/min\/range for numeric_version doesn't respect\n                    na.rm = TRUE\n           Product: R\n           Version: R 4.5.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:marberts@protonmail.com|marberts@protonmail.com>\n\nDear R Core,\n\nThe following should not return NA.\n\n```\nx &lt;- as.numeric_version(c(\"1.1\", NA))\nmax(x, na.rm = TRUE)\n&gt; [1] &lt;NA&gt;\n```\n\nThe same happens with `min()` and `range()`. The `Summary()` group generic for\nthe `numeric_version` class doesn't remove NA's from `max()\/min()` in the\nbranch when `na.rm = TRUE`, resulting in the min\/max always being\n`x[integer(0)[1]]`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1770517893.114769",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ueBzW",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19000] New: max\/min\/range for numeric_version doesn't respect na.rm = TRUE",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19000"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19000\n           Summary: max\/min\/range for numeric_version doesn't respect\n                    na.rm = TRUE\n           Product: R\n           Version: R 4.5.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:marberts@protonmail.com",
+                                "text": "marberts@protonmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nDear R Core,\n\nThe following should not return NA.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "x <- as.numeric_version(c(\"1.1\", NA))\nmax(x, na.rm = TRUE)\n> [1] <NA>\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe same happens with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "min()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "range()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". The "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Summary()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " group generic for\nthe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "numeric_version",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " class doesn't remove NA's from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "max()\/min()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in the\nbranch when "
+                            },
+                            {
+                                "type": "text",
+                                "text": "na.rm = TRUE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", resulting in the min\/max always being\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "x[integer(0)[1]]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19000] max\/min\/range for numeric_version doesn't respect na.rm = TRUE*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19000>\n\n--- Comment #1 from Steve Martin (<mailto:marberts@protonmail.com|marberts@protonmail.com>) ---\nPlease find a proposed fix:\n<https:\/\/patch-diff.githubusercontent.com\/raw\/r-devel\/r-svn\/pull\/231.diff>.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1770518572.989139",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "QyfH",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19000] max\/min\/range for numeric_version doesn't respect na.rm = TRUE",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19000"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Steve Martin ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:marberts@protonmail.com",
+                                "text": "marberts@protonmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nPlease find a proposed fix:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/patch-diff.githubusercontent.com\/raw\/r-devel\/r-svn\/pull\/231.diff"
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

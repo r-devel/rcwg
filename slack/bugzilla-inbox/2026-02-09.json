@@ -1,0 +1,830 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18999] <http:\/\/rep.int|rep.int> and rep_len on factor do not drop names attribute*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18999>\n\nSebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #3 from Sebastian Meyer (<mailto:seb.meyer@fau.de|seb.meyer@fau.de>) ---\n(In reply to Sebastian Meyer from comment #2)\n&gt; This looks good to me. Will run some more checks and commit if nothing comes\n&gt; up.\n\nNo problems found, so now committed in r89383, adding a NEWS entry and\nincluding the overdue ?rep update\n\n    -\\title{Replicate Elements of Vectors and Lists}\n    +\\title{Replicate Elements of Vectors and Vector-Like Objects}\n\nas it has long covered factors and date-time objects.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1770635071.304199",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "JMs",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18999] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/rep.int",
+                                "text": "rep.int",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and rep_len on factor do not drop names attribute",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18999"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #3 from Sebastian Meyer ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:seb.meyer@fau.de",
+                                "text": "seb.meyer@fau.de"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Sebastian Meyer from comment #2)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "This looks good to me. Will run some more checks and commit if nothing comes\n up."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nNo problems found, so now committed in r89383, adding a NEWS entry and\nincluding the overdue ?rep update\n\n    -\\title{Replicate Elements of Vectors and Lists}\n    +\\title{Replicate Elements of Vectors and Vector-Like Objects}\n\nas it has long covered factors and date-time objects."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19001] New: utils:::str.default() does not omit \"List of ...\" when called via NextMethod() by a registered S3 method*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19001>\n\n            Bug ID: 19001\n           Summary: utils:::str.default() does not omit \"List of ...\" when\n                    called via NextMethod() by a registered S3 method\n           Product: R\n           Version: R 4.5.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Linux-Ubuntu\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Misc\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:ian.farm@maine.edu|ian.farm@maine.edu>\n\nThe output of `utils:::str.default()`, when called via `NextMethod()`,\nis different when the calling method is registered with the utils S3\nmethods table than when the calling method is defined in the global\nenvironment. Specifically, when called on a list object by a registered\nmethod, `str.default()` includes a header (\"List of ...\") and the class\nattribute; but when called by a method in the global environment, it\ndoes not.\n\n*Steps to reproduce*\n\nCase where the calling method is defined in global environment:\n\n    str.someclass &lt;- function(object, ...) {\n      cat(\"&lt;someclass&gt; of length \", length(object), \"\\n\")\n      NextMethod()\n    }\n\n    x &lt;- structure(list(a = 1, b = 2, c = 3), class = \"someclass\")\n    str(x)\n\n    rm(\"str.someclass\") # clean up\n\n    ## &lt;someclass&gt; of length  3 \n    ##  $ a: num 1\n    ##  $ b: num 2\n    ##  $ c: num 3\n\nCompare to the case where the method is registered with the S3 methods\ntable:\n\n    .S3method(\"str\", \"someclass\", \n      function(object, ...) {\n        cat(\"&lt;someclass&gt; of length \", length(object), \"\\n\")\n        NextMethod()\n      }\n    )\n\n    x &lt;- structure(list(a = 1, b = 2, c = 3), class = \"someclass\")\n    str(x)\n\n    rm(\"str.someclass\", envir = loadNamespace(\"utils\")$.__S3MethodsTable__.) #\nclean up\n\n    ## &lt;someclass&gt; of length  3 \n    ## List of 3\n    ##  $ a: num 1\n    ##  $ b: num 2\n    ##  $ c: num 3\n    ##  - attr(*, \"class\")= chr \"someclass\"\n\nThe result is the same if the method is registered by a package:\n\n    # Write example package source to a temporary directory\n    tmp &lt;- tempfile()\n    dir.create(tmp)\n    dir.create(file.path(tmp, \"somepackage\"))\n    dir.create(file.path(tmp, \"somepackage\", \"R\"))\n    cat('Package: somepackage\n    Version: 0.0.0\n    ', file = file.path(tmp, \"somepackage\", \"DESCRIPTION\"))\n    cat('str.someclass &lt;- function(object, ...) {\n      cat(\"&lt;someclass&gt; of length \", length(object), \"\\n\")\n      NextMethod()\n    }', file = file.path(tmp, \"somepackage\", \"R\", \"someclass.R\"))\n    cat('S3method(utils::str, someclass)\n    ', file = file.path(tmp, \"somepackage\", \"NAMESPACE\"))\n    # Install the example package in a temporary library\n    dir.create(file.path(tmp, \"library\"))\n    system2(\"R\", c(\"CMD\", \"INSTALL\", \n      paste0(\"--library=\", file.path(tmp, \"library\")), \n      file.path(tmp, \"somepackage\")), stdout = FALSE, stderr = FALSE)\n\n    library(\"somepackage\", lib.loc = file.path(tmp, \"library\"), quietly = TRUE)\n\n    x &lt;- structure(list(a = 1, b = 2, c = 3), class = \"someclass\")\n    str(x)\n\n    # clean up\n    unloadNamespace(\"somepackage\")\n    rm(\"str.someclass\", envir = loadNamespace(\"utils\")$.__S3MethodsTable__.)\n    unlink(tmp, recursive = TRUE)\n\n    ## &lt;someclass&gt; of length  3 \n    ## List of 3\n    ##  $ a: num 1\n    ##  $ b: num 2\n    ##  $ c: num 3\n    ##  - attr(*, \"class\")= chr \"someclass\"\n\n*Diagnosis*\n\n`str.default()` uses the following logic to check whether it is a\n'NextMethod' (str.R ll. 347-54)\n\n    if(no.list || (has.class &amp;&amp;\n                   any(sapply(paste0(\"str.\", cl),\n                                #use sys.function(.) ..\n                              function(ob)exists(ob, mode= \"function\",\n                                                 inherits= TRUE))))) {\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1770662976.988699",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "rC8PM",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19001] New: utils:::str.default() does not omit \"List of ...\" when called via NextMethod() by a registered S3 method",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19001"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19001\n           Summary: utils:::str.default() does not omit \"List of ...\" when\n                    called via NextMethod() by a registered S3 method\n           Product: R\n           Version: R 4.5.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Linux-Ubuntu\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Misc\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ian.farm@maine.edu",
+                                "text": "ian.farm@maine.edu"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThe output of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "utils:::str.default()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", when called via "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NextMethod()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\nis different when the calling method is registered with the utils S3\nmethods table than when the calling method is defined in the global\nenvironment. Specifically, when called on a list object by a registered\nmethod, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "str.default()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " includes a header (\"List of ...\") and the class\nattribute; but when called by a method in the global environment, it\ndoes not.\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "Steps to reproduce",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCase where the calling method is defined in global environment:\n\n    str.someclass <- function(object, ...) {\n      cat(\"<someclass> of length \", length(object), \"\\n\")\n      NextMethod()\n    }\n\n    x <- structure(list(a = 1, b = 2, c = 3), class = \"someclass\")\n    str(x)\n\n    rm(\"str.someclass\") # clean up\n\n    ## <someclass> of length  3 \n    ##  $ a: num 1\n    ##  $ b: num 2\n    ##  $ c: num 3\n\nCompare to the case where the method is registered with the S3 methods\ntable:\n\n    .S3method(\"str\", \"someclass\", \n      function(object, ...) {\n        cat(\"<someclass> of length \", length(object), \"\\n\")\n        NextMethod()\n      }\n    )\n\n    x <- structure(list(a = 1, b = 2, c = 3), class = \"someclass\")\n    str(x)\n\n    rm(\"str.someclass\", envir = loadNamespace(\"utils\")$.__S3MethodsTable__.) #\nclean up\n\n    ## <someclass> of length  3 \n    ## List of 3\n    ##  $ a: num 1\n    ##  $ b: num 2\n    ##  $ c: num 3\n    ##  - attr(*, \"class\")= chr \"someclass\"\n\nThe result is the same if the method is registered by a package:\n\n    # Write example package source to a temporary directory\n    tmp <- tempfile()\n    dir.create(tmp)\n    dir.create(file.path(tmp, \"somepackage\"))\n    dir.create(file.path(tmp, \"somepackage\", \"R\"))\n    cat('Package: somepackage\n    Version: 0.0.0\n    ', file = file.path(tmp, \"somepackage\", \"DESCRIPTION\"))\n    cat('str.someclass <- function(object, ...) {\n      cat(\"<someclass> of length \", length(object), \"\\n\")\n      NextMethod()\n    }', file = file.path(tmp, \"somepackage\", \"R\", \"someclass.R\"))\n    cat('S3method(utils::str, someclass)\n    ', file = file.path(tmp, \"somepackage\", \"NAMESPACE\"))\n    # Install the example package in a temporary library\n    dir.create(file.path(tmp, \"library\"))\n    system2(\"R\", c(\"CMD\", \"INSTALL\", \n      paste0(\"--library=\", file.path(tmp, \"library\")), \n      file.path(tmp, \"somepackage\")), stdout = FALSE, stderr = FALSE)\n\n    library(\"somepackage\", lib.loc = file.path(tmp, \"library\"), quietly = TRUE)\n\n    x <- structure(list(a = 1, b = 2, c = 3), class = \"someclass\")\n    str(x)\n\n    # clean up\n    unloadNamespace(\"somepackage\")\n    rm(\"str.someclass\", envir = loadNamespace(\"utils\")$.__S3MethodsTable__.)\n    unlink(tmp, recursive = TRUE)\n\n    ## <someclass> of length  3 \n    ## List of 3\n    ##  $ a: num 1\n    ##  $ b: num 2\n    ##  $ c: num 3\n    ##  - attr(*, \"class\")= chr \"someclass\"\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "Diagnosis",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "str.default()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " uses the following logic to check whether it is a\n'NextMethod' (str.R ll. 347-54)\n\n    if(no.list || (has.class &&\n                   any(sapply(paste0(\"str.\", cl),\n                                #use sys.function(.) ..\n                              function(ob)exists(ob, mode= \"function\",\n                                                 inherits= TRUE))))) {"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "        ## str.default is a 'NextMethod' : omit the 'List of ..'\n        std.attr &lt;- c(std.attr, \"class\", if(is.d.f) \"row.names\")\n    }\n\nWhen `str.someclass()` is registered in an S3 methods table, `exists()`\ndoes not find it, and the condition evaluates to `FALSE` despite\n`str.default()` having been called via `NextMethod()`. It does find\nmethods that are defined in the global environment, are exported to a\npackage environment, or are part of the utils namespace (e.g.,\n`str.data.frame()`).\n\n*Proposed solution*\n\nBased on the comment in the above snippet from str.R, I might suggest\nreplacing the condition of the above if statement with something along\nthe lines of:\n\n    no.list || identical(sys.function(-1), NextMethod)\n\nOr possibly:\n\n    no.list || (exists(\".Call\") &amp;&amp; !is.null(.Call))\n\nAlternatively, if this is expected behavior, it could be noted in\n`?str`\\#Note.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1770662977.012629",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "tu8",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "## str.default is a 'NextMethod' : omit the 'List of ..'\n        std.attr <- c(std.attr, \"class\", if(is.d.f) \"row.names\")\n    }\n\nWhen "
+                            },
+                            {
+                                "type": "text",
+                                "text": "str.someclass()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is registered in an S3 methods table, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "exists()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ndoes not find it, and the condition evaluates to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " despite\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "str.default()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " having been called via "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NextMethod()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". It does find\nmethods that are defined in the global environment, are exported to a\npackage environment, or are part of the utils namespace (e.g.,\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "str.data.frame()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "Proposed solution",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nBased on the comment in the above snippet from str.R, I might suggest\nreplacing the condition of the above if statement with something along\nthe lines of:\n\n    no.list || identical(sys.function(-1), NextMethod)\n\nOr possibly:\n\n    no.list || (exists(\".Call\") && !is.null(.Call))\n\nAlternatively, if this is expected behavior, it could be noted in\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "?str",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\\#Note."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18994] ASAN error with contextstack overflows*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18994>\n\nMichael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |michaelchirico4@gmail.com\n\n--- Comment #1 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nCreated attachment 3606\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3606&amp;action=edit>\nFix off-by-one errors in CONTEXTSTACK\n\nI deployed Gemini on this since it's pretty firmly in LLM capability wheelhouse\n-- patch attached, which also found 4 other errors similar to the one reported.\n\nTesting on GitHub: <https:\/\/github.com\/r-devel\/r-svn\/pull\/232>\n\nI confirmed each of them individually result in a segfault before the gram.c\nchange is applied, and that there is no segfault afterwards.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1770675513.800299",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "cDLQ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18994] ASAN error with contextstack overflows",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18994"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMichael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |michaelchirico4@gmail.com\n\n--- Comment #1 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3606\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3606&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3606&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nFix off-by-one errors in CONTEXTSTACK\n\nI deployed Gemini on this since it's pretty firmly in LLM capability wheelhouse\n-- patch attached, which also found 4 other errors similar to the one reported.\n\nTesting on GitHub: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/pull\/232"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nI confirmed each of them individually result in a segfault before the gram.c\nchange is applied, and that there is no segfault afterwards."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18749] sort_by() all columns*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18749>\n\nMichael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |michaelchirico4@gmail.com\n\n--- Comment #3 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nI would have expected `~.` not to work due to `.` being a valid column name,\nbut actually `sort_by()` is already not supported in that case:\n\n```\nx = data.frame(a = 1:10, b = 10:1, `.` = rnorm(10))\nsort_by(x, ~.)\n# Error in terms.formula(formula) : '.' in formula and no 'data' argument\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1770676414.539419",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "y8Pxh",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18749] sort_by() all columns",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18749"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMichael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |michaelchirico4@gmail.com\n\n--- Comment #3 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI would have expected "
+                            },
+                            {
+                                "type": "text",
+                                "text": "~.",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " not to work due to "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " being a valid column name,\nbut actually "
+                            },
+                            {
+                                "type": "text",
+                                "text": "sort_by()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is already not supported in that case:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "x = data.frame(a = 1:10, b = 10:1, `.` = rnorm(10))\nsort_by(x, ~.)\n# Error in terms.formula(formula) : '.' in formula and no 'data' argument\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17766] Security vulnerabilities in bundled TRE library*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17766>\n\nMichael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |michaelchirico4@gmail.com\n\n--- Comment #4 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nIt seems upstream TRE has finally got a new maintainer -- I see these reported\nbugs  now fixed:\n\n<https:\/\/github.com\/laurikari\/tre\/issues\/37>\n<https:\/\/github.com\/laurikari\/tre\/issues\/50>\n<https:\/\/github.com\/laurikari\/tre\/issues\/52>\n<https:\/\/github.com\/laurikari\/tre\/issues\/55>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1770681774.682529",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "PxI",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17766] Security vulnerabilities in bundled TRE library",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17766"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMichael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |michaelchirico4@gmail.com\n\n--- Comment #4 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nIt seems upstream TRE has finally got a new maintainer -- I see these reported\nbugs  now fixed:\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/laurikari\/tre\/issues\/37"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/laurikari\/tre\/issues\/50"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/laurikari\/tre\/issues\/52"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/laurikari\/tre\/issues\/55"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17766] Security vulnerabilities in bundled TRE library*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17766>\n\n--- Comment #5 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nBugzilla formatting didn't cooperate:\n\n* <https:\/\/github.com\/laurikari\/tre\/issues\/37>\n* <https:\/\/github.com\/laurikari\/tre\/issues\/50>\n* <https:\/\/github.com\/laurikari\/tre\/issues\/52>\n* <https:\/\/github.com\/laurikari\/tre\/issues\/55>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1770681850.739069",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "DnAr6",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17766] Security vulnerabilities in bundled TRE library",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17766"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nBugzilla formatting didn't cooperate:\n\n* "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/laurikari\/tre\/issues\/37"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n* "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/laurikari\/tre\/issues\/50"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n* "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/laurikari\/tre\/issues\/52"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n* "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/laurikari\/tre\/issues\/55"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19002] New: Referent of 'it' in R CMD check NOTE about LinkingTo is ambiguous*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19002>\n\n            Bug ID: 19002\n           Summary: Referent of 'it' in R CMD check NOTE about LinkingTo\n                    is ambiguous\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Misc\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>\n\nCreated attachment 3607\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3607&amp;action=edit>\nRestructure sentence to avoid 'it'\n\nWhen I encoutered this NOTE in `R CMD check` for package `A` with `LinkingTo:\nB`, I assumed it was referring to an issue _with package `A`_.\n\nAfter some wasted time debugging, eventually I realized it was referring to an\nissue _with package `B`_.\n\nIn light of this, I am hoping we can just reword the sentence to avoid this\nambiguity.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1770705824.720959",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Coni",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19002] New: Referent of 'it' in R CMD check NOTE about LinkingTo is ambiguous",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19002"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19002\n           Summary: Referent of 'it' in R CMD check NOTE about LinkingTo\n                    is ambiguous\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Misc\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3607\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3607&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3607&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nRestructure sentence to avoid 'it'\n\nWhen I encoutered this NOTE in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R CMD check",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for package "
+                            },
+                            {
+                                "type": "text",
+                                "text": "A",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " with `LinkingTo:\nB`, I assumed it was referring to an issue "
+                            },
+                            {
+                                "type": "text",
+                                "text": "with package ",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "A",
+                                "style": {
+                                    "italic": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nAfter some wasted time debugging, eventually I realized it was referring to an\nissue "
+                            },
+                            {
+                                "type": "text",
+                                "text": "with package ",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "B",
+                                "style": {
+                                    "italic": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nIn light of this, I am hoping we can just reword the sentence to avoid this\nambiguity."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

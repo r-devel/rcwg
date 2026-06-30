@@ -1,0 +1,205 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19057] New: .bincode(breaks = numeric()) crashes with strict barrier enabled*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19057>\n\n            Bug ID: 19057\n           Summary: .bincode(breaks = numeric()) crashes with strict\n                    barrier enabled\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nCreated attachment 3680\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3680&amp;action=edit>\nValidate the length of 'breaks' in do_bincode before use.\n\nSeen on macOS with a build of R-devel using `--enable-strict-barrier`:\n\n```\n* thread #1, queue = 'com.apple.main-thread', stop reason = EXC_BAD_ACCESS\n(code=1, address=0x1)\n    frame #0: 0x00000001056f0d00 libR.dylib`bincode(x=0x0000625002d30af0,\nn=&lt;unavailable&gt;, breaks=0x0000000000000001, nb=&lt;unavailable&gt;,\ncode=0x0000625002d30968, right=1, include_border=0) at util.c:2752:17 [opt]\n   2749         if(!ISNAN(x[i])) {\n   2750             lo = 0;\n   2751             hi = nb1;\n-&gt; 2752             if(x[i] &lt;  breaks[lo] || breaks[hi] &lt; x[i] ||\n   2753                (x[i] == breaks[lft ? hi : lo] &amp;&amp; ! include_border)) ;\n   2754             else {\n   2755                 while(hi - lo &gt;= 2) {\nTarget 0: (R) stopped.\nwarning: libR.dylib was compiled with optimization - stepping may behave oddly;\nvariables may not be available.\n```\n\nThe issue here is that the length of the `breaks` argument isn't checked or\nverified before access (except that the length is not NA). A candidate patch is\nincluded.\n\n---\n\n```\n&gt; R.version\n               _\nplatform       aarch64-apple-darwin25.4.0\narch           aarch64\nos             darwin25.4.0\nsystem         aarch64, darwin25.4.0\nstatus         Under development (unstable)\nmajor          4\nminor          7.0\nyear           2026\nmonth          04\nday            23\nsvn rev        89955\nlanguage       R\nversion.string R Under development (unstable) (2026-04-23 r89955)\nnickname       Unsuffered Consequences\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776991115.592349",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "KoZ3",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19057] New: .bincode(breaks = numeric()) crashes with strict barrier enabled",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19057"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19057\n           Summary: .bincode(breaks = numeric()) crashes with strict\n                    barrier enabled\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3680\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3680&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3680&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nValidate the length of 'breaks' in do_bincode before use.\n\nSeen on macOS with a build of R-devel using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "--enable-strict-barrier",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "* thread #1, queue = 'com.apple.main-thread', stop reason = EXC_BAD_ACCESS\n(code=1, address=0x1)\n    frame #0: 0x00000001056f0d00 libR.dylib`bincode(x=0x0000625002d30af0,\nn=<unavailable>, breaks=0x0000000000000001, nb=<unavailable>,\ncode=0x0000625002d30968, right=1, include_border=0) at util.c:2752:17 [opt]\n   2749         if(!ISNAN(x[i])) {\n   2750             lo = 0;\n   2751             hi = nb1;\n-> 2752             if(x[i] <  breaks[lo] || breaks[hi] < x[i] ||\n   2753                (x[i] == breaks[lft ? hi : lo] && ! include_border)) ;\n   2754             else {\n   2755                 while(hi - lo >= 2) {\nTarget 0: (R) stopped.\nwarning: libR.dylib was compiled with optimization - stepping may behave oddly;\nvariables may not be available.\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe issue here is that the length of the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "breaks",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " argument isn't checked or\nverified before access (except that the length is not NA). A candidate patch is\nincluded.\n\n---\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> R.version\n               _\nplatform       aarch64-apple-darwin25.4.0\narch           aarch64\nos             darwin25.4.0\nsystem         aarch64, darwin25.4.0\nstatus         Under development (unstable)\nmajor          4\nminor          7.0\nyear           2026\nmonth          04\nday            23\nsvn rev        89955\nlanguage       R\nversion.string R Under development (unstable) (2026-04-23 r89955)\nnickname       Unsuffered Consequences\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19057] .bincode(breaks = numeric()) crashes with strict barrier enabled*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19057>\n\n--- Comment #1 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nA slightly less synthetic way of triggering the same crash here is something\nlike:\n\n```\ncut(1:5, NULL)\n```\n\nThis still seems unlikely to happen in \"real\" user code, but I suppose it could\nhappen if someone made a mistake computing the breaks for their `cut()`\ninvocation, I suppose?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1776992624.787499",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Ogl",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19057] .bincode(breaks = numeric()) crashes with strict barrier enabled",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19057"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nA slightly less synthetic way of triggering the same crash here is something\nlike:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "cut(1:5, NULL)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis still seems unlikely to happen in \"real\" user code, but I suppose it could\nhappen if someone made a mistake computing the breaks for their "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cut()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ninvocation, I suppose?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

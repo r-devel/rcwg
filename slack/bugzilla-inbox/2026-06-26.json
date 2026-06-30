@@ -1,0 +1,1326 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17549] When building a package, use inRbuildignore() before copying package contents to Tdir*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17549>\n\n--- Comment #22 from Kurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) ---\nThanks.  Committed now to the trunk in c90193.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782471404.689879",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "oc6I",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17549] When building a package, use inRbuildignore() before copying package contents to Tdir",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17549"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #22 from Kurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks.  Committed now to the trunk in c90193."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19093] New: download.file() and file() fail with NTLM proxy authentication when using libcurl*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19093>\n\n            Bug ID: 19093\n           Summary: download.file() and file() fail with NTLM proxy\n                    authentication when using libcurl\n           Product: R\n           Version: R 4.5.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: major\n          Priority: P5\n         Component: Windows GUI \/ Window specific\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:Camille.PELAT@santepubliquefrance.fr|Camille.PELAT@santepubliquefrance.fr>\n\nCreated attachment 3738\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3738&amp;action=edit>\nfull_download_file_log\n\nDescription\n________________________________________\nContext\n\nIn a Windows environment with a proxy (e.g., Squid\/Olfeo) requiring NTLM\nauthentication, the functions download.file() and file() fail with the\nfollowing error when method = \"libcurl\" is used:\n\n&gt; download.file(\"<https:\/\/cran.r-project.org\/src\/contrib\/a5R_0.4.0.tar.gz>\", \n+               destfile = \"a5R_0.4.0.tar.gz\",\n+               method = \"libcurl\")\n\nError in\ndownload.file(\"<https:\/\/cran.r-project.org\/src\/contrib\/a5R_0.4.0.tar.gz>\", : \n  cannot open URL '<https:\/\/cran.r-project.org\/src\/contrib\/a5R_0.4.0.tar.gz>'\nIn addition: Warning message:\nIn download.file(\"<https:\/\/cran.r-project.org\/src\/contrib\/a5R_0.4.0.tar.gz>\", : \n  URL '<https:\/\/cran.r-project.org\/src\/contrib\/a5R_0.4.0.tar.gz>': status was\n'HTTP response code said error'\n\n________________________________________\nRoot Cause\n\nThe internal function curlDownload (called by both download.file() and file())\ndoes not configure the CURLOPT_PROXYAUTH option in libcurl to enable multiple\nauthentication methods. By default, libcurl uses Basic Auth only, which is\nrejected by the proxy. In contrast, packages like httr and pak automatically\ntry multiple authentication methods (including NTLM) via CURLOPT_PROXYAUTH =\nCURLAUTH_ANY.\n\n________________________________________\nEvidence\n1.      Logs from download.file() (see attached) show that libcurl attempts\nBasic Auth only and not NTLM or other methods.\n2.      Functions like httr::GET() and pak::pak() work because they\nautomatically try multiple authentication methods (including NTLM) via\nCURLOPT_PROXYAUTH = CURLAUTH_ANY.\n3.      Using method = \"wininet\" (via options(download.file.method =\n\"wininet\")) bypasses the issue, as WinINet natively supports NTLM.\n\n________________________________________\nReproducible Code for the download.file error (similar error is observed with\nfile())\n\n# Fails with libcurl (Basic Auth only)\ndownload.file(\n  \"<https:\/\/cran.r-project.org\/src\/contrib\/a5R_0.4.0.tar.gz>\", \n  \"test.tar.gz\", \n  method = \"libcurl\"\n)\n\n# Works with wininet (NTLM natively supported)\ndownload.file(\n  \"<https:\/\/cran.r-project.org\/src\/contrib\/a5R_0.4.0.tar.gz>\", \n  \"test.tar.gz\",\n  method = \"wininet\"\n)\n\n# Works with httr (automatically tries NTLM after Basic fails)\nlibrary(httr)\nGET(\n  \"<https:\/\/cran.r-project.org\/src\/contrib\/a5R_0.4.0.tar.gz>\", \n  write_disk(\"test.tar.gz\")\n)\n\n________________________________________\nExpected Behavior\n\nThe functions download.file() and file() should support multiple proxy\nauthentication methods (including NTLM) when using libcurl, either by:\n1.      Adding support for the proxyauth option in the extra argument (as httr\ndoes).\n2.      Setting CURLOPT_PROXYAUTH = CURLAUTH_ANY by default (to match the\nbehavior of httr and pak).\n3.      Clearly documenting the need to use method = \"wininet\" for NTLM proxies\non Windows (but the wininet option is bound to be deprecated soon).\n\n________________________________________\nEnvironmental Information\n\n# Output of sessionInfo()\nR version 4.5.3 (2026-03-11 ucrt)\nPlatform: x86_64-w64-mingw32\/x64\nRunning under: Windows 11 x64 (build 26100)\n\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782485124.253359",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "XFm",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19093] New: download.file() and file() fail with NTLM proxy authentication when using libcurl",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19093"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19093\n           Summary: download.file() and file() fail with NTLM proxy\n                    authentication when using libcurl\n           Product: R\n           Version: R 4.5.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: major\n          Priority: P5\n         Component: Windows GUI \/ Window specific\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Camille.PELAT@santepubliquefrance.fr",
+                                "text": "Camille.PELAT@santepubliquefrance.fr"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3738\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3738&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3738&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nfull_download_file_log\n\nDescription\n________________________________________\nContext\n\nIn a Windows environment with a proxy (e.g., Squid\/Olfeo) requiring NTLM\nauthentication, the functions download.file() and file() fail with the\nfollowing error when method = \"libcurl\" is used:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "download.file(\""
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/cran.r-project.org\/src\/contrib\/a5R_0.4.0.tar.gz"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\", "
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "+               destfile = \"a5R_0.4.0.tar.gz\",\n+               method = \"libcurl\")\n\nError in\ndownload.file(\""
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/cran.r-project.org\/src\/contrib\/a5R_0.4.0.tar.gz"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\", : \n  cannot open URL '"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/cran.r-project.org\/src\/contrib\/a5R_0.4.0.tar.gz"
+                            },
+                            {
+                                "type": "text",
+                                "text": "'\nIn addition: Warning message:\nIn download.file(\""
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/cran.r-project.org\/src\/contrib\/a5R_0.4.0.tar.gz"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\", : \n  URL '"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/cran.r-project.org\/src\/contrib\/a5R_0.4.0.tar.gz"
+                            },
+                            {
+                                "type": "text",
+                                "text": "': status was\n'HTTP response code said error'\n\n________________________________________\nRoot Cause\n\nThe internal function curlDownload (called by both download.file() and file())\ndoes not configure the CURLOPT_PROXYAUTH option in libcurl to enable multiple\nauthentication methods. By default, libcurl uses Basic Auth only, which is\nrejected by the proxy. In contrast, packages like httr and pak automatically\ntry multiple authentication methods (including NTLM) via CURLOPT_PROXYAUTH =\nCURLAUTH_ANY.\n\n________________________________________\nEvidence\n1.      Logs from download.file() (see attached) show that libcurl attempts\nBasic Auth only and not NTLM or other methods.\n2.      Functions like httr::GET() and pak::pak() work because they\nautomatically try multiple authentication methods (including NTLM) via\nCURLOPT_PROXYAUTH = CURLAUTH_ANY.\n3.      Using method = \"wininet\" (via options(download.file.method =\n\"wininet\")) bypasses the issue, as WinINet natively supports NTLM.\n\n________________________________________\nReproducible Code for the download.file error (similar error is observed with\nfile())\n\n# Fails with libcurl (Basic Auth only)\ndownload.file(\n  \""
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/cran.r-project.org\/src\/contrib\/a5R_0.4.0.tar.gz"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\", \n  \"test.tar.gz\", \n  method = \"libcurl\"\n)\n\n# Works with wininet (NTLM natively supported)\ndownload.file(\n  \""
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/cran.r-project.org\/src\/contrib\/a5R_0.4.0.tar.gz"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\", \n  \"test.tar.gz\",\n  method = \"wininet\"\n)\n\n# Works with httr (automatically tries NTLM after Basic fails)\nlibrary(httr)\nGET(\n  \""
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/cran.r-project.org\/src\/contrib\/a5R_0.4.0.tar.gz"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\", \n  write_disk(\"test.tar.gz\")\n)\n\n________________________________________\nExpected Behavior\n\nThe functions download.file() and file() should support multiple proxy\nauthentication methods (including NTLM) when using libcurl, either by:\n1.      Adding support for the proxyauth option in the extra argument (as httr\ndoes).\n2.      Setting CURLOPT_PROXYAUTH = CURLAUTH_ANY by default (to match the\nbehavior of httr and pak).\n3.      Clearly documenting the need to use method = \"wininet\" for NTLM proxies\non Windows (but the wininet option is bound to be deprecated soon).\n\n________________________________________\nEnvironmental Information\n\n# Output of sessionInfo()\nR version 4.5.3 (2026-03-11 ucrt)\nPlatform: x86_64-w64-mingw32\/x64\nRunning under: Windows 11 x64 (build 26100)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "# Proxy-related environment variables\nSys.getenv(c(\"https_proxy\", \"http_proxy\", \"no_proxy\"))\n\n$https_proxy\n[1] \"<http:\/\/xxx:xxxx@xxxx:xxxxx\/>\"\n\n$http_proxy\n[1] \"<http:\/\/xxx:xxxx@xxxx:xxxxx\/>\"\n\n$no_proxy\n[1] \"xxxxxxxxxx\"\n\n________________________________________\nFull Error Logs\nsee attached\n________________________________________\nCurrent Workarounds\n1.      Force the use of WinINet for download.file() and file():\n2.       options(download.file.method = \"wininet\", url.method = \"wininet\")\n3.      Use httr::GET() or pak::pak() for downloads (they automatically handle\nNTLM).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782485124.281029",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "YPrP",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# Proxy-related environment variables\nSys.getenv(c(\"https_proxy\", \"http_proxy\", \"no_proxy\"))\n\n$https_proxy\n[1] \""
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/xxx:xxxx@xxxx:xxxxx\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"\n\n$http_proxy\n[1] \""
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/xxx:xxxx@xxxx:xxxxx\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"\n\n$no_proxy\n[1] \"xxxxxxxxxx\"\n\n________________________________________\nFull Error Logs\nsee attached\n________________________________________\nCurrent Workarounds\n1.      Force the use of WinINet for download.file() and file():\n2.       options(download.file.method = \"wininet\", url.method = \"wininet\")\n3.      Use httr::GET() or pak::pak() for downloads (they automatically handle\nNTLM)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18944] Add a preparsing filter step to aspell() in order to make LaTex spell checking more robust*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18944>\n\n--- Comment #5 from Gabriel Becker (<mailto:gabembecker@gmail.com|gabembecker@gmail.com>) ---\nHi Kurt,\n\nComing back to this, the reason we proposed a pre-processing filter is that the\nfilter (pipeline, as you pointed out) occurs *after* parsing, which is where\nthe failure is occuring, so a filter won't be able to fix the issue.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782493898.842879",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "c+n7C",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18944] Add a preparsing filter step to aspell() in order to make LaTex spell checking more robust",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18944"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Gabriel Becker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:gabembecker@gmail.com",
+                                "text": "gabembecker@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nHi Kurt,\n\nComing back to this, the reason we proposed a pre-processing filter is that the\nfilter (pipeline, as you pointed out) occurs "
+                            },
+                            {
+                                "type": "text",
+                                "text": "after",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " parsing, which is where\nthe failure is occuring, so a filter won't be able to fix the issue."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18136] Inconsistent \"scipen\"-like effect (regression in R4)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18136>\n\n--- Comment #4 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nAs Luke noted, this is constant folding in the byte compiler. `c(\"asdf\",\n1000000)` is evaluated once at compile time and the result is stored in the\nbytecode constant pool. Because combining a string with a number coerces the\nnumber to a string, and that coercion honors `getOption(\"scipen\")`, the string\n`\"1e+06\"` (scipen=0 at compile time) gets frozen into the constant -- so\n`scipen` has no effect at run time. Disassembly shows the folded constant\ndirectly:\n\n```\nLDCONST  -&gt;  c(\"asdf\", \"1e+06\")\n```\n\nTwo details explain why it only showed up inside a package and looked like an\nR4 regression: namespace-resolved base functions (like `c` in package code) are\nfoldable at the default optimize level 2, whereas global ones are only folded\nat level 3; and byte-compilation of packages became the default in R 3.5.0. The\nsame trap affects `max`\/`min`, which also coerce mixed arguments to character.\n\nFollowing Luke's suggestion, the fix declines to fold a call to a character\nresult unless every argument is already character. Folding is only an\noptimization, so declining is always safe, and this invariant avoids relying on\nwhich coercions happen to be option-dependent (double and complex use `scipen`;\ninteger and logical do not -- and `mode()` cannot even distinguish integer from\ndouble, since both report \"numeric\"). Homogeneous non-character calls (e.g.\nall-numeric) still fold as before.\n\n```\nIndex: src\/library\/compiler\/R\/cmp.R\n===================================================================\n--- src\/library\/compiler\/R\/cmp.R        (revision HEAD)\n+++ src\/library\/compiler\/R\/cmp.R        (working copy)\n@@ -422,6 +422,17 @@\n\n constModes &lt;- c(\"numeric\", \"logical\", \"NULL\", \"complex\", \"character\")\n\n+## Check whether a call combining arguments of these modes can be safely\n+## constant folded.  Every argument must be of a foldable mode.  In addition,\n+## folding a call (e.g. c() or max()) that produces a character result by\n+## coercing non-character values (such as numbers) turns them into strings,\n+## and that coercion depends on run-time options such as 'scipen'.  To keep\n+## the compiled constant independent of such options, only fold to a\n+## character result when every argument is already character (PR#18136).\n+canConstantFoldModes &lt;- function(modes)\n+    all(modes %in% constModes) &amp;&amp;\n+    (! (\"character\" %in% modes) || all(modes == \"character\"))\n+\n constNames &lt;- c(\"pi\", \"T\", \"F\")\n\n checkConst &lt;- function(e) {\n@@ -471,7 +482,7 @@\n                 else return(NULL)\n             }\n             modes &lt;- unlist(lapply(args, mode))\n-            if (all(modes %in% constModes)) {\n+            if (canConstantFoldModes(modes)) {\n                 tryCatch(checkConst(do.call(ffun, args)),\n                          error = function(e) NULL, warning = function(w) NULL)\n                 ## **** issue warning??\n```\n\nAnd a regression test in `src\/library\/compiler\/tests\/const.R`:\n\n```\nIndex: src\/library\/compiler\/tests\/const.R\n===================================================================\n--- src\/library\/compiler\/tests\/const.R  (revision HEAD)\n+++ src\/library\/compiler\/tests\/const.R  (working copy)\n@@ -63,3 +63,29 @@\n                     checkConst(sqrt(2))))\n stopifnot(identical(constantFold(quote(sqrt(2)), list(optimize = 0, env =\nce)),\n                     NULL))\n+\n+## PR#18136: folding a call that coerces non-character values to strings\n+## would freeze the formatting (e.g. 'scipen') at compile time, so a call is\n+## only folded to a character result when every argument is already\n+## character.  Homogeneous non-character calls are still folded.\n+stopifnot(identical(constantFold(quote(c(\"asdf\", 1000000)),\n+                                 list(optimize = 3, env = ce)),\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782495299.540909",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "C+Gby",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18136] Inconsistent \"scipen\"-like effect (regression in R4)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18136"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nAs Luke noted, this is constant folding in the byte compiler. `c(\"asdf\",\n1000000)` is evaluated once at compile time and the result is stored in the\nbytecode constant pool. Because combining a string with a number coerces the\nnumber to a string, and that coercion honors "
+                            },
+                            {
+                                "type": "text",
+                                "text": "getOption(\"scipen\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", the string\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"1e+06\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (scipen=0 at compile time) gets frozen into the constant -- so\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "scipen",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has no effect at run time. Disassembly shows the folded constant\ndirectly:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "LDCONST  ->  c(\"asdf\", \"1e+06\")\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nTwo details explain why it only showed up inside a package and looked like an\nR4 regression: namespace-resolved base functions (like "
+                            },
+                            {
+                                "type": "text",
+                                "text": "c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in package code) are\nfoldable at the default optimize level 2, whereas global ones are only folded\nat level 3; and byte-compilation of packages became the default in R 3.5.0. The\nsame trap affects "
+                            },
+                            {
+                                "type": "text",
+                                "text": "max",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "min",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which also coerce mixed arguments to character.\n\nFollowing Luke's suggestion, the fix declines to fold a call to a character\nresult unless every argument is already character. Folding is only an\noptimization, so declining is always safe, and this invariant avoids relying on\nwhich coercions happen to be option-dependent (double and complex use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "scipen",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ";\ninteger and logical do not -- and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mode()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " cannot even distinguish integer from\ndouble, since both report \"numeric\"). Homogeneous non-character calls (e.g.\nall-numeric) still fold as before.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/compiler\/R\/cmp.R\n===================================================================\n--- src\/library\/compiler\/R\/cmp.R        (revision HEAD)\n+++ src\/library\/compiler\/R\/cmp.R        (working copy)\n@@ -422,6 +422,17 @@\n\n constModes <- c(\"numeric\", \"logical\", \"NULL\", \"complex\", \"character\")\n\n+## Check whether a call combining arguments of these modes can be safely\n+## constant folded.  Every argument must be of a foldable mode.  In addition,\n+## folding a call (e.g. c() or max()) that produces a character result by\n+## coercing non-character values (such as numbers) turns them into strings,\n+## and that coercion depends on run-time options such as 'scipen'.  To keep\n+## the compiled constant independent of such options, only fold to a\n+## character result when every argument is already character (PR#18136).\n+canConstantFoldModes <- function(modes)\n+    all(modes %in% constModes) &&\n+    (! (\"character\" %in% modes) || all(modes == \"character\"))\n+\n constNames <- c(\"pi\", \"T\", \"F\")\n\n checkConst <- function(e) {\n@@ -471,7 +482,7 @@\n                 else return(NULL)\n             }\n             modes <- unlist(lapply(args, mode))\n-            if (all(modes %in% constModes)) {\n+            if (canConstantFoldModes(modes)) {\n                 tryCatch(checkConst(do.call(ffun, args)),\n                          error = function(e) NULL, warning = function(w) NULL)\n                 ## **** issue warning??\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nAnd a regression test in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/library\/compiler\/tests\/const.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n```\nIndex: src\/library\/compiler\/tests\/const.R\n===================================================================\n--- src\/library\/compiler\/tests\/const.R  (revision HEAD)\n+++ src\/library\/compiler\/tests\/const.R  (working copy)\n@@ -63,3 +63,29 @@\n                     checkConst(sqrt(2))))\n stopifnot(identical(constantFold(quote(sqrt(2)), list(optimize = 0, env =\nce)),\n                     NULL))\n+\n+## PR#18136: folding a call that coerces non-character values to strings\n+## would freeze the formatting (e.g. 'scipen') at compile time, so a call is\n+## only folded to a character result when every argument is already\n+## character.  Homogeneous non-character calls are still folded.\n+stopifnot(identical(constantFold(quote(c(\"asdf\", 1000000)),\n+                                 list(optimize = 3, env = ce)),"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "+                    NULL))\n+stopifnot(identical(constantFold(quote(c(\"a\", 1L)),\n+                                 list(optimize = 3, env = ce)),\n+                    NULL))\n+stopifnot(identical(constantFold(quote(c(\"a\", TRUE)),\n+                                 list(optimize = 3, env = ce)),\n+                    NULL))\n+stopifnot(identical(constantFold(quote(max(1000000, \"a\")),\n+                                 list(optimize = 3, env = ce)),\n+                    NULL))\n+stopifnot(identical(constantFold(quote(c(1, 2, 3)),\n+                                 list(optimize = 3, env = ce)),\n+                    checkConst(c(1, 2, 3))))\n+stopifnot(identical(constantFold(quote(c(1L, TRUE)),\n+                                 list(optimize = 3, env = ce)),\n+                    checkConst(c(1L, TRUE))))\n+stopifnot(identical(constantFold(quote(c(\"a\", \"b\")),\n+                                 list(optimize = 3, env = ce)),\n+                    checkConst(c(\"a\", \"b\"))))\n```\n\nWith this applied, `c(\"asdf\", 1000000)` is left as a run-time call and `scipen`\nis honored again (scipen=0 -&gt; `\"1e+06\"`, scipen=100 -&gt; `\"1000000\"`), both\ninside and outside packages. The full `compiler` test suite passes.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782495299.563359",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Go47",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "+                    NULL))\n+stopifnot(identical(constantFold(quote(c(\"a\", 1L)),\n+                                 list(optimize = 3, env = ce)),\n+                    NULL))\n+stopifnot(identical(constantFold(quote(c(\"a\", TRUE)),\n+                                 list(optimize = 3, env = ce)),\n+                    NULL))\n+stopifnot(identical(constantFold(quote(max(1000000, \"a\")),\n+                                 list(optimize = 3, env = ce)),\n+                    NULL))\n+stopifnot(identical(constantFold(quote(c(1, 2, 3)),\n+                                 list(optimize = 3, env = ce)),\n+                    checkConst(c(1, 2, 3))))\n+stopifnot(identical(constantFold(quote(c(1L, TRUE)),\n+                                 list(optimize = 3, env = ce)),\n+                    checkConst(c(1L, TRUE))))\n+stopifnot(identical(constantFold(quote(c(\"a\", \"b\")),\n+                                 list(optimize = 3, env = ce)),\n+                    checkConst(c(\"a\", \"b\"))))\n```\n\nWith this applied, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "c(\"asdf\", 1000000)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is left as a run-time call and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "scipen",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nis honored again (scipen=0 -> "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"1e+06\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", scipen=100 -> "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"1000000\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), both\ninside and outside packages. The full "
+                            },
+                            {
+                                "type": "text",
+                                "text": "compiler",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " test suite passes."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18136] Inconsistent \"scipen\"-like effect (regression in R4)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18136>\n\n--- Comment #5 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nSlightly more readable (IMHO).\n\n```\nIndex: src\/library\/compiler\/R\/cmp.R\n===================================================================\n--- src\/library\/compiler\/R\/cmp.R        (revision HEAD)\n+++ src\/library\/compiler\/R\/cmp.R        (working copy)\n@@ -422,6 +422,23 @@\n\n constModes &lt;- c(\"numeric\", \"logical\", \"NULL\", \"complex\", \"character\")\n\n+## Check whether a call combining arguments of these modes can be safely\n+## constant folded.  Every argument must be of a foldable mode.  In addition,\n+## folding a call (e.g. c() or max()) that produces a character result by\n+## coercing non-character values (such as numbers) turns them into strings,\n+## and that coercion depends on run-time options such as 'scipen'.  To keep\n+## the compiled constant independent of such options, only fold to a\n+## character result when every argument is already character (PR#18136).\n+canConstantFoldModes &lt;- function(modes) {\n+\n+    if (!all(modes %in% constModes))\n+        return(FALSE)\n+\n+    if (\"character\" %in% modes)\n+        return(all(modes == \"character\"))\n+\n+    TRUE\n+\n+}\n+\n constNames &lt;- c(\"pi\", \"T\", \"F\")\n\n checkConst &lt;- function(e) {\n@@ -471,7 +488,7 @@\n                 else return(NULL)\n             }\n             modes &lt;- unlist(lapply(args, mode))\n-            if (all(modes %in% constModes)) {\n+            if (canConstantFoldModes(modes)) {\n                 tryCatch(checkConst(do.call(ffun, args)),\n                          error = function(e) NULL, warning = function(w) NULL)\n                 ## **** issue warning??\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782495499.339079",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "YmQZy",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18136] Inconsistent \"scipen\"-like effect (regression in R4)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18136"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nSlightly more readable (IMHO).\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/compiler\/R\/cmp.R\n===================================================================\n--- src\/library\/compiler\/R\/cmp.R        (revision HEAD)\n+++ src\/library\/compiler\/R\/cmp.R        (working copy)\n@@ -422,6 +422,23 @@\n\n constModes <- c(\"numeric\", \"logical\", \"NULL\", \"complex\", \"character\")\n\n+## Check whether a call combining arguments of these modes can be safely\n+## constant folded.  Every argument must be of a foldable mode.  In addition,\n+## folding a call (e.g. c() or max()) that produces a character result by\n+## coercing non-character values (such as numbers) turns them into strings,\n+## and that coercion depends on run-time options such as 'scipen'.  To keep\n+## the compiled constant independent of such options, only fold to a\n+## character result when every argument is already character (PR#18136).\n+canConstantFoldModes <- function(modes) {\n+\n+    if (!all(modes %in% constModes))\n+        return(FALSE)\n+\n+    if (\"character\" %in% modes)\n+        return(all(modes == \"character\"))\n+\n+    TRUE\n+\n+}\n+\n constNames <- c(\"pi\", \"T\", \"F\")\n\n checkConst <- function(e) {\n@@ -471,7 +488,7 @@\n                 else return(NULL)\n             }\n             modes <- unlist(lapply(args, mode))\n-            if (all(modes %in% constModes)) {\n+            if (canConstantFoldModes(modes)) {\n                 tryCatch(checkConst(do.call(ffun, args)),\n                          error = function(e) NULL, warning = function(w) NULL)\n                 ## **** issue warning??\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18136] Inconsistent \"scipen\"-like effect (regression in R4)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18136>\n\n--- Comment #6 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nCreated attachment 3739\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3739&amp;action=edit>\nCandidate patch.\n\nKurt pointed out that this code is auto-generated from `compiler.nw`, so I've\nmade updates there (and attached as a patch file instead of including inline).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782496483.244379",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "IzRY",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18136] Inconsistent \"scipen\"-like effect (regression in R4)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18136"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #6 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3739\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3739&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3739&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCandidate patch.\n\nKurt pointed out that this code is auto-generated from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "compiler.nw",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", so I've\nmade updates there (and attached as a patch file instead of including inline)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18409] Error message 'undefined columns selected' should specify which columns are undefined*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18409>\n\nZhian Kamvar (<mailto:zkamvar@gmail.com|zkamvar@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |zkamvar@gmail.com\n\n--- Comment #4 from Zhian Kamvar (<mailto:zkamvar@gmail.com|zkamvar@gmail.com>) ---\nHello from R dev day Cascadia R! We are reviewing this patch, but there are\nconflicts with the current R devel version: \n\n```\nC         b\/src\/library\/base\/R\/dataframe.R\n&gt;         rejected hunk @@ -597,6 +597,78 @@\n&gt;         rejected hunk @@ -620,13 +692,13 @@\n&gt;         rejected hunk @@ -646,12 +718,12 @@\n&gt;         rejected hunk @@ -694,7 +766,7 @@\nC         b\/src\/library\/base\/po\/R-base.pot\n&gt;         rejected hunk @@ -1,8 +1,8 @@\n&gt;         rejected hunk @@ -282,13 +282,16 @@\n&gt;         rejected hunk @@ -1699,6 +1702,16 @@\nC         b\/src\/library\/base\/po\/R-fr.po\n&gt;         rejected hunk @@ -5,11 +5,11 @@\n&gt;         rejected hunk @@ -308,15 +308,18 @@\n&gt;         rejected hunk @@ -1926,6 +1929,16 @@\nC         b\/src\/library\/base\/man\/base-internal.Rd\n&gt;         rejected hunk @@ -15,6 +15,7 @@\n&gt;         rejected hunk @@ -82,6 +83,8 @@\n&gt;         rejected hunk @@ -206,6 +209,9 @@\nSummary of conflicts:\n  Text conflicts: 4\n```\n\nWe re-applied the original changes in dataframe.R and are going to upload a\npatch. \n\nWe confirmed that this patch works as expected.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782500426.193139",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "rPr+9",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18409] Error message 'undefined columns selected' should specify which columns are undefined",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18409"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nZhian Kamvar ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:zkamvar@gmail.com",
+                                "text": "zkamvar@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |zkamvar@gmail.com\n\n--- Comment #4 from Zhian Kamvar ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:zkamvar@gmail.com",
+                                "text": "zkamvar@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nHello from R dev day Cascadia R! We are reviewing this patch, but there are\nconflicts with the current R devel version: \n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "C         b\/src\/library\/base\/R\/dataframe.R\n>         rejected hunk @@ -597,6 +597,78 @@\n>         rejected hunk @@ -620,13 +692,13 @@\n>         rejected hunk @@ -646,12 +718,12 @@\n>         rejected hunk @@ -694,7 +766,7 @@\nC         b\/src\/library\/base\/po\/R-base.pot\n>         rejected hunk @@ -1,8 +1,8 @@\n>         rejected hunk @@ -282,13 +282,16 @@\n>         rejected hunk @@ -1699,6 +1702,16 @@\nC         b\/src\/library\/base\/po\/R-fr.po\n>         rejected hunk @@ -5,11 +5,11 @@\n>         rejected hunk @@ -308,15 +308,18 @@\n>         rejected hunk @@ -1926,6 +1929,16 @@\nC         b\/src\/library\/base\/man\/base-internal.Rd\n>         rejected hunk @@ -15,6 +15,7 @@\n>         rejected hunk @@ -82,6 +83,8 @@\n>         rejected hunk @@ -206,6 +209,9 @@\nSummary of conflicts:\n  Text conflicts: 4\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWe re-applied the original changes in dataframe.R and are going to upload a\npatch. \n\nWe confirmed that this patch works as expected."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16629] Infinite recursion when S4 object has S3 superclass and a slot of type call*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16629>\n\n--- Comment #6 from Gabriel Becker (<mailto:gabembecker@gmail.com|gabembecker@gmail.com>) ---\nI've confirmed that this bug is still fresh and the patch can still be cleanly\napplied.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782504229.924049",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Qkz",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16629] Infinite recursion when S4 object has S3 superclass and a slot of type call",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16629"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #6 from Gabriel Becker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:gabembecker@gmail.com",
+                                "text": "gabembecker@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI've confirmed that this bug is still fresh and the patch can still be cleanly\napplied."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18409] Error message 'undefined columns selected' should specify which columns are undefined*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18409>\n\n--- Comment #5 from Zhian Kamvar (<mailto:zkamvar@gmail.com|zkamvar@gmail.com>) ---\nCreated attachment 3740\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3740&amp;action=edit>\nupdated error message; removed non-R changes\n\nWe applied the function from the previous patch to the most current revision\n(90194), but we have removed the po, pot, and Rd files. We also updated the\nlanguage of the error message because no plural is needed for counting multiple\ncolumns.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782505636.443799",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "rZh",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18409] Error message 'undefined columns selected' should specify which columns are undefined",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18409"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Zhian Kamvar ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:zkamvar@gmail.com",
+                                "text": "zkamvar@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3740\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3740&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3740&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nupdated error message; removed non-R changes\n\nWe applied the function from the previous patch to the most current revision\n(90194), but we have removed the po, pot, and Rd files. We also updated the\nlanguage of the error message because no plural is needed for counting multiple\ncolumns."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18015] tools:add_datalist silently ignores Rdata files, only accepts RData files. Proposal to allow both, or warn, or at least document*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18015>\n\nZhian Kamvar (<mailto:zkamvar@gmail.com|zkamvar@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |zkamvar@gmail.com\n\n--- Comment #4 from Zhian Kamvar (<mailto:zkamvar@gmail.com|zkamvar@gmail.com>) ---\nCreated attachment 3741\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3741&amp;action=edit>\n[doc] add list of accepted file extensions for add_datalist\n\nThis is a patch from R dev day Cascadia R that should resolve this issue.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782510104.423339",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "\/VI77",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18015] tools:add_datalist silently ignores Rdata files, only accepts RData files. Proposal to allow both, or warn, or at least document",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18015"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nZhian Kamvar ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:zkamvar@gmail.com",
+                                "text": "zkamvar@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |zkamvar@gmail.com\n\n--- Comment #4 from Zhian Kamvar ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:zkamvar@gmail.com",
+                                "text": "zkamvar@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3741\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3741&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3741&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n[doc] add list of accepted file extensions for add_datalist\n\nThis is a patch from R dev day Cascadia R that should resolve this issue."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19090] R CMD build fails on package w\/o R\/ directory*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19090>\n\nGabriel Becker (<mailto:gabembecker@gmail.com|gabembecker@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |TRIAGED\n                 CC|                            |gabembecker@gmail.com\n     Ever confirmed|0                           |1\n\n--- Comment #3 from Gabriel Becker (<mailto:gabembecker@gmail.com|gabembecker@gmail.com>) ---\nI can confirm that this behavior is now fixed under a fully updated R devel:\n\n```\ngbecker@Gabriels-MacBook-Pro gabe % mkdir pkg\necho -e 'Package: test\\nVersion: 1.0.0\\n' &gt; pkg\/DESCRIPTION\ntouch pkg\/NAMESPACE\ngbecker@Gabriels-MacBook-Pro gabe % ~\/local\/Rdevelraw\/R.framework\/Resources\/R\nCMD build pkg\n* checking for file ‘pkg\/DESCRIPTION’ ... OK\n* preparing ‘test’:\n* checking DESCRIPTION meta-information ... OK\n* checking for LF line-endings in source and make files and shell scripts\n* checking for empty or unneeded directories\n* building ‘test_1.0.0.tar.gz’\n\ngbecker@Gabriels-MacBook-Pro gabe % \n```\n\nSo this issue can be closed",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782512670.634909",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "\/p1IC",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19090] R CMD build fails on package w\/o R\/ directory",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19090"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nGabriel Becker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:gabembecker@gmail.com",
+                                "text": "gabembecker@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |TRIAGED\n                 CC|                            |gabembecker@gmail.com\n     Ever confirmed|0                           |1\n\n--- Comment #3 from Gabriel Becker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:gabembecker@gmail.com",
+                                "text": "gabembecker@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI can confirm that this behavior is now fixed under a fully updated R devel:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "gbecker@Gabriels-MacBook-Pro gabe % mkdir pkg\necho -e 'Package: test\\nVersion: 1.0.0\\n' > pkg\/DESCRIPTION\ntouch pkg\/NAMESPACE\ngbecker@Gabriels-MacBook-Pro gabe % ~\/local\/Rdevelraw\/R.framework\/Resources\/R\nCMD build pkg\n* checking for file 'pkg\/DESCRIPTION' ... OK\n* preparing 'test':\n* checking DESCRIPTION meta-information ... OK\n* checking for LF line-endings in source and make files and shell scripts\n* checking for empty or unneeded directories\n* building 'test_1.0.0.tar.gz'\n\ngbecker@Gabriels-MacBook-Pro gabe % \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSo this issue can be closed"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19091] as.numeric on macOS aarch64 rounds \"0.9999999999999999\" to 1.0 instead of the nearest IEEE 754 double*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19091>\n\nGabriel Becker (<mailto:gabembecker@gmail.com|gabembecker@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |gabembecker@gmail.com\n\n--- Comment #1 from Gabriel Becker (<mailto:gabembecker@gmail.com|gabembecker@gmail.com>) ---\nMichael Chirico and I have confirmed that this behavior is present on an M3\nmacbook pro and *not* present on 86_64 linux.\n\n```\nCopyright (C) 2025 The R Foundation for Statistical Computing\nPlatform: aarch64-apple-darwin20\n\n&lt;snip&gt;\n\n&gt; sprintf(\"%a\", as.numeric(\"0.9999999999999999\"))\n[1] \"0x1p+0\"\n```\n\nNote the as.numeric step is not required:\n\n```\n&gt; sprintf(\"%a\", 0.9999999999999999)\n[1] \"0x1p+0\"\n```\n\nI also confirmed the python3 code provided in the report does give the IEEE\nround-to-nearest result as claimed.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782513866.966309",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "GSSTk",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19091] as.numeric on macOS aarch64 rounds \"0.9999999999999999\" to 1.0 instead of the nearest IEEE 754 double",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19091"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nGabriel Becker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:gabembecker@gmail.com",
+                                "text": "gabembecker@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |gabembecker@gmail.com\n\n--- Comment #1 from Gabriel Becker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:gabembecker@gmail.com",
+                                "text": "gabembecker@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nMichael Chirico and I have confirmed that this behavior is present on an M3\nmacbook pro and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " present on 86_64 linux.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Copyright (C) 2025 The R Foundation for Statistical Computing\nPlatform: aarch64-apple-darwin20\n\n<snip>\n\n> sprintf(\"%a\", as.numeric(\"0.9999999999999999\"))\n[1] \"0x1p+0\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nNote the as.numeric step is not required:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> sprintf(\"%a\", 0.9999999999999999)\n[1] \"0x1p+0\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI also confirmed the python3 code provided in the report does give the IEEE\nround-to-nearest result as claimed."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18495] Alternative algorithm for `which()`*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18495>\n\nKylie Bemis (<mailto:kuwisdelu@gmail.com|kuwisdelu@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |TRIAGED\n                 CC|                            |kuwisdelu@gmail.com\n     Ever confirmed|0                           |1\n\n--- Comment #8 from Kylie Bemis (<mailto:kuwisdelu@gmail.com|kuwisdelu@gmail.com>) ---\nThe above timings and memory improvements are still valid for current R-devel\n90193.\n\nThe branchless patch is simpler, and provides real speedup for the randomized\nlogical vector case, but does not improve memory usage. (Note: I couldn't apply\nthe branchless patch directly, perhaps due to some divergence since 2023, but\nit's easy enough to make the changes manually. I'll attach a new version of\nthis patch for reference.)\n\nThe alternative which() implementation provided by Davis improves speed in the\nrandomized case and real memory improvements. The code makes sense to me.\n\nAll tests pass locally, and I built and checked a small selection of CRAN\npackages: __abind__, __bit64__, __data.table__, __dplyr__, and __stringi__.\nThese also passed. That's about as far as I can take this without input from\nR-core.\n\nFurther details here: <https:\/\/github.com\/r-devel\/r-dev-day\/issues\/158>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782517300.635909",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "SNVJ6",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18495] Alternative algorithm for ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "which()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18495"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nKylie Bemis ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kuwisdelu@gmail.com",
+                                "text": "kuwisdelu@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |TRIAGED\n                 CC|                            |kuwisdelu@gmail.com\n     Ever confirmed|0                           |1\n\n--- Comment #8 from Kylie Bemis ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kuwisdelu@gmail.com",
+                                "text": "kuwisdelu@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe above timings and memory improvements are still valid for current R-devel\n90193.\n\nThe branchless patch is simpler, and provides real speedup for the randomized\nlogical vector case, but does not improve memory usage. (Note: I couldn't apply\nthe branchless patch directly, perhaps due to some divergence since 2023, but\nit's easy enough to make the changes manually. I'll attach a new version of\nthis patch for reference.)\n\nThe alternative which() implementation provided by Davis improves speed in the\nrandomized case and real memory improvements. The code makes sense to me.\n\nAll tests pass locally, and I built and checked a small selection of CRAN\npackages: __abind__, __bit64__, __data.table__, __dplyr__, and __stringi__.\nThese also passed. That's about as far as I can take this without input from\nR-core.\n\nFurther details here: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-dev-day\/issues\/158"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18495] Alternative algorithm for `which()`*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18495>\n\n--- Comment #9 from Kylie Bemis (<mailto:kuwisdelu@gmail.com|kuwisdelu@gmail.com>) ---\nCreated attachment 3742\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3742&amp;action=edit>\nnew version of branchless which patch",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782517835.969349",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "xil",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18495] Alternative algorithm for ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "which()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18495"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #9 from Kylie Bemis ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kuwisdelu@gmail.com",
+                                "text": "kuwisdelu@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3742\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3742&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3742&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nnew version of branchless which patch"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

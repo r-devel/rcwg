@@ -1,0 +1,1192 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19073] New: Compilation requires C23 now?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19073>\n\n            Bug ID: 19073\n           Summary: Compilation requires C23 now?\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Installation\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:csardi.gabor@gmail.com|csardi.gabor@gmail.com>\n\nThe R admin manual says\n&gt; Compiling R requires C99 or later\n\n(<https:\/\/cran.r-project.org\/doc\/manuals\/r-devel\/R-admin.html#C-standards-1>)\n\nBut it seems that compiling R-devel needs C23 now, possibly accidentally,\nspecifically in stats in stl.c:\n\n```\nubuntu-2204-clang-1  | clang -I\"..\/..\/..\/..\/include\" -DNDEBUG\n-I..\/..\/..\/include -I..\/..\/..\/..\/src\/include -DHAVE_CONFIG_H \n-I\/usr\/local\/include   -fvisibility=hidden -fPIC  -std=gnu2x  -c stl.c -o stl.o\nubuntu-2204-clang-1  | stl.c:484:5: error: expected expression\nubuntu-2204-clang-1  |     int k = i, l = j,\nubuntu-2204-clang-1  |     ^\n```\n\nI believe this is because here:\n```\nL10:\n    int k = i, l = j,\n        ij = (i + j) \/ 2;\n```\na declaration directly follows a label, and this is not allowed before C23.\n\nThis is a problem in practice because some still supported distros come with\ncompilers that don't support this. E.g. Ubuntu 22.04 (supported for 10 more\nmonths) comes with clang 14 which can't compile this, even with\n`CFLAGS=-std=gnu2x`.\n\nA workaround is to put a `;` after the label:\n```\n--- a\/src\/library\/stats\/src\/stl.c\n+++ b\/src\/library\/stats\/src\/stl.c\n@@ -480,7 +480,7 @@\n     if (! (j - i &gt; 10)) {\n        goto L174;\n     }\n-L10:\n+L10: ;\n     int k = i, l = j,\n        ij = (i + j) \/ 2;\n     double t = a[ij];\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1778833346.968049",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "IRM2N",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19073] New: Compilation requires C23 now?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19073"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19073\n           Summary: Compilation requires C23 now?\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Installation\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:csardi.gabor@gmail.com",
+                                "text": "csardi.gabor@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThe R admin manual says"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Compiling R requires C99 or later"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/cran.r-project.org\/doc\/manuals\/r-devel\/R-admin.html#C-standards-1"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n\nBut it seems that compiling R-devel needs C23 now, possibly accidentally,\nspecifically in stats in stl.c:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "ubuntu-2204-clang-1  | clang -I\"..\/..\/..\/..\/include\" -DNDEBUG\n-I..\/..\/..\/include -I..\/..\/..\/..\/src\/include -DHAVE_CONFIG_H \n-I\/usr\/local\/include   -fvisibility=hidden -fPIC  -std=gnu2x  -c stl.c -o stl.o\nubuntu-2204-clang-1  | stl.c:484:5: error: expected expression\nubuntu-2204-clang-1  |     int k = i, l = j,\nubuntu-2204-clang-1  |     ^\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI believe this is because here:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "L10:\n    int k = i, l = j,\n        ij = (i + j) \/ 2;\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "a declaration directly follows a label, and this is not allowed before C23.\n\nThis is a problem in practice because some still supported distros come with\ncompilers that don't support this. E.g. Ubuntu 22.04 (supported for 10 more\nmonths) comes with clang 14 which can't compile this, even with\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "CFLAGS=-std=gnu2x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nA workaround is to put a "
+                            },
+                            {
+                                "type": "text",
+                                "text": ";",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " after the label:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "--- a\/src\/library\/stats\/src\/stl.c\n+++ b\/src\/library\/stats\/src\/stl.c\n@@ -480,7 +480,7 @@\n     if (! (j - i > 10)) {\n        goto L174;\n     }\n-L10:\n+L10: ;\n     int k = i, l = j,\n        ij = (i + j) \/ 2;\n     double t = a[ij];\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19073] Compilation requires C23 now?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19073>\n\n--- Comment #1 from Brian Ripley (<mailto:ripley@stats.ox.ac.uk|ripley@stats.ox.ac.uk>) ---\nIt is not required, and we do test non-C23 reqularly (I fixed another problem\nlast week).\n\nThat file was machine-translated by f2c, and accepted by Apple clang 21 and GCC\n15 with their default standard, C17.  --std=gnu2x is not a current value for\nany compiler I use but was earlier used for partial support for C23.  R's\nconfigure will use --std=gnu23 where supported, including on GCC and Apple and\nLLVM clang.\n\nSo I was unable to confirm it, but will add the workaround.\n\nPlease clarify the OS and compiler used.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1778835979.361989",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Utr",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19073] Compilation requires C23 now?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19073"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Brian Ripley ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ripley@stats.ox.ac.uk",
+                                "text": "ripley@stats.ox.ac.uk",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nIt is not required, and we do test non-C23 reqularly (I fixed another problem\nlast week).\n\nThat file was machine-translated by f2c, and accepted by Apple clang 21 and GCC\n15 with their default standard, C17.  --std=gnu2x is not a current value for\nany compiler I use but was earlier used for partial support for C23.  R's\nconfigure will use --std=gnu23 where supported, including on GCC and Apple and\nLLVM clang.\n\nSo I was unable to confirm it, but will add the workaround.\n\nPlease clarify the OS and compiler used."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19073] Compilation requires C23 now?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19073>\n\n--- Comment #2 from Gabor Csardi (<mailto:csardi.gabor@gmail.com|csardi.gabor@gmail.com>) ---\n&gt;  E.g. Ubuntu 22.04 (supported for 10 more months) comes with clang 14 which can't compile this, even with CFLAGS=-std=gnu2x.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1778836260.913739",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "0XZJ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19073] Compilation requires C23 now?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19073"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Gabor Csardi ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:csardi.gabor@gmail.com",
+                                "text": "csardi.gabor@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " E.g. Ubuntu 22.04 (supported for 10 more months) comes with clang 14 which can't compile this, even with CFLAGS=-std=gnu2x."
+                            }
+                        ],
+                        "contains_padding": true
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19073] Compilation requires C23 now?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19073>\n\n--- Comment #3 from Gabor Csardi (<mailto:csardi.gabor@gmail.com|csardi.gabor@gmail.com>) ---\nThank you for the workaround!",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1778836298.697129",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Z\/WaR",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19073] Compilation requires C23 now?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19073"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Gabor Csardi ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:csardi.gabor@gmail.com",
+                                "text": "csardi.gabor@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you for the workaround!"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19073] Compilation requires C23 now?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19073>\n\nDirk Eddelbuettel (<mailto:edd@debian.org|edd@debian.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |edd@debian.org\n\n--- Comment #4 from Dirk Eddelbuettel (<mailto:edd@debian.org|edd@debian.org>) ---\nFor completeness, these Ubuntu releases have much longer _optional_ support,\nand we should expect some 'conservative users' (which may be HPC units in\nresearch centers as well as some commercial users) to deploy them well beyond\nthe May 2027 date sketeched here. And for whatever reason, these users expect\nto be able to go to CRAN and use current packages.\n\nFrom a quick google search summarizing what it at the Canonical site:\n\nThis will bite us on the C++ side where C++20 is now imposed (unless the\npackage overrides) and we have seen packages fail to compile on Ubuntu 22.04 as\nthe default compiler has 'some' C++20 support but not really enough.\n\nIt might be worthwhile considering making this default C++ standard conditional\non some host operating system characteristics.  I have already switched one\npackage to an explicit test of 'can I compile under C++20 with std::format' (==\na well-known C++20 feature not supported by the Ubuntu 22.04 cimpiler) and a\nfall back to C++17.  Otherwise for example the r-release-macos-x86_64 machine\nhits the wall.\n\nIt is a little harsh (but on the margin, feasible) to put this in the lap of a\npackage developer.  It is unrealistic to expect each system administrator to\ncope with this.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1778849019.206639",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "thread_ts": "1778849019.206639",
+        "reply_count": 7,
+        "reply_users_count": 2,
+        "latest_reply": "1778852420.126229",
+        "reply_users": [
+            "U081Z9041A5",
+            "U02HUL3G5L2"
+        ],
+        "replies": [
+            {
+                "user": "U081Z9041A5",
+                "ts": "1778849105.125639"
+            },
+            {
+                "user": "U02HUL3G5L2",
+                "ts": "1778851746.410619"
+            },
+            {
+                "user": "U081Z9041A5",
+                "ts": "1778851861.970449"
+            },
+            {
+                "user": "U081Z9041A5",
+                "ts": "1778851901.907719"
+            },
+            {
+                "user": "U081Z9041A5",
+                "ts": "1778851951.839409"
+            },
+            {
+                "user": "U02HUL3G5L2",
+                "ts": "1778852339.948999"
+            },
+            {
+                "user": "U081Z9041A5",
+                "ts": "1778852420.126229"
+            }
+        ],
+        "is_locked": false,
+        "subscribed": false,
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "mWW3=",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19073] Compilation requires C23 now?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19073"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nDirk Eddelbuettel ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:edd@debian.org",
+                                "text": "edd@debian.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |edd@debian.org\n\n--- Comment #4 from Dirk Eddelbuettel ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:edd@debian.org",
+                                "text": "edd@debian.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nFor completeness, these Ubuntu releases have much longer "
+                            },
+                            {
+                                "type": "text",
+                                "text": "optional",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " support,\nand we should expect some 'conservative users' (which may be HPC units in\nresearch centers as well as some commercial users) to deploy them well beyond\nthe May 2027 date sketeched here. And for whatever reason, these users expect\nto be able to go to CRAN and use current packages.\n\nFrom a quick google search summarizing what it at the Canonical site:\n\nThis will bite us on the C++ side where C++20 is now imposed (unless the\npackage overrides) and we have seen packages fail to compile on Ubuntu 22.04 as\nthe default compiler has 'some' C++20 support but not really enough.\n\nIt might be worthwhile considering making this default C++ standard conditional\non some host operating system characteristics.  I have already switched one\npackage to an explicit test of 'can I compile under C++20 with std::format' (==\na well-known C++20 feature not supported by the Ubuntu 22.04 cimpiler) and a\nfall back to C++17.  Otherwise for example the r-release-macos-x86_64 machine\nhits the wall.\n\nIt is a little harsh (but on the margin, feasible) to put this in the lap of a\npackage developer.  It is unrealistic to expect each system administrator to\ncope with this."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "user": "U081Z9041A5",
+        "type": "message",
+        "ts": "1778849105.125639",
+        "client_msg_id": "68a59bcb-c73c-4e1d-97e7-fc6b55ed9e48",
+        "text": "Boo.  That 'bugzillo to slack' converter dropped three full paragraphs I had there that are quoted.  Not sure we can do much about that.",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "g4e96ca7ae02",
+            "image_72": "https:\/\/secure.gravatar.com\/avatar\/4e96ca7ae02c37e7d940d17997d780e5.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0023-72.png",
+            "first_name": "Dirk",
+            "real_name": "Dirk Eddelbuettel",
+            "display_name": "Dirk Eddelbuettel",
+            "team": "T01DW9DLB2A",
+            "name": "edd",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1778849019.206639",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "nx2uS",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Boo.  That 'bugzillo to slack' converter dropped three full paragraphs I had there that are quoted.  Not sure we can do much about that."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19073] Compilation requires C23 now?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19073>\n\nBrian Ripley (<mailto:ripley@stats.ox.ac.uk|ripley@stats.ox.ac.uk>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #5 from Brian Ripley (<mailto:ripley@stats.ox.ac.uk|ripley@stats.ox.ac.uk>) ---\nIt seems this really is a compiler bug, one it seems not present in current\nreleases.\n\nAllowing labels before non-statements has long been a GNU C extension, and part\nof C23.  So -std=gnu2x requests (possibly incomplete) C23 support with GNU\nextensions, both reasons to accept this code, yet throws an error.\n\nLLVM clang is the default compiler on FreeBSD, which is one reason we test with\nit.  BUt I don't believe it is the default on Ubuntu 22.04.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1778851110.991389",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "LiY9",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19073] Compilation requires C23 now?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19073"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nBrian Ripley ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ripley@stats.ox.ac.uk",
+                                "text": "ripley@stats.ox.ac.uk",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #5 from Brian Ripley ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ripley@stats.ox.ac.uk",
+                                "text": "ripley@stats.ox.ac.uk",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nIt seems this really is a compiler bug, one it seems not present in current\nreleases.\n\nAllowing labels before non-statements has long been a GNU C extension, and part\nof C23.  So -std=gnu2x requests (possibly incomplete) C23 support with GNU\nextensions, both reasons to accept this code, yet throws an error.\n\nLLVM clang is the default compiler on FreeBSD, which is one reason we test with\nit.  BUt I don't believe it is the default on Ubuntu 22.04."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19073] Compilation requires C23 now?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19073>\n\n--- Comment #6 from Dirk Eddelbuettel (<mailto:edd@debian.org|edd@debian.org>) ---\nCorrect, and my comment was not about `clang` vs `gcc` but more about compiler\nstandards, when we switch them, and what we can expect on the user side.  \n\nAnd while personally I do what you do and stick with newer compilers, I also\nknow that the software we release will be used on older infrastructure where\nadmins may update R -- but not the compiler.  As Canonical supports 22.04 until\n2035, we should not expect it to go away by next May (though hopefully the\nmajority of system may migrate to newer LTS releases).  \n\nAnd with that, I still think we will hit user issues with C++20 compilation on\nthese older systems.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1778851609.012109",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "1I1AW",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19073] Compilation requires C23 now?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19073"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #6 from Dirk Eddelbuettel ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:edd@debian.org",
+                                "text": "edd@debian.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCorrect, and my comment was not about "
+                            },
+                            {
+                                "type": "text",
+                                "text": "clang",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " vs "
+                            },
+                            {
+                                "type": "text",
+                                "text": "gcc",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " but more about compiler\nstandards, when we switch them, and what we can expect on the user side.  \n\nAnd while personally I do what you do and stick with newer compilers, I also\nknow that the software we release will be used on older infrastructure where\nadmins may update R -- but not the compiler.  As Canonical supports 22.04 until\n2035, we should not expect it to go away by next May (though hopefully the\nmajority of system may migrate to newer LTS releases).  \n\nAnd with that, I still think we will hit user issues with C++20 compilation on\nthese older systems."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "user": "U02HUL3G5L2",
+        "type": "message",
+        "ts": "1778851746.410619",
+        "client_msg_id": "db32f1b9-f9ab-4b6f-bc49-19c7c3777dce",
+        "text": "... 15 years extended support. I hope the ubuntu security engineers are well remunerated :grimacing:",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "977af759eea9",
+            "image_72": "https:\/\/avatars.slack-edge.com\/2021-10-14\/2599997202470_977af759eea959cbafdf_72.jpg",
+            "first_name": "Tim",
+            "real_name": "Tim Taylor",
+            "display_name": "Tim Taylor",
+            "team": "T01DW9DLB2A",
+            "name": "tim.taylor",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1778849019.206639",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "oSBhK",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "... 15 years extended support. I hope the ubuntu security engineers are well remunerated "
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "grimacing",
+                                "unicode": "1f62c"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "user": "U081Z9041A5",
+        "type": "message",
+        "ts": "1778851861.970449",
+        "client_msg_id": "622b045f-035a-4516-ac6f-7f1550324b02",
+        "text": "I think that is actually a viable commercial proposition (as part of a support bundle).  Canonical is often rumored to be pre-IPO.  All our esteemed friends at posit will know a thing or two about supporting 'open sauce' for a fee.",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "g4e96ca7ae02",
+            "image_72": "https:\/\/secure.gravatar.com\/avatar\/4e96ca7ae02c37e7d940d17997d780e5.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0023-72.png",
+            "first_name": "Dirk",
+            "real_name": "Dirk Eddelbuettel",
+            "display_name": "Dirk Eddelbuettel",
+            "team": "T01DW9DLB2A",
+            "name": "edd",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1778849019.206639",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "lYJ\/9",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I think that is actually a viable commercial proposition (as part of a support bundle).  Canonical is often rumored to be pre-IPO.  All our esteemed friends at posit will know a thing or two about supporting 'open sauce' for a fee."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "user": "U081Z9041A5",
+        "type": "message",
+        "ts": "1778851901.907719",
+        "client_msg_id": "d1ea0443-e39b-4394-9976-a11273e5e530",
+        "text": "Now I have to find my Linux system from 15 years ago to show you how it's done ....  :joy_cat:",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "g4e96ca7ae02",
+            "image_72": "https:\/\/secure.gravatar.com\/avatar\/4e96ca7ae02c37e7d940d17997d780e5.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0023-72.png",
+            "first_name": "Dirk",
+            "real_name": "Dirk Eddelbuettel",
+            "display_name": "Dirk Eddelbuettel",
+            "team": "T01DW9DLB2A",
+            "name": "edd",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1778849019.206639",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "aeMWv",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Now I have to find my Linux system from 15 years ago to show you how it's done ....  "
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "joy_cat",
+                                "unicode": "1f639"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "user": "U081Z9041A5",
+        "type": "message",
+        "ts": "1778851951.839409",
+        "client_msg_id": "5bc4b6fb-73cc-446d-84fd-4b8e9f72d5a9",
+        "text": "Fighting over the differences between gcc 4.8 and 4.9. Oh those were the days in 2011...",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "g4e96ca7ae02",
+            "image_72": "https:\/\/secure.gravatar.com\/avatar\/4e96ca7ae02c37e7d940d17997d780e5.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0023-72.png",
+            "first_name": "Dirk",
+            "real_name": "Dirk Eddelbuettel",
+            "display_name": "Dirk Eddelbuettel",
+            "team": "T01DW9DLB2A",
+            "name": "edd",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1778849019.206639",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "2IKr8",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Fighting over the differences between gcc 4.8 and 4.9. Oh those were the days in 2011..."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19073] Compilation requires C23 now?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19073>\n\n--- Comment #7 from Gabor Csardi (<mailto:csardi.gabor@gmail.com|csardi.gabor@gmail.com>) ---\nCreated attachment 3697\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3697&amp;action=edit>\nDockerfile\n\n```\n❯ docker build .\n```\n\n[...]\n\n```\n52.65 clang -I\"..\/..\/..\/..\/include\" -DNDEBUG -I..\/..\/..\/include\n-I..\/..\/..\/..\/src\/include -DHAVE_CONFIG_H  -I\/usr\/local\/include  \n-fvisibility=hidden -fPIC  -g -O2  -c stl.c -o stl.o\n52.67 stl.c:484:5: error: expected expression\n52.67     int k = i, l = j,\n52.67     ^\n52.67 stl.c:486:18: error: use of undeclared identifier 'ij'\n52.67     double t = a[ij];\n52.67                  ^\n52.67 stl.c:488:4: error: use of undeclared identifier 'ij'\n52.68         a[ij] = a[i]; a[i] = t; t = a[ij];\n52.68           ^\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1778852215.161669",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "nAQ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19073] Compilation requires C23 now?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19073"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #7 from Gabor Csardi ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:csardi.gabor@gmail.com",
+                                "text": "csardi.gabor@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3697\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3697&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3697&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nDockerfile\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "❯ docker build .\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n[...]\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "52.65 clang -I\"..\/..\/..\/..\/include\" -DNDEBUG -I..\/..\/..\/include\n-I..\/..\/..\/..\/src\/include -DHAVE_CONFIG_H  -I\/usr\/local\/include  \n-fvisibility=hidden -fPIC  -g -O2  -c stl.c -o stl.o\n52.67 stl.c:484:5: error: expected expression\n52.67     int k = i, l = j,\n52.67     ^\n52.67 stl.c:486:18: error: use of undeclared identifier 'ij'\n52.67     double t = a[ij];\n52.67                  ^\n52.67 stl.c:488:4: error: use of undeclared identifier 'ij'\n52.68         a[ij] = a[i]; a[i] = t; t = a[ij];\n52.68           ^\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "user": "U02HUL3G5L2",
+        "type": "message",
+        "ts": "1778852339.948999",
+        "edited": {
+            "user": "U02HUL3G5L2",
+            "ts": "1778852352.000000"
+        },
+        "client_msg_id": "00dadfee-8d3e-4ff9-a2d2-26f5d30b3877",
+        "text": "Yes clearly they've customers who have asked for it . Backporting all the patches must be fun. Maybe there won't be any CVEs left by then  :sweat_smile:.",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "977af759eea9",
+            "image_72": "https:\/\/avatars.slack-edge.com\/2021-10-14\/2599997202470_977af759eea959cbafdf_72.jpg",
+            "first_name": "Tim",
+            "real_name": "Tim Taylor",
+            "display_name": "Tim Taylor",
+            "team": "T01DW9DLB2A",
+            "name": "tim.taylor",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1778849019.206639",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "NawQJ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Yes clearly they've customers who have asked for it . Backporting all the patches must be fun. Maybe there won't be any CVEs left by then  "
+                            },
+                            {
+                                "type": "emoji",
+                                "name": "sweat_smile",
+                                "unicode": "1f605"
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19073] Compilation requires C23 now?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19073>\n\n--- Comment #8 from Gabor Csardi (<mailto:csardi.gabor@gmail.com|csardi.gabor@gmail.com>) ---\nI added a minimal `Dockerfile` that reproduces this. \n\nclang is indeed not the default compiler on Ubuntu 22.04. \n\nOn the other hand this is still a C23 feature AFAICT, so avoiding it seems best\nto me, considering the C99 requirement documented in the R admin manual.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1778852400.623339",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "sMnC7",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19073] Compilation requires C23 now?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19073"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #8 from Gabor Csardi ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:csardi.gabor@gmail.com",
+                                "text": "csardi.gabor@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI added a minimal "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Dockerfile",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " that reproduces this. \n\nclang is indeed not the default compiler on Ubuntu 22.04. \n\nOn the other hand this is still a C23 feature AFAICT, so avoiding it seems best\nto me, considering the C99 requirement documented in the R admin manual."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "user": "U081Z9041A5",
+        "type": "message",
+        "ts": "1778852420.126229",
+        "client_msg_id": "0090137d-aec9-4360-8577-a271355346c7",
+        "text": "Something something agents something ...",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "g4e96ca7ae02",
+            "image_72": "https:\/\/secure.gravatar.com\/avatar\/4e96ca7ae02c37e7d940d17997d780e5.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0023-72.png",
+            "first_name": "Dirk",
+            "real_name": "Dirk Eddelbuettel",
+            "display_name": "Dirk Eddelbuettel",
+            "team": "T01DW9DLB2A",
+            "name": "edd",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1778849019.206639",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "L+r9A",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Something something agents something ..."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19074] New: parallel::makeCluster(&lt;cluster&gt;, type = \"PSOCK\") does not give an error*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19074>\n\n            Bug ID: 19074\n           Summary: parallel::makeCluster(&lt;cluster&gt;, type = \"PSOCK\") does\n                    not give an error\n           Product: R\n           Version: R 4.6.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Misc\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:henrikb@braju.com|henrikb@braju.com>\n\nDoing:\n\n```\ncl &lt;- parallel::makeCluster(2)\ncl2 &lt;- parallel::makeCluster(cl)\n```\n\nCreates two different 'PSOCK' clusters each with two cluster nodes. Should the\nlatter be an error?\n\nMore specifically, this happens with:\n\n```\nparallel::makeCluster(cl, type = \"PSOCK\") # default\nparallel::makeCluster(cl, type = \"SOCK\")\n```\n\nwhile we do indeed get errors if we try:\n\n```\n&gt; parallel::makeCluster(cl, type = \"FORK\")\nError in makeForkCluster(nnodes = spec, ...) :\n  'list' object cannot be coerced to type 'integer'\n\n&gt; parallel::makeCluster(cl, type = \"MPI\")\nError in Rmpi::mpi.comm.spawn(slave = mpitask, slavearg = args, nslaves =\ncount,  :\n  'list' object cannot be coerced to type 'double'\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1778862112.304839",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "U5dLd",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19074] New: parallel::makeCluster(<cluster>, type = \"PSOCK\") does not give an error",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19074"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19074\n           Summary: parallel::makeCluster(<cluster>, type = \"PSOCK\") does\n                    not give an error\n           Product: R\n           Version: R 4.6.x\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Misc\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:henrikb@braju.com",
+                                "text": "henrikb@braju.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nDoing:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "cl <- parallel::makeCluster(2)\ncl2 <- parallel::makeCluster(cl)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nCreates two different 'PSOCK' clusters each with two cluster nodes. Should the\nlatter be an error?\n\nMore specifically, this happens with:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "parallel::makeCluster(cl, type = \"PSOCK\") # default\nparallel::makeCluster(cl, type = \"SOCK\")\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nwhile we do indeed get errors if we try:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> parallel::makeCluster(cl, type = \"FORK\")\nError in makeForkCluster(nnodes = spec, ...) :\n  'list' object cannot be coerced to type 'integer'\n\n> parallel::makeCluster(cl, type = \"MPI\")\nError in Rmpi::mpi.comm.spawn(slave = mpitask, slavearg = args, nslaves =\ncount,  :\n  'list' object cannot be coerced to type 'double'\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19069] aperm(X, 1:length(dim(X))) should short-circuit and just return X.*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19069>\n\n--- Comment #13 from Kurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) ---\nI agree that it would make sense to have aperm.default() in sync with\nt.default().\n\nIt would be good to take a closer look at the list of breakages I got:\nsome of the error call stacks looked similar, so maybe only a smaller\nnumber of packages need fixing.  \n\nI don't think the default methods needs an extra keep.class or similar\nargument.  If it is not appropriate for a certain class that aperm keep\nthe class or other attributes, then one can provide methods which do\nwhat is more appropriate.\n\nIn any case, we need to augment the patch to handle resize = FALSE.\nMaybe we can simply put the \n\n+        bool skip = true;\n+        for (i = 0; i &lt; n; i++) if (pp[i] != i) {skip = false; break;}\n+        if (skip) {UNPROTECT(1); return(a);}\n\ninside if(resize)?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1778862813.629599",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Rffx",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19069] aperm(X, 1:length(dim(X))) should short-circuit and just return X.",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19069"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #13 from Kurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI agree that it would make sense to have aperm.default() in sync with\nt.default().\n\nIt would be good to take a closer look at the list of breakages I got:\nsome of the error call stacks looked similar, so maybe only a smaller\nnumber of packages need fixing.  \n\nI don't think the default methods needs an extra keep.class or similar\nargument.  If it is not appropriate for a certain class that aperm keep\nthe class or other attributes, then one can provide methods which do\nwhat is more appropriate.\n\nIn any case, we need to augment the patch to handle resize = FALSE.\nMaybe we can simply put the \n\n+        bool skip = true;\n+        for (i = 0; i < n; i++) if (pp[i] != i) {skip = false; break;}\n+        if (skip) {UNPROTECT(1); return(a);}\n\ninside if(resize)?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

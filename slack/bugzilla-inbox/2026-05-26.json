@@ -1,0 +1,541 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 17684] X11 event handling regression (?) in scrolling detection*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=17684>\n\n--- Comment #6 from Trevor Davis (<mailto:trevor.l.davis@gmail.com|trevor.l.davis@gmail.com>) ---\nCreated attachment 3709\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3709&amp;action=edit>\nAlso add scroll detection to `windows()`\n\nThis patch augments the previous patch by also adding scroll detection to\n`windows()` using the same `X11()` style system where a scroll up is\nrepresented by a mouse down and mouse up event with integer `3L` and a scroll\ndown is represented by a mouse down and mouse up event with integer `4L`.\n\nI've also tweaked the testing code from a previous comment to also provide\ninformation about mouse x\/y coordinates to help verify that the patched code\npreserves (x,y) mouse coordinate conventions when the various events are\ntriggered:\n\n```\nmousemove &lt;- function(buttons, x, y) {\n    cat(sprintf(\"mousemove   buttons=%s x=%.3f y=%.3f\\n\", toString(buttons), x,\ny))\n    NULL\n}\nmousedown &lt;- function(buttons, x, y) {\n    cat(sprintf(\"mousedown   buttons=%s x=%.3f y=%.3f\\n\", toString(buttons), x,\ny))\n    NULL\n}\nmouseup &lt;- function(buttons, x, y) {\n    cat(sprintf(\"mouseup     buttons=%s x=%.3f y=%.3f\\n\", toString(buttons), x,\ny))\n    NULL\n}\nkeystroke &lt;- function(key) {\n    cat(sprintf(\"keystroke   key=%s\\n\", key))\n    NULL\n}\n\nif (identical(.Platform$OS.type, \"unix\")) {\n    x11(type = \"Xlib\")\n} else {\n    windows()\n}\npar(mar = c(0, 0, 0, 0))\nplot.new()\ngetGraphicsEvent(onMouseMove = mousemove, onMouseDown = mousedown,\n                 onMouseUp = mouseup, onKeybd = keystroke)\n```\n\nNote unlike with `X11` where scrolling are modeled as discrete button presses\nthat instead Windows scrolling events also have information about scrolling\ndeltas.  Currently the magnitudes of these scrolling deltas are being ignored\nsince `doMouseEvent` currently does not have the signature to support passing\nsuch scroll delta information.\n\nOne side effect of this patch is that in `windows()` scrolling should now\nterminate `locator()` which will match the current `x11()` behavior.  For\n`locator()` what should happen for `windows()` isn't documented but for `X11()`\nit says:\n\n&gt; For the usual 'X11' device the identification process is terminated by pressing any mouse button other than the first.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1779779469.718369",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "byD",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 17684] X11 event handling regression (?) in scrolling detection",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=17684"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #6 from Trevor Davis ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:trevor.l.davis@gmail.com",
+                                "text": "trevor.l.davis@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3709\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3709&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3709&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nAlso add scroll detection to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "windows()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThis patch augments the previous patch by also adding scroll detection to\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "windows()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " using the same "
+                            },
+                            {
+                                "type": "text",
+                                "text": "X11()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " style system where a scroll up is\nrepresented by a mouse down and mouse up event with integer "
+                            },
+                            {
+                                "type": "text",
+                                "text": "3L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and a scroll\ndown is represented by a mouse down and mouse up event with integer "
+                            },
+                            {
+                                "type": "text",
+                                "text": "4L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nI've also tweaked the testing code from a previous comment to also provide\ninformation about mouse x\/y coordinates to help verify that the patched code\npreserves (x,y) mouse coordinate conventions when the various events are\ntriggered:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "mousemove <- function(buttons, x, y) {\n    cat(sprintf(\"mousemove   buttons=%s x=%.3f y=%.3f\\n\", toString(buttons), x,\ny))\n    NULL\n}\nmousedown <- function(buttons, x, y) {\n    cat(sprintf(\"mousedown   buttons=%s x=%.3f y=%.3f\\n\", toString(buttons), x,\ny))\n    NULL\n}\nmouseup <- function(buttons, x, y) {\n    cat(sprintf(\"mouseup     buttons=%s x=%.3f y=%.3f\\n\", toString(buttons), x,\ny))\n    NULL\n}\nkeystroke <- function(key) {\n    cat(sprintf(\"keystroke   key=%s\\n\", key))\n    NULL\n}\n\nif (identical(.Platform$OS.type, \"unix\")) {\n    x11(type = \"Xlib\")\n} else {\n    windows()\n}\npar(mar = c(0, 0, 0, 0))\nplot.new()\ngetGraphicsEvent(onMouseMove = mousemove, onMouseDown = mousedown,\n                 onMouseUp = mouseup, onKeybd = keystroke)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nNote unlike with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "X11",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " where scrolling are modeled as discrete button presses\nthat instead Windows scrolling events also have information about scrolling\ndeltas.  Currently the magnitudes of these scrolling deltas are being ignored\nsince "
+                            },
+                            {
+                                "type": "text",
+                                "text": "doMouseEvent",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " currently does not have the signature to support passing\nsuch scroll delta information.\n\nOne side effect of this patch is that in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "windows()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " scrolling should now\nterminate "
+                            },
+                            {
+                                "type": "text",
+                                "text": "locator()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " which will match the current "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x11()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " behavior.  For\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "locator()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " what should happen for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "windows()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " isn't documented but for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "X11()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nit says:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "For the usual 'X11' device the identification process is terminated by pressing any mouse button other than the first."
+                            }
+                        ],
+                        "contains_padding": true
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18364] Initializing Column Improper Length*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18364>\n\n--- Comment #11 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\n(In reply to Suharto Anggono from comment #10)\nHave you noticed that, in the example above,  \ncolumn `z1` become `1 1 1 1` and  \ncolumn `z2` become `NA 1 NA 1`, while  \n`df$z3[3] &lt;- 1` fails with\n\n    Error in `$&lt;-.data.frame`(`*tmp*`, z3, value = c(NA, NA, 1)) : \n      replacement has 3 rows, data has 4\n\n?\n\nI suggest reverting r90069. For me, the added part to Extract.data.frame.Rd\ndoesn't really  add information and can be misleading.\n\nIf wanted, example like the example above can be added to \"Examples\", maybe\nalong with `x[i, j] &lt;- value` counterpart.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1779836999.233949",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "2IrF",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18364] Initializing Column Improper Length",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18364"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #11 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Suharto Anggono from comment #10)\nHave you noticed that, in the example above,  \ncolumn "
+                            },
+                            {
+                                "type": "text",
+                                "text": "z1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " become "
+                            },
+                            {
+                                "type": "text",
+                                "text": "1 1 1 1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and  \ncolumn "
+                            },
+                            {
+                                "type": "text",
+                                "text": "z2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " become "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA 1 NA 1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", while  \n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "df$z3[3] <- 1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " fails with\n\n    Error in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "$<-.data.frame",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "("
+                            },
+                            {
+                                "type": "text",
+                                "text": "*tmp*",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", z3, value = c(NA, NA, 1)) : \n      replacement has 3 rows, data has 4\n\n?\n\nI suggest reverting r90069. For me, the added part to Extract.data.frame.Rd\ndoesn't really  add information and can be misleading.\n\nIf wanted, example like the example above can be added to \"Examples\", maybe\nalong with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x[i, j] <- value",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " counterpart."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18364] Initializing Column Improper Length*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18364>\n\nGabriel Becker (<mailto:gabembecker@gmail.com|gabembecker@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3700|0                           |1\n        is obsolete|                            |\n\n--- Comment #12 from Gabriel Becker (<mailto:gabembecker@gmail.com|gabembecker@gmail.com>) ---\nCreated attachment 3710\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3710&amp;action=edit>\nRevision of doc patch\n\nExplicitly differentiates `x$c[3:4]&lt;-5` and `x[3:4, \"c\"] &lt;-5` behavior as\npointed bout by Suharto",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1779841934.743789",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "c8G5",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18364] Initializing Column Improper Length",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18364"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nGabriel Becker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:gabembecker@gmail.com",
+                                "text": "gabembecker@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3700|0                           |1\n        is obsolete|                            |\n\n--- Comment #12 from Gabriel Becker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:gabembecker@gmail.com",
+                                "text": "gabembecker@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3710\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3710&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3710&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nRevision of doc patch\n\nExplicitly differentiates "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x$c[3:4]<-5",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x[3:4, \"c\"] <-5",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " behavior as\npointed bout by Suharto"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19078] New: Add flexiblas detection to autoconf scripts*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19078>\n\n            Bug ID: 19078\n           Summary: Add flexiblas detection to autoconf scripts\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: enhancement\n          Priority: P5\n         Component: Wishlist\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:andrew@robbinsa.me|andrew@robbinsa.me>\n\nCreated attachment 3711\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3711&amp;action=edit>\npatch\n\nFlexiblas is the default implementation of blas for all redhat-like distros\nsince fedora 33 and rhel9. Currently those distros specify\n--with-blas=flexiblas explicitly, which does work, but should not be necessary.\nAutoconf-Archives has had the ability to detect it automatically for the last\nfew years--I have simply ported that over to R.m4.\n\n(I also was the author of this PR to autoconf-archives, so there's no\nattribution issues here)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1779858436.527359",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "lN55z",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19078] New: Add flexiblas detection to autoconf scripts",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19078"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19078\n           Summary: Add flexiblas detection to autoconf scripts\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: enhancement\n          Priority: P5\n         Component: Wishlist\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:andrew@robbinsa.me",
+                                "text": "andrew@robbinsa.me"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3711\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3711&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3711&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\npatch\n\nFlexiblas is the default implementation of blas for all redhat-like distros\nsince fedora 33 and rhel9. Currently those distros specify\n--with-blas=flexiblas explicitly, which does work, but should not be necessary.\nAutoconf-Archives has had the ability to detect it automatically for the last\nfew years--I have simply ported that over to R.m4.\n\n(I also was the author of this PR to autoconf-archives, so there's no\nattribution issues here)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

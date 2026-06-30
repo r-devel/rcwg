@@ -1,0 +1,224 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19030] New: Enable constant folding of paste \/ paste0?*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19030>\n\n            Bug ID: 19030\n           Summary: Enable constant folding of paste \/ paste0?\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Wishlist\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nCreated attachment 3644\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3644&amp;action=edit>\nAdd paste, paste0 to compiler:::foldFuns.\n\nA somewhat common pattern in R packages \/ R code is to use `paste()` and\n`paste0()` to construct larger strings from literals. For example:\n\n```\n  regex &lt;- paste0(\n    \"^(?&lt;leading_dots&gt;[.]{0,2})\",\n    \"(?&lt;numbers&gt;[0-9]*)\",\n    \"(?&lt;leftovers&gt;[^0-9]?.*$)\"\n  )\n```\n\nCould these functions be constant folded \/ evaluated at compile-time during\nbyte code compilation? If I understand correctly, they could be added to the\n`compiler:::foldFuns` list, and the existing infrastructure would handle it\ncorrectly out-of-the-box.\n\n```\nIndex: src\/library\/compiler\/R\/cmp.R\n===================================================================\n--- src\/library\/compiler\/R\/cmp.R        (revision 89685)\n+++ src\/library\/compiler\/R\/cmp.R        (working copy)\n@@ -502,7 +502,7 @@\n foldFuns &lt;- c(\"+\", \"-\", \"*\", \"\/\", \"^\", \"(\",\n               \"&gt;\", \"&gt;=\", \"==\", \"!=\", \"&lt;\", \"&lt;=\", \"||\", \"&amp;&amp;\", \"!\",\n               \"|\", \"&amp;\", \"%%\",\n-              \"c\", \"rep\", \":\",\n+              \"c\", \"rep\", \":\", \"paste\", \"paste0\",\n               \"abs\", \"acos\", \"acosh\", \"asin\", \"asinh\", \"atan\", \"atan2\",\n               \"atanh\", \"ceiling\", \"choose\", \"cos\", \"cosh\", \"exp\", \"expm1\",\n               \"floor\", \"gamma\", \"lbeta\", \"lchoose\", \"lgamma\", \"log\", \"log10\",\n```\n\n---\n\n```\n$ R --version\nR version 4.5.3 (2026-03-11) -- \"Reassured Reassurer\"\nCopyright (C) 2026 The R Foundation for Statistical Computing\nPlatform: aarch64-apple-darwin20\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1774565471.902289",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "tyJyz",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19030] New: Enable constant folding of paste \/ paste0?",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19030"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19030\n           Summary: Enable constant folding of paste \/ paste0?\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Wishlist\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3644\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3644&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3644&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nAdd paste, paste0 to compiler:::foldFuns.\n\nA somewhat common pattern in R packages \/ R code is to use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "paste()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "paste0()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to construct larger strings from literals. For example:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "  regex <- paste0(\n    \"^(?<leading_dots>[.]{0,2})\",\n    \"(?<numbers>[0-9]*)\",\n    \"(?<leftovers>[^0-9]?.*$)\"\n  )\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nCould these functions be constant folded \/ evaluated at compile-time during\nbyte code compilation? If I understand correctly, they could be added to the\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "compiler:::foldFuns",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " list, and the existing infrastructure would handle it\ncorrectly out-of-the-box.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/compiler\/R\/cmp.R\n===================================================================\n--- src\/library\/compiler\/R\/cmp.R        (revision 89685)\n+++ src\/library\/compiler\/R\/cmp.R        (working copy)\n@@ -502,7 +502,7 @@\n foldFuns <- c(\"+\", \"-\", \"*\", \"\/\", \"^\", \"(\",\n               \">\", \">=\", \"==\", \"!=\", \"<\", \"<=\", \"||\", \"&&\", \"!\",\n               \"|\", \"&\", \"%%\",\n-              \"c\", \"rep\", \":\",\n+              \"c\", \"rep\", \":\", \"paste\", \"paste0\",\n               \"abs\", \"acos\", \"acosh\", \"asin\", \"asinh\", \"atan\", \"atan2\",\n               \"atanh\", \"ceiling\", \"choose\", \"cos\", \"cosh\", \"exp\", \"expm1\",\n               \"floor\", \"gamma\", \"lbeta\", \"lchoose\", \"lgamma\", \"log\", \"log10\",\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n---\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "$ R --version\nR version 4.5.3 (2026-03-11) -- \"Reassured Reassurer\"\nCopyright (C) 2026 The R Foundation for Statistical Computing\nPlatform: aarch64-apple-darwin20\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19031] New: patch: implement fast path for |, &amp; in byte code evaluator*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19031>\n\n            Bug ID: 19031\n           Summary: patch: implement fast path for |, &amp; in byte code\n                    evaluator\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nCreated attachment 3645\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3645&amp;action=edit>\nImplement FastLogic2.\n\nFastLogic2 was just falling back to Builtin2; this patch implements the actual\ndispatch to support fast evaluation here.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1774569656.698129",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Qq7+",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19031] New: patch: implement fast path for |, & in byte code evaluator",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19031"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19031\n           Summary: patch: implement fast path for |, & in byte code\n                    evaluator\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3645\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3645&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3645&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nImplement FastLogic2.\n\nFastLogic2 was just falling back to Builtin2; this patch implements the actual\ndispatch to support fast evaluation here."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

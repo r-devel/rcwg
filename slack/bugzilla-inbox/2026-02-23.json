@@ -1,0 +1,553 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19001] utils:::str.default() does not omit \"List of ...\" when called via NextMethod() by a registered S3 method*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19001>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #2 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\n(In reply to Martin Maechler from comment #1)\n&gt; ... very probably adopting a solution equal or similar to your proposed ones.\n\nI've indeed chosen your simple  `identical(sys.function(-1), NextMethod)`\nproposal  which is not \"perfect\"  in the sense that one can construct cases\nwhere `NexMethod` would e.g., be `sys.function(-2)`  but it makes sense to\nsimplify the code here.\nNote that the original code has been *very* old, i.e., last millennium and\n\"worked\" in S-plus 3.4 and early versions of R...\n\nCommitted a few minutes ago, as svn rev 89461 .",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1771852198.579919",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "e1Y42",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19001] utils:::str.default() does not omit \"List of ...\" when called via NextMethod() by a registered S3 method",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19001"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #2 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Martin Maechler from comment #1)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "... very probably adopting a solution equal or similar to your proposed ones."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI've indeed chosen your simple  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "identical(sys.function(-1), NextMethod)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nproposal  which is not \"perfect\"  in the sense that one can construct cases\nwhere "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NexMethod",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " would e.g., be "
+                            },
+                            {
+                                "type": "text",
+                                "text": "sys.function(-2)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  but it makes sense to\nsimplify the code here.\nNote that the original code has been "
+                            },
+                            {
+                                "type": "text",
+                                "text": "very",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " old, i.e., last millennium and\n\"worked\" in S-plus 3.4 and early versions of R...\n\nCommitted a few minutes ago, as svn rev 89461 ."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19008] on.exit() at top level is a silent no-op*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19008>\n\nLuke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |luke@stat.uiowa.edu\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #1 from Luke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) ---\n(In reply to Kevin Ushey from comment #0)\n&gt; For example, consider the script:\n&gt; \n&gt; ```\n&gt; on.exit(print(\"exit\"))\n&gt; ```\n&gt; \n&gt; This exit handler will not be executed if at the top-level; e.g. if executed\n&gt; via something like `R -f script.R`. However, it will be executed if run via\n&gt; `source(\"script.R\")`.\n&gt; \n&gt; Is this intentional? If so, I think it's worth documenting this caveat more\n&gt; explicitly in `?on.exit`. Strictly speaking, I believe it behaves as\n&gt; documented, since in the `Rscript -f script.R` example there indeed is no\n&gt; parent function context for `on.exit()` to attach to, but that is likely\n&gt; only apparent to R experts.\n\nIt is consistent with the documentation. I can't see how the `Rscript` case\nwould be surprising. The `source()` case may be, but many things can be\nsurprising when `eval()` is involved. I don't think there would be any harm in\nsignaling a warning, or maybe even an error, when no current function is found,\nbut I'm not sure it is worth it.\n\n&gt; If not, it would be helpful if these handlers could be registered and\n&gt; executed on process exit at some appropriate point.\n\nI don't think overloading `on.exit` for this would be a good idea. A separate\nmechanism could be added for this but it would be a fair bit of work and I'm\nnot sure it is worth the effort. `reg.finalizer` is already available for some\nof this. If you want to pursue this you can submit a WISHLIST item, preferably\nwith a proposed patch.\n\nI'll leave this open for now, but my current inclination is to close as\nWONTFIX.\n\n&gt; For posterity, I bumped into this with code of the form:\n&gt; \n&gt; ```\n&gt; conn &lt;- socketConnection(...)\n&gt; on.exit(close(conn))\n&gt; ```\n&gt; \n&gt; ---\n&gt; \n&gt; ```\n&gt; &gt; utils::sessionInfo()\n&gt; R version 4.5.1 (2025-06-13)\n&gt; Platform: aarch64-apple-darwin20\n&gt; Running under: macOS Tahoe 26.2\n&gt; ```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1771853705.127719",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "OTer4",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19008] on.exit() at top level is a silent no-op",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19008"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nLuke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |luke@stat.uiowa.edu\n             Status|UNCONFIRMED                 |CONFIRMED\n     Ever confirmed|0                           |1\n\n--- Comment #1 from Luke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Kevin Ushey from comment #0)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "For example, consider the script:\n \n "
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> on.exit(print(\"exit\"))\n> "
+                            }
+                        ],
+                        "border": 1
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " \n This exit handler will not be executed if at the top-level; e.g. if executed\n via something like "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R -f script.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". However, it will be executed if run via\n "
+                            },
+                            {
+                                "type": "text",
+                                "text": "source(\"script.R\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n \n Is this intentional? If so, I think it's worth documenting this caveat more\n explicitly in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "?on.exit",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". Strictly speaking, I believe it behaves as\n documented, since in the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rscript -f script.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " example there indeed is no\n parent function context for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "on.exit()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to attach to, but that is likely\n only apparent to R experts."
+                            }
+                        ],
+                        "contains_padding": false
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIt is consistent with the documentation. I can't see how the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rscript",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " case\nwould be surprising. The "
+                            },
+                            {
+                                "type": "text",
+                                "text": "source()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " case may be, but many things can be\nsurprising when "
+                            },
+                            {
+                                "type": "text",
+                                "text": "eval()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is involved. I don't think there would be any harm in\nsignaling a warning, or maybe even an error, when no current function is found,\nbut I'm not sure it is worth it.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "If not, it would be helpful if these handlers could be registered and\n executed on process exit at some appropriate point."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI don't think overloading "
+                            },
+                            {
+                                "type": "text",
+                                "text": "on.exit",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for this would be a good idea. A separate\nmechanism could be added for this but it would be a fair bit of work and I'm\nnot sure it is worth the effort. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "reg.finalizer",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is already available for some\nof this. If you want to pursue this you can submit a WISHLIST item, preferably\nwith a proposed patch.\n\nI'll leave this open for now, but my current inclination is to close as\nWONTFIX.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "For posterity, I bumped into this with code of the form:\n \n "
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> conn <- socketConnection(...)\n> on.exit(close(conn))\n> "
+                            }
+                        ],
+                        "border": 1
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": " \n ---\n \n "
+                            }
+                        ],
+                        "contains_padding": false
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> > utils::sessionInfo()\n> R version 4.5.1 (2025-06-13)\n> Platform: aarch64-apple-darwin20\n> Running under: macOS Tahoe 26.2\n> "
+                            }
+                        ],
+                        "border": 1
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19007] labels are not parallel to axes in persp() plot on Debian Linux*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19007>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #3 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\n(In reply to Klaus Schliep from comment #2)\n&gt; Thanks, I can confirm that fixed the problem.\n\nand thank you for the confirmation.  This is now also in R-patched\n... which should become R 4.5.3 on March 11 as was just announced:\n\n  <https:\/\/stat.ethz.ch\/pipermail\/r-announce\/2026\/000717.html>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1771865060.817789",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "DZED",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19007] labels are not parallel to axes in persp() plot on Debian Linux",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19007"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CONFIRMED                   |CLOSED\n         Resolution|---                         |FIXED\n\n--- Comment #3 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Klaus Schliep from comment #2)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Thanks, I can confirm that fixed the problem."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nand thank you for the confirmation.  This is now also in R-patched\n... which should become R 4.5.3 on March 11 as was just announced:\n\n  "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-announce\/2026\/000717.html"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18972] diff(x=&lt;m-by-n&gt;, l, d) drops dimensions when l*d &gt;= m*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18972>\n\n--- Comment #10 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\n(In reply to Suharto Anggono from comment #5)\n&gt; Created attachment 3572\n&gt; No early return for lag * differences &gt;= xlen\n\nInstead of\n\n    r[if (lag &lt; (len &lt;- nrow(r))) -len:-(len - lag + 1) else integer(), , drop\n= FALSE]\n\nand\n\n    r[if (lag &lt; (len &lt;- length(r))) -len:-(len - lag + 1L) else integer()]\n\n, now I prefer\n\n    r[-nrow(r):-max(nrow(r) - lag + 1L, 1L), , drop = FALSE]\n\nand\n\n    r[-length(r):-max(length(r) - lag + 1L, 1L)]\n\n.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1771900529.539129",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "d53Gz",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "*[Bug 18972] diff(x=<m-by-n>, l, d) drops dimensions when l*d >= m*\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18972"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #10 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Suharto Anggono from comment #5)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Created attachment 3572\n No early return for lag * differences >= xlen"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nInstead of\n\n    r[if (lag < (len <- nrow(r))) -len:-(len - lag + 1) else integer(), , drop\n= FALSE]\n\nand\n\n    r[if (lag < (len <- length(r))) -len:-(len - lag + 1L) else integer()]\n\n, now I prefer\n\n    r[-nrow(r):-max(nrow(r) - lag + 1L, 1L), , drop = FALSE]\n\nand\n\n    r[-length(r):-max(length(r) - lag + 1L, 1L)]\n\n."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

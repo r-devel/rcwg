@@ -49,9 +49,11 @@ buffer_createpost <- function(
         elem$clickElement()
     }
 
-    elem <- browser$findElement(using = 'xpath',
-                                "//button[@aria-label='linkedin channel (selected)']")
-    elem$clickElement()
+    if (!"linkedin" %in% venue) {
+        elem <- browser$findElement(using = 'xpath',
+                                    "//button[@aria-label='linkedin channel (selected)']")
+        elem$clickElement()
+    }
 
     elem <- browser$findElement(using = 'xpath',
                                 "//div[@role='textbox']")

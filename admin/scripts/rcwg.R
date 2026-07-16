@@ -4,25 +4,24 @@ source("admin/R/update_readme_dates.R")
 
 ### Usual times
 # 4th Thu 15:30 - 16:30 UK
-# 4th Tue 20:30 - 21:30 UK
+# 4th Thu 20:30 - 21:30 UK
 
 ### 2026 dates
 
-# Jun 23 19:30 UTC
 # Jul 23 14:30 UTC
-# Aug 25 19:30 UTC
+# Aug 25 19:30 UTC -> change to Aug 27, not updated Zoom or anything yet
 # Sep 24 14:30 UTC
 
-month <- "June"
+month <- "July"
 day <- 23
-time <- "19:30" # UTC !!
-zoom <- "https://us02web.zoom.us/j/89350851297?pwd=6thgJaE8VtBzG6eGMEU68tffnWJWWq.1"
+time <- "14:30" # UTC !!
+zoom <- "https://us02web.zoom.us/j/83792625860?pwd=yYHf1VHqBVxM9luqOYQ7ACIma2dlBJ.1"
 
 # times here are UK times!
 # second number is n'th 'day' of the month, e.g. `3, "Friday"` = 3rd Friday
 # !! Think I have inconsistency here: Slack message and Twitter/Mastodon were wrong last time
-update_readme_dates(1, "June", 4, "Tuesday", "20:30", 2026)
-update_readme_dates(2, "July", 4, "Thursday", "15:30", 2026)
+update_readme_dates(1, "July", 4, "Thursday", "15:30", 2026)
+update_readme_dates(2, "August", 4, "Thursday", "20:30", 2026)
 
 # Update RCWG contacts ---------------------------------------------------------
 
@@ -78,8 +77,8 @@ source("admin/R/buffer_post.R")
 # slack announcement
 weekday <- get_weekday(day, month, abbreviate = TRUE)
 agenda = c(
-"- Report back from R Dev Day @ Rencontres R
-- Triaging Team guidelines"
+"- Reports back from R Dev Days
+- Work items for R Project Sprint"
 )
 
 post <- social_post(weekday = weekday,
@@ -126,7 +125,7 @@ buffer_createpost(browser = browser,
                   day = NULL, # number, day of month
                   month = NULL, # month number
                   time = time, # UTC
-                  venue = "mastodon",
+                  venue = c("mastodon", "linkedin"),
                   postcontent = post)
 
 browser$close()

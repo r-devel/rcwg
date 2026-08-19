@@ -26,8 +26,8 @@ Después de la [Incubadora de ideas](ideas_incubator.md) en agosto-septiembre de
 We meet (on Zoom) every 1-2 months, usually alternating between the fourth Thursday of the month, 15:30 UTC and the fourth Tuesday of the month, 20:30 UTC (-1hr during Daylight Savings Time in Europe). 
 
 Next planned meeting(s):
- - Thursday, July 23, 2026, 14:30-15:30 UTC ([find your local time](https://arewemeetingyet.com/UTC/2026-07-23/14:30/R%20Contribution%20Working%20Group)).
- - Thursday, August 27, 2026, 19:30-20:30 UTC ([find your local time](https://arewemeetingyet.com/UTC/2026-08-27/19:30/R%20Contribution%20Working%20Group)).
+ - Tuesday, August 25, 2026, 19:30-20:30 UTC ([find your local time](https://arewemeetingyet.com/UTC/2026-08-25/19:30/R%20Contribution%20Working%20Group)).
+ - Thursday, September 24, 2026, 14:30-15:30 UTC ([find your local time](https://arewemeetingyet.com/UTC/2026-09-24/14:30/R%20Contribution%20Working%20Group)).
 
 Meeting details will be posted on the [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), or you can email rowforwards@gmail.com to be added to/removed from the mailing list to receive meeting invitations.
 
@@ -37,8 +37,8 @@ Meeting details will be posted on the [R-Devel Slack Group](https://forwards.git
 Nos reunimos (en Zoom) cada 1-2 meses, alternando entre el cuarto jueves del mes, 15:30 UTC y el cuarto martes del mes, 20:30 UTC (-1 hora durante el horario de verano).
 
 Próximas reuniones planificadas:
- - jueves 23 de julio de 2026, 14:30-15:30 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2026-07-23/14:30/Grupo%20de%20trabajo%20de%20contribución%20R)).
- - jueves 27 de agosto de 2026, 19:30-20:30 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2026-08-27/19:30/Grupo%20de%20trabajo%20de%20contribución%20R)).
+ - martes 25 de agosto de 2026, 19:30-20:30 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2026-08-25/19:30/Grupo%20de%20trabajo%20de%20contribución%20R)).
+ - jueves 24 de septiembre de 2026, 14:30-15:30 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2026-09-24/14:30/Grupo%20de%20trabajo%20de%20contribución%20R)).
 
 Los detalles de la reunión se publicarán en [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), o puede enviar un correo electrónico a rowforwards@gmail.com para que lo agreguen o eliminen de la lista de correo para recibir invitaciones a reuniones.
 

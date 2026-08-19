@@ -3,12 +3,12 @@
 # UTC times (for Mar - Sept, UTC time is stable)
 # Mar 10 09:00 16:00
 
-day <- 14 # day number
-month <- "July"
+day <- 11 # day number
+month <- "August"
 utc_times <- c("08:00", "16:00")
 
-meetup <- c(emea = "https://www.meetup.com/r-contributors/events/313883488",
-            amer = "https://www.meetup.com/r-contributors/events/315398737")
+meetup <- c(emea = "https://www.meetup.com/r-contributors/events/313883487",
+            amer = "https://www.meetup.com/r-contributors/events/315520557")
 
 # check the zoom matches the meetup page!
 zoom <- c(emea = "https://us02web.zoom.us/j/81682101653?pwd=O6WTmHTbrNCvJW8x0gCOYBMD3W2HmK.1",
@@ -169,7 +169,8 @@ postcontent <- list(
     key = "enter", "- get help/feedback on contributions you are working on",
     key = "enter", "- look at open bugs/work on message translations together")
 
-
+## Make sure on R Foundation not personal page before continuing
+## (https://www.linkedin.com/company/64851099/admin/page-posts/published/)
 linkedin_createevent(browser = browser,
                      image = normalizePath("admin/brooke-cagle-g1Kr4Ozfoac-unsplash.jpg"),
                      alttext = "Three people laughing together, as they sit around a table with laptops, notebooks and drinks.",

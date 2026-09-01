@@ -40,17 +40,19 @@ running `install.libs("r-base-dev")`, e.g. "Can't restore time",
     </details>
 3.  Open the profile for the Zsh shell 
     ```{sh}
-    open ~/.zprofile
+    touch ~/.zprofile && open ~/.zprofile
     ```
-    Add one of the following commands to the profile:
+	If `echo $SHELL` does not show `zsh` then use `.profile` instead of `.zprofile`.
+	
+    Add the following command to the profile:
     ```{sh}
     export PATH="/opt/R/$(uname -m)/bin:/opt/gfortran/bin:${PATH}"
     ```
     This will add the `/opt/R/*/bin` directory and GNU Fortran to your `PATH` variable 
     when you restart Terminal.app, so that the prerequisites 
-    installed with `install.libs` can be found. At thsi point re-start
+    installed with `install.libs` can be found. At this point re-start
     your Terminal window (or open a new one).
-   <details><summary><i>Note if using RStudio terminal, or using Terminal.app on macOS < 10.15 (Catalina)...</i></summary> The code above assumes you are running shell commands in a Zsh shell (the default for Terminal.app on macOS &ge; 10.15). If you are using a bash shell, edit <code>.profile</code> rather than <code>.zprofile</code>. The type of terminal in RStudio can be set in Terminal Options from the terminal or in Global Options.
+   <details><summary><i>Note if using RStudio terminal, or using Terminal.app on macOS < 10.15 (Catalina)...</i></summary> The code above assumes you are running shell commands in a Zsh shell (the default for Terminal.app on macOS &ge; 10.15). If you are using the `bash` shell, edit <code>.profile</code> rather than <code>.zprofile</code>. The type of terminal in RStudio can be set in Terminal Options from the terminal or in Global Options.
 </details>
 
 ### Install prerequisites
@@ -70,14 +72,14 @@ install.libs("r-base-dev")
 2.  Check if you already have Subversion installed:
 
     ```{r}
-system2("which", "svn")
+    Sys.which("svn")
     ```
     
-    This will print a path where Subversion is installed. If nothing is 
+    This will print a path where Subversion is installed. If only empty string is 
     printed, install Subversion:
 
     ```{r}
-install.libs("subversion", dep = FALSE)
+    install.libs("subversion", dep = FALSE)
     ```
      
     <details><summary><i>Troubleshooting...</i></summary>Please make sure you have restarted-your Terminal.app after changing the profile so your `PATH` changes are in effect. Check with `echo $PATH` to make sure it starts with `/opt/R..`. If this does not work, try installing Subversion via your preferred package manager, e.g. with Homebrew: `brew install svn`, but some Homebrew packages cause conflicts so only use as last resort. 
@@ -86,32 +88,35 @@ install.libs("subversion", dep = FALSE)
 For the remaining instructions, code should be run within Terminal.app
 
 1.  Install GNU Fortran (gfortran) from the binary at 
-<https://mac.r-project.org/tools/>. This version is prepared specifically 
-for R and will be used in preference to any other version on your system.
+	<https://mac.r-project.org/tools/>. This version is prepared specifically 
+	for R and will be used in preference to any other version on your system.
+
 2.  From the terminal, install Xcode Command Line Tools
     ```{sh}
     xcode-select --install
     ```
     (If already installed, shows "xcode-select: error: command line tools are
-already installed").
+	already installed").
+
 3.  Check if you have LaTeX installed:
     ```{sh}
-	pdflatex --version | head -n1
-	```
-	It should show something like
+    pdflatex --version | head -n1
+    ```
+    It should show something like
     ```
     pdfTeX 3.141592653-2.6-1.40.25 (TeX Live 2023)
     ```
     If it shows an error or the year is too old, install MacTex from the binary at <https://tug.org/mactex/mactex-download.html> (or install TinyTex if you prefer).
+
 4.  Check if you have XQuartz installed:
     ```{sh}
-mdls -name kMDItemVersion /Applications/Utilities/XQuartz.app
+    mdls -name kMDItemVersion /Applications/Utilities/XQuartz.app
     ```
     This will show the version number or `could not find /Applications/Utilities/XQuartz.app`. If missing, install XQuartz from the binary at  <https://www.xquartz.org/>. **Restart your computer** for XQuartz to work!  
+
 5. (Recommended)  If you are not already using a tool such as [rig](https://github.com/r-lib/rig) 
-to install and manage multiple R versions, install RSwitch from <https://rud.is/rswitch/>. These third-party tools are not part of the R 
-Project, but are recommended here as they provide an easy way to switch R 
-versions.
+   to install and manage multiple R versions, install RSwitch from <https://rud.is/rswitch/>. These third-party tools are not part of the R 
+   Project, but are recommended here as they provide an easy way to switch R versions.
 
 <details><summary><i>Detail on selected prerequisites...</i></summary>
 The following prerequisites have been installed by the above instructions:

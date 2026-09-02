@@ -1,6 +1,6 @@
 Installing R from Source on macOS
 ================
-2025-10-08
+2026-09-02
 
 ## Prerequisites
 
@@ -17,10 +17,11 @@ page](https://cran.r-project.org/bin/macosx/) and install this pre-built
 Open Terminal.app to run the shell commands in the instructions below:
 
 1.  Make your account own the R framework folder (created when
-    installing R from the binary)
+    installing R from the binary). Make sure you re-run this command any
+    time you re-install R.
 
     ``` sh
-    sudo chown -R $USER /Library/Frameworks/R.framework/
+    sudo chown -R $USER /Library/Frameworks/R.framework
     ```
 
 2.  Make your account own `/opt/R` so that we can install prerequisites
@@ -32,7 +33,6 @@ Open Terminal.app to run the shell commands in the instructions below:
     ```
 
     <details>
-
     <summary>
 
     <i>Details…</i>
@@ -45,50 +45,56 @@ Open Terminal.app to run the shell commands in the instructions below:
 
     </details>
 
-3.  Open the profile for the Zsh shell
+3.  Run the following command to add the necessary tools to your `PATH`:
 
     ``` sh
-    open /Users/$USER/.zprofile
+    export PATH="/opt/R/$(uname -m)/bin:/opt/gfortran/bin:${PATH}"
     ```
 
-    Add one of the following commands to the profile, selecting the one
-    that matches your architecture:
-
-    ``` sh
-    # Intel
-    export PATH="/opt/R/x86_64/bin:${PATH}"
-    ```
-
-    ``` sh
-    # Apple Silicon (M1, M2, ...)
-    export PATH="/opt/R/arm64/bin:${PATH}"
-    ```
-
-    This will add the `/opt/R/*/bin` directory to your `PATH` variable
-    when you restart Terminal.app, so that the prerequisites installed
-    with `install.libs` can be found.
+    This will add the `/opt/R/*/bin` directory and GNU Fortran to your
+    `PATH` variable which enables your shell to find those tools. You
+    have to do this whenever you open a new shell.
 
     <details>
-
     <summary>
 
-    <i>Note if using RStudio terminal, or using Terminal.app on macOS \<
-    10.15 (Catalina)…</i>
+    <i>You can make it persistent by editing your profile…</i>
 
     </summary>
 
-    The code above assumes you are running shell commands in a Zsh shell
-    (the default for Terminal.app on macOS ≥ 10.15). If you are using a
-    bash shell, edit <code>.bash_profile</code> rather than
-    <code>.zprofile</code>. The type of terminal in RStudio can be set
-    in Terminal Options from the terminal or in Global Options.
+    You can add the above line to your profile so it will be added
+    automatically, but this requires you to edit `~/.profile`,
+    `~/.zprofile` or `~/.zshrc` depending on your version of macOS and
+    your local settings. Typically, if any of the above files exists,
+    you add it there, otherwise you have use the file that corresponds
+    to your shell (`~/.zprofile` for zsh and `~/.profile` for bash).
+
+    </details>
+
+4.  Make sure that you rename `~/.R/Makevars` file if it exists with
+
+    ``` sh
+    [[ -e ~/.R/Makevars ]] && mv ~/.R/Makevars ~/.R/Makevars.old
+    ```
+
+    <details>
+    <summary>
+
+    <i>Details…</i>
+
+    </summary>
+
+    Other toolchains may have created custom compiler flags that are
+    incomaptible with “native” R build so we want to make sure they are
+    not in the way.
 
     </details>
 
 ### Install prerequisites
 
-Start a new R session. For the following instructions, run the code
-within R:
+Start a new R session in the Terminal.app after setting the `PATH` as
+above by typing `R`. For the following instructions, run the code within
+R:
 
 1.  Use `install.libs` from <https://mac.R-project.org> to install
     commonly required prerequisites
@@ -101,26 +107,29 @@ within R:
 2.  Check if you already have Subversion installed:
 
     ``` r
-    system2("which", "svn")
+    Sys.which("svn")
     ```
 
-    This will print a path where Subversion is installed. If nothing is
-    printed, install Subversion:
+    This will print a path where Subversion is installed. If only empty
+    string is printed, install Subversion:
 
     ``` r
     install.libs("subversion", dep = FALSE)
     ```
 
     <details>
-
     <summary>
 
     <i>Troubleshooting…</i>
 
     </summary>
 
-    If this does not work, try installing Subversion via your preferred
-    package manager, e.g. with Homebrew: <code>brew install svn</code>.
+    Please make sure you have restarted-your Terminal.app after changing
+    the profile so your `PATH` changes are in effect. Check with
+    `echo $PATH` to make sure it starts with `/opt/R..`. If this does
+    not work, try installing Subversion via your preferred package
+    manager, e.g. with Homebrew: `brew install svn`, but some Homebrew
+    packages cause conflicts so only use as last resort.
 
     </details>
 
@@ -140,20 +149,19 @@ For the remaining instructions, code should be run within Terminal.app
     (If already installed, shows “xcode-select: error: command line
     tools are already installed”).
 
-3.  Check if you have a current version of MacTeX installed:
+3.  Check if you have LaTeX installed:
 
     ``` sh
-    ls /usr/local/texlive
+    pdflatex --version | head -n1
     ```
 
-    If the `/usr/local/texlive` directory exists, you will see one or
-    more subdirectories named by year, e.g.
+    It should show something like
 
-        2022            2023            texmf-local
+        pdfTeX 3.141592653-2.6-1.40.25 (TeX Live 2023)
 
-    If this check doesn’t show a subdirectory for the current year,
-    install MacTex from the binary at
-    <https://tug.org/mactex/mactex-download.html>.
+    If it shows an error or the year is too old, install MacTex from the
+    binary at <https://tug.org/mactex/mactex-download.html> (or install
+    TinyTex if you prefer).
 
 4.  Check if you have XQuartz installed:
 
@@ -164,7 +172,7 @@ For the remaining instructions, code should be run within Terminal.app
     This will show the version number or
     `could not find /Applications/Utilities/XQuartz.app`. If missing,
     install XQuartz from the binary at <https://www.xquartz.org/>.
-    **Restart your computer** for XQuartz to work!  
+    **Restart your computer** for XQuartz to work!
 
 5.  (Recommended) If you are not already using a tool such as
     [rig](https://github.com/r-lib/rig) to install and manage multiple R
@@ -173,58 +181,39 @@ For the remaining instructions, code should be run within Terminal.app
     here as they provide an easy way to switch R versions.
 
 <details>
-
 <summary>
-
 <i>Detail on selected prerequisites…</i>
 </summary>
-
 The following prerequisites have been installed by the above
 instructions:
 <ul>
-
 <li>
-
 jpeg, libpng, pkgconfig, tiff and zlib-system-stub from r-base-dev.
 </li>
-
 <li>
-
 Objective C compiler from xcode command line tools.
 </li>
-
 <li>
-
 Tcl/Tk and texinfo from standard installation of R binary.
 </li>
-
 </ul>
-
 The following optional prerequisites have been skipped as they are
 unlikely to be needed by R contributors
 <ul>
-
 <li>
-
 readline5. Apple’s editline is sufficient. Can install with
 `install.libs("readline5")`.
 </li>
-
 <li>
-
 Cairo/Pango. Can install both with `install.libs("pango")`.
 </li>
-
 <li>
-
 Java. See [Java subsection in R-admin macOS
 instructions](https://cran.r-project.org/doc/manuals/r-patched/R-admin.html#Java-_0028macOS_0029)
 to add Java support. You may have installed Java to use a Java-using R
 package.
 </li>
-
 </ul>
-
 </details>
 
 ## Build R
@@ -232,42 +221,35 @@ package.
 ### Checking out a source code repository
 
 Run the following commands within Terminal.app to check out a local copy
-of the R Subversion (SVN) repository into `TOP_SRCDIR`:
+of the R Subversion (SVN) repository into `R-devel` subdirectory.
 
 ``` sh
-export TOP_SRCDIR="$HOME/svn/R-devel"
-svn checkout https://svn.r-project.org/R/trunk/ "$TOP_SRCDIR"
+svn checkout https://svn.r-project.org/R/trunk/ R-devel
 ```
 
 This will retrieve the source code for the development version of R
 (`r-devel`).
 
 <details>
-
 <summary>
-
 <i>Alternatively create an RStudio SVN project…</i>
 </summary>
-
 You may prefer to create an RStudio project from the SVN repository. Set
 `https://svn.r-project.org/R/trunk/` as the Repository URL; set
 `R-devel` as the project directory name and create the project as a
-subdirectory of `/Users/<username>/svn` (or adapt the definition of
-`TOP_SRCDIR` to match where you create the project). This will create an
-SVN pane in RStudio where you can track changes.
+subdirectory. This will create an SVN pane in RStudio where you can
+track changes.
 </details>
-
 <details>
-
 <summary>
-
-<i>Alternatively checkout a fork of the r-svn GitHub repo…</i>
+<i>Alternatively clone a fork of the r-svn GitHub repo, however, that
+requires `git-svn` to be installed manually.</i>
 </summary>
-
 You may prefer to use a fork of the
-<a href="https://github.com/r-devel/r-svn">r-svn GitHub repo</a>. Set
-the <code>TOP_SRCDIR</code> environment variable to the directory where
-you checkout your fork of the repository.
+<a href="https://github.com/r-devel/r-svn">r-svn GitHub repo</a>. If you
+do, you must create `SVNINFO` in the `R-devel` directory with
+`git svn info > SVNINFO`, however, this requires `git-svn` which is not
+installed by default on macOS.
 </details>
 
 ### Building R from a new checkout
@@ -278,112 +260,46 @@ run the following commands within Terminal.app:
 1.  Download the source code for the recommended packages:
 
     ``` sh
-    $TOP_SRCDIR/tools/rsync-recommended
+        ( cd R-devel && tools/rsync-recommended )
     ```
 
-2.  Create the build directory, `BUILDDIR` (you may wish to customise
-    this path):
+    (If your network blocks `rsync` use `tools/fetch-recommended`
+    instead)
+
+2.  Create the `build` subdirectory where R will be built and make it
+    your current directory:
 
     ``` sh
-    export BUILDDIR="$HOME/build/R-devel"
-    mkdir -p $BUILDDIR
-    cd $BUILDDIR
+        mkdir build
+        cd build
     ```
 
 3.  Define the `LOCAL` environment variable to match your architecture
+    so you don’t have to type the same path repeatedly
 
     ``` sh
-    # Intel
-    export LOCAL=/opt/R/x86_64 
+    export LOCAL=/opt/R/$(uname -m)
     ```
 
-    ``` sh
-    # Apple Silicon (e.g. M1)
-    export LOCAL=/opt/R/arm64  
-    ```
-
-    Create `config.site` within the build directory to set some
-    configuration flags as recommended by the [R-admin
-    manual](https://cran.r-project.org/doc/manuals/r-devel/R-admin.html#Prerequisites).
+4.  Configure the R installation with:
 
     ``` sh
-    cat << EOF > config.site
-    CC=clang
-    OBJC=\$CC
-    FC="/opt/gfortran/bin/gfortran -mtune=native"
-    CPPFLAGS='-isystem $LOCAL/include'
-    CXX=clang++
-    PKG_CONFIG_PATH=$LOCAL/lib/pkgconfig:/usr/lib/pkgconfig
-    EOF
-    ```
-
-    Add the additional configuration flags if you are on Apple Silicon:
-
-    ``` sh
-    cat << EOF >> config.site
-    CFLAGS="-falign-functions=8 -g -O0"
-    FFLAGS="-g -O2 -mmacosx-version-min=11.0"
-    FCFLAGS="-g -O2 -mmacosx-version-min=11.0"
-    LDFLAGS="-L$LOCAL/lib -L/opt/gfortran/lib"
-    CPPFLAGS="-isystem $LOCAL/include -I$LOCAL/include"
-    EOF
+    ../R-devel/configure --prefix=$LOCAL --enable-R-framework --enable-R-shlib \
+       CPPFLAGS=-I$LOCAL/include LDFLAGS=-L$LOCAL/lib CFLAGS='-Wall -g -O0' \
+       --x-includes=/opt/X11/include --x-libraries=/opt/X11/lib \
+       FC=/opt/gfortran/bin/gfortran
     ```
 
     <details>
-
-    <summary>
-
-    <i>Details…</i>
-
-    </summary>
-
-    Some modifications to the recommendations in R-admin: `-O0` to
-    enable debugging symbols and disable compiler optimisations for
-    better debugging experience; `-mmacos-version-min` corrected \[?\]
-    to `-mmacosx-version-min`;
-    `LDFLAGS="-L$LOCAL/lib -L/opt/gfortran/lib"` added so that liblzma
-    (in `$LOCAL/lib`) and gfortran libraries can be found. CPPFLAGS
-    modified for Apple Silicon to link to the headers for liblzma.
-
-    </details>
-
-    <details>
-
-    <summary>
-
-    <i>Extra step if you are using the r-svn GitHub mirror…</i>
-
-    </summary>
-
-    You will need to update the Makefile template to infer the SVN
-    revision number from the git mirror. Run the following line of code
-    to replace an `svn` command in the template with a shell script that
-    will infer the SVN revision number: <br> <code> sed -i.bak
-    "s\|\\\$(GIT) svn info\|\$TOP_SRCDIR/.github/scripts/svn-info.sh\|"
-    "\$TOP_SRCDIR/Makefile.in" </code>
-
-    </details>
-
-4.  Configure the R installation with `--enable-R-framework` to prepare
-    for installation as an App and `--disable-java` to skip configuring
-    Java, which may not be installed. Use `FW_VERSION` to set the
-    version name as “R-devel”:
-
-    ``` sh
-    $TOP_SRCDIR/configure --enable-R-framework --disable-java FW_VERSION=R-devel
-    ```
-
-    <details>
-
     <summary>
 
     <i>Multiple versions of R-devel…</i>
 
     </summary>
 
-    If you want to build multiple versions of R-devel, customize
-    `FW_VERSION` to give a unique name to each build. Be aware that if
-    you install R-devel from an Intel Mac binary, e.g., from
+    If you want to build multiple versions of R-devel, add
+    `FW_VERSION=name` to give a unique `name` to each build. Be aware
+    that if you install R-devel from an Intel Mac binary, e.g., from
     <url><https://mac.r-project.org/></url> or using rig, this will use
     the default name “Major.Minor”, using the major and minor numbers
     from the R version number (e.g. 4.4 for R 4.4.0 Under development
@@ -396,8 +312,13 @@ run the following commands within Terminal.app:
 5.  Build R :
 
     ``` sh
-    make
+    make -j8
     ```
+
+    (The `-j8` instructs `make` to use 8 parallel jobs. You can either
+    increase the number corresponding to you machine’s capabilities, or
+    drop it when debugging since it can be harder to find the error
+    among parallel jobs).
 
 6.  Check that R works as expected:
 
@@ -407,11 +328,9 @@ run the following commands within Terminal.app:
 
     `make` will exit with an error if there are any problems. You can
     start the built version of by running the command `bin/R` from the
-    build directory, but we recommending installing as an App, as
-    described next.
+    build directory.
 
     <details>
-
     <summary>
 
     <i>Note if you are using RStudio terminal…</i>
@@ -422,12 +341,10 @@ run the following commands within Terminal.app:
 
     </details>
 
-7.  Install the built version of R and reset permissions on the R
-    framework folder to include the new directories.
+7.  Install the built version of R
 
     ``` sh
     make install
-    sudo chown -R $USER /Library/Frameworks/R.framework/
     ```
 
     The built version of R will now be your default version of R, which
@@ -437,23 +354,18 @@ run the following commands within Terminal.app:
 
 ## Re-build R
 
-After making changes to the source files in `$TOP_SRCDIR` (via
-`svn update` or making your own modifications), you can re-build R
-incorporating the changed components by switching to the build directory
-in the terminal and running make:
-
-``` sh
-export BUILDDIR="$HOME/build/R-devel"
-cd $BUILDDIR
-make
-```
+After making changes to the source files in `R-devel` (via `svn update`
+or making your own modifications), you can re-build R incorporating the
+changed components by switching to the build directory in the terminal
+and running `make` again.
 
 If you are building a version with your own changes, you may wish to run
 `make check` to check you haven’t broken any tests.
 
 If you followed the recommended steps to install R as an App, you can
-install the re-built version as follows:
+install the re-built version with `make install` as before.
 
-``` sh
-make install
-```
+NOTE: Sometimes re-building signed binaries can cause problems which
+manifest themselves as `Killed: 9` in the error. If that is the case,
+the most reliable way to resolve it is to remove the `build` directory
+with `rm -rf build`, and repeat steps from 2. on.

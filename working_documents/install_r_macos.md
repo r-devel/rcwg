@@ -1,6 +1,6 @@
 Installing R from Source on macOS
 ================
-2026-09-01
+2026-09-02
 
 ## Prerequisites
 
@@ -45,46 +45,56 @@ Open Terminal.app to run the shell commands in the instructions below:
 
     </details>
 
-3.  Open the profile for the Zsh shell
-
-    ``` sh
-    touch ~/.zprofile && open ~/.zprofile
-    ```
-
-    If `echo $SHELL` does not show `zsh` then use `.profile` instead of
-    `.zprofile`.
-
-    Add the following command to the profile:
+3.  Run the following command to add the necessary tools to your `PATH`:
 
     ``` sh
     export PATH="/opt/R/$(uname -m)/bin:/opt/gfortran/bin:${PATH}"
     ```
 
     This will add the `/opt/R/*/bin` directory and GNU Fortran to your
-    `PATH` variable when you restart Terminal.app, so that the
-    prerequisites installed with `install.libs` can be found. At this
-    point re-start your Terminal window (or open a new one).
+    `PATH` variable which enables your shell to find those tools. You
+    have to do this whenever you open a new shell.
 
     <details>
     <summary>
 
-    <i>Note if using RStudio terminal, or using Terminal.app on macOS \<
-    10.15 (Catalina)…</i>
+    <i>You can make it persistent by editing your profile…</i>
 
     </summary>
 
-    The code above assumes you are running shell commands in a Zsh shell
-    (the default for Terminal.app on macOS ≥ 10.15). If you are using
-    the `bash` shell, edit <code>.profile</code> rather than
-    <code>.zprofile</code>. The type of terminal in RStudio can be set
-    in Terminal Options from the terminal or in Global Options.
+    You can add the above line to your profile so it will be added
+    automatically, but this requires you to edit `~/.profile`,
+    `~/.zprofile` or `~/.zshrc` depending on your version of macOS and
+    your local settings. Typically, if any of the above files exists,
+    you add it there, otherwise you have use the file that corresponds
+    to your shell (`~/.zprofile` for zsh and `~/.profile` for bash).
+
+    </details>
+
+4.  Make sure that you rename `~/.R/Makevars` file if it exists with
+
+    ``` sh
+    [[ -e ~/.R/Makevars ]] && mv ~/.R/Makevars ~/.R/Makevars.old
+    ```
+
+    <details>
+    <summary>
+
+    <i>Details…</i>
+
+    </summary>
+
+    Other toolchains may have created custom compiler flags that are
+    incomaptible with “native” R build so we want to make sure they are
+    not in the way.
 
     </details>
 
 ### Install prerequisites
 
-Start a new R session. For the following instructions, run the code
-within R:
+Start a new R session in the Terminal.app after setting the `PATH` as
+above by typing `R`. For the following instructions, run the code within
+R:
 
 1.  Use `install.libs` from <https://mac.R-project.org> to install
     commonly required prerequisites

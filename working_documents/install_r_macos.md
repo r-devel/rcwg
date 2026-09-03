@@ -336,9 +336,13 @@ run the following commands within Terminal.app:
     make check
     ```
 
-    `make` will exit with an error if there are any problems. You can
-    start the built version of by running the command `bin/R` from the
-    build directory.
+    `make` will exit with an error if there are any problems.
+
+    More thorough checks can be run with `make check-devel` (excludes
+    recommended packages) and `make check-all` (runs all tests).
+
+    You can start the built version of by running the command `bin/R`
+    from the build directory.
 
     <details>
     <summary>

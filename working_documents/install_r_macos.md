@@ -1,6 +1,6 @@
 Installing R from Source on macOS
 ================
-2026-09-02
+2026-09-03
 
 ## Prerequisites
 
@@ -52,8 +52,8 @@ Open Terminal.app to run the shell commands in the instructions below:
     ```
 
     This will add the `/opt/R/*/bin` directory and GNU Fortran to your
-    `PATH` variable which enables your shell to find those tools. You
-    have to do this whenever you open a new shell.
+    `PATH` variable which enables your shell to find those tools. **You
+    have to do this whenever you open a new shell.**
 
     <details>
     <summary>
@@ -162,6 +162,16 @@ For the remaining instructions, code should be run within Terminal.app
     If it shows an error or the year is too old, install MacTex from the
     binary at <https://tug.org/mactex/mactex-download.html> (or install
     TinyTex if you prefer).
+
+    Note: MacTeX sometimes does not show on the `PATH`, so if it still
+    doesn’t work after installation, also execute the following in the
+    Terminal.app:
+
+    ``` sh
+    export PATH=$PATH:/Library/TeX/texbin
+    ```
+
+    and re-try above check.
 
 4.  Check if you have XQuartz installed:
 

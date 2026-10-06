@@ -1,0 +1,211 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18944] Add a preparsing filter step to aspell() in order to make LaTex spell checking more robust*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18944>\n\n--- Comment #6 from Kurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) ---\nOh dear ... apparently I last worked on the new LaTeX aspell filter 2 years\nago.\n\nClearly, currently one cannot compose filters.  So to \"enhance\" an\navailable filter for pre or maybe also post processing one needs to\ncreate a new filter wrapping around the available one, which is not\nsuper-convenient as the available one are not directly accessible.  \n\nThat could be changed by exporting utils:::aspell_filter_db, which I\nguess I should do in any case.\n\nCurrently,\n\nR&gt; names(utils:::aspell_filter_db)\n[1] \"LaTeX\"        \"Sweave+LaTeX\" \"md\"           \"Sweave\"       \"Rd\"          \n[6] \"R\"            \"dcf\"          \"pot\"     \n\nwhere the first two are undocumented (and the second has a \"Try to merge\ninto the Sweave filter.\" FIXME).  The unfortunately-still-undocumented\nLaTeX filter wraps around utils:::aspell_filter_LaTeX_worker() which has\n\nR&gt; args(utils:::aspell_filter_LaTeX_worker)\nfunction (x, cmds = NULL, envs = NULL, parser = tools::parseLatex, \n    ...) \n\nwhich I should document and say that one can also use the\nparseLatex::parseLatex parser, which iirc these days handles errors\n(more) gracefully.  (Need to re-run my test codes and discuss results\nwith Duncan.)\n\nOne could add a 'before' argument to the LaTeX filter\/worker, and use as\nsomething like\n\n  if(is.function(before))\n    x &lt;- before(x)\n\nbefore calling the parser on x.\n\nGood enough ...?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782892350.759479",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "LPnN",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18944] Add a preparsing filter step to aspell() in order to make LaTex spell checking more robust",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18944"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #6 from Kurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nOh dear ... apparently I last worked on the new LaTeX aspell filter 2 years\nago.\n\nClearly, currently one cannot compose filters.  So to \"enhance\" an\navailable filter for pre or maybe also post processing one needs to\ncreate a new filter wrapping around the available one, which is not\nsuper-convenient as the available one are not directly accessible.  \n\nThat could be changed by exporting utils:::aspell_filter_db, which I\nguess I should do in any case.\n\nCurrently,\n\nR> names(utils:::aspell_filter_db)\n[1] \"LaTeX\"        \"Sweave+LaTeX\" \"md\"           \"Sweave\"       \"Rd\"          \n[6] \"R\"            \"dcf\"          \"pot\"     \n\nwhere the first two are undocumented (and the second has a \"Try to merge\ninto the Sweave filter.\" FIXME).  The unfortunately-still-undocumented\nLaTeX filter wraps around utils:::aspell_filter_LaTeX_worker() which has\n\nR> args(utils:::aspell_filter_LaTeX_worker)\nfunction (x, cmds = NULL, envs = NULL, parser = tools::parseLatex, \n    ...) \n\nwhich I should document and say that one can also use the\nparseLatex::parseLatex parser, which iirc these days handles errors\n(more) gracefully.  (Need to re-run my test codes and discuss results\nwith Duncan.)\n\nOne could add a 'before' argument to the LaTeX filter\/worker, and use as\nsomething like\n\n  if(is.function(before))\n    x <- before(x)\n\nbefore calling the parser on x.\n\nGood enough ...?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18934] Improve computing of Kendall's tau in stats::cor()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18934>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |CONFIRMED\n\n--- Comment #1 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nIn the mean time, this has been taken up during R Dev Day \/ Rencontres R in\nNantes, June 19,  see  <https:\/\/github.com\/r-devel\/r-dev-day\/issues\/151>\ninitiated by a plan setup by Heather Turner, subsequently mentored by her and\nme.\nThis resulted in working code, providing a patch:\n  <https:\/\/github.com\/r-devel\/r-dev-day\/issues\/151#issuecomment-4756543031>\n\nI've applied it to my sources and started testing, also compiled the C code\nwith more warning flags and with clang, and hence add some explicit casts etc.\n\nNote that data with ties (in a column \/ vector) uses different code, so one\nshould test data with ties (as the `swiss` data) and without. \nI have done that now, not extensively, seeing that the computed results are the\nsame (only checking to default print() accuracy) and things work with NAs,\nties, etc, as previously.\n\nI see that Heather has added this also for the R Dev Day in Warsaw next week,\nbut I will commit the current code and a NEWS entry, now...\nwhich will leave more systematic tests for the R Dev Day (if desired).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782900271.690619",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "t6d9r",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18934] Improve computing of Kendall's tau in stats::cor()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18934"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n     Ever confirmed|0                           |1\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |CONFIRMED\n\n--- Comment #1 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nIn the mean time, this has been taken up during R Dev Day \/ Rencontres R in\nNantes, June 19,  see  "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-dev-day\/issues\/151"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ninitiated by a plan setup by Heather Turner, subsequently mentored by her and\nme.\nThis resulted in working code, providing a patch:\n  "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-dev-day\/issues\/151#issuecomment-4756543031"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nI've applied it to my sources and started testing, also compiled the C code\nwith more warning flags and with clang, and hence add some explicit casts etc.\n\nNote that data with ties (in a column \/ vector) uses different code, so one\nshould test data with ties (as the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "swiss",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " data) and without. \nI have done that now, not extensively, seeing that the computed results are the\nsame (only checking to default print() accuracy) and things work with NAs,\nties, etc, as previously.\n\nI see that Heather has added this also for the R Dev Day in Warsaw next week,\nbut I will commit the current code and a NEWS entry, now...\nwhich will leave more systematic tests for the R Dev Day (if desired)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18934] Improve computing of Kendall's tau in stats::cor()*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18934>\n\nKurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |Kurt.Hornik@wu.ac.at\n\n--- Comment #2 from Kurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) ---\nGreat news!",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782906441.418449",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "e8O",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18934] Improve computing of Kendall's tau in stats::cor()",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18934"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nKurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |Kurt.Hornik@wu.ac.at\n\n--- Comment #2 from Kurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nGreat news!"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

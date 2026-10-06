@@ -1,0 +1,493 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19131] New: Stale lazy-load database cache after re-installing a package in the same session*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19131>\n\n            Bug ID: 19131\n           Summary: Stale lazy-load database cache after re-installing a\n                    package in the same session\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nCreated attachment 3778\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3778&amp;action=edit>\nCandidate patch.\n\n## Summary\n\nR caches the contents of lazy-load databases (`.rdb` files) in memory, keyed\nby file path alone, with no invalidation (`readRawFromFile()` in\n`src\/main\/serialize.c`). `unloadNamespace()` flushes only the package's\n*code* database (`R\/&lt;pkg&gt;.rdb`) from this cache. The package's other\nlazy-load databases -- `help\/&lt;pkg&gt;.rdb`, `R\/sysdata.rdb`, and\n`data\/Rdata.rdb` -- are never flushed.\n\nAs a result, when a package is unloaded, re-installed, and re-loaded within\na single R session, offsets from the freshly-read `.rdx` index are applied\nto a stale cached copy of the corresponding `.rdb` file. This produces two\ndistinct failure modes:\n\n1. **Help pages**: queries fail until the session is restarted, with\n\n   ```\n   Error in fetch(key) :\n     lazy-load database '...\/help\/&lt;pkg&gt;.rdb' is corrupt\n   In addition: Warning message:\n   internal error ... in R_decompress1\n   ```\n\n2. **Lazy data (silent)**: when a blob's offset happens to coincide across\n   the two installations, a stale `data\/Rdata.rdb` silently serves values\n   from the *previously installed version* of the package, with no error or\n   warning. (`R\/sysdata.rdb` behaves the same way, by the same mechanism.)\n\nThe first failure mode is a long-standing source of \"restart R\" advice and\ndownstream bug reports. Package managers that can re-install packages\nin-session work around it by calling the internal `lazyLoadDBflush()`\nthemselves from `.onUnload()` -- see e.g. renv\n(<https:\/\/github.com\/rstudio\/renv\/issues\/1294>) and pak -- which requires\ncontortions to keep `R CMD check` quiet about the `.Internal()` call in\npackage code.\n\nThe second failure mode appears not to have been reported before, and is\narguably worse: silently wrong data rather than an error.\n\n## Reproduction\n\nRun in a fresh session (tested on macOS arm64 and Linux; platform-independent):\n\n```\nlib &lt;- tempfile(\"lib\"); dir.create(lib)\n.libPaths(c(lib, .libPaths()))\nsrc &lt;- tempfile(\"src\"); dir.create(src)\npkg &lt;- file.path(src, \"lazytest\")\ndir.create(file.path(pkg, \"R\"), recursive = TRUE)\ndir.create(file.path(pkg, \"man\"), recursive = TRUE)\ndir.create(file.path(pkg, \"data\"), recursive = TRUE)\n\nwriteLines(c(\"Package: lazytest\", \"Version: 1.0\", \"Title: Test\",\n             \"Description: Test.\", \"Author: A\", \"Maintainer: A &lt;a@b.c&gt;\",\n             \"License: GPL-3\", \"LazyData: true\"),\n           file.path(pkg, \"DESCRIPTION\"))\nwriteLines(\"export(f)\", file.path(pkg, \"NAMESPACE\"))\nwriteLines(\"f &lt;- function() 42\", file.path(pkg, \"R\", \"f.R\"))\n\nrd &lt;- function(x)\n  writeLines(c(\"\\\\name{f}\", \"\\\\alias{f}\", \"\\\\title{t}\", \"\\\\description{d}\",\n               paste0(\"\\\\details{\", x, \"}\")),\n             file.path(pkg, \"man\", \"f.Rd\"))\nmkdata &lt;- function(x) {\n  d &lt;- x\n  save(d, file = file.path(pkg, \"data\", \"d.rda\"))\n}\n\nrd(\"short docs\"); mkdata(\"short\")\ninstall.packages(pkg, lib = lib, repos = NULL, type = \"source\")\nlibrary(lazytest)\nlength(tools::Rd_db(\"lazytest\", lib.loc = lib))  # ok; populates help cache\nlazytest::d                                      # \"short\"; populates data\ncache\n\ndetach(\"package:lazytest\", character.only = TRUE)\nunloadNamespace(\"lazytest\")\n\nrd(strrep(\"much longer docs to shift the offsets \", 50))\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1786383211.040739",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "WsZL",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19131] New: Stale lazy-load database cache after re-installing a package in the same session",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19131"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19131\n           Summary: Stale lazy-load database cache after re-installing a\n                    package in the same session\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3778\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3778&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3778&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCandidate patch.\n\n## Summary\n\nR caches the contents of lazy-load databases ("
+                            },
+                            {
+                                "type": "text",
+                                "text": ".rdb",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " files) in memory, keyed\nby file path alone, with no invalidation ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "readRawFromFile()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/serialize.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "). "
+                            },
+                            {
+                                "type": "text",
+                                "text": "unloadNamespace()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " flushes only the package's\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "code",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " database ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "R\/<pkg>.rdb",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") from this cache. The package's other\nlazy-load databases -- "
+                            },
+                            {
+                                "type": "text",
+                                "text": "help\/<pkg>.rdb",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R\/sysdata.rdb",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "data\/Rdata.rdb",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " -- are never flushed.\n\nAs a result, when a package is unloaded, re-installed, and re-loaded within\na single R session, offsets from the freshly-read "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".rdx",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " index are applied\nto a stale cached copy of the corresponding "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".rdb",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " file. This produces two\ndistinct failure modes:\n\n1. **Help pages**: queries fail until the session is restarted, with\n\n   "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "   Error in fetch(key) :\n     lazy-load database '...\/help\/<pkg>.rdb' is corrupt\n   In addition: Warning message:\n   internal error ... in R_decompress1\n   "
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n2. **Lazy data (silent)**: when a blob's offset happens to coincide across\n   the two installations, a stale "
+                            },
+                            {
+                                "type": "text",
+                                "text": "data\/Rdata.rdb",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " silently serves values\n   from the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "previously installed version",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " of the package, with no error or\n   warning. ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "R\/sysdata.rdb",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " behaves the same way, by the same mechanism.)\n\nThe first failure mode is a long-standing source of \"restart R\" advice and\ndownstream bug reports. Package managers that can re-install packages\nin-session work around it by calling the internal "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lazyLoadDBflush()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nthemselves from "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".onUnload()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " -- see e.g. renv\n("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/rstudio\/renv\/issues\/1294"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") and pak -- which requires\ncontortions to keep "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R CMD check",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " quiet about the "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".Internal()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " call in\npackage code.\n\nThe second failure mode appears not to have been reported before, and is\narguably worse: silently wrong data rather than an error.\n\n## Reproduction\n\nRun in a fresh session (tested on macOS arm64 and Linux; platform-independent):\n\n```\nlib <- tempfile(\"lib\"); dir.create(lib)\n.libPaths(c(lib, .libPaths()))\nsrc <- tempfile(\"src\"); dir.create(src)\npkg <- file.path(src, \"lazytest\")\ndir.create(file.path(pkg, \"R\"), recursive = TRUE)\ndir.create(file.path(pkg, \"man\"), recursive = TRUE)\ndir.create(file.path(pkg, \"data\"), recursive = TRUE)\n\nwriteLines(c(\"Package: lazytest\", \"Version: 1.0\", \"Title: Test\",\n             \"Description: Test.\", \"Author: A\", \"Maintainer: A <a@b.c>\",\n             \"License: GPL-3\", \"LazyData: true\"),\n           file.path(pkg, \"DESCRIPTION\"))\nwriteLines(\"export(f)\", file.path(pkg, \"NAMESPACE\"))\nwriteLines(\"f <- function() 42\", file.path(pkg, \"R\", \"f.R\"))\n\nrd <- function(x)\n  writeLines(c(\"\\\\name{f}\", \"\\\\alias{f}\", \"\\\\title{t}\", \"\\\\description{d}\",\n               paste0(\"\\\\details{\", x, \"}\")),\n             file.path(pkg, \"man\", \"f.Rd\"))\nmkdata <- function(x) {\n  d <- x\n  save(d, file = file.path(pkg, \"data\", \"d.rda\"))\n}\n\nrd(\"short docs\"); mkdata(\"short\")\ninstall.packages(pkg, lib = lib, repos = NULL, type = \"source\")\nlibrary(lazytest)\nlength(tools::Rd_db(\"lazytest\", lib.loc = lib))  # ok; populates help cache\nlazytest::d                                      # \"short\"; populates data\ncache\n\ndetach(\"package:lazytest\", character.only = TRUE)\nunloadNamespace(\"lazytest\")\n\nrd(strrep(\"much longer docs to shift the offsets \", 50))"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "mkdata(strrep(\"a much longer data value to shift database offsets \", 50))\ninstall.packages(pkg, lib = lib, repos = NULL, type = \"source\")\nlibrary(lazytest)\n\nlength(tools::Rd_db(\"lazytest\", lib.loc = lib))\n#&gt; Error : lazy-load database '...\/lazytest\/help\/lazytest.rdb' is corrupt\n\nlazytest::d\n#&gt; [1] \"short\"\n```\n\nNote the final result: the old version's data value is returned silently,\neven though the installed package now contains a 2600-character string.\n\n## Proposed patch\n\n`unloadNamespace()` already flushes `R\/&lt;pkg&gt;.rdb`, precisely so that the\nunload + re-install + re-load cycle works for package code. The attached\npatch (against trunk) extends the same treatment to the package's other\nlazy-load databases:\n\n```\nIndex: src\/library\/base\/R\/namespace.R\n===================================================================\n--- src\/library\/base\/R\/namespace.R      (revision 90386)\n+++ src\/library\/base\/R\/namespace.R      (working copy)\n@@ -907,7 +907,13 @@ unloadNamespace &lt;- function(ns)\n        .Internal(unregisterNamespace(nsname))\n        if(.isMethodsDispatchOn() &amp;&amp; methods:::.hasS4MetaData(ns))\n            methods::cacheMetaData(ns, FALSE, ns)\n+       ## flush the package's lazy-load databases: stale cached copies\n+       ## could otherwise be seen if the package is re-installed and\n+       ## re-loaded in this session\n        .Internal(lazyLoadDBflush(paste0(nspath, \"\/R\/\", nsname, \".rdb\")))\n+       .Internal(lazyLoadDBflush(paste0(nspath, \"\/R\/sysdata.rdb\")))\n+       .Internal(lazyLoadDBflush(paste0(nspath, \"\/data\/Rdata.rdb\")))\n+       .Internal(lazyLoadDBflush(paste0(nspath, \"\/help\/\", nsname, \".rdb\")))\n     }\n     invisible()\n }\n```\n\nFlushing a path with no cache entry (e.g. for packages without help or\nlazy data) is a no-op: `do_lazyLoadDBflush()` only searches the in-memory\nname table and never touches the filesystem. The cost is a bounded string\ncomparison per database per unload; eviction also releases up to 10Mb of\ncached contents per database.\n\nWith this patch applied, both the help query and the data access in the\nreproduction above return the newly installed version's contents.\n\nThe patch is also available as a pull request on the r-svn CI mirror, with\nbuilds and checks run on Linux, macOS, and Windows:\n<https:\/\/github.com\/r-devel\/r-svn\/pull\/295> (diff:\n<https:\/\/github.com\/r-devel\/r-svn\/pull\/295.diff>)\n\n## Notes on scope\n\n- The cache is keyed by the literal path string. This patch flushes the\n  namespace's stored (normalized) path, which matches how the help and\n  data cache keys are constructed in standard use, since `.libPaths()`\n  entries are normalized. Loading a package from an unnormalized `lib.loc`\n  spelling not on `.libPaths()` can still defeat the flush; that\n  limitation applies identically to the existing `R\/&lt;pkg&gt;.rdb` flush\n  (`loadNamespace()` keys its lazy-load promises with the raw\n  `find.package()` path, while `unloadNamespace()` flushes the normalized\n  stored path), so it is not made worse here.\n\n- Re-installation performed by another process (a second R session, or\n  `R CMD INSTALL` from a terminal) while the package's databases are\n  cached is still not covered. A complete fix would validate cache\n  entries inside `readRawFromFile()` against the file's current\n  size\/mtime\/inode, invalidating stale entries at fetch time regardless\n  of how or where the re-installation happened. I am happy to propose\n  that patch instead of (or in addition to) this one.\n\n- Related observation while reading `readRawFromFile()`: on a cache hit,\n  the code performs `memcpy(RAW(val), ptr[icache]+offset, len)` without\n  storing or checking the cached file's length, so index offsets pointing\n  beyond the end of a stale (smaller) cached file read out of bounds of\n  the malloc'd buffer. Validating entries at fetch time (previous bullet)\n  would remove that possibility; alternatively a bounds check could be\n  added cheaply by recording each cached file's length.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1786383211.064419",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "5GuP",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "mkdata(strrep(\"a much longer data value to shift database offsets \", 50))\ninstall.packages(pkg, lib = lib, repos = NULL, type = \"source\")\nlibrary(lazytest)\n\nlength(tools::Rd_db(\"lazytest\", lib.loc = lib))\n#> Error : lazy-load database '...\/lazytest\/help\/lazytest.rdb' is corrupt\n\nlazytest::d\n#> [1] \"short\""
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nNote the final result: the old version's data value is returned silently,\neven though the installed package now contains a 2600-character string.\n\n## Proposed patch\n\n`unloadNamespace()` already flushes `R\/<pkg>.rdb`, precisely so that the\nunload + re-install + re-load cycle works for package code. The attached\npatch (against trunk) extends the same treatment to the package's other\nlazy-load databases:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/base\/R\/namespace.R\n===================================================================\n--- src\/library\/base\/R\/namespace.R      (revision 90386)\n+++ src\/library\/base\/R\/namespace.R      (working copy)\n@@ -907,7 +907,13 @@ unloadNamespace <- function(ns)\n        .Internal(unregisterNamespace(nsname))\n        if(.isMethodsDispatchOn() && methods:::.hasS4MetaData(ns))\n            methods::cacheMetaData(ns, FALSE, ns)\n+       ## flush the package's lazy-load databases: stale cached copies\n+       ## could otherwise be seen if the package is re-installed and\n+       ## re-loaded in this session\n        .Internal(lazyLoadDBflush(paste0(nspath, \"\/R\/\", nsname, \".rdb\")))\n+       .Internal(lazyLoadDBflush(paste0(nspath, \"\/R\/sysdata.rdb\")))\n+       .Internal(lazyLoadDBflush(paste0(nspath, \"\/data\/Rdata.rdb\")))\n+       .Internal(lazyLoadDBflush(paste0(nspath, \"\/help\/\", nsname, \".rdb\")))\n     }\n     invisible()\n }\n```\n\nFlushing a path with no cache entry (e.g. for packages without help or\nlazy data) is a no-op: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_lazyLoadDBflush()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " only searches the in-memory\nname table and never touches the filesystem. The cost is a bounded string\ncomparison per database per unload; eviction also releases up to 10Mb of\ncached contents per database.\n\nWith this patch applied, both the help query and the data access in the\nreproduction above return the newly installed version's contents.\n\nThe patch is also available as a pull request on the r-svn CI mirror, with\nbuilds and checks run on Linux, macOS, and Windows:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/pull\/295"
+                            },
+                            {
+                                "type": "text",
+                                "text": " (diff:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/pull\/295.diff"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n\n## Notes on scope\n\n- The cache is keyed by the literal path string. This patch flushes the\n  namespace's stored (normalized) path, which matches how the help and\n  data cache keys are constructed in standard use, since "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".libPaths()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n  entries are normalized. Loading a package from an unnormalized "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lib.loc",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n  spelling not on "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".libPaths()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " can still defeat the flush; that\n  limitation applies identically to the existing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R\/<pkg>.rdb",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " flush\n  ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "loadNamespace()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " keys its lazy-load promises with the raw\n  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "find.package()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " path, while "
+                            },
+                            {
+                                "type": "text",
+                                "text": "unloadNamespace()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " flushes the normalized\n  stored path), so it is not made worse here.\n\n- Re-installation performed by another process (a second R session, or\n  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R CMD INSTALL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " from a terminal) while the package's databases are\n  cached is still not covered. A complete fix would validate cache\n  entries inside "
+                            },
+                            {
+                                "type": "text",
+                                "text": "readRawFromFile()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " against the file's current\n  size\/mtime\/inode, invalidating stale entries at fetch time regardless\n  of how or where the re-installation happened. I am happy to propose\n  that patch instead of (or in addition to) this one.\n\n- Related observation while reading "
+                            },
+                            {
+                                "type": "text",
+                                "text": "readRawFromFile()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ": on a cache hit,\n  the code performs "
+                            },
+                            {
+                                "type": "text",
+                                "text": "memcpy(RAW(val), ptr[icache]+offset, len)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " without\n  storing or checking the cached file's length, so index offsets pointing\n  beyond the end of a stale (smaller) cached file read out of bounds of\n  the malloc'd buffer. Validating entries at fetch time (previous bullet)\n  would remove that possibility; alternatively a bounds check could be\n  added cheaply by recording each cached file's length."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

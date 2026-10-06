@@ -1,0 +1,1223 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19091] as.numeric on macOS aarch64 rounds \"0.9999999999999999\" to 1.0 instead of the nearest IEEE 754 double*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19091>\n\n--- Comment #9 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\nWorks here: approximate the result by a power of 2 and then calculate the\nerror.\n\nA power of 2 is exactly representable and multiplication by a power of 2 is\nexact.\n\n999999999999999*10 is exact.\n\nR&gt; r &lt;- 1\nR&gt; sprintf(\"%a\", r + ((999999999999999*10 - r*1e16) + 9)\/1e16)\n[1] \"0x1.fffffffffffffp-1\"\n\nFor division by 10^22:\n\nR&gt; r &lt;- 2^-20\nR&gt; print(r + ((999999999999999*10 - r*1e22) + 9)\/1e22, 17)\n[1] 9.9999999999999995e-07\n\nIt is different from\n\nR&gt; print(999999999999999\/1e21 + 9\/1e22, 17)\n[1] 9.9999999999999974e-07\n\n\nOtherwise, if not using system 'sccanf' or 'strtod', R could adopt a proven\ncorrect code that doesn't use long double, like David M. Gay's 'strtod' or the\nmore recent Eisel-Lemire algorithm. Eisel-Lemire algorithm has a C port and\ndoesn't need big integer for inputs up to 19 digits.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785837503.022969",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "bMxLN",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19091] as.numeric on macOS aarch64 rounds \"0.9999999999999999\" to 1.0 instead of the nearest IEEE 754 double",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19091"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #9 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nWorks here: approximate the result by a power of 2 and then calculate the\nerror.\n\nA power of 2 is exactly representable and multiplication by a power of 2 is\nexact.\n\n999999999999999*10 is exact.\n\nR> r <- 1\nR> sprintf(\"%a\", r + ((999999999999999*10 - r*1e16) + 9)\/1e16)\n[1] \"0x1.fffffffffffffp-1\"\n\nFor division by 10^22:\n\nR> r <- 2^-20\nR> print(r + ((999999999999999*10 - r*1e22) + 9)\/1e22, 17)\n[1] 9.9999999999999995e-07\n\nIt is different from\n\nR> print(999999999999999\/1e21 + 9\/1e22, 17)\n[1] 9.9999999999999974e-07\n\n\n\nOtherwise, if not using system 'sccanf' or 'strtod', R could adopt a proven\ncorrect code that doesn't use long double, like David M. Gay's 'strtod' or the\nmore recent Eisel-Lemire algorithm. Eisel-Lemire algorithm has a C port and\ndoesn't need big integer for inputs up to 19 digits."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19123] New: Memory leak in `scan()` when a field fails type conversion*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19123>\n\n            Bug ID: 19123\n           Summary: Memory leak in `scan()` when a field fails type\n                    conversion\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nCreated attachment 3773\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3773&amp;action=edit>\nCandidate patch.\n\n## Summary\n\n`scan()` leaks its internal line buffer (an 8 KB `R_StringBuffer`) every\ntime it aborts on a malformed field. `scanVector()` and `scanFrame()`\nallocate the buffer with `R_AllocStringBuffer()` and free it with\n`R_FreeStringBuffer()` only on their normal return paths. When a value\ncannot be converted to the requested type, `extractItem()` calls\n`error()`, which `longjmp`s out of the function and skips the free, so\nthe buffer is leaked.\n\nBecause `read.table()` \/ `read.csv()` are built on `scan()`, this is\nreachable from ordinary data-reading code: every failed parse of an\nuntrusted or malformed input leaks ~8 KB. A long-running process that\nrepeatedly reads malformed input accumulates these leaks.\n\nSeverity: low. It is a memory leak, not a memory-safety error — no crash\nor corruption. The practical impact is unbounded memory growth in a\npersistent process that keeps parsing malformed input.\n\n## Affected code\n\n`src\/main\/scan.c`, `scanVector()` (as of r89873). The buffer is\nallocated once, up front:\n\n```\nstatic SEXP scanVector(SEXPTYPE type, R_xlen_t maxitems, R_xlen_t maxlines,\n                       int flush, SEXP stripwhite, int blskip, LocalData *d)\n{\n    ...\n    R_StringBuffer strBuf = {NULL, 0, MAXELTSIZE};\n    ...\n    R_AllocStringBuffer(0, &amp;strBuf);              \/* line 571: malloc *\/\n    PROTECT(ans = allocVector(type, blocksize));\n    ...\n    for (;;) {\n        ...\n        buffer = fillBuffer(type, strip, &amp;bch, d, &amp;strBuf);\n        ...\n        extractItem(buffer, ans, n, d);           \/* line 617: may error() *\/\n        ...\n    }\n    ...\n    R_FreeStringBuffer(&amp;strBuf);                   \/* lines 638\/643\/674 *\/\n    return bns;\n}\n```\n\n`extractItem()` throws on a type mismatch via `expected()`:\n\n```\nNORET static R_INLINE void expected(char *what, char *got, LocalData *d)\n{\n    ...\n    error(_(\"scan() expected '%s', got '%s'\"), what, got);   \/* line 494 *\/\n}\n```\n\nThe `error()` at line 494 `longjmp`s straight past the\n`R_FreeStringBuffer(&amp;strBuf)` calls at lines 638, 643 and 674, so the\n`malloc`ed buffer from line 571 is never released. `PROTECT(ans)` is\nunwound by the error machinery, but the raw `malloc` in the\n`R_StringBuffer` is not.\n\n`scanFrame()` (used for `what = list(...)`, i.e. `read.table()`) has the\nsame structure: `R_AllocStringBuffer(0, &amp;buf)` at line 699,\n`extractItem()` at lines 743\/784\/806, `R_FreeStringBuffer(&amp;buf)` at line\n847 — and leaks identically on error.\n\n## Reproducer\n\nUnder an R build configured with `--enable-strict-barrier` and compiled\nwith `-fsanitize=address` (or run under `valgrind --leak-check=full`):\n\n```\n# scanVector path (atomic 'what'):\nscan(text = \"x\", what = 0, quiet = TRUE)\n## Error in scan(...) : scan() expected 'a real', got 'x'\n##  -&gt; leaks one 8192-byte R_StringBuffer\n\n# scanFrame path (list 'what'; also what read.table uses):\nscan(text = \"x\", what = list(0), quiet = TRUE)\n\n# reachable from read.table()\/read.csv() when a column is typed numeric.\n# (With the default colClasses the fields are read as character, so there\n# is no conversion error and no leak; forcing a numeric column triggers it.)\nread.csv(text = \"value\\nx\", colClasses = \"numeric\")\n```\n\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785854760.396729",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "LXSp=",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19123] New: Memory leak in ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "scan()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " when a field fails type conversion",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19123"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19123\n           Summary: Memory leak in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "scan()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " when a field fails type\n                    conversion\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3773\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3773&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3773&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCandidate patch.\n\n## Summary\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "scan()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " leaks its internal line buffer (an 8 KB "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_StringBuffer",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") every\ntime it aborts on a malformed field. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "scanVector()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "scanFrame()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nallocate the buffer with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_AllocStringBuffer()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and free it with\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_FreeStringBuffer()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " only on their normal return paths. When a value\ncannot be converted to the requested type, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "extractItem()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " calls\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "error()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which "
+                            },
+                            {
+                                "type": "text",
+                                "text": "longjmp",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "s out of the function and skips the free, so\nthe buffer is leaked.\n\nBecause "
+                            },
+                            {
+                                "type": "text",
+                                "text": "read.table()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " \/ "
+                            },
+                            {
+                                "type": "text",
+                                "text": "read.csv()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " are built on "
+                            },
+                            {
+                                "type": "text",
+                                "text": "scan()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", this is\nreachable from ordinary data-reading code: every failed parse of an\nuntrusted or malformed input leaks ~8 KB. A long-running process that\nrepeatedly reads malformed input accumulates these leaks.\n\nSeverity: low. It is a memory leak, not a memory-safety error — no crash\nor corruption. The practical impact is unbounded memory growth in a\npersistent process that keeps parsing malformed input.\n\n## Affected code\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/scan.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "scanVector()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (as of r89873). The buffer is\nallocated once, up front:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "static SEXP scanVector(SEXPTYPE type, R_xlen_t maxitems, R_xlen_t maxlines,\n                       int flush, SEXP stripwhite, int blskip, LocalData *d)\n{\n    ...\n    R_StringBuffer strBuf = {NULL, 0, MAXELTSIZE};\n    ...\n    R_AllocStringBuffer(0, &strBuf);              \/* line 571: malloc *\/\n    PROTECT(ans = allocVector(type, blocksize));\n    ...\n    for (;;) {\n        ...\n        buffer = fillBuffer(type, strip, &bch, d, &strBuf);\n        ...\n        extractItem(buffer, ans, n, d);           \/* line 617: may error() *\/\n        ...\n    }\n    ...\n    R_FreeStringBuffer(&strBuf);                   \/* lines 638\/643\/674 *\/\n    return bns;\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "extractItem()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " throws on a type mismatch via "
+                            },
+                            {
+                                "type": "text",
+                                "text": "expected()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "NORET static R_INLINE void expected(char *what, char *got, LocalData *d)\n{\n    ...\n    error(_(\"scan() expected '%s', got '%s'\"), what, got);   \/* line 494 *\/\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "error()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " at line 494 "
+                            },
+                            {
+                                "type": "text",
+                                "text": "longjmp",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "s straight past the\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_FreeStringBuffer(&strBuf)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " calls at lines 638, 643 and 674, so the\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "malloc",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "ed buffer from line 571 is never released. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "PROTECT(ans)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is\nunwound by the error machinery, but the raw "
+                            },
+                            {
+                                "type": "text",
+                                "text": "malloc",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in the\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_StringBuffer",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is not.\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "scanFrame()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (used for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "what = list(...)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", i.e. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "read.table()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") has the\nsame structure: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_AllocStringBuffer(0, &buf)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " at line 699,\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "extractItem()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " at lines 743\/784\/806, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_FreeStringBuffer(&buf)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " at line\n847 — and leaks identically on error.\n\n## Reproducer\n\nUnder an R build configured with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "--enable-strict-barrier",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and compiled\nwith "
+                            },
+                            {
+                                "type": "text",
+                                "text": "-fsanitize=address",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (or run under "
+                            },
+                            {
+                                "type": "text",
+                                "text": "valgrind --leak-check=full",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# scanVector path (atomic 'what'):\nscan(text = \"x\", what = 0, quiet = TRUE)\n## Error in scan(...) : scan() expected 'a real', got 'x'\n##  -> leaks one 8192-byte R_StringBuffer\n\n# scanFrame path (list 'what'; also what read.table uses):\nscan(text = \"x\", what = list(0), quiet = TRUE)\n\n# reachable from read.table()\/read.csv() when a column is typed numeric.\n# (With the default colClasses the fields are read as character, so there\n# is no conversion error and no leak; forcing a numeric column triggers it.)\nread.csv(text = \"value\\nx\", colClasses = \"numeric\")\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "Each failed call leaks 8192 bytes. Repeating it grows RSS without bound.\n\n## Sanitizer output\n\n```\n==ERROR: LeakSanitizer: detected memory leaks\n\nDirect leak of 8192 byte(s) in 1 object(s) allocated from:\n    #0 ... in malloc\n    #1 ... in R_AllocStringBuffer src\/main\/memory.c:4969\n    #2 ... in scanVector       src\/main\/scan.c:571\n    #3 ... in do_scan          src\/main\/scan.c:1001\n    #4 ... in bcEval_loop      src\/main\/eval.c:8150\n    #5 ... in bcEval           src\/main\/eval.c:7533\n    #6 ... in Rf_eval          src\/main\/eval.c:1167\n    #7 ... in R_execClosure    src\/main\/eval.c:2398\n    ...\n\nSUMMARY: AddressSanitizer: 8192 byte(s) leaked in 1 allocation(s).\n```\n\n## Suggested fix\n\n`do_scan()` already installs an on-error cleanup for the same call: it\nsets up a context whose `cend` handler, `scan_cleanup()`, releases the\nconnection and the `quoteset` buffer on a non-local exit:\n\n```\nbegincontext(&amp;cntxt, CTXT_CCODE, R_GlobalContext-&gt;call, R_BaseEnv,\n             R_BaseEnv, R_NilValue, R_NilValue);\ncntxt.cend = &amp;scan_cleanup;\ncntxt.cenddata = &amp;data;\n```\n\nThe cleanest fix is to bring the string buffer under that same cleanup.\nFor example, add an `R_StringBuffer *buf` field to `LocalData`, point it\nat the local buffer at the top of `scanVector()`\/`scanFrame()`\n(`d-&gt;buf = &amp;strBuf;`), and free it in `scan_cleanup()`:\n\n```\nstatic void scan_cleanup(void *data)\n{\n    LocalData *ld = data;\n    if (ld-&gt;buf) { R_FreeStringBuffer(ld-&gt;buf); ld-&gt;buf = NULL; }\n    if (ld-&gt;con &amp;&amp; !ld-&gt;ttyflag &amp;&amp; !ld-&gt;wasopen) { ... }\n    if (ld-&gt;quoteset &amp;&amp; ld-&gt;quoteset[0]) { ... }\n}\n```\n\n`R_FreeStringBuffer()` clears `buf-&gt;data`, so the existing normal-path\n`R_FreeStringBuffer()` calls in `scanVector()`\/`scanFrame()` become no-ops\nafter cleanup and there is no double free.\n\n## How it was found\n\nlibFuzzer + AddressSanitizer harness driving `scan(text = &lt;fuzz&gt;, ...)`\nwith `what` set to `\"\"`, `0`, and separators `,`\/`\\t`, embedding R via\n`Rf_initEmbeddedR()`. The leak fires on essentially every input that\nisn't a clean parse, so it surfaces immediately.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785854760.416999",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ZncO",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Each failed call leaks 8192 bytes. Repeating it grows RSS without bound.\n\n## Sanitizer output\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "==ERROR: LeakSanitizer: detected memory leaks\n\nDirect leak of 8192 byte(s) in 1 object(s) allocated from:\n    #0 ... in malloc\n    #1 ... in R_AllocStringBuffer src\/main\/memory.c:4969\n    #2 ... in scanVector       src\/main\/scan.c:571\n    #3 ... in do_scan          src\/main\/scan.c:1001\n    #4 ... in bcEval_loop      src\/main\/eval.c:8150\n    #5 ... in bcEval           src\/main\/eval.c:7533\n    #6 ... in Rf_eval          src\/main\/eval.c:1167\n    #7 ... in R_execClosure    src\/main\/eval.c:2398\n    ...\n\nSUMMARY: AddressSanitizer: 8192 byte(s) leaked in 1 allocation(s).\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n## Suggested fix\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_scan()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " already installs an on-error cleanup for the same call: it\nsets up a context whose "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cend",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " handler, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "scan_cleanup()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", releases the\nconnection and the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "quoteset",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " buffer on a non-local exit:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "begincontext(&cntxt, CTXT_CCODE, R_GlobalContext->call, R_BaseEnv,\n             R_BaseEnv, R_NilValue, R_NilValue);\ncntxt.cend = &scan_cleanup;\ncntxt.cenddata = &data;\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe cleanest fix is to bring the string buffer under that same cleanup.\nFor example, add an "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_StringBuffer *buf",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " field to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "LocalData",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", point it\nat the local buffer at the top of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "scanVector()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "scanFrame()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n("
+                            },
+                            {
+                                "type": "text",
+                                "text": "d->buf = &strBuf;",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), and free it in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "scan_cleanup()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "static void scan_cleanup(void *data)\n{\n    LocalData *ld = data;\n    if (ld->buf) { R_FreeStringBuffer(ld->buf); ld->buf = NULL; }\n    if (ld->con && !ld->ttyflag && !ld->wasopen) { ... }\n    if (ld->quoteset && ld->quoteset[0]) { ... }\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_FreeStringBuffer()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " clears "
+                            },
+                            {
+                                "type": "text",
+                                "text": "buf->data",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", so the existing normal-path\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_FreeStringBuffer()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " calls in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "scanVector()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "scanFrame()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " become no-ops\nafter cleanup and there is no double free.\n\n## How it was found\n\nlibFuzzer + AddressSanitizer harness driving "
+                            },
+                            {
+                                "type": "text",
+                                "text": "scan(text = <fuzz>, ...)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nwith "
+                            },
+                            {
+                                "type": "text",
+                                "text": "what",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " set to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "0",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and separators "
+                            },
+                            {
+                                "type": "text",
+                                "text": ",",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\\t",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", embedding R via\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "Rf_initEmbeddedR()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". The leak fires on essentially every input that\nisn't a clean parse, so it surfaces immediately."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19124] New: strptime() fails to parse %w of '0' in LC_CTYPE=C*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19124>\n\n            Bug ID: 19124\n           Summary: strptime() fails to parse %w of '0' in LC_CTYPE=C\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: NEW\n          Severity: minor\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>\n\nCreated attachment 3774\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3774&amp;action=edit>\nHandle %w of '0' consistently in LC_CTYPE=C\n\nr63319 introduced a boundary check for `w_strptime_internal` that was not\nmirrored in `strptime_internal`, so we get this difference in behavior:\n\n```\nLC_CTYPE=C          Rscript -e 'strptime(\"2026 0 0\", \"%Y %U %w\")'\n# [1] NA\nLC_CTYPE=en_US.utf8 Rscript -e 'strptime(\"2026 0 0\", \"%Y %U %w\")'\n# [1] \"2026-01-04 UTC\"\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785862162.169979",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "3PWqA",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19124] New: strptime() fails to parse %w of '0' in LC_CTYPE=C",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19124"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19124\n           Summary: strptime() fails to parse %w of '0' in LC_CTYPE=C\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: NEW\n          Severity: minor\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3774\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3774&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3774&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nHandle %w of '0' consistently in LC_CTYPE=C\n\nr63319 introduced a boundary check for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "w_strptime_internal",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " that was not\nmirrored in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "strptime_internal",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", so we get this difference in behavior:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "LC_CTYPE=C          Rscript -e 'strptime(\"2026 0 0\", \"%Y %U %w\")'\n# [1] NA\nLC_CTYPE=en_US.utf8 Rscript -e 'strptime(\"2026 0 0\", \"%Y %U %w\")'\n# [1] \"2026-01-04 UTC\"\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19125] New: Integer arithmetic means '%z' for minute-level offsets is incorrect*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19125>\n\n            Bug ID: 19125\n           Summary: Integer arithmetic means '%z' for minute-level offsets\n                    is incorrect\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: NEW\n          Severity: minor\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>\n\nCreated attachment 3775\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3775&amp;action=edit>\nExpress tz offset in seconds and thereby avoid truncation error\n\n```\nstrptime(\"2020-01-01 -0001\", \"%Y-%m-%d %z\", tz = \"UTC\")\n# [1] \"2020-01-01 00:00:36 UTC\"\n```\n\nThe problem is the `\/30` is truncated to integer. We can overcome this by\nmoving the `*3600\/100` step earlier and avoiding `\/` as much as possible.\n\nIn fact, I think it's much more natural to express this calculation in the\nunits of seconds, as in the patch, but I may be missing a subtlety.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785864876.782439",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "e3EG",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19125] New: Integer arithmetic means '%z' for minute-level offsets is incorrect",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19125"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19125\n           Summary: Integer arithmetic means '%z' for minute-level offsets\n                    is incorrect\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: NEW\n          Severity: minor\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3775\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3775&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3775&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nExpress tz offset in seconds and thereby avoid truncation error\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "strptime(\"2020-01-01 -0001\", \"%Y-%m-%d %z\", tz = \"UTC\")\n# [1] \"2020-01-01 00:00:36 UTC\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe problem is the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/30",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is truncated to integer. We can overcome this by\nmoving the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "*3600\/100",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " step earlier and avoiding "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as much as possible.\n\nIn fact, I think it's much more natural to express this calculation in the\nunits of seconds, as in the patch, but I may be missing a subtlety."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19126] New: Compilation fails with gcc -Werror=format-security*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19126>\n\n            Bug ID: 19126\n           Summary: Compilation fails with gcc -Werror=format-security\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: major\n          Priority: P5\n         Component: Installation\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:csardi.gabor@gmail.com|csardi.gabor@gmail.com>\n\nSeems like after 90348 compilation fails on setups where\n-Werror=format-security is set. E.g. this is Fedora 44 and gcc 16.1.1:\n\n```\nfedora-gcc16-1  | gcc -I..\/..\/src\/extra -I..\/..\/src\/extra\/xdr -I.\n-I..\/..\/src\/include -I..\/..\/src\/include  -I\/usr\/local\/include -I..\/..\/src\/nmath\n-DHAVE_CONFIG_H   -fopenmp -fpic  -g -O2 -Wall -pedantic -mtune=native\n-Werror=format-security -Wp,-D_FORTIFY_SOURCE=3 -fexceptions\n-fstack-protector-strong -fstack-clash-protection -fcf-protection\n-Werror=implicit-function-declaration -Wstrict-prototypes  -c array.c -o\narray.o\nfedora-gcc16-1  | array.c: In function 'dim2total':\nfedora-gcc16-1  | array.c:302:9: error: format not a string literal and no\nformat arguments [-Werror=format-security]\nfedora-gcc16-1  |   302 |         error(ErrMsg);\nfedora-gcc16-1  |       |         ^~~~~\nfedora-gcc16-1  | cc1: some warnings being treated as errors\n```\n<https:\/\/github.com\/r-hub\/containers\/actions\/runs\/30978440969\/job\/92217515789>\n\nAnother example is Fedora 42 and gcc 15.2.1:\n<https:\/\/github.com\/r-hub\/containers\/actions\/runs\/30978440969\/job\/92217515853>\n\nFix:\n```\nerror(\"%s\", ErrMsg);\n```\n\nThis is currently not a security issue per se because `ErrMsg` is always a\n(translated) literal.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785911293.933709",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "5bOph",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19126] New: Compilation fails with gcc -Werror=format-security",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19126"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19126\n           Summary: Compilation fails with gcc -Werror=format-security\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: major\n          Priority: P5\n         Component: Installation\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:csardi.gabor@gmail.com",
+                                "text": "csardi.gabor@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSeems like after 90348 compilation fails on setups where\n-Werror=format-security is set. E.g. this is Fedora 44 and gcc 16.1.1:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "fedora-gcc16-1  | gcc -I..\/..\/src\/extra -I..\/..\/src\/extra\/xdr -I.\n-I..\/..\/src\/include -I..\/..\/src\/include  -I\/usr\/local\/include -I..\/..\/src\/nmath\n-DHAVE_CONFIG_H   -fopenmp -fpic  -g -O2 -Wall -pedantic -mtune=native\n-Werror=format-security -Wp,-D_FORTIFY_SOURCE=3 -fexceptions\n-fstack-protector-strong -fstack-clash-protection -fcf-protection\n-Werror=implicit-function-declaration -Wstrict-prototypes  -c array.c -o\narray.o\nfedora-gcc16-1  | array.c: In function 'dim2total':\nfedora-gcc16-1  | array.c:302:9: error: format not a string literal and no\nformat arguments [-Werror=format-security]\nfedora-gcc16-1  |   302 |         error(ErrMsg);\nfedora-gcc16-1  |       |         ^~~~~\nfedora-gcc16-1  | cc1: some warnings being treated as errors\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-hub\/containers\/actions\/runs\/30978440969\/job\/92217515789"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nAnother example is Fedora 42 and gcc 15.2.1:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-hub\/containers\/actions\/runs\/30978440969\/job\/92217515853"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nFix:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "error(\"%s\", ErrMsg);\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis is currently not a security issue per se because "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ErrMsg",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is always a\n(translated) literal."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

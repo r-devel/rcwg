@@ -1,0 +1,1280 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19091] as.numeric on macOS aarch64 rounds \"0.9999999999999999\" to 1.0 instead of the nearest IEEE 754 double*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19091>\n\nPeter Dalgaard (<mailto:pd.mes@cbs.dk|pd.mes@cbs.dk>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |pd.mes@cbs.dk\n\n--- Comment #7 from Peter Dalgaard (<mailto:pd.mes@cbs.dk|pd.mes@cbs.dk>) ---\nYes (to Suharto), conversion algorithms is the culprit\n\nIf we avoid going via large integers, and go by the definition, we get\n\n&gt; a &lt;- 0; m &lt;- 1 ; for (i in 1:16){m &lt;- m\/10; a &lt;- a + 9*m}\n&gt; sprintf(\"%a\",a)\n[1] \"0x1.fffffffffffffp-1\"\n&gt; 1-a\n[1] 1.110223e-16\n\nor, just doing the last digit this way:\n\n&gt; .999999999999999 + 9*1e-16 \n[1] 1\n&gt; sprintf(\"%a\", .999999999999999 + 9*1e-16 )\n[1] \"0x1.fffffffffffffp-1\"\n&gt; .999999999999999 + 9*1e-16 -1\n[1] -1.110223e-16\n\nbut curiously\n\n&gt; 999999999999999*1e-15 + 9*1e-16 -1\n[1] 0\n&gt; sprintf(\"%a\", 999999999999999*1e-15 + 9*1e-16)\n[1] \"0x1p+0\"\n\nHowever, negative powers of 10 come with their own representation issues:\n\n&gt; 1e-16 - 1e-8*1e-8\n[1] -1.232595e-32\n\nor even \n\n&gt; 0.01 - 0.1 * 0.1\n[1] -1.734723e-18\n\nso perhaps better look at stuff like\n\n&gt; sprintf(\"%a\",999999999999999\/1e15 + 9\/1e16)\n[1] \"0x1.fffffffffffffp-1\"",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782821107.597009",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "nbb",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19091] as.numeric on macOS aarch64 rounds \"0.9999999999999999\" to 1.0 instead of the nearest IEEE 754 double",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19091"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nPeter Dalgaard ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:pd.mes@cbs.dk",
+                                "text": "pd.mes@cbs.dk"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |pd.mes@cbs.dk\n\n--- Comment #7 from Peter Dalgaard ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:pd.mes@cbs.dk",
+                                "text": "pd.mes@cbs.dk"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nYes (to Suharto), conversion algorithms is the culprit\n\nIf we avoid going via large integers, and go by the definition, we get\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "a <- 0; m <- 1 ; for (i in 1:16){m <- m\/10; a <- a + 9*m}\n sprintf(\"%a\",a)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[1] \"0x1.fffffffffffffp-1\""
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "1-a"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[1] 1.110223e-16\n\nor, just doing the last digit this way:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": ".999999999999999 + 9*1e-16 "
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[1] 1"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "sprintf(\"%a\", .999999999999999 + 9*1e-16 )"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[1] \"0x1.fffffffffffffp-1\""
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": ".999999999999999 + 9*1e-16 -1"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[1] -1.110223e-16\n\nbut curiously\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "999999999999999*1e-15 + 9*1e-16 -1"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[1] 0"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "sprintf(\"%a\", 999999999999999*1e-15 + 9*1e-16)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[1] \"0x1p+0\"\n\nHowever, negative powers of 10 come with their own representation issues:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "1e-16 - 1e-8*1e-8"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[1] -1.232595e-32\n\nor even \n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "0.01 - 0.1 * 0.1"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[1] -1.734723e-18\n\nso perhaps better look at stuff like\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "sprintf(\"%a\",999999999999999\/1e15 + 9\/1e16)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[1] \"0x1.fffffffffffffp-1\""
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19095] New: `loadNamespace()` performance issue with many `importFrom()`*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19095>\n\n            Bug ID: 19095\n           Summary: `loadNamespace()` performance issue with many\n                    `importFrom()`\n           Product: R\n           Version: R 4.6.x\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: enhancement\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:lionel.hry@gmail.com|lionel.hry@gmail.com>\n\nCreated attachment 3744\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3744&amp;action=edit>\nBenchmark\n\nA single `importFrom(pkg, sym1, sym2, ...)` scales much better during namespace\nloading than consecutive `importFrom(pkg, sym1); importFrom(pkg, sym2); ...`\ndirectives (which is what roxygen2 generates). The attached patches make the\nconsecutive style load as fast as the grouped style.\n\nCurrent R (baseline):\n\n```\nN=10     many       2.0 ms\nN=10     one        2.0 ms\nN=100    many      10.0 ms\nN=100    one        2.0 ms\nN=1000   many     131.5 ms\nN=1000   one        6.0 ms\nN=10000  many    5756.0 ms\nN=10000  one       48.0 ms\n```\n\nWith the first patch which avoids computing the names of a big exports\nenvironment for each import-from iteration:\n\n```\nN=10     many       2.0 ms\nN=10     one        2.0 ms\nN=100    many       9.0 ms\nN=100    one        2.0 ms\nN=1000   many      96.0 ms\nN=1000   one        5.0 ms\nN=10000  many    2434.5 ms\nN=10000  one       46.0 ms\n```\n\nWith the second patch that merges adjacent import-from directives for the same\npackage at install time:\n\n```\nN=10     many       2.0 ms\nN=10     one        2.0 ms\nN=100    many       2.0 ms\nN=100    one        2.0 ms\nN=1000   many       5.0 ms\nN=1000   one        5.0 ms\nN=10000  many      45.0 ms\nN=10000  one       46.0 ms\n```\n\nWhile N=10k is extreme, a few 100s or even a 1000 imported symbols might occur\nwith large packages.\n\n- roxygen2 generates individual `importFrom()` expressions.\n\n- We're considering expanding bulk imports to explicit `importFrom()`\ndirectives to pin the set of imported symbols and prevent package updates from\ncreating user-visible conflicts at load-time.\n\nThe install-time merge implemented here benefits every package, hand-written or\nroxygen2-generated, with no author action needed. Separately we plan to have\nroxygen2 emit merged `importFrom()`s so older R versions benefit too.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782833607.535219",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "=ga",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19095] New: ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "loadNamespace()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " performance issue with many ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "importFrom()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19095"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19095\n           Summary: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "loadNamespace()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " performance issue with many\n                    "
+                            },
+                            {
+                                "type": "text",
+                                "text": "importFrom()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n           Product: R\n           Version: R 4.6.x\n          Hardware: Other\n                OS: Other\n            Status: UNCONFIRMED\n          Severity: enhancement\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:lionel.hry@gmail.com",
+                                "text": "lionel.hry@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3744\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3744&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3744&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nBenchmark\n\nA single "
+                            },
+                            {
+                                "type": "text",
+                                "text": "importFrom(pkg, sym1, sym2, ...)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " scales much better during namespace\nloading than consecutive "
+                            },
+                            {
+                                "type": "text",
+                                "text": "importFrom(pkg, sym1); importFrom(pkg, sym2); ...",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ndirectives (which is what roxygen2 generates). The attached patches make the\nconsecutive style load as fast as the grouped style.\n\nCurrent R (baseline):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "N=10     many       2.0 ms\nN=10     one        2.0 ms\nN=100    many      10.0 ms\nN=100    one        2.0 ms\nN=1000   many     131.5 ms\nN=1000   one        6.0 ms\nN=10000  many    5756.0 ms\nN=10000  one       48.0 ms\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWith the first patch which avoids computing the names of a big exports\nenvironment for each import-from iteration:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "N=10     many       2.0 ms\nN=10     one        2.0 ms\nN=100    many       9.0 ms\nN=100    one        2.0 ms\nN=1000   many      96.0 ms\nN=1000   one        5.0 ms\nN=10000  many    2434.5 ms\nN=10000  one       46.0 ms\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWith the second patch that merges adjacent import-from directives for the same\npackage at install time:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "N=10     many       2.0 ms\nN=10     one        2.0 ms\nN=100    many       2.0 ms\nN=100    one        2.0 ms\nN=1000   many       5.0 ms\nN=1000   one        5.0 ms\nN=10000  many      45.0 ms\nN=10000  one       46.0 ms\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWhile N=10k is extreme, a few 100s or even a 1000 imported symbols might occur\nwith large packages.\n\n- roxygen2 generates individual "
+                            },
+                            {
+                                "type": "text",
+                                "text": "importFrom()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " expressions.\n\n- We're considering expanding bulk imports to explicit "
+                            },
+                            {
+                                "type": "text",
+                                "text": "importFrom()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ndirectives to pin the set of imported symbols and prevent package updates from\ncreating user-visible conflicts at load-time.\n\nThe install-time merge implemented here benefits every package, hand-written or\nroxygen2-generated, with no author action needed. Separately we plan to have\nroxygen2 emit merged "
+                            },
+                            {
+                                "type": "text",
+                                "text": "importFrom()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "s so older R versions benefit too."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19095] `loadNamespace()` performance issue with many `importFrom()`*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19095>\n\n--- Comment #1 from Lionel Henry (<mailto:lionel.hry@gmail.com|lionel.hry@gmail.com>) ---\nCreated attachment 3745\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3745&amp;action=edit>\nDon't compute `names(exports)` in import loop",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782833665.649119",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "jPe",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19095] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "loadNamespace()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " performance issue with many ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "importFrom()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19095"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Lionel Henry ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:lionel.hry@gmail.com",
+                                "text": "lionel.hry@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3745\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3745&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3745&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nDon't compute "
+                            },
+                            {
+                                "type": "text",
+                                "text": "names(exports)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in import loop"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19095] `loadNamespace()` performance issue with many `importFrom()`*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19095>\n\n--- Comment #2 from Lionel Henry (<mailto:lionel.hry@gmail.com|lionel.hry@gmail.com>) ---\nCreated attachment 3746\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3746&amp;action=edit>\nMerge `importFrom()` expressions at install time",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782833721.063009",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "uHM",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19095] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "loadNamespace()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " performance issue with many ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "importFrom()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19095"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Lionel Henry ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:lionel.hry@gmail.com",
+                                "text": "lionel.hry@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3746\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3746&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3746&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nMerge "
+                            },
+                            {
+                                "type": "text",
+                                "text": "importFrom()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " expressions at install time"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19096] New: Update handling of overflow in integer operations*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19096>\n\n            Bug ID: 19096\n           Summary: Update handling of overflow in integer operations\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>\n\nCreated attachment 3747\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3747&amp;action=edit>\n__builtin overflow checks in arithmetic.c\n\nFollowing up from r-devel:\n<https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2026-June\/084615.html>\n\nThe initial motivation here is that `R_integer_times`, as currently\nimplemented, relies on Undefined Behavior (UB):\n\n```\n\/\/ stylized from arithmetic.c\nint z = x * y;\nif ((double)x * (double)y == z &amp;&amp; z != NA_INTEGER)\n  return z;\n```\n\nI.e., _after_ running the multiplication in `int`, we check if wraparound\nhappened _in `double`_ (into which `int` embeds faithfully). The comment in the\ncode acknowledges this is UB.\n\nMy initial proposal was to use `int64_t` instead, but Brian points out it is\nnot universally available and indeed it's basically not used elsewhere in the R\nsources. The widely available `int_fast64_t` seems much more appropriate here\nthan `int_least64_t`.\n\nLuke also mentions `__builtin_mul_overflow` [1][2], which are recent enough\n(e.g. 2015) to necessitate some `configure` checks to activate, but which _are_\nsupported by `gcc` and `clang`.\n\nOn r-devel, I mentioned a quick benchmark in support of moving away from\n`double` -- now I've made that more formal by running the benchmark on GitHub\nActions in the R mirror [3] by adding in `reg-tests-2.R` a snippet:\n\n```\nx &lt;- y &lt;- rep(10000L, 5e7)\nprint(system.time(for(i in 1:100) x * y))\n```\n\nAnd extracting the timings from 4 different proposals [4][5][6][7]. \n\nHere is the benchmark timings table (unit: seconds) compiled from the logs:\n\n| Flavor | baseline | int64_t | int_fast64_t | \\_\\_builtin\\_mul\\_overflow |\n| :--- | :--- | :--- | :--- | :--- |\n| **Linux (clang, debian:stable, arm)** | 14.084 | 12.915 | 12.815* | 13.521 |\n| **Linux (clang, debian:stable, intel)** | 15.528 | 10.573 | 10.694 | 10.379*\n|\n| **Linux (clang, debian:testing, arm)** | 14.400 | 12.896 | 12.757* | 13.799 |\n| **Linux (clang, debian:testing, intel)** | 15.487 | 10.776 | 10.612* | 10.639\n|\n| **Linux (gcc, debian:stable, arm)** | 14.940 | 12.588 | 12.518* | 14.285 |\n| **Linux (gcc, debian:stable, intel)** | 13.983 | 10.046 | 9.318* | 9.441 |\n| **Linux (gcc, debian:testing, arm)** | 14.731 | 12.707* | 12.870 | 14.386 |\n| **Linux (gcc, debian:testing, intel)** | 14.753 | 11.719 | 10.903 | 8.704* |\n| **MacOS (macOS-26)** | 8.977 | 10.001 | 8.855* | 11.006 |\n| **MacOS (macOS-26-intel)** | 22.831 | 21.492 | 21.802 | 20.030* |\n| **Windows (aarch64)** | 12.250 | 11.050 | 10.980* | 11.940 |\n| **Windows (x86_64)** | 14.990 | 6.350* | 12.250 | 11.310 |\n\nNote that these timings all have a fair amount of overhead from R -- I'm trying\nto make it a bit more realistic to show how the end user will perceive the\nchange. This is of course far from comprehensive. Another way to view this is\ncomparing the assembly output of the two approaches (`double` vs.\n`int_fast64_t`). Consider this minimized script:\n\n```\n\/\/ compare.c\n#include &lt;stdint.h&gt;\n#include &lt;stdbool.h&gt;\n#include &lt;stddef.h&gt;\n\n#define R_INT_MAX  2147483647\n#define R_INT_MIN -2147483647\n#define NA_INTEGER -2147483648\n\n#define GOODIPROD_DOUBLE(x, y, z) ((double) (x) * (double) (y) == (z))\n\nint times_double(int x, int y, bool *pnaflag) {\n    if (x == NA_INTEGER || y == NA_INTEGER) return NA_INTEGER;\n    int z = x * y;\n    if (GOODIPROD_DOUBLE(x, y, z) &amp;&amp; z != NA_INTEGER)\n        return z;\n    else {\n        if (pnaflag != NULL) *pnaflag = true;\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782841184.869899",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "8aU6",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19096] New: Update handling of overflow in integer operations",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19096"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19096\n           Summary: Update handling of overflow in integer operations\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3747\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3747&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3747&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n__builtin overflow checks in arithmetic.c\n\nFollowing up from r-devel:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2026-June\/084615.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThe initial motivation here is that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_integer_times",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", as currently\nimplemented, relies on Undefined Behavior (UB):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\/\/ stylized from arithmetic.c\nint z = x * y;\nif ((double)x * (double)y == z && z != NA_INTEGER)\n  return z;\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI.e., "
+                            },
+                            {
+                                "type": "text",
+                                "text": "after",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " running the multiplication in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "int",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", we check if wraparound\nhappened "
+                            },
+                            {
+                                "type": "text",
+                                "text": "in ",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "double",
+                                "style": {
+                                    "italic": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (into which "
+                            },
+                            {
+                                "type": "text",
+                                "text": "int",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " embeds faithfully). The comment in the\ncode acknowledges this is UB.\n\nMy initial proposal was to use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "int64_t",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " instead, but Brian points out it is\nnot universally available and indeed it's basically not used elsewhere in the R\nsources. The widely available "
+                            },
+                            {
+                                "type": "text",
+                                "text": "int_fast64_t",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " seems much more appropriate here\nthan "
+                            },
+                            {
+                                "type": "text",
+                                "text": "int_least64_t",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nLuke also mentions "
+                            },
+                            {
+                                "type": "text",
+                                "text": "__builtin_mul_overflow",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " [1][2], which are recent enough\n(e.g. 2015) to necessitate some "
+                            },
+                            {
+                                "type": "text",
+                                "text": "configure",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " checks to activate, but which "
+                            },
+                            {
+                                "type": "text",
+                                "text": "are",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nsupported by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "gcc",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "clang",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nOn r-devel, I mentioned a quick benchmark in support of moving away from\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "double",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " -- now I've made that more formal by running the benchmark on GitHub\nActions in the R mirror [3] by adding in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "reg-tests-2.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " a snippet:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "x <- y <- rep(10000L, 5e7)\nprint(system.time(for(i in 1:100) x * y))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nAnd extracting the timings from 4 different proposals [4][5][6][7]. \n\nHere is the benchmark timings table (unit: seconds) compiled from the logs:\n\n| Flavor | baseline | int64_t | int_fast64_t | \\_\\_builtin\\_mul\\_overflow |\n| :--- | :--- | :--- | :--- | :--- |\n| **Linux (clang, debian:stable, arm)** | 14.084 | 12.915 | 12.815* | 13.521 |\n| **Linux (clang, debian:stable, intel)** | 15.528 | 10.573 | 10.694 | 10.379*\n|\n| **Linux (clang, debian:testing, arm)** | 14.400 | 12.896 | 12.757* | 13.799 |\n| **Linux (clang, debian:testing, intel)** | 15.487 | 10.776 | 10.612* | 10.639\n|\n| **Linux (gcc, debian:stable, arm)** | 14.940 | 12.588 | 12.518* | 14.285 |\n| **Linux (gcc, debian:stable, intel)** | 13.983 | 10.046 | 9.318* | 9.441 |\n| **Linux (gcc, debian:testing, arm)** | 14.731 | 12.707* | 12.870 | 14.386 |\n| **Linux (gcc, debian:testing, intel)** | 14.753 | 11.719 | 10.903 | 8.704* |\n| **MacOS (macOS-26)** | 8.977 | 10.001 | 8.855* | 11.006 |\n| **MacOS (macOS-26-intel)** | 22.831 | 21.492 | 21.802 | 20.030* |\n| **Windows (aarch64)** | 12.250 | 11.050 | 10.980* | 11.940 |\n| **Windows (x86_64)** | 14.990 | 6.350* | 12.250 | 11.310 |\n\nNote that these timings all have a fair amount of overhead from R -- I'm trying\nto make it a bit more realistic to show how the end user will perceive the\nchange. This is of course far from comprehensive. Another way to view this is\ncomparing the assembly output of the two approaches ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "double",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " vs.\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "int_fast64_t",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "). Consider this minimized script:\n\n```\n\/\/ compare.c\n#include <stdint.h>\n#include <stdbool.h>\n#include <stddef.h>\n\n#define R_INT_MAX  2147483647\n#define R_INT_MIN -2147483647\n#define NA_INTEGER -2147483648\n\n#define GOODIPROD_DOUBLE(x, y, z) ((double) (x) * (double) (y) == (z))\n\nint times_double(int x, int y, bool *pnaflag) {\n    if (x == NA_INTEGER || y == NA_INTEGER) return NA_INTEGER;\n    int z = x * y;\n    if (GOODIPROD_DOUBLE(x, y, z) && z != NA_INTEGER)\n        return z;\n    else {\n        if (pnaflag != NULL) *pnaflag = true;"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "        return NA_INTEGER;\n    }\n}\n\nint times_fast64(int x, int y, bool *pnaflag) {\n    if (x == NA_INTEGER || y == NA_INTEGER) return NA_INTEGER;\n    int_fast64_t prod = (int_fast64_t)x * (int_fast64_t)y;\n    if (prod &gt;= R_INT_MIN &amp;&amp; prod &lt;= R_INT_MAX &amp;&amp; prod != NA_INTEGER) {\n        return (int)prod;\n    } else {\n        if (pnaflag != NULL) *pnaflag = true;\n        return NA_INTEGER;\n    }\n}\n```\n\nIn the generated assembly (`gcc -O2 -S -masm=intel compare.c -o compare.s`, and\nsimilarly for `clang`), I see:\n\n```\ntimes_double:\n.LFB0:\n        .cfi_startproc\n        mov     r8, rdx\n        cmp     edi, -2147483648\n        je      .L2\n        cmp     esi, -2147483648\n        sete    cl\n        je      .L2\n        pxor    xmm0, xmm0\n        pxor    xmm1, xmm1\n        mov     eax, edi\n        cvtsi2sd        xmm1, esi\n        cvtsi2sd        xmm0, edi\n        mulsd   xmm0, xmm1\n        imul    eax, esi\n        pxor    xmm1, xmm1\n        cvtsi2sd        xmm1, eax\n        ucomisd xmm0, xmm1\n        setnp   dl\n        cmovne  edx, ecx\n        test    dl, dl\n        je      .L5\n        cmp     eax, -2147483648\n        je      .L5\n        ret\n        .p2align 4,,10\n        .p2align 3\n```\n\nCompared to:\n\n```\ntimes_fast64:\n.LFB1:\n        .cfi_startproc\n        mov     rcx, rdx\n        cmp     edi, -2147483648\n        je      .L14\n        cmp     esi, -2147483648\n        je      .L14\n        movsx   rdi, edi\n        movsx   rsi, esi\n        mov     edx, 4294967294\n        imul    rdi, rsi\n        lea     rax, 2147483647[rdi]\n        cmp     rdx, rax\n        jb      .L15\n        mov     eax, edi\n        ret\n        .p2align 4,,10\n        .p2align 3\n```\n\n`cvtsi2sd`, `mulsd`, and `ucomisd` are all relatively expensive compared to\n`movsx`, `imul`, and `cmp`.\n\nSo to me, this is really about whether we should use `int_fast64_t` or\n`__builtin_mul_overflow`. The appeal of the latter is that it is _designed_\nexplicitly for what we're trying to do. The code is also quite clean.\n\nLastly, while this started from improving integer _multiplication_ in this\nfile, we might as well address the checks for overflow in _subtraction and\naddition_ while we're at it. The principle is the same -- we can refactor to\neither (1) explicitly embed in a 64-bit type, probably `int64_t` or (2) use\n`__builtin_{add,sub}_overflow`. It's not formalized yet, but a quick benchmark\nshows a similar conclusion -- we can do way better than the current\nimplementation with either approach.\n\nI think all of the approaches are pretty straightforward; I'm attaching a PoC\npatch of the `__builtin_{add,sub,mul}_overflow`.\n\n[1]\n<https:\/\/gcc.gnu.org\/onlinedocs\/gcc-13.3.0\/gcc\/Integer-Overflow-Builtins.html>\n[2]\n<https:\/\/clang.llvm.org\/docs\/LanguageExtensions.html#checked-arithmetic-builtins>\n[3] <https:\/\/github.com\/r-devel\/r-svn\/pull\/272>\n[4] <https:\/\/github.com\/r-devel\/r-svn\/actions\/runs\/28381932448> (baseline)\n[5] <https:\/\/github.com\/r-devel\/r-svn\/actions\/runs\/28414598687> (`int64_t`)\n[6] <https:\/\/github.com\/r-devel\/r-svn\/actions\/runs\/28421249004> (`int_fast64_t`)\n[7] <https:\/\/github.com\/r-devel\/r-svn\/actions\/runs\/28425139273>\n(`__builtin_mul_overflow`)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782841184.893829",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "NJXD",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "return NA_INTEGER;\n    }\n}\n\nint times_fast64(int x, int y, bool *pnaflag) {\n    if (x == NA_INTEGER || y == NA_INTEGER) return NA_INTEGER;\n    int_fast64_t prod = (int_fast64_t)x * (int_fast64_t)y;\n    if (prod >= R_INT_MIN && prod <= R_INT_MAX && prod != NA_INTEGER) {\n        return (int)prod;\n    } else {\n        if (pnaflag != NULL) *pnaflag = true;\n        return NA_INTEGER;\n    }\n}"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nIn the generated assembly (`gcc -O2 -S -masm=intel compare.c -o compare.s`, and\nsimilarly for `clang`), I see:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "times_double:\n.LFB0:\n        .cfi_startproc\n        mov     r8, rdx\n        cmp     edi, -2147483648\n        je      .L2\n        cmp     esi, -2147483648\n        sete    cl\n        je      .L2\n        pxor    xmm0, xmm0\n        pxor    xmm1, xmm1\n        mov     eax, edi\n        cvtsi2sd        xmm1, esi\n        cvtsi2sd        xmm0, edi\n        mulsd   xmm0, xmm1\n        imul    eax, esi\n        pxor    xmm1, xmm1\n        cvtsi2sd        xmm1, eax\n        ucomisd xmm0, xmm1\n        setnp   dl\n        cmovne  edx, ecx\n        test    dl, dl\n        je      .L5\n        cmp     eax, -2147483648\n        je      .L5\n        ret\n        .p2align 4,,10\n        .p2align 3"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nCompared to:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "times_fast64:\n.LFB1:\n        .cfi_startproc\n        mov     rcx, rdx\n        cmp     edi, -2147483648\n        je      .L14\n        cmp     esi, -2147483648\n        je      .L14\n        movsx   rdi, edi\n        movsx   rsi, esi\n        mov     edx, 4294967294\n        imul    rdi, rsi\n        lea     rax, 2147483647[rdi]\n        cmp     rdx, rax\n        jb      .L15\n        mov     eax, edi\n        ret\n        .p2align 4,,10\n        .p2align 3\n```\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "cvtsi2sd",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mulsd",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ucomisd",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " are all relatively expensive compared to\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "movsx",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "imul",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "cmp",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nSo to me, this is really about whether we should use "
+                            },
+                            {
+                                "type": "text",
+                                "text": "int_fast64_t",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "__builtin_mul_overflow",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". The appeal of the latter is that it is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "designed",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nexplicitly for what we're trying to do. The code is also quite clean.\n\nLastly, while this started from improving integer "
+                            },
+                            {
+                                "type": "text",
+                                "text": "multiplication",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in this\nfile, we might as well address the checks for overflow in _subtraction and\naddition_ while we're at it. The principle is the same -- we can refactor to\neither (1) explicitly embed in a 64-bit type, probably "
+                            },
+                            {
+                                "type": "text",
+                                "text": "int64_t",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or (2) use\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "__builtin_{add,sub}_overflow",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". It's not formalized yet, but a quick benchmark\nshows a similar conclusion -- we can do way better than the current\nimplementation with either approach.\n\nI think all of the approaches are pretty straightforward; I'm attaching a PoC\npatch of the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "__builtin_{add,sub,mul}_overflow",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n[1]\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/gcc.gnu.org\/onlinedocs\/gcc-13.3.0\/gcc\/Integer-Overflow-Builtins.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n[2]\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/clang.llvm.org\/docs\/LanguageExtensions.html#checked-arithmetic-builtins"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n[3] "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/pull\/272"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n[4] "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/actions\/runs\/28381932448"
+                            },
+                            {
+                                "type": "text",
+                                "text": " (baseline)\n[5] "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/actions\/runs\/28414598687"
+                            },
+                            {
+                                "type": "text",
+                                "text": " ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "int64_t",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n[6] "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/actions\/runs\/28421249004"
+                            },
+                            {
+                                "type": "text",
+                                "text": " ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "int_fast64_t",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\n[7] "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/actions\/runs\/28425139273"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n("
+                            },
+                            {
+                                "type": "text",
+                                "text": "__builtin_mul_overflow",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

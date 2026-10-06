@@ -1,0 +1,1895 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19102] New: Wishlist: Define how diff methods in base R treat lag that is not a whole number*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19102>\n\n            Bug ID: 19102\n           Summary: Wishlist: Define how diff methods in base R treat lag\n                    that is not a whole number\n           Product: R\n           Version: R 4.6.x\n          Hardware: All\n               URL: <https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2026-May\/084582>\n                    .html\n                OS: All\n            Status: UNCONFIRMED\n          Severity: enhancement\n          Priority: P5\n         Component: Wishlist\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>\n\nAs I have raised to R-devel mailing list,\n<https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2026-May\/084582.html> :\n\n\nR documentation doesn't state what happens if the supplied 'lag' (or\n'differences') to the default, \"POSIXt\", \"Date\", \"difftime\" or \"ts\" method of\n'diff' is not a whole number.\n\nS-PLUS 3.4 help on 'diff' has such a statement:\nlag:\nNon-integer values are rounded to the nearest integer.\ndifferences:\nNon-integer values are rounded to the nearest integer.\n\n\nIn R 4.6.0:\n\n&gt; diff(1:10, 1.25)\n[1] 1 1 1 1 1 1 1 1 9\nWarning message:\nIn r[i1] - `length&lt;-`(r, max(length(r) - lag, 0L)) :\n  longer object length is not a multiple of shorter object length\n&gt; diff(1:10, 1.75)\n[1] 1 1 1 1 1 1 1 1 9\nWarning message:\nIn r[i1] - `length&lt;-`(r, max(length(r) - lag, 0L)) :\n  longer object length is not a multiple of shorter object length\n\n9 in the result is because of recycling. It is because\n'i1', which is -seq_len(lag) , is -1 and r[i1] has length 9, and\nmax(length(r) - lag, 0L) is between 8 and 9 and `length&lt;-`(r, max(length(r) -\nlag, 0L)) has length 8.\n\nIn R 4.5.3 (and previous R versions):\n\n&gt; diff(1:10, 1.25)\n[1] 1 1 1 1 1 1 1 1 1\n&gt; diff(1:10, 1.75)\n[1] 1 1 1 1 1 1 1 1 1\n\n\n\"POSIXt\", \"Date\" and \"difftime\" cases are similar.\n\nIn R 4.6.0:\n\n&gt; diff(.POSIXct(1:10), 1.25)\nTime differences in secs\n[1] 1 1 1 1 1 1 1 1 9\nWarning message:\nIn unclass(time1) - unclass(time2) :\n  longer object length is not a multiple of shorter object length\n&gt; diff(.POSIXct(1:10), 1.75)\nTime differences in secs\n[1] 1 1 1 1 1 1 1 1 9\nWarning message:\nIn unclass(time1) - unclass(time2) :\n  longer object length is not a multiple of shorter object length\n&gt; diff(.Date(1:10), 1.25)\nTime differences in days\n[1] 1 1 1 1 1 1 1 1 9\nWarning message:\nIn unclass(time1) - unclass(time2) :\n  longer object length is not a multiple of shorter object length\n&gt; diff(.Date(1:10), 1.75)\nTime differences in days\n[1] 1 1 1 1 1 1 1 1 9\nWarning message:\nIn unclass(time1) - unclass(time2) :\n  longer object length is not a multiple of shorter object length\n&gt; diff(.difftime(1:10, \"secs\"), 1.25)\nTime differences in secs\n[1] 1 1 1 1 1 1 1 1 9\nWarning message:\nIn r[i1] - `length&lt;-`(r, max(length(r) - lag, 0L)) :\n  longer object length is not a multiple of shorter object length\n&gt; diff(.difftime(1:10, \"secs\"), 1.75)\nTime differences in secs\n[1] 1 1 1 1 1 1 1 1 9\nWarning message:\nIn r[i1] - `length&lt;-`(r, max(length(r) - lag, 0L)) :\n  longer object length is not a multiple of shorter object length\n\nIn R 4.5.3:\n\n&gt; diff(.POSIXct(1:10), 1.25)\nTime differences in secs\n[1] 1 1 1 1 1 1 1 1 1\n&gt; diff(.POSIXct(1:10), 1.75)\nTime differences in secs\n[1] 1 1 1 1 1 1 1 1 1\n&gt; diff(.Date(1:10), 1.25)\nTime differences in days\n[1] 1 1 1 1 1 1 1 1 1\n&gt; diff(.Date(1:10), 1.75)\nTime differences in days\n[1] 1 1 1 1 1 1 1 1 1\n&gt; diff(.difftime(1:10, \"secs\"), 1.25)\nTime differences in secs\n[1] 1 1 1 1 1 1 1 1 1\n&gt; diff(.difftime(1:10, \"secs\"), 1.75)\nTime differences in secs\n[1] 1 1 1 1 1 1 1 1 1\n\n\n\"ts\" case is different.\n\nIn R 4.5.3 and 4.6.0:\n\n&gt; diff(ts(1:10), 1.25)\nTime Series:\nStart = 2\nEnd = 10\nFrequency = 1\n[1] 1 1 1 1 1 1 1 1 1\nWarning message:\nIn lag.default(r, -lag) : 'k' is not an integer\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1784109796.098499",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "rrS",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19102] New: Wishlist: Define how diff methods in base R treat lag that is not a whole number",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19102"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19102\n           Summary: Wishlist: Define how diff methods in base R treat lag\n                    that is not a whole number\n           Product: R\n           Version: R 4.6.x\n          Hardware: All\n               URL: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2026-May\/084582"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n                    .html\n                OS: All\n            Status: UNCONFIRMED\n          Severity: enhancement\n          Priority: P5\n         Component: Wishlist\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nAs I have raised to R-devel mailing list,\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2026-May\/084582.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": " :\n\n\n\nR documentation doesn't state what happens if the supplied 'lag' (or\n'differences') to the default, \"POSIXt\", \"Date\", \"difftime\" or \"ts\" method of\n'diff' is not a whole number.\n\nS-PLUS 3.4 help on 'diff' has such a statement:\nlag:\nNon-integer values are rounded to the nearest integer.\ndifferences:\nNon-integer values are rounded to the nearest integer.\n\n\n\nIn R 4.6.0:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(1:10, 1.25)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[1] 1 1 1 1 1 1 1 1 9\nWarning message:\nIn r[i1] - "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length<-",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "(r, max(length(r) - lag, 0L)) :\n  longer object length is not a multiple of shorter object length"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(1:10, 1.75)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[1] 1 1 1 1 1 1 1 1 9\nWarning message:\nIn r[i1] - "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length<-",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "(r, max(length(r) - lag, 0L)) :\n  longer object length is not a multiple of shorter object length\n\n9 in the result is because of recycling. It is because\n'i1', which is -seq_len(lag) , is -1 and r[i1] has length 9, and\nmax(length(r) - lag, 0L) is between 8 and 9 and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length<-",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "(r, max(length(r) -\nlag, 0L)) has length 8.\n\nIn R 4.5.3 (and previous R versions):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(1:10, 1.25)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[1] 1 1 1 1 1 1 1 1 1"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(1:10, 1.75)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[1] 1 1 1 1 1 1 1 1 1\n\n\n\n\"POSIXt\", \"Date\" and \"difftime\" cases are similar.\n\nIn R 4.6.0:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(.POSIXct(1:10), 1.25)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Time differences in secs\n[1] 1 1 1 1 1 1 1 1 9\nWarning message:\nIn unclass(time1) - unclass(time2) :\n  longer object length is not a multiple of shorter object length"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(.POSIXct(1:10), 1.75)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Time differences in secs\n[1] 1 1 1 1 1 1 1 1 9\nWarning message:\nIn unclass(time1) - unclass(time2) :\n  longer object length is not a multiple of shorter object length"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(.Date(1:10), 1.25)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Time differences in days\n[1] 1 1 1 1 1 1 1 1 9\nWarning message:\nIn unclass(time1) - unclass(time2) :\n  longer object length is not a multiple of shorter object length"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(.Date(1:10), 1.75)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Time differences in days\n[1] 1 1 1 1 1 1 1 1 9\nWarning message:\nIn unclass(time1) - unclass(time2) :\n  longer object length is not a multiple of shorter object length"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(.difftime(1:10, \"secs\"), 1.25)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Time differences in secs\n[1] 1 1 1 1 1 1 1 1 9\nWarning message:\nIn r[i1] - "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length<-",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "(r, max(length(r) - lag, 0L)) :\n  longer object length is not a multiple of shorter object length"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(.difftime(1:10, \"secs\"), 1.75)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Time differences in secs\n[1] 1 1 1 1 1 1 1 1 9\nWarning message:\nIn r[i1] - "
+                            },
+                            {
+                                "type": "text",
+                                "text": "length<-",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "(r, max(length(r) - lag, 0L)) :\n  longer object length is not a multiple of shorter object length\n\nIn R 4.5.3:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(.POSIXct(1:10), 1.25)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Time differences in secs\n[1] 1 1 1 1 1 1 1 1 1"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(.POSIXct(1:10), 1.75)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Time differences in secs\n[1] 1 1 1 1 1 1 1 1 1"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(.Date(1:10), 1.25)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Time differences in days\n[1] 1 1 1 1 1 1 1 1 1"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(.Date(1:10), 1.75)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Time differences in days\n[1] 1 1 1 1 1 1 1 1 1"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(.difftime(1:10, \"secs\"), 1.25)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Time differences in secs\n[1] 1 1 1 1 1 1 1 1 1"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(.difftime(1:10, \"secs\"), 1.75)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Time differences in secs\n[1] 1 1 1 1 1 1 1 1 1\n\n\n\n\"ts\" case is different.\n\nIn R 4.5.3 and 4.6.0:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(ts(1:10), 1.25)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Time Series:\nStart = 2\nEnd = 10\nFrequency = 1\n[1] 1 1 1 1 1 1 1 1 1\nWarning message:\nIn lag.default(r, -lag) : 'k' is not an integer"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "&gt; diff(ts(1:10), 1.75)\nTime Series:\nStart = 3\nEnd = 10\nFrequency = 1\n[1] 2 2 2 2 2 2 2 2\nWarning message:\nIn lag.default(r, -lag) : 'k' is not an integer\n\nIn R 4.0.3 (or any versions up to 4.5.2): [edit: from 1.4.0]\n\n&gt; diff(ts(1:10), 1.25)\nError in .cbind.ts(list(e1, e2), c(deparse(substitute(e1))[1L],\ndeparse(substitute(e2))[1L]),  :\n  not all series have the same phase\n&gt; diff(ts(1:10), 1.75)\nError in .cbind.ts(list(e1, e2), c(deparse(substitute(e1))[1L],\ndeparse(substitute(e2))[1L]),  :\n  not all series have the same phase\n\nIt is because, since R 4.5.3, in 'diff.ts', 'lag' is used to replace 'tsLag',\nand 'lag.default' rounds 'k'.\n\nThe rounding of 'k' by 'lag.default' in R happens since the beginning, but is\nnot documented. S-PLUS 3.4 help on 'lag'\n(<https:\/\/sites.oxy.edu\/lengyel\/m150\/Sueselbeck\/helpfiles\/lag.html>) has a\nstatement:\nNon-integer, values of 'k' are rounded to the nearest integer.\n\n\nHow about defining how to treat the supplied 'lag' argument to the default,\n\"POSIXt\", \"Date\", \"difftime\" or \"ts\" method that is not a whole number? Maybe\nfollowing 'lag.default' that rounds? Maybe having the same treatment in the\ndefault and \"ts\" method of 'diffinv'? Also, I think it is good to emit a\nwarning for non-integer.\n\n\nBecause of\nfor (i in seq_len(differences))\nor\nfor (i in 1L:differences)\n, 'differences' is implicitly truncated. It hasn't changed.\n\n\nThe early return in 'diff.ts' doesn't consider rounding.\n\nIn R 4.5.3 and 4.6.0:\n\n&gt; diff(ts(1:10), 1.25, 7)\nTime Series:\nStart = 8\nEnd = 10\nFrequency = 1\n[1] 0 0 0\nWarning messages:\n1: In lag.default(r, -lag) : 'k' is not an integer\n2: In lag.default(r, -lag) : 'k' is not an integer\n3: In lag.default(r, -lag) : 'k' is not an integer\n4: In lag.default(r, -lag) : 'k' is not an integer\n5: In lag.default(r, -lag) : 'k' is not an integer\n6: In lag.default(r, -lag) : 'k' is not an integer\n7: In lag.default(r, -lag) : 'k' is not an integer\n&gt; diff(ts(1:10), 1.25, 8)\ninteger(0)\n&gt; diff(ts(1:10), 1.75, 5)\nError in ts(r, end = xtsp[2L], frequency = xtsp[3L]) :\n  'ts' object must have one or more observations\nIn addition: Warning messages:\n1: In lag.default(r, -lag) : 'k' is not an integer\n2: In lag.default(r, -lag) : 'k' is not an integer\n3: In lag.default(r, -lag) : 'k' is not an integer\n4: In lag.default(r, -lag) : 'k' is not an integer\n5: In lag.default(r, -lag) : 'k' is not an integer\n6: In .cbind.ts(list(e1, e2), c(deparse(substitute(e1))[1L],\ndeparse(substitute(e2))[1L]),  :\n  non-intersecting series",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1784109796.117549",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Ukszf",
+                "elements": [
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(ts(1:10), 1.75)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Time Series:\nStart = 3\nEnd = 10\nFrequency = 1\n[1] 2 2 2 2 2 2 2 2\nWarning message:\nIn lag.default(r, -lag) : 'k' is not an integer\n\nIn R 4.0.3 (or any versions up to 4.5.2): [edit: from 1.4.0]\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(ts(1:10), 1.25)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Error in .cbind.ts(list(e1, e2), c(deparse(substitute(e1))[1L],\ndeparse(substitute(e2))[1L]),  :\n  not all series have the same phase"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(ts(1:10), 1.75)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Error in .cbind.ts(list(e1, e2), c(deparse(substitute(e1))[1L],\ndeparse(substitute(e2))[1L]),  :\n  not all series have the same phase\n\nIt is because, since R 4.5.3, in 'diff.ts', 'lag' is used to replace 'tsLag',\nand 'lag.default' rounds 'k'.\n\nThe rounding of 'k' by 'lag.default' in R happens since the beginning, but is\nnot documented. S-PLUS 3.4 help on 'lag'\n("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/sites.oxy.edu\/lengyel\/m150\/Sueselbeck\/helpfiles\/lag.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") has a\nstatement:\nNon-integer, values of 'k' are rounded to the nearest integer.\n\n\n\nHow about defining how to treat the supplied 'lag' argument to the default,\n\"POSIXt\", \"Date\", \"difftime\" or \"ts\" method that is not a whole number? Maybe\nfollowing 'lag.default' that rounds? Maybe having the same treatment in the\ndefault and \"ts\" method of 'diffinv'? Also, I think it is good to emit a\nwarning for non-integer.\n\n\n\nBecause of\nfor (i in seq_len(differences))\nor\nfor (i in 1L:differences)\n, 'differences' is implicitly truncated. It hasn't changed.\n\n\n\nThe early return in 'diff.ts' doesn't consider rounding.\n\nIn R 4.5.3 and 4.6.0:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(ts(1:10), 1.25, 7)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Time Series:\nStart = 8\nEnd = 10\nFrequency = 1\n[1] 0 0 0\nWarning messages:\n1: In lag.default(r, -lag) : 'k' is not an integer\n2: In lag.default(r, -lag) : 'k' is not an integer\n3: In lag.default(r, -lag) : 'k' is not an integer\n4: In lag.default(r, -lag) : 'k' is not an integer\n5: In lag.default(r, -lag) : 'k' is not an integer\n6: In lag.default(r, -lag) : 'k' is not an integer\n7: In lag.default(r, -lag) : 'k' is not an integer"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(ts(1:10), 1.25, 8)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "integer(0)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "diff(ts(1:10), 1.75, 5)"
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Error in ts(r, end = xtsp[2L], frequency = xtsp[3L]) :\n  'ts' object must have one or more observations\nIn addition: Warning messages:\n1: In lag.default(r, -lag) : 'k' is not an integer\n2: In lag.default(r, -lag) : 'k' is not an integer\n3: In lag.default(r, -lag) : 'k' is not an integer\n4: In lag.default(r, -lag) : 'k' is not an integer\n5: In lag.default(r, -lag) : 'k' is not an integer\n6: In .cbind.ts(list(e1, e2), c(deparse(substitute(e1))[1L],\ndeparse(substitute(e2))[1L]),  :\n  non-intersecting series"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19102] Wishlist: Define how diff methods in base R treat lag that is not a whole number*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19102>\n\n--- Comment #1 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\nCreated attachment 3756\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3756&amp;action=edit>\nAgainst R devel r90257: round lag in diff and diffinv methods and document it\n\nI add early stopping in the `for` loop in the default, `\"POSIXt\"` and `\"Date\"`\nmethods of `diff`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1784110291.498659",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "2FVd",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19102] Wishlist: Define how diff methods in base R treat lag that is not a whole number",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19102"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3756\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3756&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3756&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nAgainst R devel r90257: round lag in diff and diffinv methods and document it\n\nI add early stopping in the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "for",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " loop in the default, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"POSIXt\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"Date\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nmethods of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "diff",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19102] Wishlist: Define how diff methods in base R treat lag that is not a whole number*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19102>\n\n--- Comment #2 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\nCreated attachment 3757\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3757&amp;action=edit>\nAgainst R devel r90257, alternative: round lag and differences in diff and\ndiffinv methods and document it\n\nI also consider rounding `differences` because difference of fractional order\nexists.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1784110596.432659",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "\/Uo",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19102] Wishlist: Define how diff methods in base R treat lag that is not a whole number",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19102"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3757\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3757&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3757&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nAgainst R devel r90257, alternative: round lag and differences in diff and\ndiffinv methods and document it\n\nI also consider rounding "
+                            },
+                            {
+                                "type": "text",
+                                "text": "differences",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " because difference of fractional order\nexists."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19102] Wishlist: Define how diff methods in base R treat lag that is not a whole number*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19102>\n\nSuharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3756|0                           |1\n        is obsolete|                            |\n\n--- Comment #3 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\nCreated attachment 3758\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3758&amp;action=edit>\nAgainst R devel r90257: round lag in diff and diffinv methods and document it\n\nSorry, my previous patch doesn't stop the `for` loop early.\n\nThe loop executes at least once.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1784114986.128789",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "zF\/7",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19102] Wishlist: Define how diff methods in base R treat lag that is not a whole number",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19102"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSuharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3756|0                           |1\n        is obsolete|                            |\n\n--- Comment #3 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3758\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3758&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3758&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nAgainst R devel r90257: round lag in diff and diffinv methods and document it\n\nSorry, my previous patch doesn't stop the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "for",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " loop early.\n\nThe loop executes at least once."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19102] Wishlist: Define how diff methods in base R treat lag that is not a whole number*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19102>\n\nSuharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3757|0                           |1\n        is obsolete|                            |\n\n--- Comment #4 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\nCreated attachment 3759\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3759&amp;action=edit>\nAgainst R devel r90257, alternative: round lag and differences in diff and\ndiffinv methods and document it",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1784115083.303949",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "hZY8",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19102] Wishlist: Define how diff methods in base R treat lag that is not a whole number",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19102"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSuharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3757|0                           |1\n        is obsolete|                            |\n\n--- Comment #4 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3759\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3759&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3759&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nAgainst R devel r90257, alternative: round lag and differences in diff and\ndiffinv methods and document it"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18341] aov() with constant data returns different p-values depending on sample size &amp; balancedness*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18341>\n\n--- Comment #9 from Deepansh Khurana (<mailto:deepanshkhurana@outlook.com|deepanshkhurana@outlook.com>) ---\n(In reply to Benjamin Tyner from comment #8)\n&gt; To me it makes sense to use the same approach in both places. It looks like\n&gt; the existing `lm.R` check was added back in 2014 (with revision 65291).\n\nHmm, upon testing this, I ran into another issue: `var(f) + resvar` doesn't\nwork for near-constant responses like `y=1`.\n\n(Based on my understanding) When the response is nearly constant, both collapse\nto near zero regardless of the actual magnitude of the data, so the `eps^2`\nthreshold ends up being smaller than `resvar`.\n\n`mean(f)^2 + var(f)) * 1e-30` avoids this and passes the full tests below\ncleanly, though.\n\nHow do you suggest we go forward?\n\nFor reference, here are some test cases (that currently work consistently for\n`lm` and `aov`):\n\n```\n# Case 1: Warning fires for both\nd30 &lt;- data.frame(x=gl(2, 15), y=1)\nfmL &lt;- lm (y~x, data=d30)\nfmA &lt;- aov(y~x, data=d30)\nstopifnot(identical(coef(fmA), coef(fmL)))\nsummary(fmL)\nsummary(fmA)\n\n# Case 2: Warning fires for both with no names on variables\nd30 &lt;- data.frame(x = gl(2, 15), y1 = 1, y2 = 2)\nfmL &lt;- lm(cbind(y1, y2) ~ x, data = d30)\nfmA &lt;- aov(cbind(y1, y2) ~ x, data = d30)\nsummary(fmL)\nsummary(fmA)\n\n# Case 3: Warning fires for both with names present on variables\nd30 &lt;- data.frame(group = gl(2, 15), weight = 1, height = 1)\nfmL &lt;- lm(cbind(weight, height) ~ group, data = d30)\nfmA &lt;- aov(cbind(weight, height) ~ group, data = d30)\nsummary(fmL)\nsummary(fmA)\n\n# Case 4: Warning fires for both\nd30 &lt;- data.frame(group = gl(2, 15), weight = 1)\noff &lt;- rep(0, 30)\nfmL &lt;- lm(weight ~ group, data = d30, offset = off)\nfmA &lt;- aov(weight ~ group, data = d30, offset = off)\nsummary(fmL)\nsummary(fmA)\n\n# Case 5: Warning fires for both with names present on variables\nd30 &lt;- data.frame(group = gl(2, 15), weight = 1, height = 1)\noff &lt;- matrix(0, nrow = 30, ncol = 2)\nfmL &lt;- lm(cbind(weight, height) ~ group, data = d30, offset = off)\nfmA &lt;- aov(cbind(weight, height) ~ group, data = d30, offset = off)\nsummary(fmL)\nsummary(fmA)\n\n# Case 6: Warning fires for y but not for y2\nd30 &lt;- data.frame(x = gl(2, 30), y = 1, y2 = runif(60))\nsummary(aov(y~x, data=d30))\nsummary(aov(y2~x, data=d30))\n\n# Case 7: Warning does not fire (non-social perfect fit)\nfm1 &lt;- aov(count ~ spray, data = InsectSprays)\nsummary(fm1)\n\n# Case 8: Warning does not fire (non-social perfect fit)\nfm2 &lt;- aov(sqrt(count) ~ spray, data = InsectSprays)\nsummary(fm2)\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1784120818.200319",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "R40E",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18341] aov() with constant data returns different p-values depending on sample size & balancedness",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18341"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #9 from Deepansh Khurana ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:deepanshkhurana@outlook.com",
+                                "text": "deepanshkhurana@outlook.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Benjamin Tyner from comment #8)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "To me it makes sense to use the same approach in both places. It looks like\n the existing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lm.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " check was added back in 2014 (with revision 65291)."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nHmm, upon testing this, I ran into another issue: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "var(f) + resvar",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " doesn't\nwork for near-constant responses like "
+                            },
+                            {
+                                "type": "text",
+                                "text": "y=1",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n(Based on my understanding) When the response is nearly constant, both collapse\nto near zero regardless of the actual magnitude of the data, so the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "eps^2",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nthreshold ends up being smaller than "
+                            },
+                            {
+                                "type": "text",
+                                "text": "resvar",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "mean(f)^2 + var(f)) * 1e-30",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " avoids this and passes the full tests below\ncleanly, though.\n\nHow do you suggest we go forward?\n\nFor reference, here are some test cases (that currently work consistently for\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "lm",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "aov",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# Case 1: Warning fires for both\nd30 <- data.frame(x=gl(2, 15), y=1)\nfmL <- lm (y~x, data=d30)\nfmA <- aov(y~x, data=d30)\nstopifnot(identical(coef(fmA), coef(fmL)))\nsummary(fmL)\nsummary(fmA)\n\n# Case 2: Warning fires for both with no names on variables\nd30 <- data.frame(x = gl(2, 15), y1 = 1, y2 = 2)\nfmL <- lm(cbind(y1, y2) ~ x, data = d30)\nfmA <- aov(cbind(y1, y2) ~ x, data = d30)\nsummary(fmL)\nsummary(fmA)\n\n# Case 3: Warning fires for both with names present on variables\nd30 <- data.frame(group = gl(2, 15), weight = 1, height = 1)\nfmL <- lm(cbind(weight, height) ~ group, data = d30)\nfmA <- aov(cbind(weight, height) ~ group, data = d30)\nsummary(fmL)\nsummary(fmA)\n\n# Case 4: Warning fires for both\nd30 <- data.frame(group = gl(2, 15), weight = 1)\noff <- rep(0, 30)\nfmL <- lm(weight ~ group, data = d30, offset = off)\nfmA <- aov(weight ~ group, data = d30, offset = off)\nsummary(fmL)\nsummary(fmA)\n\n# Case 5: Warning fires for both with names present on variables\nd30 <- data.frame(group = gl(2, 15), weight = 1, height = 1)\noff <- matrix(0, nrow = 30, ncol = 2)\nfmL <- lm(cbind(weight, height) ~ group, data = d30, offset = off)\nfmA <- aov(cbind(weight, height) ~ group, data = d30, offset = off)\nsummary(fmL)\nsummary(fmA)\n\n# Case 6: Warning fires for y but not for y2\nd30 <- data.frame(x = gl(2, 30), y = 1, y2 = runif(60))\nsummary(aov(y~x, data=d30))\nsummary(aov(y2~x, data=d30))\n\n# Case 7: Warning does not fire (non-social perfect fit)\nfm1 <- aov(count ~ spray, data = InsectSprays)\nsummary(fm1)\n\n# Case 8: Warning does not fire (non-social perfect fit)\nfm2 <- aov(sqrt(count) ~ spray, data = InsectSprays)\nsummary(fm2)\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18949] When neither %R_USER% nor %HOME% is set, path.expand('~') may return ANSI instead of UTF-8*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18949>\n\n--- Comment #1 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nDr. Manuel Muñoz Márquez (who is not yet on Bugzilla) has very kindly agreed to\ntest a build of r90253 with attachment 3549 applied. In an off-list exchange he\ntold me that on three Windows 10 machines and one Windows 11 machine the\npatched build does not exhibit the problem.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1784122613.115799",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "l8Qhf",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18949] When neither %R_USER% nor %HOME% is set, path.expand('~') may return ANSI instead of UTF-8",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18949"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nDr. Manuel Muñoz Márquez (who is not yet on Bugzilla) has very kindly agreed to\ntest a build of r90253 with attachment 3549 applied. In an off-list exchange he\ntold me that on three Windows 10 machines and one Windows 11 machine the\npatched build does not exhibit the problem."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19103] New: choose.dir() returns NA without showing a dialog in Rterm\/Rscript*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19103>\n\n            Bug ID: 19103\n           Summary: choose.dir() returns NA without showing a dialog in\n                    Rterm\/Rscript\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Windows GUI \/ Window specific\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nSince R 4.3.0, `utils::choose.dir()` returns `NA` immediately, without\nshowing the folder-selection dialog, whenever R is run via Rterm or\nRscript (and therefore also in front ends that embed or drive Rterm,\ne.g. RStudio and VS Code). Under Rgui the dialog appears as expected.\n\nTo reproduce, from Rterm (or Rscript) on Windows:\n\n```\n&gt; utils::choose.dir()\n[1] NA\n```\n\nNo dialog is shown. There is a curious workaround, originally noticed\nby users: call `file.choose()` first (it can be cancelled), after which\n`choose.dir()` works normally for the rest of the session.\n\n## Analysis\n\nIn R 4.3.0, `askcdstring()` in `src\/extra\/graphapp\/dialogs.c` (the helper\nbehind `choose.dir()` and Rgui's \"Change working directory\" dialog) was\nrewritten from `SHBrowseForFolder()` to the COM-based `IFileOpenDialog`.\nThe new code calls\n\n```\nres = CoCreateInstance(&amp;CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER,\n                 &amp;IID_IFileOpenDialog, (void **)&amp;fileOpen);\n```\n\nbut COM is never initialized on the calling thread (there is no\n`CoInitialize`\/`CoInitializeEx`\/`OleInitialize` call anywhere in graphapp or\ngnuwin32). In Rterm\/Rscript nothing else has initialized COM, so\n`CoCreateInstance` fails with `CO_E_NOTINITIALIZED`, and `askcdstring()`\nreturns `NULL`, which `chooseDir()` maps to `NA` -- indistinguishable from\nthe user cancelling the dialog.\n\nThis also explains the observed behavior elsewhere:\n\n- The `file.choose()` workaround works because `askfilenames()` goes\n  through `GetOpenFileNameW()`, which initializes COM on the calling\n  thread as a side effect; once that has happened, `CoCreateInstance`\n  succeeds.\n\n- Rgui is unaffected, presumably because something during GUI startup\n  initializes COM on the main thread as a side effect.\n\nThe fix is for `askcdstring()` to initialize COM itself, as documented\nfor callers of `CoCreateInstance`. Per the `CoInitializeEx` documentation,\n`S_FALSE` (already initialized in this apartment) and `RPC_E_CHANGED_MODE`\n(already initialized with a different threading model) both mean COM\nis usable on the thread; a successful call (`S_OK` or `S_FALSE`) must be\nbalanced by `CoUninitialize`, while `RPC_E_CHANGED_MODE` must not be.\n\n## Patch\n\nAgainst R-devel (r90194):\n\n```\nIndex: src\/extra\/graphapp\/dialogs.c\n===================================================================\n--- src\/extra\/graphapp\/dialogs.c        (revision 90194)\n+++ src\/extra\/graphapp\/dialogs.c        (working copy)\n@@ -757,7 +757,7 @@\n\n char *askcdstring(const char *question, const char *default_str)\n {\n-    HRESULT res;\n+    HRESULT res, initres;\n     IFileOpenDialog *fileOpen = NULL;\n     IShellItem *dirsi = NULL;\n     DWORD flags = 0;\n@@ -768,6 +768,15 @@\n     wquestion = mbstowcs_malloc(question);\n     wdefault_str = mbstowcs_malloc(default_str);\n\n+    \/* COM may not have been initialized on this thread (it is not in\n+       Rterm\/Rscript), in which case CoCreateInstance below fails with\n+       CO_E_NOTINITIALIZED and no dialog is shown.  S_FALSE and\n+       RPC_E_CHANGED_MODE mean COM is already initialized on this\n+       thread, which is fine; a successful call (S_OK or S_FALSE) must\n+       be balanced by CoUninitialize. *\/\n+    initres = CoInitializeEx(NULL,\n+                            COINIT_APARTMENTTHREADED |\nCOINIT_DISABLE_OLE1DDE);\n+\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1784133991.810569",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Lo6",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19103] New: choose.dir() returns NA without showing a dialog in Rterm\/Rscript",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19103"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19103\n           Summary: choose.dir() returns NA without showing a dialog in\n                    Rterm\/Rscript\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Windows GUI \/ Window specific\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nSince R 4.3.0, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "utils::choose.dir()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " returns "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " immediately, without\nshowing the folder-selection dialog, whenever R is run via Rterm or\nRscript (and therefore also in front ends that embed or drive Rterm,\ne.g. RStudio and VS Code). Under Rgui the dialog appears as expected.\n\nTo reproduce, from Rterm (or Rscript) on Windows:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> utils::choose.dir()\n[1] NA\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nNo dialog is shown. There is a curious workaround, originally noticed\nby users: call "
+                            },
+                            {
+                                "type": "text",
+                                "text": "file.choose()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " first (it can be cancelled), after which\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "choose.dir()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " works normally for the rest of the session.\n\n## Analysis\n\nIn R 4.3.0, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "askcdstring()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/extra\/graphapp\/dialogs.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (the helper\nbehind "
+                            },
+                            {
+                                "type": "text",
+                                "text": "choose.dir()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and Rgui's \"Change working directory\" dialog) was\nrewritten from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "SHBrowseForFolder()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to the COM-based "
+                            },
+                            {
+                                "type": "text",
+                                "text": "IFileOpenDialog",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\nThe new code calls\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "res = CoCreateInstance(&CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER,\n                 &IID_IFileOpenDialog, (void **)&fileOpen);\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nbut COM is never initialized on the calling thread (there is no\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "CoInitialize",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "CoInitializeEx",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "OleInitialize",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " call anywhere in graphapp or\ngnuwin32). In Rterm\/Rscript nothing else has initialized COM, so\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "CoCreateInstance",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " fails with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "CO_E_NOTINITIALIZED",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "askcdstring()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nreturns "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NULL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which "
+                            },
+                            {
+                                "type": "text",
+                                "text": "chooseDir()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " maps to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " -- indistinguishable from\nthe user cancelling the dialog.\n\nThis also explains the observed behavior elsewhere:\n\n- The "
+                            },
+                            {
+                                "type": "text",
+                                "text": "file.choose()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " workaround works because "
+                            },
+                            {
+                                "type": "text",
+                                "text": "askfilenames()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " goes\n  through "
+                            },
+                            {
+                                "type": "text",
+                                "text": "GetOpenFileNameW()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which initializes COM on the calling\n  thread as a side effect; once that has happened, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "CoCreateInstance",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n  succeeds.\n\n- Rgui is unaffected, presumably because something during GUI startup\n  initializes COM on the main thread as a side effect.\n\nThe fix is for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "askcdstring()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to initialize COM itself, as documented\nfor callers of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "CoCreateInstance",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". Per the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "CoInitializeEx",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " documentation,\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "S_FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (already initialized in this apartment) and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "RPC_E_CHANGED_MODE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n(already initialized with a different threading model) both mean COM\nis usable on the thread; a successful call ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "S_OK",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "S_FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") must be\nbalanced by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "CoUninitialize",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", while "
+                            },
+                            {
+                                "type": "text",
+                                "text": "RPC_E_CHANGED_MODE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " must not be.\n\n## Patch\n\nAgainst R-devel (r90194):\n\n```\nIndex: src\/extra\/graphapp\/dialogs.c\n===================================================================\n--- src\/extra\/graphapp\/dialogs.c        (revision 90194)\n+++ src\/extra\/graphapp\/dialogs.c        (working copy)\n@@ -757,7 +757,7 @@\n\n char *askcdstring(const char *question, const char *default_str)\n {\n-    HRESULT res;\n+    HRESULT res, initres;\n     IFileOpenDialog *fileOpen = NULL;\n     IShellItem *dirsi = NULL;\n     DWORD flags = 0;\n@@ -768,6 +768,15 @@\n     wquestion = mbstowcs_malloc(question);\n     wdefault_str = mbstowcs_malloc(default_str);\n\n+    \/* COM may not have been initialized on this thread (it is not in\n+       Rterm\/Rscript), in which case CoCreateInstance below fails with\n+       CO_E_NOTINITIALIZED and no dialog is shown.  S_FALSE and\n+       RPC_E_CHANGED_MODE mean COM is already initialized on this\n+       thread, which is fine; a successful call (S_OK or S_FALSE) must\n+       be balanced by CoUninitialize. *\/\n+    initres = CoInitializeEx(NULL,\n+                            COINIT_APARTMENTTHREADED |\nCOINIT_DISABLE_OLE1DDE);\n+"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "     res = CoCreateInstance(&amp;CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER,\n                      &amp;IID_IFileOpenDialog, (void **)&amp;fileOpen);\n\n@@ -805,7 +814,9 @@\n        free(wquestion);\n     if (wdefault_str)\n        free(wdefault_str);\n-    return ok ? strbuf : NULL; \n+    if (initres == S_OK || initres == S_FALSE)\n+       CoUninitialize();\n+    return ok ? strbuf : NULL;\n }\n\n char *askpassword(const char *question, const char *default_str)\n```\n\nNotes on the patch:\n\n- `COINIT_APARTMENTTHREADED` matches what the common dialogs\n  (`GetOpenFileName`) use and is the appropriate model for a thread\n  showing UI; `COINIT_DISABLE_OLE1DDE` is the usual companion flag.\n\n- Rgui's use of `askcdstring()` (\"Change working directory\") is\n  unaffected: if COM is already initialized on the thread,\n  `CoInitializeEx` returns `S_FALSE` (or `RPC_E_CHANGED_MODE`) and the\n  balancing rule above leaves the caller's COM state untouched.\n\nDownstream reports of this issue include\n<https:\/\/github.com\/rstudio\/rstudio\/issues\/13078> (also describing the\nsame behavior in VS Code).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1784133991.830869",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "\/CBdM",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "res = CoCreateInstance(&CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER,\n                      &IID_IFileOpenDialog, (void **)&fileOpen);\n\n@@ -805,7 +814,9 @@\n        free(wquestion);\n     if (wdefault_str)\n        free(wdefault_str);\n-    return ok ? strbuf : NULL; \n+    if (initres == S_OK || initres == S_FALSE)\n+       CoUninitialize();\n+    return ok ? strbuf : NULL;\n }\n\n char *askpassword(const char *question, const char *default_str)\n```\n\nNotes on the patch:\n\n- "
+                            },
+                            {
+                                "type": "text",
+                                "text": "COINIT_APARTMENTTHREADED",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " matches what the common dialogs\n  ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "GetOpenFileName",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") use and is the appropriate model for a thread\n  showing UI; "
+                            },
+                            {
+                                "type": "text",
+                                "text": "COINIT_DISABLE_OLE1DDE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is the usual companion flag.\n\n- Rgui's use of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "askcdstring()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (\"Change working directory\") is\n  unaffected: if COM is already initialized on the thread,\n  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "CoInitializeEx",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " returns "
+                            },
+                            {
+                                "type": "text",
+                                "text": "S_FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "RPC_E_CHANGED_MODE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") and the\n  balancing rule above leaves the caller's COM state untouched.\n\nDownstream reports of this issue include\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/rstudio\/rstudio\/issues\/13078"
+                            },
+                            {
+                                "type": "text",
+                                "text": " (also describing the\nsame behavior in VS Code)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18415] nls port ignores names in lower, upper*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18415>\n\nPeter Dalgaard (<mailto:pd.mes@cbs.dk|pd.mes@cbs.dk>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CLOSED                      |REOPENED\n         Resolution|FIXED                       |---\n     Ever confirmed|0                           |1\n\n--- Comment #4 from Peter Dalgaard (<mailto:pd.mes@cbs.dk|pd.mes@cbs.dk>) ---\nThe patch was from Ben, but Sebastian seems to be right that it doesn't\nactually skip the reordering (but likely breaks the indexing instead).\nReopened.\n\n(I'd like to review the whole thing anyway. It would be convenient if just lwr\n&lt;- c(k=0.1) would work. A simpler fix would be if (....) {warning(....) ; x}\nelse x[ns] .)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1784134267.029659",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "xBbdu",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18415] nls port ignores names in lower, upper",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18415"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nPeter Dalgaard ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:pd.mes@cbs.dk",
+                                "text": "pd.mes@cbs.dk"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CLOSED                      |REOPENED\n         Resolution|FIXED                       |---\n     Ever confirmed|0                           |1\n\n--- Comment #4 from Peter Dalgaard ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:pd.mes@cbs.dk",
+                                "text": "pd.mes@cbs.dk"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThe patch was from Ben, but Sebastian seems to be right that it doesn't\nactually skip the reordering (but likely breaks the indexing instead).\nReopened.\n\n(I'd like to review the whole thing anyway. It would be convenient if just lwr\n<- c(k=0.1) would work. A simpler fix would be if (....) {warning(....) ; x}\nelse x[ns] .)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18415] nls port ignores names in lower, upper*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18415>\n\n--- Comment #5 from Ben Bolker (<mailto:bbolker@gmail.com|bbolker@gmail.com>) ---\nSorry for bad patch ...",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1784136106.372799",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ggAj",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18415] nls port ignores names in lower, upper",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18415"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Ben Bolker ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:bbolker@gmail.com",
+                                "text": "bbolker@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nSorry for bad patch ..."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18341] aov() with constant data returns different p-values depending on sample size &amp; balancedness*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18341>\n\n--- Comment #10 from Benjamin Tyner (<mailto:btyner@gmail.com|btyner@gmail.com>) ---\n(In reply to Deepansh Khurana from comment #9)\nIn that case maybe it is better to lean on precedent and use this in both\nplaces:\n\n```\nif (is.finite(resvar) &amp;&amp; resvar &lt; (mean(fitted)^2 + var(c(fitted))) * 1e-30)\n```\nas that seems to have stood the test of time for real-world data.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1784150665.925129",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Lmb3",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18341] aov() with constant data returns different p-values depending on sample size & balancedness",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18341"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #10 from Benjamin Tyner ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:btyner@gmail.com",
+                                "text": "btyner@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Deepansh Khurana from comment #9)\nIn that case maybe it is better to lean on precedent and use this in both\nplaces:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "if (is.finite(resvar) && resvar < (mean(fitted)^2 + var(c(fitted))) * 1e-30)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "as that seems to have stood the test of time for real-world data."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

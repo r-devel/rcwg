@@ -1,0 +1,1854 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19109] `dim&lt;-` dimension vector product can overflow*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19109>\n\n--- Comment #2 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\n    x &lt;- integer(0)\n    dim(x) &lt;- c(1073741824L, 1073741824L, 0L)\n\nas well as\n\n    x &lt;- array(integer(0), dim = c(1073741824L, 1073741824L, 0L))\n\nshould be accepted, right?\n\nSo, only the final `dtotal` needs to be compared with `R_XLEN_T_MAX`, outside\nthe `for` loop. Function `allocArray()` should be like that, too.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785779391.365209",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "bp2s",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19109] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "dim<-",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " dimension vector product can overflow",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19109"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n    x <- integer(0)\n    dim(x) <- c(1073741824L, 1073741824L, 0L)\n\nas well as\n\n    x <- array(integer(0), dim = c(1073741824L, 1073741824L, 0L))\n\nshould be accepted, right?\n\nSo, only the final "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dtotal",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " needs to be compared with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_XLEN_T_MAX",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", outside\nthe "
+                            },
+                            {
+                                "type": "text",
+                                "text": "for",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " loop. Function "
+                            },
+                            {
+                                "type": "text",
+                                "text": "allocArray()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " should be like that, too."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19119] New: `writeChar()` on Windows counts supplementary characters twice*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19119>\n\n            Bug ID: 19119\n           Summary: `writeChar()` on Windows counts supplementary\n                    characters twice\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\n## Summary\n\n`do_writechar()` counts the characters of each element with\n`mbstowcs(NULL, s, 0)`.  Where `wchar_t` is 16-bit (Windows), `mbstowcs()`\nreturns the number of UTF-16 code units, so each supplementary (\"non-BMP\")\ncharacter such as `\"\\U0001F600\"` counts as 2.  `nchars` therefore means\nsomething different on Windows than on other platforms -- and something\ndifferent from what `readChar()` and `nchar()` mean by a \"char\" on Windows\nitself.  `?writeChar` describes `nchars` as a number of characters, with no\nplatform qualification.\n\nThis surfaced as a Windows check failure of the regression test added with\nthe PR#19112 fix in r90334: the test writes 100 supplementary characters with\n`nchars = 399L` and expects a 699-byte file; Windows writes 599 bytes.\n\n## Reproducible example\n\nRun on Windows, in a UTF-8 locale:\n\n```\nsu &lt;- strrep(\"\\U0001F600\", 100L)   # 100 characters, 400 bytes in UTF-8\nnchar(su, \"chars\")\n## [1] 100                &lt;- R counts code points itself, also on Windows\n\ntf &lt;- tempfile(); f &lt;- file(tf, \"wb\")\nsuppressWarnings(writeChar(su, f, nchars = 399L, eos = NULL))\nclose(f)\nfile.size(tf)\n## Unix, macOS: 699       (400 bytes + 299 padding: 399 - 100 characters)\n## Windows:     599       (400 bytes + 199 padding: 399 - 200 UTF-16 units)\n```\n\nThis is part (c) of the PR#19112 regression test in `tests\/reg-encodings.R`,\nwhose unconditional `stopifnot(all.equal(file.size(tf), 699))` currently\nfails on Windows.\n\n## Analysis\n\nBoth the buffer-sizing loop and the writing loop of `do_writechar()` count\ncharacters the same way (`src\/main\/connections.c:5419-5420` and `:5506`):\n\n```\n            size_t nb = strlen(ss),\n                nc = mbcslocale ? mbstowcs(NULL, ss, 0) : nb;\n```\n\nWith a 16-bit `wchar_t`, converting a supplementary character yields a UTF-16\nsurrogate pair, so `mbstowcs(NULL, s, 0)` counts it twice.  The padding\narithmetic `nb += tt - nc` then under-pads by one byte per supplementary\ncharacter.\n\n`readChar()` never goes through `wchar_t`: in a UTF-8 locale,\n`readFixedString()` and `rawFixedString()` walk the input with `utf8clen()`,\none character at a time (`connections.c:5189-5212`, `:5245-5259`), and\n`nchar(x, \"chars\")` likewise counts code points.  So on Windows,\n`writeChar(x, con, nchars = n)` and `readChar(con, nchars = n)` disagree\nabout what a \"char\" is whenever `x` contains supplementary characters.\n\nThe truncation branch (`nchars` smaller than the character count,\n`connections.c:5423-5433` and the matching loop in the writer) compares\n`tt &lt; nc` against the same inflated count before consuming characters with\n`Mbrtowc()`; for non-BMP input this path was exercised by no test on any\nplatform.\n\n## Candidate patch\n\nAdd `mbCharCount()` and `mbBytesForChars()` helpers used by both the\nbuffer-sizing loop and the writing loop: in a UTF-8 locale, count complete\nUTF-8 characters directly via `utf8clen()` -- the same idiom `readChar()`\nuses -- and in other MBCS locales keep the existing `mbstowcs()`\/`Mbrtowc()`\ncode (those encodings have no supplementary-plane characters, so the counts\nagree).\n\n```\n\/* Number of characters in 's': where wchar_t is 16-bit (Windows),\n   mbstowcs() returns the number of UTF-16 code units, counting each\n   supplementary (\"non-BMP\") character twice, so in a UTF-8 locale count\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785780377.913659",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "B6A",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19119] New: ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "writeChar()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " on Windows counts supplementary characters twice",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19119"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19119\n           Summary: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "writeChar()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " on Windows counts supplementary\n                    characters twice\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n## Summary\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_writechar()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " counts the characters of each element with\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "mbstowcs(NULL, s, 0)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  Where "
+                            },
+                            {
+                                "type": "text",
+                                "text": "wchar_t",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is 16-bit (Windows), "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mbstowcs()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nreturns the number of UTF-16 code units, so each supplementary (\"non-BMP\")\ncharacter such as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"\\U0001F600\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " counts as 2.  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nchars",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " therefore means\nsomething different on Windows than on other platforms -- and something\ndifferent from what "
+                            },
+                            {
+                                "type": "text",
+                                "text": "readChar()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nchar()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " mean by a \"char\" on Windows\nitself.  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "?writeChar",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " describes "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nchars",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as a number of characters, with no\nplatform qualification.\n\nThis surfaced as a Windows check failure of the regression test added with\nthe PR#19112 fix in r90334: the test writes 100 supplementary characters with\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "nchars = 399L",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and expects a 699-byte file; Windows writes 599 bytes.\n\n## Reproducible example\n\nRun on Windows, in a UTF-8 locale:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "su <- strrep(\"\\U0001F600\", 100L)   # 100 characters, 400 bytes in UTF-8\nnchar(su, \"chars\")\n## [1] 100                <- R counts code points itself, also on Windows\n\ntf <- tempfile(); f <- file(tf, \"wb\")\nsuppressWarnings(writeChar(su, f, nchars = 399L, eos = NULL))\nclose(f)\nfile.size(tf)\n## Unix, macOS: 699       (400 bytes + 299 padding: 399 - 100 characters)\n## Windows:     599       (400 bytes + 199 padding: 399 - 200 UTF-16 units)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis is part (c) of the PR#19112 regression test in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tests\/reg-encodings.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\nwhose unconditional "
+                            },
+                            {
+                                "type": "text",
+                                "text": "stopifnot(all.equal(file.size(tf), 699))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " currently\nfails on Windows.\n\n## Analysis\n\nBoth the buffer-sizing loop and the writing loop of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_writechar()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " count\ncharacters the same way ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/connections.c:5419-5420",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": ":5506",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "            size_t nb = strlen(ss),\n                nc = mbcslocale ? mbstowcs(NULL, ss, 0) : nb;\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWith a 16-bit "
+                            },
+                            {
+                                "type": "text",
+                                "text": "wchar_t",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", converting a supplementary character yields a UTF-16\nsurrogate pair, so "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mbstowcs(NULL, s, 0)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " counts it twice.  The padding\narithmetic "
+                            },
+                            {
+                                "type": "text",
+                                "text": "nb += tt - nc",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " then under-pads by one byte per supplementary\ncharacter.\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "readChar()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " never goes through "
+                            },
+                            {
+                                "type": "text",
+                                "text": "wchar_t",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ": in a UTF-8 locale,\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "readFixedString()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "rawFixedString()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " walk the input with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "utf8clen()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\none character at a time ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "connections.c:5189-5212",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": ":5245-5259",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), and\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "nchar(x, \"chars\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " likewise counts code points.  So on Windows,\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "writeChar(x, con, nchars = n)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "readChar(con, nchars = n)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " disagree\nabout what a \"char\" is whenever "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " contains supplementary characters.\n\nThe truncation branch ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "nchars",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " smaller than the character count,\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "connections.c:5423-5433",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and the matching loop in the writer) compares\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "tt < nc",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " against the same inflated count before consuming characters with\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "Mbrtowc()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "; for non-BMP input this path was exercised by no test on any\nplatform.\n\n## Candidate patch\n\nAdd "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mbCharCount()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mbBytesForChars()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " helpers used by both the\nbuffer-sizing loop and the writing loop: in a UTF-8 locale, count complete\nUTF-8 characters directly via "
+                            },
+                            {
+                                "type": "text",
+                                "text": "utf8clen()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " -- the same idiom "
+                            },
+                            {
+                                "type": "text",
+                                "text": "readChar()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nuses -- and in other MBCS locales keep the existing "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mbstowcs()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/"
+                            },
+                            {
+                                "type": "text",
+                                "text": "Mbrtowc()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ncode (those encodings have no supplementary-plane characters, so the counts\nagree).\n\n```\n\/* Number of characters in 's': where wchar_t is 16-bit (Windows),\n   mbstowcs() returns the number of UTF-16 code units, counting each\n   supplementary (\"non-BMP\") character twice, so in a UTF-8 locale count"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "   complete UTF-8 characters directly, as readChar() and nchar() do.\n   Returns (size_t)-1 for an invalid multibyte string. *\/\nstatic size_t mbCharCount(const char *s)\n{\n    size_t nc = mbstowcs(NULL, s, 0);\n\n    if(utf8locale &amp;&amp; (int) nc &gt;= 0) {\n        nc = 0;\n        for(const char *p = s; *p; p += utf8clen(*p))\n            nc++;\n    }\n    return nc;\n}\n\n\/* Byte length of the first 'nchars' characters of 's'.  For an invalid\n   multibyte string (valid = FALSE), Mbrtowc() signals an error when it\n   reaches the first invalid sequence. *\/\nstatic size_t mbBytesForChars(const char *s, R_xlen_t nchars, Rboolean valid)\n{\n    const char *p = s;\n\n    if(valid &amp;&amp; utf8locale) {\n        for(R_xlen_t j = 0; j &lt; nchars &amp;&amp; *p; j++)\n            p += utf8clen(*p);\n    } else {\n        mbstate_t mb_st;\n        mbs_init(&amp;mb_st);\n        for(R_xlen_t j = 0; j &lt; nchars; j++) {\n            size_t used = Mbrtowc(NULL, p, R_MB_CUR_MAX, &amp;mb_st);\n            if(!used) break;\n            p += used;\n        }\n    }\n    return (size_t)(p - s);\n}\n```\n\nProperties:\n\n- On platforms with 32-bit `wchar_t` (Unix, macOS), behavior is unchanged:\n  for valid strings, the `utf8clen()` walk returns exactly what\n  `mbstowcs()`\/`Mbrtowc()` returned.\n- Invalid multibyte strings take the previous `Mbrtowc()` path unchanged\n  (`mbCharCount()` still calls `mbstowcs()` first, so invalidity is still\n  detected), preserving the existing \"invalid multibyte string at ...\"\n  error behavior.\n- On Windows, `nchars` now counts supplementary characters once,\n  consistently with `readChar()` and `nchar()`, and the unconditional\n  `file.size(tf) == 699` expectation in `tests\/reg-encodings.R` holds on\n  Windows too.\n\nThe patch also adds a truncation test (`nchars` smaller than the number of\ncharacters) with supplementary characters.  Its assertions deliberately use\n`readBin()`\/raw comparisons rather than `readChar()`: whether UCRT's\n`mbrtowc()` (used in `readFixedString()`'s per-character validity check)\naccepts 4-byte UTF-8 sequences with a 16-bit `wchar_t` is a separate open\nquestion, and `readChar()` of non-BMP text on Windows deserves its own\ntest and investigation.\n\n## Compatibility\n\nThis changes what Windows writes for the (rare) case\n`nchars != number of characters` with non-BMP input: previously-written\npadded files effectively used UTF-16-unit counts.  Given that the\npadding\/truncation path for non-BMP characters was inconsistent between\n`writeChar()` and `readChar()` and untested, treating the old Windows\nbehavior as a bug seems right, but that is R-core's call.  The alternative\nis to keep the Windows behavior, special-case the r90334 regression test\n(`if(onWindows) 599`, proposed as\n<https:\/\/github.com\/r-devel\/r-svn\/pull\/280>), and document that on Windows\n`nchars` counts UTF-16 code units.\n\n## Verification after patching\n\nOn all platforms, including Windows:\n\n```\nsu &lt;- strrep(\"\\U0001F600\", 100L)\n\n## (c) of the PR#19112 regression test: padding\ntf &lt;- tempfile(); f &lt;- file(tf, \"wb\")\nsuppressWarnings(writeChar(su, f, nchars = 399L, eos = NULL))\nclose(f)\nstopifnot(file.size(tf) == 699)\n\n## truncation, previously untested for non-BMP input on any platform\nr2 &lt;- writeChar(su, raw(), nchars = 50L, eos = NULL)\ntf2 &lt;- tempfile(); f &lt;- file(tf2, \"wb\")\nwriteChar(su, f, nchars = 50L, eos = NULL)\nclose(f)\nstopifnot(exprs = {\n    identical(r2, charToRaw(strrep(\"\\U0001F600\", 50L)))\n    file.size(tf2) == 200\n    identical(readBin(tf2, \"raw\", 300L), charToRaw(strrep(\"\\U0001F600\", 50L)))\n})\n```\n\nBoth checks are included in the patch as additions to\n`tests\/reg-encodings.R`, and pass in the r-svn mirror's CI on Linux, macOS,\nand both Windows runners (x86_64 and aarch64).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785780377.953339",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "MUMfm",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "complete UTF-8 characters directly, as readChar() and nchar() do.\n   Returns (size_t)-1 for an invalid multibyte string. *\/\nstatic size_t mbCharCount(const char *s)\n{\n    size_t nc = mbstowcs(NULL, s, 0);\n\n    if(utf8locale && (int) nc >= 0) {\n        nc = 0;\n        for(const char *p = s; *p; p += utf8clen(*p))\n            nc++;\n    }\n    return nc;\n}\n\n\/* Byte length of the first 'nchars' characters of 's'.  For an invalid\n   multibyte string (valid = FALSE), Mbrtowc() signals an error when it\n   reaches the first invalid sequence. *\/\nstatic size_t mbBytesForChars(const char *s, R_xlen_t nchars, Rboolean valid)\n{\n    const char *p = s;\n\n    if(valid && utf8locale) {\n        for(R_xlen_t j = 0; j < nchars && *p; j++)\n            p += utf8clen(*p);\n    } else {\n        mbstate_t mb_st;\n        mbs_init(&mb_st);\n        for(R_xlen_t j = 0; j < nchars; j++) {\n            size_t used = Mbrtowc(NULL, p, R_MB_CUR_MAX, &mb_st);\n            if(!used) break;\n            p += used;\n        }\n    }\n    return (size_t)(p - s);\n}"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nProperties:\n\n- On platforms with 32-bit `wchar_t` (Unix, macOS), behavior is unchanged:\n  for valid strings, the `utf8clen()` walk returns exactly what\n  `mbstowcs()`\/`Mbrtowc()` returned.\n- Invalid multibyte strings take the previous `Mbrtowc()` path unchanged\n  (`mbCharCount()` still calls `mbstowcs()` first, so invalidity is still\n  detected), preserving the existing \"invalid multibyte string at ...\"\n  error behavior.\n- On Windows, `nchars` now counts supplementary characters once,\n  consistently with `readChar()` and `nchar()`, and the unconditional\n  `file.size(tf) == 699` expectation in `tests\/reg-encodings.R` holds on\n  Windows too.\n\nThe patch also adds a truncation test (`nchars` smaller than the number of\ncharacters) with supplementary characters.  Its assertions deliberately use\n`readBin()`\/raw comparisons rather than `readChar()`: whether UCRT's\n`mbrtowc()` (used in `readFixedString()`'s per-character validity check)\naccepts 4-byte UTF-8 sequences with a 16-bit `wchar_t` is a separate open\nquestion, and `readChar()` of non-BMP text on Windows deserves its own\ntest and investigation.\n\n## Compatibility\n\nThis changes what Windows writes for the (rare) case\n`nchars != number of characters` with non-BMP input: previously-written\npadded files effectively used UTF-16-unit counts.  Given that the\npadding\/truncation path for non-BMP characters was inconsistent between\n`writeChar()` and `readChar()` and untested, treating the old Windows\nbehavior as a bug seems right, but that is R-core's call.  The alternative\nis to keep the Windows behavior, special-case the r90334 regression test\n(`if(onWindows) 599`, proposed as\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/pull\/280"
+                            },
+                            {
+                                "type": "text",
+                                "text": "), and document that on Windows\n`nchars` counts UTF-16 code units.\n\n## Verification after patching\n\nOn all platforms, including Windows:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "su <- strrep(\"\\U0001F600\", 100L)\n\n## (c) of the PR#19112 regression test: padding\ntf <- tempfile(); f <- file(tf, \"wb\")\nsuppressWarnings(writeChar(su, f, nchars = 399L, eos = NULL))\nclose(f)\nstopifnot(file.size(tf) == 699)\n\n## truncation, previously untested for non-BMP input on any platform\nr2 <- writeChar(su, raw(), nchars = 50L, eos = NULL)\ntf2 <- tempfile(); f <- file(tf2, \"wb\")\nwriteChar(su, f, nchars = 50L, eos = NULL)\nclose(f)\nstopifnot(exprs = {\n    identical(r2, charToRaw(strrep(\"\\U0001F600\", 50L)))\n    file.size(tf2) == 200\n    identical(readBin(tf2, \"raw\", 300L), charToRaw(strrep(\"\\U0001F600\", 50L)))\n})\n```\n\nBoth checks are included in the patch as additions to\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "tests\/reg-encodings.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", and pass in the r-svn mirror's CI on Linux, macOS,\nand both Windows runners (x86_64 and aarch64)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19119] `writeChar()` on Windows counts supplementary characters twice*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19119>\n\n--- Comment #1 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nCreated attachment 3769\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3769&amp;action=edit>\nCandidate patch.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785780619.301909",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "M7CG8",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19119] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "writeChar()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " on Windows counts supplementary characters twice",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19119"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3769\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3769&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3769&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCandidate patch."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19109] `dim&lt;-` dimension vector product can overflow*\nhttps:\/\/bugs.r-project.org\/show_bug.cgi?id=19109\n\n--- Comment #3 from Suharto Anggono (suharto_anggono@yahoo.com) ---\n(In reply to Suharto Anggono from comment #2)\n&gt; So, only the final `dtotal` needs to be compared with `R_XLEN_T_MAX`,\n&gt; outside the `for` loop. Function `allocArray()` should be like that, too.\n\nTo guard against infinity times zero, maybe use\n\n        if (INTEGER(val)[i] == 0) dtotal = 0.; else\n        dtotal *= INTEGER(val)[i];\n\n.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785780837.558489",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "YSY",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19109] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "dim<-",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " dimension vector product can overflow",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nhttps:\/\/bugs.r-project.org\/show_bug.cgi?id=19109\n\n--- Comment #3 from Suharto Anggono (suharto_anggono@yahoo.com) ---\n(In reply to Suharto Anggono from comment #2)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "So, only the final "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dtotal",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " needs to be compared with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_XLEN_T_MAX",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\n outside the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "for",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " loop. Function "
+                            },
+                            {
+                                "type": "text",
+                                "text": "allocArray()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " should be like that, too."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nTo guard against infinity times zero, maybe use\n\n        if (INTEGER(val)[i] == 0) dtotal = 0.; else\n        dtotal *= INTEGER(val)[i];\n\n."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19120] New: tools:::ccE() hard-codes 'cc', aborting \"checking compiled code\" on Windows*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19120>\n\n            Bug ID: 19120\n           Summary: tools:::ccE() hard-codes 'cc', aborting \"checking\n                    compiled code\" on Windows\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Models\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:Ramirez-Lopez.L@buchi.com|Ramirez-Lopez.L@buchi.com>\n\nOn Windows, the \"checking compiled code\" step of R CMD check falls over for any\npackage with a src\/ directory:\n\nLike this:\n\n```\n* checking compiled code ... NOTE\nError in ccE(lines, flags = new_flags, include = include) : \n  'cc' is not on the path\nCalls: &lt;Anonymous&gt; ... lapply -&gt; FUN -&gt; lapply -&gt; FUN -&gt; getFunsHdr -&gt; ccE\nExecution halted\n```\n\nThe step never gets as far as looking at the package, so the NOTE says nothing\nabout the package itself... and the boilerplate that follows it (\"See 'Writing\nportable packages' ...\") is a bit misleading, since nothing was actually\ninspected. The practical upshot is that no C API-compliance checking is\nhappening on Windows at all at the moment, for any package with compiled code.\nMaintainers also get a NOTE they can't do anything about, which takes some\nexplaining in cran-comments.\n\nThe cause is that tools:::ccE() wants a compiler literally called 'cc', both in\nits guard and in the command it builds:\n\n```\nif (Sys.which(\"cc\") == \"\") stop(\"'cc' is not on the path\")\n...\ncmd &lt;- sprintf(\"cc -E %s %s\", include, tfile)\n```\n\nRtools ships gcc.exe and g++.exe, and there's no cc anywhere on the path. 'cc'\nis a normal enough name on Unix-alikes, but nothing provides it on Windows.\n\nEasy to reproduce on Windows R-devel:\n\n```\nSys.which(\"cc\")\n## \"\"\ntools:::ccE(\"#include &lt;Rinternals.h&gt;\")\n## Error in tools:::ccE(\"#include &lt;Rinternals.h&gt;\") : \n##   'cc' is not on the path\n```\n\nOr just run R CMD check on anything with a src\/ directory.\n\nSeen on:\n- Local: R Under development (unstable) (2026-08-02 r90339 ucrt),\nx86_64-w64-mingw32\/x64\n- CRAN Windows builder: R Under development (unstable) (2026-07-30 r90327\nucrt), Rtools gcc 14.3.0, Windows Server 2022\n\nMartin Maechler mentioned he'd hit the same thing on win-builder (email,\n2026-08-03).\n\nOne further thought, beyond the Windows breakage: even where 'cc' does exist it\nisn't necessarily the compiler R was built with — it's usually a distro-managed\nsymlink. Since ccE() preprocesses R's own headers, a mismatch in predefined\nmacros, include paths or default C standard could give answers that don't match\nhow the package actually gets compiled. R CMD config CC would give the\nconfigured compiler everywhere.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785787244.736039",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "xy=",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19120] New: tools:::ccE() hard-codes 'cc', aborting \"checking compiled code\" on Windows",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19120"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19120\n           Summary: tools:::ccE() hard-codes 'cc', aborting \"checking\n                    compiled code\" on Windows\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Windows 64-bit\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Models\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Ramirez-Lopez.L@buchi.com",
+                                "text": "Ramirez-Lopez.L@buchi.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nOn Windows, the \"checking compiled code\" step of R CMD check falls over for any\npackage with a src\/ directory:\n\nLike this:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "* checking compiled code ... NOTE\nError in ccE(lines, flags = new_flags, include = include) : \n  'cc' is not on the path\nCalls: <Anonymous> ... lapply -> FUN -> lapply -> FUN -> getFunsHdr -> ccE\nExecution halted\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe step never gets as far as looking at the package, so the NOTE says nothing\nabout the package itself... and the boilerplate that follows it (\"See 'Writing\nportable packages' ...\") is a bit misleading, since nothing was actually\ninspected. The practical upshot is that no C API-compliance checking is\nhappening on Windows at all at the moment, for any package with compiled code.\nMaintainers also get a NOTE they can't do anything about, which takes some\nexplaining in cran-comments.\n\nThe cause is that tools:::ccE() wants a compiler literally called 'cc', both in\nits guard and in the command it builds:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "if (Sys.which(\"cc\") == \"\") stop(\"'cc' is not on the path\")\n...\ncmd <- sprintf(\"cc -E %s %s\", include, tfile)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nRtools ships gcc.exe and g++.exe, and there's no cc anywhere on the path. 'cc'\nis a normal enough name on Unix-alikes, but nothing provides it on Windows.\n\nEasy to reproduce on Windows R-devel:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Sys.which(\"cc\")\n## \"\"\ntools:::ccE(\"#include <Rinternals.h>\")\n## Error in tools:::ccE(\"#include <Rinternals.h>\") : \n##   'cc' is not on the path\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nOr just run R CMD check on anything with a src\/ directory.\n\nSeen on:\n- Local: R Under development (unstable) (2026-08-02 r90339 ucrt),\nx86_64-w64-mingw32\/x64\n- CRAN Windows builder: R Under development (unstable) (2026-07-30 r90327\nucrt), Rtools gcc 14.3.0, Windows Server 2022\n\nMartin Maechler mentioned he'd hit the same thing on win-builder (email,\n2026-08-03).\n\nOne further thought, beyond the Windows breakage: even where 'cc' does exist it\nisn't necessarily the compiler R was built with — it's usually a distro-managed\nsymlink. Since ccE() preprocesses R's own headers, a mismatch in predefined\nmacros, include paths or default C standard could give answers that don't match\nhow the package actually gets compiled. R CMD config CC would give the\nconfigured compiler everywhere."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19109] `dim&lt;-` dimension vector product can overflow*\nhttps:\/\/bugs.r-project.org\/show_bug.cgi?id=19109\n\nMartin Maechler (maechler@stat.math.ethz.ch) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CLOSED                      |REOPENED\n         Resolution|FIXED                       |---\n\n--- Comment #4 from Martin Maechler (maechler@stat.math.ethz.ch) ---\n(In reply to Suharto Anggono from comment #2)\n&gt;     x &lt;- integer(0)\n&gt;     dim(x) &lt;- c(1073741824L, 1073741824L, 0L)\n&gt; \n&gt; as well as\n&gt; \n&gt;     x &lt;- array(integer(0), dim = c(1073741824L, 1073741824L, 0L))\n&gt; \n&gt; should be accepted, right?\n&gt; \n&gt; So, only the final `dtotal` needs to be compared with `R_XLEN_T_MAX`,\n&gt; outside the `for` loop. Function `allocArray()` should be like that, too.\n\nexcellent finding -- thank you, Suharto!\nAnd indeed you are right:  whereas  allocArray() is not called too often from\nR, it is in the API.\n\nI've tried that and added more tests, finding that (old and new) R fail for an\nextreme case which should work -- note: I am indeed aiming at case where the\nproduct of dimensions overflows to `Inf` and then \"would be\" multiplied by 0\n{which R's cumprod() does \"correctly\"}:\n```\n&gt; array(integer(0), dim = c(rep(2^30, 35), 0))\nError in array(integer(0), dim = c(rep(2^30, 35), 0)) : \n  negative length vectors are not allowed\n```\nbut the following works (after fix) and also in earlier R:\n```\n&gt; a &lt;- integer(0); dim(a) &lt;- c(rep(2^30, 35), 0)\n&gt; str(a)\n int[1:1073741824, 1:1073741824, 1:1073741824, 1:1073741824, .......\n     ....................\n     1:1073741824, 0 ] \n&gt; cumprod(dim(a))\n [1]  1.073742e+09  1.152922e+18  1.237940e+27  1.329228e+36  1.427248e+45 \n1.532496e+54\n................\n[31] 9.076031e+279 9.745314e+288 1.046395e+298 1.123558e+307           Inf \n0.000000e+00\n&gt; \n```\n\nI see a nice way to work via a  `dim2total()` auxiliary function  to be used at\nleast in 3 different cases, and which would ensure that also the above extreme\n`array()` example works.\n\nI'm re-opening the PR for now.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785796850.445589",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "1tI",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19109] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "dim<-",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " dimension vector product can overflow",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nhttps:\/\/bugs.r-project.org\/show_bug.cgi?id=19109\n\nMartin Maechler (maechler@stat.math.ethz.ch) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|CLOSED                      |REOPENED\n         Resolution|FIXED                       |---\n\n--- Comment #4 from Martin Maechler (maechler@stat.math.ethz.ch) ---\n(In reply to Suharto Anggono from comment #2)"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "    x <- integer(0)\n     dim(x) <- c(1073741824L, 1073741824L, 0L)\n \n as well as\n \n     x <- array(integer(0), dim = c(1073741824L, 1073741824L, 0L))\n \n should be accepted, right?\n \n So, only the final "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dtotal",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " needs to be compared with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_XLEN_T_MAX",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\n outside the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "for",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " loop. Function "
+                            },
+                            {
+                                "type": "text",
+                                "text": "allocArray()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " should be like that, too."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nexcellent finding -- thank you, Suharto!\nAnd indeed you are right:  whereas  allocArray() is not called too often from\nR, it is in the API.\n\nI've tried that and added more tests, finding that (old and new) R fail for an\nextreme case which should work -- note: I am indeed aiming at case where the\nproduct of dimensions overflows to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Inf",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and then \"would be\" multiplied by 0\n{which R's cumprod() does \"correctly\"}:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> array(integer(0), dim = c(rep(2^30, 35), 0))\nError in array(integer(0), dim = c(rep(2^30, 35), 0)) : \n  negative length vectors are not allowed\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "but the following works (after fix) and also in earlier R:"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> a <- integer(0); dim(a) <- c(rep(2^30, 35), 0)\n> str(a)\n int[1:1073741824, 1:1073741824, 1:1073741824, 1:1073741824, .......\n     ....................\n     1:1073741824, 0 ] \n> cumprod(dim(a))\n [1]  1.073742e+09  1.152922e+18  1.237940e+27  1.329228e+36  1.427248e+45 \n1.532496e+54\n................\n[31] 9.076031e+279 9.745314e+288 1.046395e+298 1.123558e+307           Inf \n0.000000e+00\n> \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI see a nice way to work via a  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dim2total()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " auxiliary function  to be used at\nleast in 3 different cases, and which would ensure that also the above extreme\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "array()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " example works.\n\nI'm re-opening the PR for now."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19117] strptime() parses shortest prefix of localised month name*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19117>\n\nMichael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |michaelchirico4@gmail.com\n\n--- Comment #1 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nTangentially related: when playing around with this behavior a bit, I also\nnoticed the following confusing error:\n\n\n```\nSys.setlocale(\"LC_TIME\", \"zh_CN\")\nSys.getlocale()\n# [1]\n\"LC_CTYPE=en_US.UTF-8;LC_NUMERIC=C;LC_TIME=zh_CN;LC_COLLATE=en_US.UTF-8;LC_MONETARY=en_US.UTF-8;LC_MESSAGES=en_US.UTF-8;LC_PAPER=en_US.UTF-8;LC_NAME=C;LC_ADDRESS=C;LC_TELEPHONE=C;LC_MEASUREMENT=en_US.UTF-8;LC_IDENTIFICATION=C\"\n\nroundtrip = \\() strptime(strftime(as.Date('2000-11-01'), '%Y %d %b'), '%Y %d\n%b')\n\nroundtrip()\n# Error in strptime(strftime(as.Date(\"2000-11-01\"), \"%Y %d %b\"), \"%Y %d %b\") : \n#   input string is too long\n\n# c.f.\nstrftime(as.Date(\"2000-11-01\"), \"%Y %d %b\")\n# [1] \"2000 01 11\\xd4\\xc2\"\n```\n\nIt's unusual to have this particular locale setting; more typical would be:\n\n```\nSys.setlocale(\"LC_CTYPE\", \"zh_CN\")\nroundtrip()\n# [1] \"2000-11-01 UTC\"\n```\n\nAnd this works too:\n\n```\nSys.setlocale(\"LC_TIME\", \"zh_CN.utf8\")\nroundtrip()\n# [1] \"2000-11-01 UTC\"\n```\n\nSo it's because of a mismatch in the inferred encoding under `zh_CN` (GB2312).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785799054.308689",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "1Ed4",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19117] strptime() parses shortest prefix of localised month name",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19117"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMichael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |michaelchirico4@gmail.com\n\n--- Comment #1 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nTangentially related: when playing around with this behavior a bit, I also\nnoticed the following confusing error:\n\n\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Sys.setlocale(\"LC_TIME\", \"zh_CN\")\nSys.getlocale()\n# [1]\n\"LC_CTYPE=en_US.UTF-8;LC_NUMERIC=C;LC_TIME=zh_CN;LC_COLLATE=en_US.UTF-8;LC_MONETARY=en_US.UTF-8;LC_MESSAGES=en_US.UTF-8;LC_PAPER=en_US.UTF-8;LC_NAME=C;LC_ADDRESS=C;LC_TELEPHONE=C;LC_MEASUREMENT=en_US.UTF-8;LC_IDENTIFICATION=C\"\n\nroundtrip = \\() strptime(strftime(as.Date('2000-11-01'), '%Y %d %b'), '%Y %d\n%b')\n\nroundtrip()\n# Error in strptime(strftime(as.Date(\"2000-11-01\"), \"%Y %d %b\"), \"%Y %d %b\") : \n#   input string is too long\n\n# c.f.\nstrftime(as.Date(\"2000-11-01\"), \"%Y %d %b\")\n# [1] \"2000 01 11\\xd4\\xc2\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIt's unusual to have this particular locale setting; more typical would be:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Sys.setlocale(\"LC_CTYPE\", \"zh_CN\")\nroundtrip()\n# [1] \"2000-11-01 UTC\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nAnd this works too:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Sys.setlocale(\"LC_TIME\", \"zh_CN.utf8\")\nroundtrip()\n# [1] \"2000-11-01 UTC\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSo it's because of a mismatch in the inferred encoding under "
+                            },
+                            {
+                                "type": "text",
+                                "text": "zh_CN",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (GB2312)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19121] New: re-entrant calls to parse_Rd can crash R*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19121>\n\n            Bug ID: 19121\n           Summary: re-entrant calls to parse_Rd can crash R\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nCreated attachment 3770\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3770&amp;action=edit>\nCandidate patch.\n\nTo reproduce:\n\n```\ntailn &lt;- function(n) paste(sprintf(\"\\\\section{S%d}{body %d \\\\code{x%d}}\",\n                                   1:n, 1:n, 1:n), collapse = \"\\n\")\nouter &lt;- tempfile(fileext=\".Rd\")\nwriteLines(paste0(\"\\\\name{o}\\\\title{T}\\\\description{d}\\\\eqn{a\\nb}\\n\",\n                  tailn(12), \"\\n\"), outer)\ninner &lt;- tempfile(fileext=\".Rd\")\nwriteLines(\"\\\\name{i}\\\\title{IT}\\\\description{inner \\\\code{z}}\\n\", inner)\n\nwithCallingHandlers(\n    tools::parse_Rd(outer),\n    warning = function(w) {\n        tools::parse_Rd(inner)          # &lt;- re-entry\n        invokeRestart(\"muffleWarning\")\n    })\n```\n\nSuch code is somewhat convoluted, but there is code in R itself that gets\n\"close\" to this -- `tools:::processRdChunk` (`RdConv2.R:312-318`) calls\n`parse_Rd` in a try block *and* in both its `warning` and `error` handlers, for\n`\\Sexpr[results=rd]` -- exactly the shape one would worry about, but happens to\nbe fine because `tryCatch` unwinds.\n\nExploring this identified a similar issue; the `busy` flag in the parser can\nalso get leaked if a longjmp occurs during the parse. The `mset` value is also\nnever copied or set in `PutState` \/ `UseState`.\n\nThe simplest fix here is to just catch and disallow re-entrant parsing of Rd\nfiles in R, and also copy the `mset` field as appropriate.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785799602.047089",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "qZp",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19121] New: re-entrant calls to parse_Rd can crash R",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19121"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19121\n           Summary: re-entrant calls to parse_Rd can crash R\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3770\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3770&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3770&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCandidate patch.\n\nTo reproduce:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "tailn <- function(n) paste(sprintf(\"\\\\section{S%d}{body %d \\\\code{x%d}}\",\n                                   1:n, 1:n, 1:n), collapse = \"\\n\")\nouter <- tempfile(fileext=\".Rd\")\nwriteLines(paste0(\"\\\\name{o}\\\\title{T}\\\\description{d}\\\\eqn{a\\nb}\\n\",\n                  tailn(12), \"\\n\"), outer)\ninner <- tempfile(fileext=\".Rd\")\nwriteLines(\"\\\\name{i}\\\\title{IT}\\\\description{inner \\\\code{z}}\\n\", inner)\n\nwithCallingHandlers(\n    tools::parse_Rd(outer),\n    warning = function(w) {\n        tools::parse_Rd(inner)          # <- re-entry\n        invokeRestart(\"muffleWarning\")\n    })\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSuch code is somewhat convoluted, but there is code in R itself that gets\n\"close\" to this -- "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tools:::processRdChunk",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "RdConv2.R:312-318",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") calls\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "parse_Rd",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in a try block "
+                            },
+                            {
+                                "type": "text",
+                                "text": "and",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in both its "
+                            },
+                            {
+                                "type": "text",
+                                "text": "warning",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "error",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " handlers, for\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\\Sexpr[results=rd]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " -- exactly the shape one would worry about, but happens to\nbe fine because "
+                            },
+                            {
+                                "type": "text",
+                                "text": "tryCatch",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " unwinds.\n\nExploring this identified a similar issue; the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "busy",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " flag in the parser can\nalso get leaked if a longjmp occurs during the parse. The "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mset",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " value is also\nnever copied or set in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "PutState",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " \/ "
+                            },
+                            {
+                                "type": "text",
+                                "text": "UseState",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nThe simplest fix here is to just catch and disallow re-entrant parsing of Rd\nfiles in R, and also copy the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mset",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " field as appropriate."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19117] strptime() parses shortest prefix of localised month name*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19117>\n\n--- Comment #2 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nCreated attachment 3771\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3771&amp;action=edit>\nSwitch order of checking mbcstowcs failure\n\nFor my previous comment, the attached patch gives a friendlier error by\nchecking for conversion failure first:\n\n```\nSys.setlocale(\"LC_TIME\", \"zh_CN\")\nSys.setlocale(\"LC_CTYPE\", \"zh_CN.utf8\")\nstrptime(strftime(as.Date('2000-11-01'), '%Y %d %b'), '%Y %d %b')\n# Error in strptime(strftime(as.Date(\"2000-11-01\"), \"%Y %d %b\"), \"%Y %d %b\") : \n#   invalid multibyte input string\n```\n\nThis is a more conservative patch, I think we can also consolidate to just one\ncall to `mbcstowcs()` because `wbuf` has fixed size, i.e., the `mbcstowcs(NULL,\nbuf, 0)` call is not needed, but I'm not 100% confident here.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785800768.981939",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "eGtcZ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19117] strptime() parses shortest prefix of localised month name",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19117"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3771\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3771&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3771&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nSwitch order of checking mbcstowcs failure\n\nFor my previous comment, the attached patch gives a friendlier error by\nchecking for conversion failure first:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Sys.setlocale(\"LC_TIME\", \"zh_CN\")\nSys.setlocale(\"LC_CTYPE\", \"zh_CN.utf8\")\nstrptime(strftime(as.Date('2000-11-01'), '%Y %d %b'), '%Y %d %b')\n# Error in strptime(strftime(as.Date(\"2000-11-01\"), \"%Y %d %b\"), \"%Y %d %b\") : \n#   invalid multibyte input string\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis is a more conservative patch, I think we can also consolidate to just one\ncall to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mbcstowcs()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " because "
+                            },
+                            {
+                                "type": "text",
+                                "text": "wbuf",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has fixed size, i.e., the `mbcstowcs(NULL,\nbuf, 0)` call is not needed, but I'm not 100% confident here."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19122] New: %OS in strptime does not validate the input as %S does*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19122>\n\n            Bug ID: 19122\n           Summary: %OS in strptime does not validate the input as %S does\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: NEW\n          Severity: minor\n          Priority: P5\n         Component: Language\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>\n\nCreated attachment 3772\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3772&amp;action=edit>\n%OS returns NA when encountering seconds outside [0,61)\n\n`%OS` does not require its value to have `0 &lt;= x &lt; 61` as `%S` ostensibly does:\n\n```\nstrptime(\"2023-01-01 12:00:99\", \"%Y-%m-%d %H:%M:%S\")\n# [1] NA\nstrptime(\"2023-01-01 12:00:99.0\", \"%Y-%m-%d %H:%M:%OS\")\n# [1] \"2023-01-01 12:00:00 UTC\"\n```\n\nI don't see anything in `?strptime` suggesting this is intended behavior, so\nI'm attaching a patch whereby it becomes `NA` in parity to the `%S` case.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785826623.706149",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "9EQ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19122] New: %OS in strptime does not validate the input as %S does",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19122"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19122\n           Summary: %OS in strptime does not validate the input as %S does\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: NEW\n          Severity: minor\n          Priority: P5\n         Component: Language\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3772\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3772&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3772&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n%OS returns NA when encountering seconds outside [0,61)\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "%OS",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does not require its value to have "
+                            },
+                            {
+                                "type": "text",
+                                "text": "0 <= x < 61",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "%S",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ostensibly does:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "strptime(\"2023-01-01 12:00:99\", \"%Y-%m-%d %H:%M:%S\")\n# [1] NA\nstrptime(\"2023-01-01 12:00:99.0\", \"%Y-%m-%d %H:%M:%OS\")\n# [1] \"2023-01-01 12:00:00 UTC\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI don't see anything in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "?strptime",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " suggesting this is intended behavior, so\nI'm attaching a patch whereby it becomes "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NA",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in parity to the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "%S",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " case."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

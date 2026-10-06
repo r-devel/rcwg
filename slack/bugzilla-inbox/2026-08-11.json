@@ -1,0 +1,1302 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19132] New: parseNamespaceFile is inconsistent when parsing the importFrom directive*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19132>\n\n            Bug ID: 19132\n           Summary: parseNamespaceFile is inconsistent when parsing the\n                    importFrom directive\n           Product: R\n           Version: R 4.6.x\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Misc\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:tim.taylor@hiddenelephants.co.uk|tim.taylor@hiddenelephants.co.uk>\n\nWhen parseDirective (internal to parseNamespaceFile) parses\n\n```\nimportFrom(data.table, .N, `:=`)\n```\n\nit returns something akin to\n\n```\n[[1]]\n[[1]][[1]]\n[1] \"data.table\"\n\n[[1]][[2]]\n[1] \".N\"   \"`:=`\"\n```\n\nin contrast, when it parses \n\n```\nimportFrom(data.table, `:=`)\n```\n\nwe will get (note the lack of backticks)\n\n```\n[[2]]\n[[2]][[1]]\n[1] \"data.table\"\n\n[[2]][[2]]\n[1] \":=\"\n```\n\nThe result is that the first example will not work in a NAMESPACE file (it\nneeds changing to `importFrom(data.table, .N, \":=\")`).\n\nDigging in to the code I believe a solution may be changing [line 1397 in\nnamespace.R](<https:\/\/svn.r-project.org\/browse\/R\/trunk\/src\/library\/base\/R\/namespace.R?op=blame&amp;rev=89563#l1397>)\nfrom\n\n```\nstructure(asChar(ivars), names = inames)\n```\n\nto\n\n```\nstructure(vapply(ivars, asChar, \"\"), names = inames)\n```\n\nI've not yet tried a patch as wanted to flag for thoughts.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1786443321.088269",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "qbiS",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19132] New: parseNamespaceFile is inconsistent when parsing the importFrom directive",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19132"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19132\n           Summary: parseNamespaceFile is inconsistent when parsing the\n                    importFrom directive\n           Product: R\n           Version: R 4.6.x\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Misc\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tim.taylor@hiddenelephants.co.uk",
+                                "text": "tim.taylor@hiddenelephants.co.uk",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nWhen parseDirective (internal to parseNamespaceFile) parses\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "importFrom(data.table, .N, `:=`)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nit returns something akin to\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[[1]]\n[[1]][[1]]\n[1] \"data.table\"\n\n[[1]][[2]]\n[1] \".N\"   \"`:=`\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nin contrast, when it parses \n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "importFrom(data.table, `:=`)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nwe will get (note the lack of backticks)\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[[2]]\n[[2]][[1]]\n[1] \"data.table\"\n\n[[2]][[2]]\n[1] \":=\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe result is that the first example will not work in a NAMESPACE file (it\nneeds changing to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "importFrom(data.table, .N, \":=\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\n\nDigging in to the code I believe a solution may be changing [line 1397 in\nnamespace.R]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/svn.r-project.org\/browse\/R\/trunk\/src\/library\/base\/R\/namespace.R?op=blame&amp;rev=89563#l1397",
+                                "text": "https:\/\/svn.r-project.org\/browse\/R\/trunk\/src\/library\/base\/R\/namespace.R?op=blame&rev=89563#l1397"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")\nfrom\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "structure(asChar(ivars), names = inames)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nto\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "structure(vapply(ivars, asChar, \"\"), names = inames)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nI've not yet tried a patch as wanted to flag for thoughts."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19133] New: A new matrix method for aperm*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19133>\n\n            Bug ID: 19133\n           Summary: A new matrix method for aperm\n           Product: R\n           Version: R 4.6.x\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:hugo.gruson+Rbugzilla@normalesup.org|hugo.gruson+Rbugzilla@normalesup.org>\n\nThis request is somewhat in the same line as\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19069> in that it offers a\nshort-circuit for a particular case of `aperm()`.\n\n`?aperm` documentation reads:\n\n&gt; The function t provides a faster and more convenient way of transposing matrices.\n\nSince `aperm()` is a generic function, would it be possible to provide an\n`aperm()` method for matrices which would:\n\n- call `t()` if `perm` is `c(1, 2)`\n- call the identity otherwise\n\nWhile I understand the short-circuit is documented in `?aperm`:\n\n- many users will glance over it when reading the documentation\n- I am developing a package which needs to permute arrays with an arbitrary\nnumber of dimensions. Currently, if I want to leverage the short-circuit, I\nneed to \"manually dispatch\" to `t()` or `aperm()` depending on the number of\ndimensions of the array. This is not very elegant, and seems like a waste of a\ngood opportunity for actual S3 dispatch.\n\nYou can see a similar pattern in at least a couple of CRAN or Bioconductor\npackages in the wild:\n\n<https:\/\/github.com\/Huber-group-EMBL\/Rarr\/blob\/697fc75ea74ed5fdd2162d1e20e51eeeaf87a684\/R\/codecs_array_array.R#L22-L30>\n\n<https:\/\/github.com\/mlverse\/torch\/blob\/e4de110c1df9130acb9ec927cb220720d9957259\/R\/tensor.R#L439-L445>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1786456934.993939",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "OgCxr",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19133] New: A new matrix method for aperm",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19133"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19133\n           Summary: A new matrix method for aperm\n           Product: R\n           Version: R 4.6.x\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:hugo.gruson+Rbugzilla@normalesup.org",
+                                "text": "hugo.gruson+Rbugzilla@normalesup.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThis request is somewhat in the same line as\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19069"
+                            },
+                            {
+                                "type": "text",
+                                "text": " in that it offers a\nshort-circuit for a particular case of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "aperm()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "?aperm",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " documentation reads:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_quote",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "The function t provides a faster and more convenient way of transposing matrices."
+                            }
+                        ],
+                        "contains_padding": true
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSince "
+                            },
+                            {
+                                "type": "text",
+                                "text": "aperm()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is a generic function, would it be possible to provide an\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "aperm()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method for matrices which would:\n\n- call "
+                            },
+                            {
+                                "type": "text",
+                                "text": "t()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " if "
+                            },
+                            {
+                                "type": "text",
+                                "text": "perm",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "c(1, 2)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n- call the identity otherwise\n\nWhile I understand the short-circuit is documented in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "?aperm",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n- many users will glance over it when reading the documentation\n- I am developing a package which needs to permute arrays with an arbitrary\nnumber of dimensions. Currently, if I want to leverage the short-circuit, I\nneed to \"manually dispatch\" to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "t()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "aperm()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " depending on the number of\ndimensions of the array. This is not very elegant, and seems like a waste of a\ngood opportunity for actual S3 dispatch.\n\nYou can see a similar pattern in at least a couple of CRAN or Bioconductor\npackages in the wild:\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/Huber-group-EMBL\/Rarr\/blob\/697fc75ea74ed5fdd2162d1e20e51eeeaf87a684\/R\/codecs_array_array.R#L22-L30"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/mlverse\/torch\/blob\/e4de110c1df9130acb9ec927cb220720d9957259\/R\/tensor.R#L439-L445"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19133] A new matrix method for aperm*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19133>\n\n--- Comment #1 from Hugo Gruson (<mailto:hugo.gruson+Rbugzilla@normalesup.org|hugo.gruson+Rbugzilla@normalesup.org>) ---\nCreated attachment 3779\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3779&amp;action=edit>\naperm.matrix method\n\nI'm attaching two patches.\n\nThe first one implements the proposed `aperm.matrix()` method. The second adds\nregression tests.\n\nI reproduced the input validation from the C code of `aperm` (default method).\nAn alternative to avoid code duplication might be to implement the\nshort-circuit in the C code rather than with S3 dispatch.\n\nAs far as I can tell, I reimplemented the existing &amp; documented behaviour,\nincluding:\n\n- `resize` argument\n- using the names of the dimnames in `perm`\n- allowing non-integer input and coercing it to integer\n- keeping attributes, excepted when `resize = FALSE`",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1786457736.750039",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "LHz6",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19133] A new matrix method for aperm",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19133"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Hugo Gruson ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:hugo.gruson+Rbugzilla@normalesup.org",
+                                "text": "hugo.gruson+Rbugzilla@normalesup.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3779\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3779&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3779&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\naperm.matrix method\n\nI'm attaching two patches.\n\nThe first one implements the proposed "
+                            },
+                            {
+                                "type": "text",
+                                "text": "aperm.matrix()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method. The second adds\nregression tests.\n\nI reproduced the input validation from the C code of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "aperm",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (default method).\nAn alternative to avoid code duplication might be to implement the\nshort-circuit in the C code rather than with S3 dispatch.\n\nAs far as I can tell, I reimplemented the existing & documented behaviour,\nincluding:\n\n- "
+                            },
+                            {
+                                "type": "text",
+                                "text": "resize",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " argument\n- using the names of the dimnames in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "perm",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n- allowing non-integer input and coercing it to integer\n- keeping attributes, excepted when "
+                            },
+                            {
+                                "type": "text",
+                                "text": "resize = FALSE",
+                                "style": {
+                                    "code": true
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19133] A new matrix method for aperm*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19133>\n\n--- Comment #2 from Hugo Gruson (<mailto:hugo.gruson+Rbugzilla@normalesup.org|hugo.gruson+Rbugzilla@normalesup.org>) ---\nCreated attachment 3780\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3780&amp;action=edit>\naperm.matrix method regression tests",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1786457760.152579",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "RTm",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19133] A new matrix method for aperm",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19133"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Hugo Gruson ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:hugo.gruson+Rbugzilla@normalesup.org",
+                                "text": "hugo.gruson+Rbugzilla@normalesup.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3780\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3780&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3780&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\naperm.matrix method regression tests"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19133] A new matrix method for aperm*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19133>\n\n--- Comment #3 from Hugo Gruson (<mailto:hugo.gruson+Rbugzilla@normalesup.org|hugo.gruson+Rbugzilla@normalesup.org>) ---\nNote that a subtle side-effect of the patch as provided is that when a custom\n`t()` method is defined for a matrix subclass, but not the corresponding\n`aperm()` method, `aperm()` will now dispatch to the custom `t()` method.\n\nI **think** it is probably a desirable behaviour but it's a breaking change\nnonetheless.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1786462137.522719",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "THLq",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19133] A new matrix method for aperm",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19133"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Hugo Gruson ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:hugo.gruson+Rbugzilla@normalesup.org",
+                                "text": "hugo.gruson+Rbugzilla@normalesup.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nNote that a subtle side-effect of the patch as provided is that when a custom\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "t()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method is defined for a matrix subclass, but not the corresponding\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "aperm()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "aperm()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " will now dispatch to the custom "
+                            },
+                            {
+                                "type": "text",
+                                "text": "t()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " method.\n\nI **think** it is probably a desirable behaviour but it's a breaking change\nnonetheless."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19134] New: iconv() leaks conversion descriptors and a string buffer on some errors*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19134>\n\n            Bug ID: 19134\n           Summary: iconv() leaks conversion descriptors and a string\n                    buffer on some errors\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:troy@cornball.ai|troy@cornball.ai>\n\nCreated attachment 3781\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3781&amp;action=edit>\niconv() leak patch\n\n## Summary\n\n`do_iconv()` allocates a local `R_StringBuffer` and lazily opens conversion\ndescriptors, but releases them only on normal return. Errors inside the\nconversion loop longjmp past that cleanup.\n\nThe first reproducer below leaks the buffer and a descriptor; the second leaks\nthe buffer. On R-devel r90391 with glibc 2.39, LeakSanitizer measured 4,115,200\nbytes leaked across 100 runs of the first reproducer.\n\nThe trigger is an ordinary type error, not memory pressure, so no unusual\nconditions are needed to reach it.\n\n## Affected code\n\n`src\/main\/sysutils.c`, `do_iconv()`:\n\n```\n607:    R_StringBuffer cbuff = {NULL, 0, MAXELTSIZE};   \/* function local *\/\n683:    R_AllocStringBuffer(0, &amp;cbuff);\n691:            error(_(\"'x' must be a character vector or a list of NULL or\nraw vectors\"));\n755:            arg_obj = Riconv_open(to, from);\n768:                error(_(\"unsupported conversion from '%s' to '%s'\"), from,\nto);\n929:    if (latin1_obj != (iconv_t)-1) Riconv_close(latin1_obj);\n930:    if (utf8_obj != (iconv_t)-1) Riconv_close(utf8_obj);\n931:    if (arg_obj != (iconv_t)-1) Riconv_close(arg_obj);\n932:    R_FreeStringBuffer(&amp;cbuff);\n```\n\nLines 929-932 are the only releases, and no `begincontext`,\n`R_ExecWithCleanup` or `R_UnwindProtect` covers them. Line 691 is inside the\nconversion loop, so a descriptor opened for one element is lost when a later\nelement fails.\n\n## Reproducer\n\n```\n## leaks the buffer and a descriptor\niconv(list(charToRaw(\"a\"), 42), from = \"latin1\", to = \"UTF-8\")\n\n## leaks the buffer\niconv(list(charToRaw(\"a\")), from = \"NOSUCHENC\", to = \"UTF-8\")\n```\n\nRepeating either grows the process without bound.\n\n## Measurement\n\nR-devel r90391 built with `clang -fsanitize=address`, 100 runs of the first\nreproducer:\n\n```\nSUMMARY: AddressSanitizer: 4115200 byte(s) leaked in 400 allocation(s).\n```\n\n| allocation site | bytes | objects |\n|---|---|---|\n| `iconv_open` via `Riconv_open`, `do_iconv:755` | 11,200 | 100 |\n| gconv step tables, same path | 3,264,000 | 100 |\n| gconv cache lookup, same path | 20,800 | 100 |\n| `R_AllocStringBuffer`, `do_iconv:683` | 819,200 | 100 |\n\n41,152 bytes per call. The 8,192-byte string buffer is\nimplementation-independent; the rest is glibc's gconv allocation and will\ndiffer on other C libraries. Full sanitizer log available on request.\n\n## History\n\nr73116 (2017-08-23) added `Riconv_close(obj)` at both error sites. r82791\n(2022-09-02) removed them: it replaced the single pre-loop `obj` with three\ndescriptors opened lazily inside the loop, at which point one\n`Riconv_close(obj)` no longer applies, and the closes were dropped rather than\nrewritten. The descriptor close was therefore present in R 3.5.0 through 4.2.x\nand absent from 4.3.0 onward. The string buffer has leaked since r41899\n(2007-06-10) and was not covered by the 2017 fix.\n\n(PR#17328 shares commit r73116 but is a different defect, `Sys.setlocale()`\nleaking cached descriptors; that fix is still correct and in place.)\n\n## Suggested fix\n\nAttached. It registers the releases on the context stack, as `writetable()`\ndoes in `src\/library\/utils\/src\/io.c`, rather than re-adding `Riconv_close()` at\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1786476278.354949",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "jjxb",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19134] New: iconv() leaks conversion descriptors and a string buffer on some errors",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19134"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19134\n           Summary: iconv() leaks conversion descriptors and a string\n                    buffer on some errors\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: minor\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:troy@cornball.ai",
+                                "text": "troy@cornball.ai"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3781\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3781&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3781&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\niconv() leak patch\n\n## Summary\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_iconv()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " allocates a local "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_StringBuffer",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and lazily opens conversion\ndescriptors, but releases them only on normal return. Errors inside the\nconversion loop longjmp past that cleanup.\n\nThe first reproducer below leaks the buffer and a descriptor; the second leaks\nthe buffer. On R-devel r90391 with glibc 2.39, LeakSanitizer measured 4,115,200\nbytes leaked across 100 runs of the first reproducer.\n\nThe trigger is an ordinary type error, not memory pressure, so no unusual\nconditions are needed to reach it.\n\n## Affected code\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/sysutils.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_iconv()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "607:    R_StringBuffer cbuff = {NULL, 0, MAXELTSIZE};   \/* function local *\/\n683:    R_AllocStringBuffer(0, &cbuff);\n691:            error(_(\"'x' must be a character vector or a list of NULL or\nraw vectors\"));\n755:            arg_obj = Riconv_open(to, from);\n768:                error(_(\"unsupported conversion from '%s' to '%s'\"), from,\nto);\n929:    if (latin1_obj != (iconv_t)-1) Riconv_close(latin1_obj);\n930:    if (utf8_obj != (iconv_t)-1) Riconv_close(utf8_obj);\n931:    if (arg_obj != (iconv_t)-1) Riconv_close(arg_obj);\n932:    R_FreeStringBuffer(&cbuff);\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nLines 929-932 are the only releases, and no "
+                            },
+                            {
+                                "type": "text",
+                                "text": "begincontext",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_ExecWithCleanup",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_UnwindProtect",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " covers them. Line 691 is inside the\nconversion loop, so a descriptor opened for one element is lost when a later\nelement fails.\n\n## Reproducer\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "## leaks the buffer and a descriptor\niconv(list(charToRaw(\"a\"), 42), from = \"latin1\", to = \"UTF-8\")\n\n## leaks the buffer\niconv(list(charToRaw(\"a\")), from = \"NOSUCHENC\", to = \"UTF-8\")\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nRepeating either grows the process without bound.\n\n## Measurement\n\nR-devel r90391 built with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "clang -fsanitize=address",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", 100 runs of the first\nreproducer:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "SUMMARY: AddressSanitizer: 4115200 byte(s) leaked in 400 allocation(s).\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n| allocation site | bytes | objects |\n|---|---|---|\n| "
+                            },
+                            {
+                                "type": "text",
+                                "text": "iconv_open",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " via "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Riconv_open",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_iconv:755",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 11,200 | 100 |\n| gconv step tables, same path | 3,264,000 | 100 |\n| gconv cache lookup, same path | 20,800 | 100 |\n| "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_AllocStringBuffer",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", "
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_iconv:683",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " | 819,200 | 100 |\n\n41,152 bytes per call. The 8,192-byte string buffer is\nimplementation-independent; the rest is glibc's gconv allocation and will\ndiffer on other C libraries. Full sanitizer log available on request.\n\n## History\n\nr73116 (2017-08-23) added "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Riconv_close(obj)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " at both error sites. r82791\n(2022-09-02) removed them: it replaced the single pre-loop "
+                            },
+                            {
+                                "type": "text",
+                                "text": "obj",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " with three\ndescriptors opened lazily inside the loop, at which point one\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "Riconv_close(obj)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " no longer applies, and the closes were dropped rather than\nrewritten. The descriptor close was therefore present in R 3.5.0 through 4.2.x\nand absent from 4.3.0 onward. The string buffer has leaked since r41899\n(2007-06-10) and was not covered by the 2017 fix.\n\n(PR#17328 shares commit r73116 but is a different defect, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Sys.setlocale()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nleaking cached descriptors; that fix is still correct and in place.)\n\n## Suggested fix\n\nAttached. It registers the releases on the context stack, as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "writetable()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ndoes in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/library\/utils\/src\/io.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", rather than re-adding "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Riconv_close()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " at"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "each error site -- the latter is what 2022 removed, and would be vulnerable to\nthe same restructuring again. The handler releases whichever descriptors are\nopen and frees the buffer on the reported error paths.\n`R_FreeStringBuffer()` clears `buf-&gt;data` and the handler resets the\ndescriptors, so the normal-path call after `endcontext()` cannot double free.\n\n## Verification\n\nOn r90391 with the ASan build: LeakSanitizer reports no leaks from either\nreproducer, conversion behaviour and both error messages are unchanged, 200\ninterleaved successful and failing calls show no double free or use-after-free,\nand `make check` passes including `reg-encodings.R`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1786476278.377229",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Cotcs",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "each error site -- the latter is what 2022 removed, and would be vulnerable to\nthe same restructuring again. The handler releases whichever descriptors are\nopen and frees the buffer on the reported error paths.\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_FreeStringBuffer()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " clears "
+                            },
+                            {
+                                "type": "text",
+                                "text": "buf->data",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and the handler resets the\ndescriptors, so the normal-path call after "
+                            },
+                            {
+                                "type": "text",
+                                "text": "endcontext()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " cannot double free.\n\n## Verification\n\nOn r90391 with the ASan build: LeakSanitizer reports no leaks from either\nreproducer, conversion behaviour and both error messages are unchanged, 200\ninterleaved successful and failing calls show no double free or use-after-free,\nand "
+                            },
+                            {
+                                "type": "text",
+                                "text": "make check",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " passes including "
+                            },
+                            {
+                                "type": "text",
+                                "text": "reg-encodings.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19131] Stale lazy-load database cache after re-installing a package in the same session*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19131>\n\nKurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |Kurt.Hornik@wu.ac.at\n\n--- Comment #1 from Kurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) ---\nThanks.  Can we please have the \"that patch instead\" variant? :-)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1786481093.733909",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Umqzo",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19131] Stale lazy-load database cache after re-installing a package in the same session",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19131"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nKurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |Kurt.Hornik@wu.ac.at\n\n--- Comment #1 from Kurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks.  Can we please have the \"that patch instead\" variant? :-)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19104] Fix buffer overread in R_is_redirection_tty*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19104>\n\nLuke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CONFIRMED\n                 CC|                            |luke@stat.uiowa.edu\n     Ever confirmed|0                           |1\n\n--- Comment #1 from Luke Tierney (<mailto:luke@stat.uiowa.edu|luke@stat.uiowa.edu>) ---\nThanks. Patch applied to R-devel in r90393. Will port to R-patched if no issues\nsurface.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1786483923.397319",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "te0",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19104] Fix buffer overread in R_is_redirection_tty",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19104"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nLuke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|UNCONFIRMED                 |CONFIRMED\n                 CC|                            |luke@stat.uiowa.edu\n     Ever confirmed|0                           |1\n\n--- Comment #1 from Luke Tierney ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:luke@stat.uiowa.edu",
+                                "text": "luke@stat.uiowa.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks. Patch applied to R-devel in r90393. Will port to R-patched if no issues\nsurface."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19131] Stale lazy-load database cache after re-installing a package in the same session*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19131>\n\n--- Comment #2 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nCreated attachment 3782\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3782&amp;action=edit>\nAlternate patch (use file id as gate for caching)\n\nA note on the cost of the fetch-time validation, since it puts a stat()\non a path that previously did no filesystem work at all on a cache hit.\n\nThe check runs once per lazyLoadDBfetch() call, i.e. once per first use\nof each lazy-loaded object (promises are only forced once), once per\nobject retrieved from a help database, and once per lazy-data load.\nSome measured numbers (macOS arm64, APFS; a warm stat() there is about\n0.6 microseconds):\n\n- A full R startup performs ~700 fetches, so validation adds ~0.4 ms\n  to a ~180 ms startup.\n- tools::Rd_db(\"stats\") performs ~650 fetches: again ~0.4 ms, against\n  ~200 ms the workload spends reading, decompressing and unserializing\n  the blobs. Per fetch, the stat is well under 0.1% of the work the\n  fetch already does.\n\nTo report the one number that looks alarming rather than hide it: the\nvalidation does become the largest source of stat() calls in an R\nstartup (~700 of ~850). But the time is what matters, and the time is\nnegligible on local filesystems; the pattern of validating a cache\nwith a stat per use is standard practice elsewhere for exactly that\nreason.\n\nOther language runtimes do comparable validation. CPython validates\nits bytecode cache with a stat of the .py source when a module is\nfirst imported, comparing the mtime and size recorded in the .pyc\nheader; once imported, a module is never revalidated, just as a forced\npromise never re-fetches. The units differ -- Python's unit of code\nloading is the module where R's lazy-load unit is the object -- but\nper unit loaded Python touches the filesystem more, not less: on my\nmachine, importing 130 stdlib modules performed 823 stat\/open calls\n(path probing, cache validation, opens), about five per module, where\nthis patch performs exactly one attribute lookup per object fetched.\nPHP's opcache is the closest match to the situation being fixed here\n-- a long-running process serving compiled artifacts whose files can\nbe replaced underneath it -- and it revalidates scripts by timestamp\non use, enabled by default (rate-limited to once per 2 seconds per\nscript).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1786486798.576709",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "FBHc0",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19131] Stale lazy-load database cache after re-installing a package in the same session",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19131"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3782\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3782&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3782&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nAlternate patch (use file id as gate for caching)\n\nA note on the cost of the fetch-time validation, since it puts a stat()\non a path that previously did no filesystem work at all on a cache hit.\n\nThe check runs once per lazyLoadDBfetch() call, i.e. once per first use\nof each lazy-loaded object (promises are only forced once), once per\nobject retrieved from a help database, and once per lazy-data load.\nSome measured numbers (macOS arm64, APFS; a warm stat() there is about\n0.6 microseconds):\n\n- A full R startup performs ~700 fetches, so validation adds ~0.4 ms\n  to a ~180 ms startup.\n- tools::Rd_db(\"stats\") performs ~650 fetches: again ~0.4 ms, against\n  ~200 ms the workload spends reading, decompressing and unserializing\n  the blobs. Per fetch, the stat is well under 0.1% of the work the\n  fetch already does.\n\nTo report the one number that looks alarming rather than hide it: the\nvalidation does become the largest source of stat() calls in an R\nstartup (~700 of ~850). But the time is what matters, and the time is\nnegligible on local filesystems; the pattern of validating a cache\nwith a stat per use is standard practice elsewhere for exactly that\nreason.\n\nOther language runtimes do comparable validation. CPython validates\nits bytecode cache with a stat of the .py source when a module is\nfirst imported, comparing the mtime and size recorded in the .pyc\nheader; once imported, a module is never revalidated, just as a forced\npromise never re-fetches. The units differ -- Python's unit of code\nloading is the module where R's lazy-load unit is the object -- but\nper unit loaded Python touches the filesystem more, not less: on my\nmachine, importing 130 stdlib modules performed 823 stat\/open calls\n(path probing, cache validation, opens), about five per module, where\nthis patch performs exactly one attribute lookup per object fetched.\nPHP's opcache is the closest match to the situation being fixed here\n-- a long-running process serving compiled artifacts whose files can\nbe replaced underneath it -- and it revalidates scripts by timestamp\non use, enabled by default (rate-limited to once per 2 seconds per\nscript)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

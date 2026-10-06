@@ -1,0 +1,859 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19142] Error for match.arg(&lt;non-string&gt;, ...) is not very illustrative*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19142>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #2 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nWell, given that in so many places people grep for the error message,\nsuch a change would cost quite a bit of human time fixing all these instances.\n\nAlso, note that  `\"a\"`  _is_ a character vector length one,\nso \"character vector\" is correct.\nIf we'd write the function from scratch today, I'd simply use \"character\"\ninstead \n(as all \"character\" are atomic vector, even if of length 0 or 1, see above),\nbut given the human time above, I don't think we should change it now.\n\nAlso (your '2.') the \"suggestion\" of _any_ character vector is really not true,\nin the context of R (or programming in general, outside of language\nprocessing).\nIt is typical notably for this function that not every string \/ character\nvector will match, and given that an error is a desired outcome for\nnon-matching input,\n\nI propose to close this with something as 'WORKSFORME' or 'WONTFIX'.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1787740889.619529",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "YDo",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19142] Error for match.arg(<non-string>, ...) is not very illustrative",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19142"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |maechler@stat.math.ethz.ch\n\n--- Comment #2 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nWell, given that in so many places people grep for the error message,\nsuch a change would cost quite a bit of human time fixing all these instances.\n\nAlso, note that  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"a\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "is",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " a character vector length one,\nso \"character vector\" is correct.\nIf we'd write the function from scratch today, I'd simply use \"character\"\ninstead \n(as all \"character\" are atomic vector, even if of length 0 or 1, see above),\nbut given the human time above, I don't think we should change it now.\n\nAlso (your '2.') the \"suggestion\" of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "any",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " character vector is really not true,\nin the context of R (or programming in general, outside of language\nprocessing).\nIt is typical notably for this function that not every string \/ character\nvector will match, and given that an error is a desired outcome for\nnon-matching input,\n\nI propose to close this with something as 'WORKSFORME' or 'WONTFIX'."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19142] Error for match.arg(&lt;non-string&gt;, ...) is not very illustrative*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19142>\n\n--- Comment #3 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nI just want to make sure my intent here is understood. I don't mean to argue\nthat \"character vector\" is incorrect, rather that it could be more helpful.\n\nA more minimal change would be to just edit \"character vector\" to \"character\nstring\" in the `isFALSE(several.ok)` case, for example.\n\nWe could also simply omit the 'or NULL' part from the error message in the\npatch; this would still lead to some CRAN churn, but less [1].\n\nI don't think we should be _too_ beholden to what CRAN authors mistakenly (IMHO\n[2] [3]) hard-code in their test suites if we can substantially improve the R\nuser experience. The proposed error is self-documenting -- the user immediately\nsees how to proceed.\n\n[1] E.g.\n<https:\/\/github.com\/search?q=org%3Acran+%2Fmust+be+NULL+or+a+character%2F+path%3Atest+-path%3A_snaps&amp;type=code>.\nI'm of course happy to quantify this more formally if requested.\n\n[2] data.table, for example, takes great pains to _only_ test error messages\n_under its control_:\n<https:\/\/github.com\/Rdatatable\/data.table\/blob\/e26cf1b6b95474d90d3db462409e2d59e371b740\/inst\/tests\/tests.Rraw#L200-L225>\n\n[3] I myself have just this month had to update a CRAN package because of a\nchange to R's own messages, a fragility of my own making:\n<https:\/\/github.com\/r-lib\/bit64\/commit\/b4f08213072de64f9b0448582290605ce7f4ab01>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1787760553.826929",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "gs7",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19142] Error for match.arg(<non-string>, ...) is not very illustrative",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19142"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI just want to make sure my intent here is understood. I don't mean to argue\nthat \"character vector\" is incorrect, rather that it could be more helpful.\n\nA more minimal change would be to just edit \"character vector\" to \"character\nstring\" in the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "isFALSE(several.ok)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " case, for example.\n\nWe could also simply omit the 'or NULL' part from the error message in the\npatch; this would still lead to some CRAN churn, but less [1].\n\nI don't think we should be "
+                            },
+                            {
+                                "type": "text",
+                                "text": "too",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " beholden to what CRAN authors mistakenly (IMHO\n[2] [3]) hard-code in their test suites if we can substantially improve the R\nuser experience. The proposed error is self-documenting -- the user immediately\nsees how to proceed.\n\n[1] E.g.\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/search?q=org%3Acran+%2Fmust+be+NULL+or+a+character%2F+path%3Atest+-path%3A_snaps&amp;type=code",
+                                "text": "https:\/\/github.com\/search?q=org%3Acran+%2Fmust+be+NULL+or+a+character%2F+path%3Atest+-path%3A_snaps&type=code"
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\nI'm of course happy to quantify this more formally if requested.\n\n[2] data.table, for example, takes great pains to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "only",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " test error messages\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "under its control",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/Rdatatable\/data.table\/blob\/e26cf1b6b95474d90d3db462409e2d59e371b740\/inst\/tests\/tests.Rraw#L200-L225"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n[3] I myself have just this month had to update a CRAN package because of a\nchange to R's own messages, a fragility of my own making:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-lib\/bit64\/commit\/b4f08213072de64f9b0448582290605ce7f4ab01"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19035] postscript(): PS_Open() is too pessimistic wrt R_popen(), failing in Docker on GitHub Actions*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19035>\n\nPaul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|NEW                         |CONFIRMED\n                 CC|                            |paul@stat.auckland.ac.nz\n\n--- Comment #4 from Paul Murrell (<mailto:paul@stat.auckland.ac.nz|paul@stat.auckland.ac.nz>) ---\nThanks for report and patches!\n\nPatches applied to r-devel (r90449)\n\nPlease confirm that this fixes the problem for you.\n\nWould it also make sense to add the `errno` to the error message, something\nlike ... ?\n\n```\nerror(_(\"cannot open 'postscript' pipe to '%s' (reason: %s)\"), errbuf,\nstrerror(errno));\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1787800843.159079",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "nzJ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19035] postscript(): PS_Open() is too pessimistic wrt R_popen(), failing in Docker on GitHub Actions",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19035"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nPaul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n             Status|NEW                         |CONFIRMED\n                 CC|                            |paul@stat.auckland.ac.nz\n\n--- Comment #4 from Paul Murrell ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:paul@stat.auckland.ac.nz",
+                                "text": "paul@stat.auckland.ac.nz",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks for report and patches!\n\nPatches applied to r-devel (r90449)\n\nPlease confirm that this fixes the problem for you.\n\nWould it also make sense to add the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "errno",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to the error message, something\nlike ... ?\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "error(_(\"cannot open 'postscript' pipe to '%s' (reason: %s)\"), errbuf,\nstrerror(errno));\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19143] New: `Sys.getlocale()` does not mark non-ASCII Windows locale names as UTF-8*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19143>\n\n            Bug ID: 19143\n           Summary: `Sys.getlocale()` does not mark non-ASCII Windows\n                    locale names as UTF-8\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Windows GUI \/ Window specific\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nCreated attachment 3802\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3802&amp;action=edit>\nCandidate patch.\n\n## Summary\n\nOn recent Windows systems, R uses UCRT with UTF-8 as the native encoding.\nThe narrow `setlocale()` result is consequently encoded as UTF-8.  Windows\nlocale names are not necessarily ASCII; for example, the canonical name of\nthe Norwegian Bokmål locale can contain `Bokmål`.\n\n`Sys.getlocale()` returns such a name with UTF-8 bytes but does not declare\nthe returned R string as UTF-8.  `Encoding()` therefore reports `\"unknown\"`.\nThe return value of `Sys.setlocale()` is constructed in the same way and has\nthe same issue.\n\n## Reproduction\n\nRun this on a recent Windows system where `l10n_info()[[\"UTF-8\"]]` is true:\n\n```\nlocal({\n    old &lt;- Sys.getlocale(\"LC_TIME\")\n    on.exit(Sys.setlocale(\"LC_TIME\", old))\n\n    set &lt;- Sys.setlocale(\"LC_TIME\", \"Norwegian_Norway.UTF-8\")\n    current &lt;- Sys.getlocale(\"LC_TIME\")\n\n    print(list(\n        set_value = set,\n        set_encoding = Encoding(set),\n        get_value = current,\n        get_encoding = Encoding(current),\n        get_raw = charToRaw(current),\n        l10n = l10n_info()\n    ))\n})\n```\n\nThe exact canonical spelling can vary with the Windows version.  An affected\nresult contains a non-ASCII spelling such as one of:\n\n```\nNorwegian (Bokmål)_Norway.utf8\nNorwegian Bokmål_Norway.utf8\n```\n\nThe UTF-8 representation of `å` includes the bytes `c3 a5`, but the current\nresult is:\n\n```\nEncoding(current)\n# [1] \"unknown\"\n```\n\nThe same is true of the value returned by `Sys.setlocale()`.\n\n## Expected behavior\n\nFor a non-ASCII locale name returned as UTF-8, both functions should return\na string for which:\n\n```\nEncoding(current)\n# [1] \"UTF-8\"\n```\n\nASCII locale names should remain unmarked, in accordance with R's existing\nrule that ASCII strings never carry an encoding declaration.\n\n## Cause\n\n`do_getlocale()` in `src\/main\/platform.c` obtains a narrow string from\n`setlocale()` and wraps it with `mkString()`:\n\n```\nif (cat != NA_INTEGER) p = setlocale(cat, NULL);\nreturn mkString(p ? p : \"\");\n```\n\n`mkString()` uses `mkChar()` and therefore records the result as\n`CE_NATIVE`, even when R knows that the native locale is UTF-8.  The return\npath in `do_setlocale()` similarly uses `mkChar(p)`.\n\nThe adjacent comment, `Locale specs are always ASCII`, is not valid for\nWindows locale names such as Norwegian Bokmål.  UCRT can construct legacy\nlocale names from the English language and country names supplied by the\nWindows locale APIs, and those names can contain non-ASCII characters.\n\nThis often remains unnoticed while the process stays in a UTF-8 locale,\nbecause an unmarked string is interpreted in the current native encoding.\nHowever, the fact that the bytes are known to be UTF-8 is lost.  This can\nmatter if the value outlives a subsequent locale change or is processed by\ncode whose encoding propagation depends on an explicit declaration.\n\n## Proposed fix\n\nConstruct locale results with `mkCharCE(..., CE_UTF8)` whenever\n`utf8locale` is true.  `mkCharCE()` already removes the declaration for\nASCII-only strings, so the change only affects non-ASCII results.\n\nFor `do_setlocale()`, copy the CRT-owned result before calling\n`R_check_locale()`, since a later `setlocale()` call may invalidate the\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1787804610.401829",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "kFncB",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19143] New: ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "Sys.getlocale()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does not mark non-ASCII Windows locale names as UTF-8",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19143"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19143\n           Summary: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Sys.getlocale()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does not mark non-ASCII Windows\n                    locale names as UTF-8\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Windows GUI \/ Window specific\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3802\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3802&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3802&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCandidate patch.\n\n## Summary\n\nOn recent Windows systems, R uses UCRT with UTF-8 as the native encoding.\nThe narrow "
+                            },
+                            {
+                                "type": "text",
+                                "text": "setlocale()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " result is consequently encoded as UTF-8.  Windows\nlocale names are not necessarily ASCII; for example, the canonical name of\nthe Norwegian Bokmål locale can contain "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Bokmål",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "Sys.getlocale()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " returns such a name with UTF-8 bytes but does not declare\nthe returned R string as UTF-8.  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Encoding()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " therefore reports "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"unknown\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\nThe return value of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Sys.setlocale()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is constructed in the same way and has\nthe same issue.\n\n## Reproduction\n\nRun this on a recent Windows system where "
+                            },
+                            {
+                                "type": "text",
+                                "text": "l10n_info()[[\"UTF-8\"]]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is true:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "local({\n    old <- Sys.getlocale(\"LC_TIME\")\n    on.exit(Sys.setlocale(\"LC_TIME\", old))\n\n    set <- Sys.setlocale(\"LC_TIME\", \"Norwegian_Norway.UTF-8\")\n    current <- Sys.getlocale(\"LC_TIME\")\n\n    print(list(\n        set_value = set,\n        set_encoding = Encoding(set),\n        get_value = current,\n        get_encoding = Encoding(current),\n        get_raw = charToRaw(current),\n        l10n = l10n_info()\n    ))\n})\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe exact canonical spelling can vary with the Windows version.  An affected\nresult contains a non-ASCII spelling such as one of:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Norwegian (Bokmål)_Norway.utf8\nNorwegian Bokmål_Norway.utf8\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe UTF-8 representation of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "å",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " includes the bytes "
+                            },
+                            {
+                                "type": "text",
+                                "text": "c3 a5",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", but the current\nresult is:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Encoding(current)\n# [1] \"unknown\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe same is true of the value returned by "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Sys.setlocale()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n## Expected behavior\n\nFor a non-ASCII locale name returned as UTF-8, both functions should return\na string for which:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Encoding(current)\n# [1] \"UTF-8\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nASCII locale names should remain unmarked, in accordance with R's existing\nrule that ASCII strings never carry an encoding declaration.\n\n## Cause\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_getlocale()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "src\/main\/platform.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " obtains a narrow string from\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "setlocale()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and wraps it with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mkString()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "if (cat != NA_INTEGER) p = setlocale(cat, NULL);\nreturn mkString(p ? p : \"\");\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "mkString()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " uses "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mkChar()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and therefore records the result as\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "CE_NATIVE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", even when R knows that the native locale is UTF-8.  The return\npath in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_setlocale()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " similarly uses "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mkChar(p)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nThe adjacent comment, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Locale specs are always ASCII",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", is not valid for\nWindows locale names such as Norwegian Bokmål.  UCRT can construct legacy\nlocale names from the English language and country names supplied by the\nWindows locale APIs, and those names can contain non-ASCII characters.\n\nThis often remains unnoticed while the process stays in a UTF-8 locale,\nbecause an unmarked string is interpreted in the current native encoding.\nHowever, the fact that the bytes are known to be UTF-8 is lost.  This can\nmatter if the value outlives a subsequent locale change or is processed by\ncode whose encoding propagation depends on an explicit declaration.\n\n## Proposed fix\n\nConstruct locale results with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mkCharCE(..., CE_UTF8)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " whenever\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "utf8locale",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is true.  "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mkCharCE()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " already removes the declaration for\nASCII-only strings, so the change only affects non-ASCII results.\n\nFor "
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_setlocale()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", copy the CRT-owned result before calling\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_check_locale()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", since a later "
+                            },
+                            {
+                                "type": "text",
+                                "text": "setlocale()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " call may invalidate the"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "pointer.  After `R_check_locale()` has updated `utf8locale`, construct the\nR string using the new locale's encoding.\n\nA regression test can select `Norwegian_Norway.UTF-8` on Windows and check\nthe encoding of the `Sys.setlocale()` and `Sys.getlocale()` results when\nUCRT expands the alias to a non-ASCII canonical name.  The test should be\nconditional because that locale may not be available on every Windows\ninstallation.\n\n## Version information\n\nThe issue is present in current R-devel source as of 2026-08-26.  It is\nrelevant to UCRT-based Windows builds using UTF-8 as the native encoding,\nincluding the default configuration on recent Windows versions.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1787804610.426359",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "0HQlA",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "pointer.  After "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_check_locale()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has updated "
+                            },
+                            {
+                                "type": "text",
+                                "text": "utf8locale",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", construct the\nR string using the new locale's encoding.\n\nA regression test can select "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Norwegian_Norway.UTF-8",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " on Windows and check\nthe encoding of the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Sys.setlocale()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Sys.getlocale()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " results when\nUCRT expands the alias to a non-ASCII canonical name.  The test should be\nconditional because that locale may not be available on every Windows\ninstallation.\n\n## Version information\n\nThe issue is present in current R-devel source as of 2026-08-26.  It is\nrelevant to UCRT-based Windows builds using UTF-8 as the native encoding,\nincluding the default configuration on recent Windows versions."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

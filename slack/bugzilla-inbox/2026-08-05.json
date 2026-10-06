@@ -1,0 +1,534 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19091] as.numeric on macOS aarch64 rounds \"0.9999999999999999\" to 1.0 instead of the nearest IEEE 754 double*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19091>\n\n--- Comment #10 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\n(In reply to Akitada Kasahara from comment #0)\nOn \"-177253333.333333343267441\":\n\n17725333333333334 can actually be represented exactly by 'double'. Using it\ngives the expected result:\n\nR&gt; sprintf(\"%0.15f\", -17725333333333334\/1e8)\n[1] \"-177253333.333333343267441\"\n\nShift is introduced by further calculations:\n\nR&gt; print(a &lt;- 17725333333333334, 17)\n[1] 17725333333333334\nR&gt; for (d in c(3,2,6,7,4,4,1)) print(a &lt;- 10*a + d, 17)\n[1] 177253333333333344\n[1] 1772533333333333504\n[1] 17725333333333336064\n[1] 177253333333333377024\n[1] 1772533333333333770240\n[1] 1.7725333333333338e+22\n[1] 1.7725333333333337e+23\nR&gt; print(-a\/1e15, 17)\n[1] -177253333.33333337\n\nOnly multiplication that actually matters here:\n\nR&gt; a &lt;- 17725333333333334\nR&gt; for (d in c(3,2,6,7,4,4,1)) print(a &lt;- 10*a, 17)\n[1] 177253333333333344\n[1] 1772533333333333504\n[1] 17725333333333336064\n[1] 177253333333333377024\n[1] 1772533333333333770240\n[1] 1.7725333333333338e+22\n[1] 1.7725333333333337e+23\n\nAlso gives the expected result:\n\nR&gt; sprintf(\"%0.15f\", -(17725333333333334 + 3267441\/1e7)\/1e8)\n[1] \"-177253333.333333343267441\"\n\n\nSo, stopping multiplying by 10 at some point may be better.\n\nAs said by <https:\/\/stat.ethz.ch\/pipermail\/r-help\/2025-March\/480631.html> ,\nSQLite code may provide inspiration.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785917817.432269",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "hjoC",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19091] as.numeric on macOS aarch64 rounds \"0.9999999999999999\" to 1.0 instead of the nearest IEEE 754 double",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19091"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #10 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Akitada Kasahara from comment #0)\nOn \"-177253333.333333343267441\":\n\n17725333333333334 can actually be represented exactly by 'double'. Using it\ngives the expected result:\n\nR> sprintf(\"%0.15f\", -17725333333333334\/1e8)\n[1] \"-177253333.333333343267441\"\n\nShift is introduced by further calculations:\n\nR> print(a <- 17725333333333334, 17)\n[1] 17725333333333334\nR> for (d in c(3,2,6,7,4,4,1)) print(a <- 10*a + d, 17)\n[1] 177253333333333344\n[1] 1772533333333333504\n[1] 17725333333333336064\n[1] 177253333333333377024\n[1] 1772533333333333770240\n[1] 1.7725333333333338e+22\n[1] 1.7725333333333337e+23\nR> print(-a\/1e15, 17)\n[1] -177253333.33333337\n\nOnly multiplication that actually matters here:\n\nR> a <- 17725333333333334\nR> for (d in c(3,2,6,7,4,4,1)) print(a <- 10*a, 17)\n[1] 177253333333333344\n[1] 1772533333333333504\n[1] 17725333333333336064\n[1] 177253333333333377024\n[1] 1772533333333333770240\n[1] 1.7725333333333338e+22\n[1] 1.7725333333333337e+23\n\nAlso gives the expected result:\n\nR> sprintf(\"%0.15f\", -(17725333333333334 + 3267441\/1e7)\/1e8)\n[1] \"-177253333.333333343267441\"\n\n\n\nSo, stopping multiplying by 10 at some point may be better.\n\nAs said by "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-help\/2025-March\/480631.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": " ,\nSQLite code may provide inspiration."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19091] as.numeric on macOS aarch64 rounds \"0.9999999999999999\" to 1.0 instead of the nearest IEEE 754 double*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19091>\n\n--- Comment #11 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\n(In reply to Suharto Anggono from comment #10)\nBut, there, \"+ 3267441\/1e7\" is no-op.\n\nBy first approximating the result with a power of 2:\n\nR&gt; r &lt;- 2^27\nR&gt; sprintf(\"%0.15f\", -(r + ((1772533333333333*10 - r*1e8) + 43267441\/1e7)\/1e8))\n[1] \"-177253333.333333343267441\"",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785924968.443399",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "gaq=",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19091] as.numeric on macOS aarch64 rounds \"0.9999999999999999\" to 1.0 instead of the nearest IEEE 754 double",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19091"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #11 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Suharto Anggono from comment #10)\nBut, there, \"+ 3267441\/1e7\" is no-op.\n\nBy first approximating the result with a power of 2:\n\nR> r <- 2^27\nR> sprintf(\"%0.15f\", -(r + ((1772533333333333*10 - r*1e8) + 43267441\/1e7)\/1e8))\n[1] \"-177253333.333333343267441\""
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 16166] inconsistent results of zapsmall called by Thin.row (especially in anova.mlm)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=16166>\n\nPeter Dalgaard (<mailto:pd.mes@cbs.dk|pd.mes@cbs.dk>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|TRIAGED                     |CLOSED\n\n--- Comment #6 from Peter Dalgaard (<mailto:pd.mes@cbs.dk|pd.mes@cbs.dk>) ---\nSuggestion now implemented in R-devel, r90353. (Actually 4 similar spots with\nthis issue.)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785935479.145479",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "JRi7",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 16166] inconsistent results of zapsmall called by Thin.row (especially in anova.mlm)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=16166"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nPeter Dalgaard ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:pd.mes@cbs.dk",
+                                "text": "pd.mes@cbs.dk"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n             Status|TRIAGED                     |CLOSED\n\n--- Comment #6 from Peter Dalgaard ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:pd.mes@cbs.dk",
+                                "text": "pd.mes@cbs.dk"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nSuggestion now implemented in R-devel, r90353. (Actually 4 similar spots with\nthis issue.)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19126] Compilation fails with gcc -Werror=format-security*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19126>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #1 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nI think we mentioned before, that problem with R-devel should *not* be reported\non bugzilla.\n\n.. notably as that is marked as \"in development\" etc..\nIt's been fixed within a few hours, already.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785942650.790909",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "rfqBb",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19126] Compilation fails with gcc -Werror=format-security",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19126"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|UNCONFIRMED                 |CLOSED\n\n--- Comment #1 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI think we mentioned before, that problem with R-devel should "
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " be reported\non bugzilla.\n\n.. notably as that is marked as \"in development\" etc..\nIt's been fixed within a few hours, already."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19126] Compilation fails with gcc -Werror=format-security*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19126>\n\n--- Comment #2 from Gabor Csardi (<mailto:csardi.gabor@gmail.com|csardi.gabor@gmail.com>) ---\nI am sorry about that. \n\nTo avoid making this mistake in the future, maybe you could include this\nwarning when people are reporting bugs. Or at least remote the possibility to\nselect \"R-devel\" for the \"Version\" when reporting bugs. \n\nOtherwise I am sure how you expect people to know about this.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785943215.605969",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "DoB",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19126] Compilation fails with gcc -Werror=format-security",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19126"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Gabor Csardi ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:csardi.gabor@gmail.com",
+                                "text": "csardi.gabor@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI am sorry about that. \n\nTo avoid making this mistake in the future, maybe you could include this\nwarning when people are reporting bugs. Or at least remote the possibility to\nselect \"R-devel\" for the \"Version\" when reporting bugs. \n\nOtherwise I am sure how you expect people to know about this."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19126] Compilation fails with gcc -Werror=format-security*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19126>\n\n--- Comment #3 from Gabor Csardi (<mailto:csardi.gabor@gmail.com|csardi.gabor@gmail.com>) ---\nSorry, correction:\n\nOtherwise I am *not* sure how you expect people to know about this.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785943251.611179",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "nR2Hm",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19126] Compilation fails with gcc -Werror=format-security",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19126"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Gabor Csardi ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:csardi.gabor@gmail.com",
+                                "text": "csardi.gabor@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nSorry, correction:\n\nOtherwise I am "
+                            },
+                            {
+                                "type": "text",
+                                "text": "not",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " sure how you expect people to know about this."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19127] New: Sys.timezone() gives strange error in non-UTF-8 encoding*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19127>\n\n            Bug ID: 19127\n           Summary: Sys.timezone() gives strange error in non-UTF-8\n                    encoding\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: NEW\n          Severity: minor\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>\n\nCreated attachment 3776\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3776&amp;action=edit>\nUse 'timedatectl show' to leverage machine-readable output\n\n```\n# defaults to lv_LV.ISO-8859-13\nLC_TIME=lv_LV R\n\nSys.timezone()\n# Failed to print table: Invalid argument\n# [1] \"Etc\/UTC\"\n# Warning message:\n# In system(\"timedatectl\", intern = TRUE) :\n#   running command 'timedatectl' had status 1\n```\n\nFrom what I understand, that's because `timedatectl` by default invokes\n`timedatectl status`, which ultimately requires UTF-8, but today is Wednesday,\nabbreviated as Tē.\n\nThere is an alternative, `timedatectl show`, which is probably more suitable\nanyway -- it's specifically designed to be machine-readable:\n\n```\nLC_TIME=lv_LV timedatectl show\n# Timezone=Etc\/UTC\n# LocalRTC=no\n# CanNTP=yes\n# NTP=yes\n# NTPSynchronized=yes\n# TimeUSec=Wed 2026-08-05 17:14:46 UTC\n# RTCTimeUSec=Wed 2026-08-05 17:14:46 UTC\n```\n\nThe only downside is it's \"recent\" -- v239 == 2018:\n<https:\/\/github.com\/systemd\/systemd\/releases\/tag\/v239>.\n\nIs that old enough to be used unconditionally? Or perhaps we should add a\nbranch based on whether `timedatectl show` succeeds? For now, I'm keeping the\npatch as simple as possible &amp; removing all the brittle text manipulation.\n\n<https:\/\/man7.org\/linux\/man-pages\/man1\/timedatectl.1.html>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785951240.533649",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "g50",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19127] New: Sys.timezone() gives strange error in non-UTF-8 encoding",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19127"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19127\n           Summary: Sys.timezone() gives strange error in non-UTF-8\n                    encoding\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: NEW\n          Severity: minor\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3776\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3776&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3776&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nUse 'timedatectl show' to leverage machine-readable output\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# defaults to lv_LV.ISO-8859-13\nLC_TIME=lv_LV R\n\nSys.timezone()\n# Failed to print table: Invalid argument\n# [1] \"Etc\/UTC\"\n# Warning message:\n# In system(\"timedatectl\", intern = TRUE) :\n#   running command 'timedatectl' had status 1\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nFrom what I understand, that's because "
+                            },
+                            {
+                                "type": "text",
+                                "text": "timedatectl",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " by default invokes\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "timedatectl status",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which ultimately requires UTF-8, but today is Wednesday,\nabbreviated as Tē.\n\nThere is an alternative, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "timedatectl show",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which is probably more suitable\nanyway -- it's specifically designed to be machine-readable:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "LC_TIME=lv_LV timedatectl show\n# Timezone=Etc\/UTC\n# LocalRTC=no\n# CanNTP=yes\n# NTP=yes\n# NTPSynchronized=yes\n# TimeUSec=Wed 2026-08-05 17:14:46 UTC\n# RTCTimeUSec=Wed 2026-08-05 17:14:46 UTC\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe only downside is it's \"recent\" -- v239 == 2018:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/systemd\/systemd\/releases\/tag\/v239"
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nIs that old enough to be used unconditionally? Or perhaps we should add a\nbranch based on whether "
+                            },
+                            {
+                                "type": "text",
+                                "text": "timedatectl show",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " succeeds? For now, I'm keeping the\npatch as simple as possible & removing all the brittle text manipulation.\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/man7.org\/linux\/man-pages\/man1\/timedatectl.1.html"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

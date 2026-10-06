@@ -1,0 +1,330 @@
+[
+    {
+        "user": "U01F5FZJ4MN",
+        "type": "message",
+        "ts": "1783473913.150589",
+        "edited": {
+            "user": "U01F5FZJ4MN",
+            "ts": "1783475009.000000"
+        },
+        "client_msg_id": "2b3d5e11-7df8-485a-ac79-c3adca353623",
+        "text": "Every time I use the quantile function I really feel it needs to use the names provided to the `probs` argument. So I can do `quantile(x, probs = c(low = 0.05, mid = 0.5, high = 0.95))`  or similar. It should be a relatively straightforward addition, something like this:\n\n```quantile <- function(\n  x,\n  probs = seq(0, 1, 0.25),\n  na.rm = FALSE,\n  names = TRUE,\n  type = 7,\n  digits = 7,\n  fuzz = if (type == 7L) 0 else 4 * .Machine$double.eps,\n  ...\n) {\n  q <- stats::quantile(x, probs, na.rm, names, type, digits, fuzz, ...)\n  if (!names) {\n    return(q)\n  }\n\n  if (is.null(names(probs))) {\n    return(q)\n  }\n\n  names(q) <- ifelse(names(probs) == \"\", names(q), names(probs))\n  q\n}```\nWould this be a good topic for r-dev you think?",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "g9f3e8927ec9",
+            "image_72": "https:\/\/secure.gravatar.com\/avatar\/9f3e8927ec981edfb1dc3320072539cc.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0002-72.png",
+            "first_name": "",
+            "real_name": "Elio",
+            "display_name": "Elio",
+            "team": "T01DW9DLB2A",
+            "name": "eliocampitelli",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1783473913.150589",
+        "reply_count": 2,
+        "reply_users_count": 2,
+        "latest_reply": "1783482140.886549",
+        "reply_users": [
+            "U021X72PVRN",
+            "U01F5FZJ4MN"
+        ],
+        "replies": [
+            {
+                "user": "U021X72PVRN",
+                "ts": "1783480779.798849"
+            },
+            {
+                "user": "U01F5FZJ4MN",
+                "ts": "1783482140.886549"
+            }
+        ],
+        "is_locked": false,
+        "subscribed": true,
+        "last_read": "1783482140.886549",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ckx4c",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Every time I use the quantile function I really feel it needs to use the names provided to the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "probs",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " argument. So I can do "
+                            },
+                            {
+                                "type": "text",
+                                "text": "quantile(x, probs = c(low = 0.05, mid = 0.5, high = 0.95))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "  or similar. It should be a relatively straightforward addition, something like this:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "quantile <- function(\n  x,\n  probs = seq(0, 1, 0.25),\n  na.rm = FALSE,\n  names = TRUE,\n  type = 7,\n  digits = 7,\n  fuzz = if (type == 7L) 0 else 4 * .Machine$double.eps,\n  ...\n) {\n  q <- stats::quantile(x, probs, na.rm, names, type, digits, fuzz, ...)\n  if (!names) {\n    return(q)\n  }\n\n  if (is.null(names(probs))) {\n    return(q)\n  }\n\n  names(q) <- ifelse(names(probs) == \"\", names(q), names(probs))\n  q\n}"
+                            }
+                        ],
+                        "border": 0
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Would this be a good topic for r-dev you think?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "reactions": [
+            {
+                "name": "+1",
+                "users": [
+                    "U03DNG13C3A"
+                ],
+                "count": 1
+            }
+        ]
+    },
+    {
+        "user": "U021X72PVRN",
+        "type": "message",
+        "ts": "1783480779.798849",
+        "client_msg_id": "b82b5329-b9cc-41fc-83cd-b1900cc8d1c5",
+        "text": "Keep in mind that `quantile` is a generic. The implementation of `stats:::quantile.default` looks like it has an opportunity for replacing the names where they're currently set with `names(qs) &lt;- format_perc(probs, digits = digits)` .\n\nI'd consider an even broader improvement of retaining the probs either way, perhaps as an attribute - they can currently be recovered with some string manipulation, but consider\n\n```R&gt; quantile(runif(5), probs = c(1\/3, 2\/3))\n33.33333% 66.66667%\n0.3384649 0.5921896```\nParticularly if you replaced these with arbitrary names, it would be impossible to recover what values were used (aside from the source).\n\nAttributes other than `names` are currently printed, and I doubt a proposal to make a new structure would go anywhere, so for a minimal prototype I used `comment` which doesn't print, but does require a character string, whereas a `language` object itself from `substitute` might not be a bad thing\n\n```quantile2 &lt;- function(x, probs = seq(0, 1, 0.25)) {\n  res &lt;- quantile(x, probs)\n  comment(res) &lt;- deparse(substitute(probs))\n  if (!is.null(names(probs))) {\n    setNames(res, names(probs))\n  } else {\n    res\n  }\n}\n\nvals &lt;- runif(50)\n\nx &lt;- quantile2(vals, probs = c(1\/3, 2\/3))\nx\n#&gt; 33.33333% 66.66667%\n#&gt; 0.4329540 0.6776829\ncomment(x)\n#&gt; [1] \"c(1\/3, 2\/3)\"\n\ny &lt;- quantile2(vals)\ny\n#&gt;         0%        25%        50%        75%       100%\n#&gt; 0.01259037 0.32146006 0.53364646 0.82721406 0.99776432\ncomment(y)\n#&gt; [1] \"seq(0, 1, 0.25)\"\n\nz &lt;- quantile2(vals, probs = c(low = 1\/3, hi = 2\/3))\nz\n#&gt;       low        hi\n#&gt; 0.4329540 0.6776829\ncomment(z)\n#&gt; [1] \"c(low = 1\/3, hi = 2\/3)\"```\nThis still may not be ideal, as passing in variables doesn't resolve to the values, e.g. `probs = c(lo, hi)`.",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "gc96fb19f1c2",
+            "image_72": "https:\/\/secure.gravatar.com\/avatar\/c96fb19f1c22a8c67dbb6db88165e280.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0009-72.png",
+            "first_name": "Jonathan",
+            "real_name": "Jonathan Carroll",
+            "display_name": "Jonathan Carroll",
+            "team": "T01DW9DLB2A",
+            "name": "jono",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1783473913.150589",
+        "parent_user_id": "U01F5FZJ4MN",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "9lANP",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Keep in mind that "
+                            },
+                            {
+                                "type": "text",
+                                "text": "quantile",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is a generic. The implementation of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "stats:::quantile.default",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " looks like it has an opportunity for replacing the names where they're currently set with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "names(qs) <- format_perc(probs, digits = digits)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " .\n\nI'd consider an even broader improvement of retaining the probs either way, perhaps as an attribute - they can currently be recovered with some string manipulation, but consider\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "R> quantile(runif(5), probs = c(1\/3, 2\/3))\n33.33333% 66.66667%\n0.3384649 0.5921896"
+                            }
+                        ],
+                        "border": 0
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nParticularly if you replaced these with arbitrary names, it would be impossible to recover what values were used (aside from the source).\n\nAttributes other than "
+                            },
+                            {
+                                "type": "text",
+                                "text": "names",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " are currently printed, and I doubt a proposal to make a new structure would go anywhere, so for a minimal prototype I used "
+                            },
+                            {
+                                "type": "text",
+                                "text": "comment",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " which doesn't print, but does require a character string, whereas a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "language",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " object itself from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "substitute",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " might not be a bad thing\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "quantile2 <- function(x, probs = seq(0, 1, 0.25)) {\n  res <- quantile(x, probs)\n  comment(res) <- deparse(substitute(probs))\n  if (!is.null(names(probs))) {\n    setNames(res, names(probs))\n  } else {\n    res\n  }\n}\n\nvals <- runif(50)\n\nx <- quantile2(vals, probs = c(1\/3, 2\/3))\nx\n#> 33.33333% 66.66667%\n#> 0.4329540 0.6776829\ncomment(x)\n#> [1] \"c(1\/3, 2\/3)\"\n\ny <- quantile2(vals)\ny\n#>         0%        25%        50%        75%       100%\n#> 0.01259037 0.32146006 0.53364646 0.82721406 0.99776432\ncomment(y)\n#> [1] \"seq(0, 1, 0.25)\"\n\nz <- quantile2(vals, probs = c(low = 1\/3, hi = 2\/3))\nz\n#>       low        hi\n#> 0.4329540 0.6776829\ncomment(z)\n#> [1] \"c(low = 1\/3, hi = 2\/3)\""
+                            }
+                        ],
+                        "border": 0
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\nThis still may not be ideal, as passing in variables doesn't resolve to the values, e.g. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "probs = c(lo, hi)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "reactions": [
+            {
+                "name": "+1",
+                "users": [
+                    "U01KXU8UNRX"
+                ],
+                "count": 1
+            }
+        ]
+    },
+    {
+        "user": "U01F5FZJ4MN",
+        "type": "message",
+        "ts": "1783482140.886549",
+        "client_msg_id": "843a4bd5-4f71-4798-b1ed-c5bfb4db0f8c",
+        "text": "I guess I never though about having to recover the underlying probabilities. That's also a good improvement.\n\nquantile.default has access to the numerical values of the probabilities, so deparse(substitude()) might not be needed if we solve this in quantile.default directly.",
+        "team": "T01DW9DLB2A",
+        "user_team": "T01DW9DLB2A",
+        "source_team": "T01DW9DLB2A",
+        "user_profile": {
+            "avatar_hash": "g9f3e8927ec9",
+            "image_72": "https:\/\/secure.gravatar.com\/avatar\/9f3e8927ec981edfb1dc3320072539cc.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0002-72.png",
+            "first_name": "",
+            "real_name": "Elio",
+            "display_name": "Elio",
+            "team": "T01DW9DLB2A",
+            "name": "eliocampitelli",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "thread_ts": "1783473913.150589",
+        "parent_user_id": "U01F5FZJ4MN",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "c+4nH",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I guess I never though about having to recover the underlying probabilities. That's also a good improvement.\n\nquantile.default has access to the numerical values of the probabilities, so deparse(substitude()) might not be needed if we solve this in quantile.default directly."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

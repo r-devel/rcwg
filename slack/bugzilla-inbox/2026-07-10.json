@@ -1,0 +1,244 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18468] stats::dummy.coef fails with back ticked variable names*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18468>\n\n--- Comment #6 from Vincent Arel-Bundock (<mailto:vincent.arel-bundock@umontreal.ca|vincent.arel-bundock@umontreal.ca>) ---\nCreated attachment 3753\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3753&amp;action=edit>\nfix stats::dummy.coef with non-standard names (Version 2)\n\nVersion 2 of the proposed patch I posted above, with minor fixes to a test and\nNEWS entry. Apologies for the duplication.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1783695671.631899",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "DUq",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18468] stats::dummy.coef fails with back ticked variable names",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18468"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #6 from Vincent Arel-Bundock ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:vincent.arel-bundock@umontreal.ca",
+                                "text": "vincent.arel-bundock@umontreal.ca",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3753\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3753&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3753&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nfix stats::dummy.coef with non-standard names (Version 2)\n\nVersion 2 of the proposed patch I posted above, with minor fixes to a test and\nNEWS entry. Apologies for the duplication."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18341] aov() with constant data returns different p-values depending on sample size &amp; balancedness*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18341>\n\nDeepansh Khurana (<mailto:deepanshkhurana@outlook.com|deepanshkhurana@outlook.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |deepanshkhurana@outlook.com\n                   |                            |, <mailto:stefan.linner97@gmail.com|stefan.linner97@gmail.com>\n\n--- Comment #4 from Deepansh Khurana (<mailto:deepanshkhurana@outlook.com|deepanshkhurana@outlook.com>) ---\n# Patch \n\n```\nIndex: src\/library\/stats\/R\/aov.R\n===================================================================\n--- src\/library\/stats\/R\/aov.R   (revision 90228)\n+++ src\/library\/stats\/R\/aov.R   (working copy)\n@@ -299,6 +299,8 @@\n     nmeffect &lt;- c(\"(Intercept)\", attr(object$terms, \"term.labels\"))\n     coef &lt;- as.matrix(object$coefficients)\n     resid &lt;- as.matrix(object$residuals)\n+    fit &lt;- as.matrix(object$fitted.values)\n+    if (!is.null(object$offset)) fit &lt;- (fit - object$offset)\n     wt &lt;- object$weights\n     if(!is.null(wt)) resid &lt;- resid * sqrt(wt)\n     nresp &lt;- NCOL(resid)\n@@ -333,7 +335,7 @@\n             ns &lt;- names(split)\n         }\n     }\n-\n+    perfect.fit &lt;- logical(nresp)\n     for (y in 1L:nresp) {\n         if(is.null(effects)) {\n             nterms &lt;- 0L\n@@ -361,7 +363,13 @@\n         }\n         if(rdf &gt; 0L) {\n             df &lt;- c(df, rdf)\n-            ss &lt;- c(ss, sum(resid[, y]^2))\n+            rss &lt;- sum(resid[, y]^2)\n+            ss &lt;- c(ss, rss)\n+            resvar &lt;- rss \/ rdf\n+            fitted &lt;- fit[, y]\n+            if (is.finite(resvar) &amp;&amp; resvar &lt; (mean(fitted)^2 +\nvar(c(fitted))) * 1e-30) {\n+              perfect.fit[y] &lt;- TRUE\n+            }\n             nmrows &lt;- c(nmrows,  \"Residuals\")\n         }\n         nt &lt;- length(df)\n@@ -382,6 +390,14 @@\n         if(!intercept &amp;&amp; pm &gt; 0L) x &lt;- x[-pm ,]\n         ans[[y]] &lt;- x\n     }\n+  if (any(perfect.fit)) {\n+    response.names &lt;- colnames(resid)\n+    if (is.null(response.names)) response.names &lt;-\nas.character(seq_len(nresp))\n+    targets &lt;- paste(sQuote(response.names[perfect.fit]), collapse = \", \")\n+    warning(ngettext(nresp, \"essentially perfect fit: summary may be\nunreliable\",\n+      sprintf(\"essentially perfect fit for response(s) %s: summary may be\nunreliable\", targets))\n+    )\n+  }\n     class(ans) &lt;- c(\"summary.aov\", \"listof\")\n     attr(ans, \"na.action\") &lt;- object$na.action\n     ans\nIndex: tests\/reg-tests-1d.R\n===================================================================\n--- tests\/reg-tests-1d.R        (revision 90228)\n+++ tests\/reg-tests-1d.R        (working copy)\n@@ -3874,7 +3874,24 @@\n stopifnot(all.equal(cf1, cfL))\n ## mkAov(nLng)  failed in R &lt;= 4.0.0\n\n+# Tests warning message for almost perfect fit in summary.aov()\n+d30 &lt;- data.frame(group = gl(2, 15), weight = 1, height = 1)\n+fmL &lt;- lm(cbind(weight, height) ~ group, data = d30)\n+fmA &lt;- aov(cbind(weight, height) ~ group, data = d30)\n+stopifnot(identical(coef(fmA), coef(fmL)))\n+(smA &lt;- getVaW(summary(fmA)))\n+if(englishMsgs)\n+    stopifnot(grepl(\"essentially perfect fit\", attr(smA, \"warning\")))\n\n+d30 &lt;- data.frame(x=gl(2, 15), y=1)\n+fmL &lt;- lm(y~x, data=d30)\n+fmA &lt;- aov(y~x, data=d30)\n+stopifnot(identical(coef(fmA), coef(fmL)))\n+(smA &lt;- getVaW(summary(fmA)))\n+if(englishMsgs)\n+    stopifnot(grepl(\"essentially perfect fit\", attr(smA, \"warning\")))\n+\n+\n ## UTF8 validity checking internal in R (from PCRE, PR#17755)\n ## This is the byte representation of U+D800 (a part of a surrogate\n ## pair) in UTF-8, but do not rely on parser (which on some platforms\n```\n\n# Contributors\n\nDeepansh Khurana (deepanshkhurana), Oscar de Leon (), Stefan Linner ()",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1783696309.825939",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "LiZRt",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18341] aov() with constant data returns different p-values depending on sample size & balancedness",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18341"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nDeepansh Khurana ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:deepanshkhurana@outlook.com",
+                                "text": "deepanshkhurana@outlook.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |deepanshkhurana@outlook.com\n                   |                            |, "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:stefan.linner97@gmail.com",
+                                "text": "stefan.linner97@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Deepansh Khurana ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:deepanshkhurana@outlook.com",
+                                "text": "deepanshkhurana@outlook.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n# Patch \n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/stats\/R\/aov.R\n===================================================================\n--- src\/library\/stats\/R\/aov.R   (revision 90228)\n+++ src\/library\/stats\/R\/aov.R   (working copy)\n@@ -299,6 +299,8 @@\n     nmeffect <- c(\"(Intercept)\", attr(object$terms, \"term.labels\"))\n     coef <- as.matrix(object$coefficients)\n     resid <- as.matrix(object$residuals)\n+    fit <- as.matrix(object$fitted.values)\n+    if (!is.null(object$offset)) fit <- (fit - object$offset)\n     wt <- object$weights\n     if(!is.null(wt)) resid <- resid * sqrt(wt)\n     nresp <- NCOL(resid)\n@@ -333,7 +335,7 @@\n             ns <- names(split)\n         }\n     }\n-\n+    perfect.fit <- logical(nresp)\n     for (y in 1L:nresp) {\n         if(is.null(effects)) {\n             nterms <- 0L\n@@ -361,7 +363,13 @@\n         }\n         if(rdf > 0L) {\n             df <- c(df, rdf)\n-            ss <- c(ss, sum(resid[, y]^2))\n+            rss <- sum(resid[, y]^2)\n+            ss <- c(ss, rss)\n+            resvar <- rss \/ rdf\n+            fitted <- fit[, y]\n+            if (is.finite(resvar) && resvar < (mean(fitted)^2 +\nvar(c(fitted))) * 1e-30) {\n+              perfect.fit[y] <- TRUE\n+            }\n             nmrows <- c(nmrows,  \"Residuals\")\n         }\n         nt <- length(df)\n@@ -382,6 +390,14 @@\n         if(!intercept && pm > 0L) x <- x[-pm ,]\n         ans[[y]] <- x\n     }\n+  if (any(perfect.fit)) {\n+    response.names <- colnames(resid)\n+    if (is.null(response.names)) response.names <-\nas.character(seq_len(nresp))\n+    targets <- paste(sQuote(response.names[perfect.fit]), collapse = \", \")\n+    warning(ngettext(nresp, \"essentially perfect fit: summary may be\nunreliable\",\n+      sprintf(\"essentially perfect fit for response(s) %s: summary may be\nunreliable\", targets))\n+    )\n+  }\n     class(ans) <- c(\"summary.aov\", \"listof\")\n     attr(ans, \"na.action\") <- object$na.action\n     ans\nIndex: tests\/reg-tests-1d.R\n===================================================================\n--- tests\/reg-tests-1d.R        (revision 90228)\n+++ tests\/reg-tests-1d.R        (working copy)\n@@ -3874,7 +3874,24 @@\n stopifnot(all.equal(cf1, cfL))\n ## mkAov(nLng)  failed in R <= 4.0.0\n\n+# Tests warning message for almost perfect fit in summary.aov()\n+d30 <- data.frame(group = gl(2, 15), weight = 1, height = 1)\n+fmL <- lm(cbind(weight, height) ~ group, data = d30)\n+fmA <- aov(cbind(weight, height) ~ group, data = d30)\n+stopifnot(identical(coef(fmA), coef(fmL)))\n+(smA <- getVaW(summary(fmA)))\n+if(englishMsgs)\n+    stopifnot(grepl(\"essentially perfect fit\", attr(smA, \"warning\")))\n\n+d30 <- data.frame(x=gl(2, 15), y=1)\n+fmL <- lm(y~x, data=d30)\n+fmA <- aov(y~x, data=d30)\n+stopifnot(identical(coef(fmA), coef(fmL)))\n+(smA <- getVaW(summary(fmA)))\n+if(englishMsgs)\n+    stopifnot(grepl(\"essentially perfect fit\", attr(smA, \"warning\")))\n+\n+\n ## UTF8 validity checking internal in R (from PCRE, PR#17755)\n ## This is the byte representation of U+D800 (a part of a surrogate\n ## pair) in UTF-8, but do not rely on parser (which on some platforms\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n# Contributors\n\nDeepansh Khurana (deepanshkhurana), Oscar de Leon (), Stefan Linner ()"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18341] aov() with constant data returns different p-values depending on sample size &amp; balancedness*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18341>\n\n--- Comment #5 from Deepansh Khurana (<mailto:deepanshkhurana@outlook.com|deepanshkhurana@outlook.com>) ---\nCreated attachment 3754\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3754&amp;action=edit>\nPatch for solving the issue\n\nHello,\n\n[Please ignore the previous comment (I can't edit it now). It seems that when\nwe pressed the return key while adding\/tagging Stefan and Oscar to the bugzilla\npage before we left the Dev Day room, it also submitted the partially typed\ncomment. If possible, please feel free to remove the previous comment.]\n\nThe proper patch file is now attached to this comment.\n\nSubmitted by: Stefan Linner (<mailto:stefan.linner97@gmail.com|stefan.linner97@gmail.com>), Oscar de Leon\n(<mailto:odeleon@alumni.emory.edu|odeleon@alumni.emory.edu>), Deepansh Khurana (<mailto:deepanshkhurana@outlook.com|deepanshkhurana@outlook.com>)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1783700370.695629",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "xYDpJ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18341] aov() with constant data returns different p-values depending on sample size & balancedness",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18341"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Deepansh Khurana ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:deepanshkhurana@outlook.com",
+                                "text": "deepanshkhurana@outlook.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3754\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3754&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3754&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nPatch for solving the issue\n\nHello,\n\n[Please ignore the previous comment (I can't edit it now). It seems that when\nwe pressed the return key while adding\/tagging Stefan and Oscar to the bugzilla\npage before we left the Dev Day room, it also submitted the partially typed\ncomment. If possible, please feel free to remove the previous comment.]\n\nThe proper patch file is now attached to this comment.\n\nSubmitted by: Stefan Linner ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:stefan.linner97@gmail.com",
+                                "text": "stefan.linner97@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "), Oscar de Leon\n("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:odeleon@alumni.emory.edu",
+                                "text": "odeleon@alumni.emory.edu",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "), Deepansh Khurana ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:deepanshkhurana@outlook.com",
+                                "text": "deepanshkhurana@outlook.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ")"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

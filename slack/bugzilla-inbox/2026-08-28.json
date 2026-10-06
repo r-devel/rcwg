@@ -1,0 +1,303 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19144] New: wilcox.test(exact=TRUE) can return p-values outside [0,1] with a zero difference*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19144>\n\n            Bug ID: 19144\n           Summary: wilcox.test(exact=TRUE) can return p-values outside\n                    [0,1] with a zero difference\n           Product: R\n           Version: R 4.6.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Linux-Ubuntu\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Accuracy\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:tasuku.kobayashi@gmail.com|tasuku.kobayashi@gmail.com>\n\nIn R 4.6.0, R 4.6.1, and current R-devel, the one-sample exact path of\nwilcox.test() can return finite p-values outside [0, 1] when the sample\ncontains a zero difference.\n\nI reproduced this on the official R SVN trunk revision r90451, built from\nsource and run under Rscript --vanilla on x86_64-pc-linux-gnu. The method\nreported by R was \"Wilcoxon signed rank exact test\", there were no warnings,\nand repeated calls were bitwise identical.\n\nDeterministic reproducer (n = 100 integers, exactly one zero):\n\n    x &lt;- c(52,49,65,23,-30,67,31,79,35,7,94,75,58,50,97,-1,73,37,46,\n           34,-54,78,66,70,15,76,3,82,42,5,17,51,88,12,89,22,56,64,43,\n           28,25,48,-33,8,53,36,60,32,91,24,96,18,-71,-27,45,99,77,69,\n           26,68,57,95,40,98,72,86,6,16,0,93,90,38,59,14,47,19,-41,84,\n           92,63,39,87,9,80,10,85,20,62,13,21,83,4,11,44,81,55,2,61,\n           -29,74)\n\n    for (alt in c(\"two.sided\", \"greater\", \"less\")) {\n        p &lt;- wilcox.test(x, exact = TRUE, alternative = alt)$p.value\n        cat(alt, format(p, digits = 17), \"\\n\")\n    }\n\nObserved on R-devel r90451 (the same displayed values were observed in\nR 4.6.0 and 4.6.1):\n\n    two.sided  -7.5495165674510645e-15\n    greater    -3.7747582837255322e-15\n    less        1.0000000000000038\n\nExpected: every p-value must lie in [0, 1].\n\nThree separately implemented exact-arithmetic lineages agreed on the\nconditional zero-preserving signed-rank distribution. The exact reference\nvalues are:\n\n    greater =\n      409667043355 \/ 316912650057057350374175801344\n      -&gt; correctly rounded binary64: 1.2926812586409632e-18\n\n    two.sided =\n      409667043355 \/ 158456325028528675187087900672\n      -&gt; correctly rounded binary64: 2.5853625172819263e-18\n\n    less =\n      158456325028528674992491941179 \/\n      158456325028528675187087900672\n      -&gt; correctly rounded binary64: 1.0\n\nThe signed-rank statistic is 4755 in both R and the exact computations.\n\nReporter-side numerical diagnostic (not an R Core root-cause\nattribution): for this input, the floating mass function constructed by\n.dsignrank() sums to 1.0000000000000038. The CDF used by .psignrank()\nhas the same value. The following identities reproduce the reported\noutputs bit-for-bit:\n\n    greater   = 1 - CDF\n    less      = CDF\n    two.sided = 2 * (1 - CDF)\n\nThe normalization excess is about 2920 times the exact positive upper\ntail, so the complement becomes negative. Summing the floating upper\ntail directly instead gives 1.2926812586409682e-18, which stays in\n[0,1] but is 26 ULP from the correctly rounded exact value.\n\nThis also means that a final clamp alone is only a domain guard: for this\nreproducer it would turn the negative upper tail into zero, although the\nexact upper tail is strictly positive. I have not assumed a preferred\ncomplete repair. I can prepare an SVN diff after maintainer guidance on\nthe intended numerical strategy.\n\nFor comparison, the same calls in my tested R 4.4.3 environment returned\nin-range values through the older behavior, which removed the zero and\nused the asymptotic path. In the tested versions, the out-of-domain behavior\nis present from R 4.6.0 onward and is not present in R 4.4.3, which follows a\ndifferent fallback path.\n\nR-devel identity:\n\n    R Under development (unstable) (2026-08-27 r90451)\n    Platform: x86_64-pc-linux-gnu",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1787902666.322769",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "s4Wx",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19144] New: wilcox.test(exact=TRUE) can return p-values outside [0,1] with a zero difference",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19144"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19144\n           Summary: wilcox.test(exact=TRUE) can return p-values outside\n                    [0,1] with a zero difference\n           Product: R\n           Version: R 4.6.x\n          Hardware: x86_64\/x64\/amd64 (64-bit)\n                OS: Linux-Ubuntu\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Accuracy\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:tasuku.kobayashi@gmail.com",
+                                "text": "tasuku.kobayashi@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIn R 4.6.0, R 4.6.1, and current R-devel, the one-sample exact path of\nwilcox.test() can return finite p-values outside [0, 1] when the sample\ncontains a zero difference.\n\nI reproduced this on the official R SVN trunk revision r90451, built from\nsource and run under Rscript --vanilla on x86_64-pc-linux-gnu. The method\nreported by R was \"Wilcoxon signed rank exact test\", there were no warnings,\nand repeated calls were bitwise identical.\n\nDeterministic reproducer (n = 100 integers, exactly one zero):\n\n    x <- c(52,49,65,23,-30,67,31,79,35,7,94,75,58,50,97,-1,73,37,46,\n           34,-54,78,66,70,15,76,3,82,42,5,17,51,88,12,89,22,56,64,43,\n           28,25,48,-33,8,53,36,60,32,91,24,96,18,-71,-27,45,99,77,69,\n           26,68,57,95,40,98,72,86,6,16,0,93,90,38,59,14,47,19,-41,84,\n           92,63,39,87,9,80,10,85,20,62,13,21,83,4,11,44,81,55,2,61,\n           -29,74)\n\n    for (alt in c(\"two.sided\", \"greater\", \"less\")) {\n        p <- wilcox.test(x, exact = TRUE, alternative = alt)$p.value\n        cat(alt, format(p, digits = 17), \"\\n\")\n    }\n\nObserved on R-devel r90451 (the same displayed values were observed in\nR 4.6.0 and 4.6.1):\n\n    two.sided  -7.5495165674510645e-15\n    greater    -3.7747582837255322e-15\n    less        1.0000000000000038\n\nExpected: every p-value must lie in [0, 1].\n\nThree separately implemented exact-arithmetic lineages agreed on the\nconditional zero-preserving signed-rank distribution. The exact reference\nvalues are:\n\n    greater =\n      409667043355 \/ 316912650057057350374175801344\n      -> correctly rounded binary64: 1.2926812586409632e-18\n\n    two.sided =\n      409667043355 \/ 158456325028528675187087900672\n      -> correctly rounded binary64: 2.5853625172819263e-18\n\n    less =\n      158456325028528674992491941179 \/\n      158456325028528675187087900672\n      -> correctly rounded binary64: 1.0\n\nThe signed-rank statistic is 4755 in both R and the exact computations.\n\nReporter-side numerical diagnostic (not an R Core root-cause\nattribution): for this input, the floating mass function constructed by\n.dsignrank() sums to 1.0000000000000038. The CDF used by .psignrank()\nhas the same value. The following identities reproduce the reported\noutputs bit-for-bit:\n\n    greater   = 1 - CDF\n    less      = CDF\n    two.sided = 2 * (1 - CDF)\n\nThe normalization excess is about 2920 times the exact positive upper\ntail, so the complement becomes negative. Summing the floating upper\ntail directly instead gives 1.2926812586409682e-18, which stays in\n[0,1] but is 26 ULP from the correctly rounded exact value.\n\nThis also means that a final clamp alone is only a domain guard: for this\nreproducer it would turn the negative upper tail into zero, although the\nexact upper tail is strictly positive. I have not assumed a preferred\ncomplete repair. I can prepare an SVN diff after maintainer guidance on\nthe intended numerical strategy.\n\nFor comparison, the same calls in my tested R 4.4.3 environment returned\nin-range values through the older behavior, which removed the zero and\nused the asymptotic path. In the tested versions, the out-of-domain behavior\nis present from R 4.6.0 onward and is not present in R 4.4.3, which follows a\ndifferent fallback path.\n\nR-devel identity:\n\n    R Under development (unstable) (2026-08-27 r90451)\n    Platform: x86_64-pc-linux-gnu"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19124] strptime() fails to parse %w of '0' in LC_CTYPE=C*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19124>\n\n--- Comment #2 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\n(In reply to Michael Chirico from comment #0)\nWith `%U`, week 1 starts at the first Sunday. So, Sunday of week 0 doesn't\nexist. In fact,\n\n    strftime(\"2026-01-04\", \"%Y %U %w\")\n\ngives `\"2026 01 0\"`.\n\nOn the other hand,\n\n    strftime(\"2026-01-04\", \"%W\")\n\ngives `\"00\"`.\n\nThe added code in `w_strptime_internal`, which is supposed to fix Bug 15195, is\nwrong.\n\nIn the formula, `save_wday - w_offset` part is supposed to mean how many days\n_ahead of_ `w_offset`.\n\n          if(tm-&gt;tm_yday &lt; 0) tm-&gt;tm_yday += 7;\n\nshould be\n\n          if(save_wday - w_offset &lt; 0) tm-&gt;tm_yday += 7;\n\n.\n\nAlternatively, discard it entirely, but replace\n\n    save_wday - w_offset\n\nin the formula with\n\n    (save_wday - w_offset + 7) % 7\n\n.\n\n    strptime(paste(\"2026\", c(\"00\", \"01\"), \"0\"), \"%Y %W %w\")\n\nshould be one week apart, `2026-01-04` and `2026-01-11`.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1787934733.701409",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "l8XK",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19124] strptime() fails to parse %w of '0' in LC_CTYPE=C",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19124"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Michael Chirico from comment #0)\nWith "
+                            },
+                            {
+                                "type": "text",
+                                "text": "%U",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", week 1 starts at the first Sunday. So, Sunday of week 0 doesn't\nexist. In fact,\n\n    strftime(\"2026-01-04\", \"%Y %U %w\")\n\ngives "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"2026 01 0\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nOn the other hand,\n\n    strftime(\"2026-01-04\", \"%W\")\n\ngives "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"00\"",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nThe added code in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "w_strptime_internal",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", which is supposed to fix Bug 15195, is\nwrong.\n\nIn the formula, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "save_wday - w_offset",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " part is supposed to mean how many days\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "ahead of",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " "
+                            },
+                            {
+                                "type": "text",
+                                "text": "w_offset",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n          if(tm->tm_yday < 0) tm->tm_yday += 7;\n\nshould be\n\n          if(save_wday - w_offset < 0) tm->tm_yday += 7;\n\n.\n\nAlternatively, discard it entirely, but replace\n\n    save_wday - w_offset\n\nin the formula with\n\n    (save_wday - w_offset + 7) % 7\n\n.\n\n    strptime(paste(\"2026\", c(\"00\", \"01\"), \"0\"), \"%Y %W %w\")\n\nshould be one week apart, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "2026-01-04",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "2026-01-11",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19143] `Sys.getlocale()` does not mark non-ASCII Windows locale names as UTF-8*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19143>\n\nKevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3804|0                           |1\n        is obsolete|                            |\n   Attachment #3805|0                           |1\n        is obsolete|                            |\n\n--- Comment #9 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nCreated attachment 3806\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3806&amp;action=edit>\nCandidate patch.\n\nNow with a fully fleshed-out fix, including sanity for the non-Windows side.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1787946235.928519",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "rZ=U",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19143] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "Sys.getlocale()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does not mark non-ASCII Windows locale names as UTF-8",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19143"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nKevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3804|0                           |1\n        is obsolete|                            |\n   Attachment #3805|0                           |1\n        is obsolete|                            |\n\n--- Comment #9 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3806\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3806&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3806&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCandidate patch.\n\nNow with a fully fleshed-out fix, including sanity for the non-Windows side."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,422 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19114] New: poison free small-node data to catch use of collected objects*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19114>\n\n            Bug ID: 19114\n           Summary: poison free small-node data to catch use of collected\n                    objects\n           Product: R\n           Version: R 4.6.x\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nCreated attachment 3765\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3765&amp;action=edit>\nCandidate patch.\n\nThis patch provided an additional mechanism for identifying usages of\nunprotected objects, via ASan's support for \"poisoning\" of memory regions.\n\nIn short, once a memory region has been \"poisoned\", ASan can then report an\nerror if that memory region is accessed or used. This is primarily helpful in\nidentifying usages of unprotected (or already-freed) R objects, which might\notherwise be challenging to isolate via e.g. `gctorture()`.\n\nWith R configured as `CC=\"clang -fsanitize=address\"\nCFLAGS=\"-fno-omit-frame-pointer -g -O2\" MAIN_LDFLAGS=-fsanitize=address` (no\nstrict barrier needed), running this under `gctorture(TRUE)`:\n\n```\nSEXP C_uaf(void)\n{\n    SEXP x = allocVector(REALSXP, 3);\n    REAL(x)[0] = 42.0;\n    SEXP y = PROTECT(allocVector(REALSXP, 100)); \/* x not protected *\/\n    double d = REAL(x)[0];  \/* use after collection *\/\n    REAL(y)[0] = d;\n    UNPROTECT(1);\n    return y;\n}\n```\n\nproduces an immediate report with the exact faulting access:\n\n```\n==13131==ERROR: AddressSanitizer: use-after-poison on address 0x625001a5b938\n...\n    #0 0x000101d7d2f4 in C_uaf uaf.c:13\n    #1 0x00010105ec10 in R_doDotCall dotcode.c:751\n    #2 0x00010106feb0 in do_dotcall dotcode.c:1437\n    #3 0x0001010f1ab0 in Rf_eval eval.c:1258\n    ...\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785618440.691719",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "eLj",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19114] New: poison free small-node data to catch use of collected objects",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19114"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19114\n           Summary: poison free small-node data to catch use of collected\n                    objects\n           Product: R\n           Version: R 4.6.x\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3765\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3765&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3765&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCandidate patch.\n\nThis patch provided an additional mechanism for identifying usages of\nunprotected objects, via ASan's support for \"poisoning\" of memory regions.\n\nIn short, once a memory region has been \"poisoned\", ASan can then report an\nerror if that memory region is accessed or used. This is primarily helpful in\nidentifying usages of unprotected (or already-freed) R objects, which might\notherwise be challenging to isolate via e.g. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "gctorture()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nWith R configured as `CC=\"clang -fsanitize=address\"\nCFLAGS=\"-fno-omit-frame-pointer -g -O2\" MAIN_LDFLAGS=-fsanitize=address` (no\nstrict barrier needed), running this under "
+                            },
+                            {
+                                "type": "text",
+                                "text": "gctorture(TRUE)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "SEXP C_uaf(void)\n{\n    SEXP x = allocVector(REALSXP, 3);\n    REAL(x)[0] = 42.0;\n    SEXP y = PROTECT(allocVector(REALSXP, 100)); \/* x not protected *\/\n    double d = REAL(x)[0];  \/* use after collection *\/\n    REAL(y)[0] = d;\n    UNPROTECT(1);\n    return y;\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nproduces an immediate report with the exact faulting access:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "==13131==ERROR: AddressSanitizer: use-after-poison on address 0x625001a5b938\n...\n    #0 0x000101d7d2f4 in C_uaf uaf.c:13\n    #1 0x00010105ec10 in R_doDotCall dotcode.c:751\n    #2 0x00010106feb0 in do_dotcall dotcode.c:1437\n    #3 0x0001010f1ab0 in Rf_eval eval.c:1258\n    ...\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19115] New: `do_pmatch()` never protects its hash table*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19115>\n\n            Bug ID: 19115\n           Summary: `do_pmatch()` never protects its hash table\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nCreated attachment 3766\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3766&amp;action=edit>\nCandidate patch.\n\nTo reproduce:\n\n```\nn   &lt;- 101L                                   # &gt; 100 on both sides\npad &lt;- rawToChar(as.raw(rep(0xe9, 500)))      # 500 high bytes, unmarked\ntab &lt;- paste0(pad, sprintf(\"%04d\", seq_len(n)))\nEncoding(tab) &lt;- rep(\"latin1\", n)             # declared encoding =&gt; useUTF8\ngctorture(TRUE)\npmatch(tab, tab)\n```\n\nThis gives me a crash with R 4.6.1 on macOS:\n\n```\n&gt; n   &lt;- 101L                                   # &gt; 100 on both sides\npad &lt;- rawToChar(as.raw(rep(0xe9, 500)))      # 500 high bytes, unmarked\ntab &lt;- paste0(pad, sprintf(\"%04d\", seq_len(n)))\nEncoding(tab) &lt;- rep(\"latin1\", n)             # declared encoding =&gt; useUTF8\ngctorture(TRUE)\npmatch(tab, tab)&gt; pad &lt;- rawToChar(as.raw(rep(0xe9, 500)))      # 500 high\nbytes, unmarked\n&gt; tab &lt;- paste0(pad, sprintf(\"%04d\", seq_len(n)))\n&gt; Encoding(tab) &lt;- rep(\"latin1\", n)             # declared encoding =&gt; useUTF8\n&gt; gctorture(TRUE)\n&gt; pmatch(tab, tab)\n\n *** caught bus error ***\naddress 0xbb4642130, cause 'invalid alignment'\n\nTraceback:\n 1: pmatch(tab, tab)\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785630331.232919",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "\/sqbo",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19115] New: ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_pmatch()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " never protects its hash table",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19115"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19115\n           Summary: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_pmatch()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " never protects its hash table\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3766\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3766&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3766&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCandidate patch.\n\nTo reproduce:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "n   <- 101L                                   # > 100 on both sides\npad <- rawToChar(as.raw(rep(0xe9, 500)))      # 500 high bytes, unmarked\ntab <- paste0(pad, sprintf(\"%04d\", seq_len(n)))\nEncoding(tab) <- rep(\"latin1\", n)             # declared encoding => useUTF8\ngctorture(TRUE)\npmatch(tab, tab)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis gives me a crash with R 4.6.1 on macOS:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> n   <- 101L                                   # > 100 on both sides\npad <- rawToChar(as.raw(rep(0xe9, 500)))      # 500 high bytes, unmarked\ntab <- paste0(pad, sprintf(\"%04d\", seq_len(n)))\nEncoding(tab) <- rep(\"latin1\", n)             # declared encoding => useUTF8\ngctorture(TRUE)\npmatch(tab, tab)> pad <- rawToChar(as.raw(rep(0xe9, 500)))      # 500 high\nbytes, unmarked\n> tab <- paste0(pad, sprintf(\"%04d\", seq_len(n)))\n> Encoding(tab) <- rep(\"latin1\", n)             # declared encoding => useUTF8\n> gctorture(TRUE)\n> pmatch(tab, tab)\n\n *** caught bus error ***\naddress 0xbb4642130, cause 'invalid alignment'\n\nTraceback:\n 1: pmatch(tab, tab)\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19116] New: &lt;matrix&gt;[[i, j]]: stochastic error with negative i*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19116>\n\n            Bug ID: 19116\n           Summary: &lt;matrix&gt;[[i, j]]: stochastic error with negative i\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nCreated attachment 3767\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3767&amp;action=edit>\nCandidate patch.\n\nTo reproduce:\n\n```\nm &lt;- matrix(1:4, 2)\n\nmm &lt;- m; mm[[-1, 1]] &lt;- 99L\nmm[, 1]\n\n## `[[` reads an uninitialized int in the same argument position:\nres &lt;- replicate(200, {\n  invisible(lapply(1:200, function(i) c(2L, 2L)))   # churn the heap\n  tryCatch(as.character(m[[-1, 1]]), error = function(e) \"&lt;error&gt;\")\n})\ntable(res)\n```\n\nThis gives me:\n\n```\n&gt; mm &lt;- m; mm[[-1, 1]] &lt;- 99L\n&gt; mm[, 1]\n[1]  1 99\n&gt;\n&gt; ## `[[` reads an uninitialized int in the same argument position:\n&gt; res &lt;- replicate(200, {\n+   invisible(lapply(1:200, function(i) c(2L, 2L)))   # churn the heap\n+   tryCatch(as.character(m[[-1, 1]]), error = function(e) \"&lt;error&gt;\")\n+ })\n&gt; table(res)\nres\n&lt;error&gt;       2\n    173      27\n```\n\nbut note that the number of errors here isn't deterministic.\n\nFrom what I can see, the issue here arises because of the use of `pindx`\ninstead of `pdims` in the invocation of `get1index()`. Note that the same loop\nform is used in `do_subassign2_dflt()` (`subassign.c:1897-1911`), but with\n`pdims[i]` passed instead, so I suspect this is a long-standing typo.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785631569.406069",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "GYR",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19116] New: <matrix>[[i, j]]: stochastic error with negative i",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19116"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19116\n           Summary: <matrix>[[i, j]]: stochastic error with negative i\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3767\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3767&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3767&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCandidate patch.\n\nTo reproduce:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "m <- matrix(1:4, 2)\n\nmm <- m; mm[[-1, 1]] <- 99L\nmm[, 1]\n\n## `[[` reads an uninitialized int in the same argument position:\nres <- replicate(200, {\n  invisible(lapply(1:200, function(i) c(2L, 2L)))   # churn the heap\n  tryCatch(as.character(m[[-1, 1]]), error = function(e) \"<error>\")\n})\ntable(res)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis gives me:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> mm <- m; mm[[-1, 1]] <- 99L\n> mm[, 1]\n[1]  1 99\n>\n> ## `[[` reads an uninitialized int in the same argument position:\n> res <- replicate(200, {\n+   invisible(lapply(1:200, function(i) c(2L, 2L)))   # churn the heap\n+   tryCatch(as.character(m[[-1, 1]]), error = function(e) \"<error>\")\n+ })\n> table(res)\nres\n<error>       2\n    173      27\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nbut note that the number of errors here isn't deterministic.\n\nFrom what I can see, the issue here arises because of the use of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pindx",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\ninstead of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "pdims",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in the invocation of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "get1index()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". Note that the same loop\nform is used in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "do_subassign2_dflt()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "subassign.c:1897-1911",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), but with\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "pdims[i]",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " passed instead, so I suspect this is a long-standing typo."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

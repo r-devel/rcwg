@@ -1,0 +1,487 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18341] aov() with constant data returns different p-values depending on sample size &amp; balancedness*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18341>\n\n--- Comment #7 from Deepansh Khurana (<mailto:deepanshkhurana@outlook.com|deepanshkhurana@outlook.com>) ---\n(In reply to Benjamin Tyner from comment #6)\nI agree with your point of view here, Benjamin. We are adding two quantities\nthat maybe shouldn't be added. The same approach is in `lm.R` for a similar\nfunction, so we brought it over.\n\nFor context, the `lm.R` version:\n\n```\nif (is.finite(resvar) &amp;&amp;\n        resvar &lt; (mean(f)^2 + var(c(f))) * 1e-30)  # a few times\n.Machine$double.eps^2\n        warning(\"essentially perfect fit: summary may be unreliable\")\n```\n\nThe comment in `lm.R` suggests this codifies the same thing, but I like the\nmore explicit solution you shared.\n\nDo you suggest we resolve it in both `aov.R` and `lm.R` here, or we first close\nthis and then branch off into a new issue to fix this for both?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1784028256.106189",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "f4MX",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18341] aov() with constant data returns different p-values depending on sample size & balancedness",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18341"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #7 from Deepansh Khurana ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:deepanshkhurana@outlook.com",
+                                "text": "deepanshkhurana@outlook.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Benjamin Tyner from comment #6)\nI agree with your point of view here, Benjamin. We are adding two quantities\nthat maybe shouldn't be added. The same approach is in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lm.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for a similar\nfunction, so we brought it over.\n\nFor context, the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lm.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " version:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "if (is.finite(resvar) &&\n        resvar < (mean(f)^2 + var(c(f))) * 1e-30)  # a few times\n.Machine$double.eps^2\n        warning(\"essentially perfect fit: summary may be unreliable\")\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThe comment in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lm.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " suggests this codifies the same thing, but I like the\nmore explicit solution you shared.\n\nDo you suggest we resolve it in both "
+                            },
+                            {
+                                "type": "text",
+                                "text": "aov.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lm.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " here, or we first close\nthis and then branch off into a new issue to fix this for both?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18959] undoc(dir=) differs from undoc(package=)*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18959>\n\n--- Comment #4 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nOffering an LLM investigation which basically pinpoints the issue, but omitting\nthe proposed solution about which I'm more agnostic. It did find this comment\nin the code which is evocative:\n\n```\n&lt;NOTE&gt;\nThere is no point in worrying about exportClasses directives\nin a NAMESPACE file when working on a package source dir, as\nwe only source the assignments, and hence do not get any\nS4 classes or methods.\n&lt;\/NOTE&gt;\n```\n\n<https:\/\/github.com\/r-devel\/r-svn\/blob\/b5a50cb201993f64bd62d6c1d0b610e6f3dbef6e\/src\/library\/tools\/R\/QC.R#L229-L278>\n\nWhich means the QC.R code assumes that {diffobj} approach of assigning the\noutput of `setClass()` doesn't occur.\n\n---\n\nThe inconsistency between `undoc(dir=)` (checking source directory) and\n`undoc(package=)` (checking installed package) for S4 classes and methods was\ncaused by two main issues in how `undoc(dir=)` processed the source files:\n\n1.  **Incomplete Evaluation of S4 Definitions:**\n    To find objects in `dir` mode, R sources the package files into a temporary\nenvironment. However, it was using `.source_assignments` which only evaluated\ntop-level assignments (matching `&lt;-` or `=`).\n    *   S4 classes defined *with* assignment (e.g., `MyClass &lt;-\nsetClass(\"MyClass\", ...)`) were evaluated and registered.\n    *   S4 classes defined *without* assignment (e.g., `setClass(\"MyClass\",\n...)`) were ignored.\n    *   S4 methods (typically defined using `setMethod(...)` without\nassignment) and S4 generics defined without assignment were also ignored.\n\n2.  **Missing NAMESPACE Filtering for S4 Objects:**\n    While `undoc(dir=)` filtered regular code objects using `NAMESPACE`\nexports, it did not apply any filtering to S4 classes and methods.\n    *   Any S4 class that happened to be evaluated (because of assignment) was\nchecked, even if it was not exported. This led to false positives (reporting\nunexported S4 classes as undocumented).\n    *   Conversely, exported S4 classes\/methods defined without assignment were\nmissed entirely because they were never evaluated.\n\nIn contrast, `undoc(package=)` loads the installed package and checks the\nattached package environment, which naturally only contains exported S4 classes\nand methods.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1784049405.957529",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "NkV",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18959] undoc(dir=) differs from undoc(package=)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18959"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nOffering an LLM investigation which basically pinpoints the issue, but omitting\nthe proposed solution about which I'm more agnostic. It did find this comment\nin the code which is evocative:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "<NOTE>\nThere is no point in worrying about exportClasses directives\nin a NAMESPACE file when working on a package source dir, as\nwe only source the assignments, and hence do not get any\nS4 classes or methods.\n<\/NOTE>\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/b5a50cb201993f64bd62d6c1d0b610e6f3dbef6e\/src\/library\/tools\/R\/QC.R#L229-L278"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nWhich means the QC.R code assumes that {diffobj} approach of assigning the\noutput of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "setClass()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " doesn't occur.\n\n---\n\nThe inconsistency between "
+                            },
+                            {
+                                "type": "text",
+                                "text": "undoc(dir=)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (checking source directory) and\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "undoc(package=)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (checking installed package) for S4 classes and methods was\ncaused by two main issues in how "
+                            },
+                            {
+                                "type": "text",
+                                "text": "undoc(dir=)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " processed the source files:\n\n1.  **Incomplete Evaluation of S4 Definitions:**\n    To find objects in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dir",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " mode, R sources the package files into a temporary\nenvironment. However, it was using "
+                            },
+                            {
+                                "type": "text",
+                                "text": ".source_assignments",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " which only evaluated\ntop-level assignments (matching "
+                            },
+                            {
+                                "type": "text",
+                                "text": "<-",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "=",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\n    *   S4 classes defined "
+                            },
+                            {
+                                "type": "text",
+                                "text": "with",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " assignment (e.g., `MyClass <-\nsetClass(\"MyClass\", ...)`) were evaluated and registered.\n    *   S4 classes defined "
+                            },
+                            {
+                                "type": "text",
+                                "text": "without",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " assignment (e.g., `setClass(\"MyClass\",\n...)`) were ignored.\n    *   S4 methods (typically defined using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "setMethod(...)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " without\nassignment) and S4 generics defined without assignment were also ignored.\n\n2.  **Missing NAMESPACE Filtering for S4 Objects:**\n    While "
+                            },
+                            {
+                                "type": "text",
+                                "text": "undoc(dir=)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " filtered regular code objects using "
+                            },
+                            {
+                                "type": "text",
+                                "text": "NAMESPACE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nexports, it did not apply any filtering to S4 classes and methods.\n    *   Any S4 class that happened to be evaluated (because of assignment) was\nchecked, even if it was not exported. This led to false positives (reporting\nunexported S4 classes as undocumented).\n    *   Conversely, exported S4 classes\/methods defined without assignment were\nmissed entirely because they were never evaluated.\n\nIn contrast, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "undoc(package=)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " loads the installed package and checks the\nattached package environment, which naturally only contains exported S4 classes\nand methods."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19085] Discarded qualifiers warning when building from source*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19085>\n\nIvan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n     Ever confirmed|0                           |1\n             Status|UNCONFIRMED                 |TRIAGED\n\n--- Comment #1 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nThank you for the report! Prof. Brian Ripley fixed these warnings (and more) in\nR-devel r90254, so this report can be closed.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1784059703.402649",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "axoWy",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19085] Discarded qualifiers warning when building from source",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19085"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIvan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n     Ever confirmed|0                           |1\n             Status|UNCONFIRMED                 |TRIAGED\n\n--- Comment #1 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you for the report! Prof. Brian Ripley fixed these warnings (and more) in\nR-devel r90254, so this report can be closed."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 18341] aov() with constant data returns different p-values depending on sample size &amp; balancedness*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=18341>\n\n--- Comment #8 from Benjamin Tyner (<mailto:btyner@gmail.com|btyner@gmail.com>) ---\nTo me it makes sense to use the same approach in both places. It looks like the\nexisting `lm.R` check was added back in 2014 (with revision 65291).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1784076888.491459",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "nqtP",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 18341] aov() with constant data returns different p-values depending on sample size & balancedness",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=18341"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #8 from Benjamin Tyner ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:btyner@gmail.com",
+                                "text": "btyner@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nTo me it makes sense to use the same approach in both places. It looks like the\nexisting "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lm.R",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " check was added back in 2014 (with revision 65291)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

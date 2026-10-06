@@ -1,0 +1,1191 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19143] `Sys.getlocale()` does not mark non-ASCII Windows locale names as UTF-8*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19143>\n\nIvan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #1 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nCould you please share your `sessionInfo()`? My Windows machines seem to\npreserve the locale name I give them.\n\nWhat is the underlying issue here? What is broken by having a UTF-8 string\nbeing marked as `CE_NATIVE` when the native encoding is UTF-8? R is full of\nsuch strings. `charIsUTF8()` is true for them. Both `translateChar()` and\n`translateCharUTF8()` return the underlying buffer.\n\nMeanwhile, even latest R can still run on legacy Windows systems with an 8-bit\ncodepage instead of UTF-8, where the non-ASCII encoding name must be marked as\n`CE_NATIVE`:\n\n```\n&gt; Sys.setlocale(\"LC_TIME\", \"Norwegian Bokmål_Norway\") |&gt; tools::showNonASCII()\n1: Norwegian Bokm&lt;e5&gt;l_Norway.1252\n&gt; sessionInfo()\nR Under development (unstable) (2026-07-19 r90279 ucrt)\nPlatform: x86_64-w64-mingw32\/x64\nRunning under: Windows Server 2022 x64 (build 20348)\n\nMatrix products: default\n  LAPACK version 3.12.1\n\nlocale:\n[1] LC_COLLATE=English_United States.1252 \n[2] LC_CTYPE=English_United States.1252   \n[3] LC_MONETARY=English_United States.1252\n[4] LC_NUMERIC=C                          \n[5] LC_TIME=Norwegian Bokmål_Norway.1252  \n\ntime zone: Europe\/Moscow\ntzcode source: internal\n\nattached base packages:\n[1] stats     graphics  grDevices utils     datasets  methods   base     \n\nloaded via a namespace (and not attached):\n[1] compiler_4.7.0 tools_4.7.0   \n```\n\nWhat needs to be fixed for non-ASCII locale names to work is\n`CHAR(STRING_ELT(locale, 0))` (it must be `translateChar(STRING_ELT(locale,\n0))`, subject to the chicken-and-egg problem of what's valid in the current\nencoding); otherwise non-ASCII locale names won't work unless the string\ncontents happen to coincide with the ANSI\/UTF-8 encoding expected by the CRT.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1787836718.268689",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "zGLw",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19143] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "Sys.getlocale()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does not mark non-ASCII Windows locale names as UTF-8",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19143"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIvan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n                 CC|                            |ikrylov@disroot.org\n\n--- Comment #1 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCould you please share your "
+                            },
+                            {
+                                "type": "text",
+                                "text": "sessionInfo()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "? My Windows machines seem to\npreserve the locale name I give them.\n\nWhat is the underlying issue here? What is broken by having a UTF-8 string\nbeing marked as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "CE_NATIVE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " when the native encoding is UTF-8? R is full of\nsuch strings. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "charIsUTF8()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is true for them. Both "
+                            },
+                            {
+                                "type": "text",
+                                "text": "translateChar()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "translateCharUTF8()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " return the underlying buffer.\n\nMeanwhile, even latest R can still run on legacy Windows systems with an 8-bit\ncodepage instead of UTF-8, where the non-ASCII encoding name must be marked as\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "CE_NATIVE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ":\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> Sys.setlocale(\"LC_TIME\", \"Norwegian Bokmål_Norway\") |> tools::showNonASCII()\n1: Norwegian Bokm<e5>l_Norway.1252\n> sessionInfo()\nR Under development (unstable) (2026-07-19 r90279 ucrt)\nPlatform: x86_64-w64-mingw32\/x64\nRunning under: Windows Server 2022 x64 (build 20348)\n\nMatrix products: default\n  LAPACK version 3.12.1\n\nlocale:\n[1] LC_COLLATE=English_United States.1252 \n[2] LC_CTYPE=English_United States.1252   \n[3] LC_MONETARY=English_United States.1252\n[4] LC_NUMERIC=C                          \n[5] LC_TIME=Norwegian Bokmål_Norway.1252  \n\ntime zone: Europe\/Moscow\ntzcode source: internal\n\nattached base packages:\n[1] stats     graphics  grDevices utils     datasets  methods   base     \n\nloaded via a namespace (and not attached):\n[1] compiler_4.7.0 tools_4.7.0   \n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWhat needs to be fixed for non-ASCII locale names to work is\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "CHAR(STRING_ELT(locale, 0))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (it must be `translateChar(STRING_ELT(locale,\n0))`, subject to the chicken-and-egg problem of what's valid in the current\nencoding); otherwise non-ASCII locale names won't work unless the string\ncontents happen to coincide with the ANSI\/UTF-8 encoding expected by the CRT."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19143] `Sys.getlocale()` does not mark non-ASCII Windows locale names as UTF-8*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19143>\n\n--- Comment #2 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nHere's an example; running RGui.exe with R 4.6.1.\n\n```\n&gt; sessionInfo()\nR version 4.6.1 (2026-06-24 ucrt)\nPlatform: x86_64-w64-mingw32\/x64\nRunning under: Windows 11 x64 (build 29634)\n\nMatrix products: default\n  LAPACK version 3.12.1\n\nlocale:\n[1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8  \n[3] LC_MONETARY=English_United States.utf8 LC_NUMERIC=C                         \n[5] LC_TIME=English_United States.utf8    \n\ntime zone: America\/Phoenix\ntzcode source: internal\n\nattached base packages:\n[1] stats     graphics  grDevices utils     datasets  methods   base     \n\nloaded via a namespace (and not attached):\n[1] compiler_4.6.1\n&gt; Sys.setlocale(\"LC_CTYPE\", \"Norwegian Bokmål_Norway.utf8\")\n[1] \"Norwegian Bokmål_Norway.utf8\"\n&gt; before &lt;- Sys.getlocale(\"LC_CTYPE\")\n&gt; Sys.setlocale(\"LC_CTYPE\", \"C\")\n[1] \"C\"\n&gt; Sys.setlocale(\"LC_CTYPE\", before)\n[1] \"\"\nWarning message:\nIn Sys.setlocale(\"LC_CTYPE\", before) :\n  OS reports request to set locale to \"Norwegian BokmÃ¥l_Norway.utf8\" cannot be\nhonored\n```\n\nSetting the locale in this way and resetting it is common when e.g. attempting\nto sort using the C locale.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1787844899.210349",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "QMh",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19143] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "Sys.getlocale()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does not mark non-ASCII Windows locale names as UTF-8",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19143"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nHere's an example; running RGui.exe with R 4.6.1.\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> sessionInfo()\nR version 4.6.1 (2026-06-24 ucrt)\nPlatform: x86_64-w64-mingw32\/x64\nRunning under: Windows 11 x64 (build 29634)\n\nMatrix products: default\n  LAPACK version 3.12.1\n\nlocale:\n[1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8  \n[3] LC_MONETARY=English_United States.utf8 LC_NUMERIC=C                         \n[5] LC_TIME=English_United States.utf8    \n\ntime zone: America\/Phoenix\ntzcode source: internal\n\nattached base packages:\n[1] stats     graphics  grDevices utils     datasets  methods   base     \n\nloaded via a namespace (and not attached):\n[1] compiler_4.6.1\n> Sys.setlocale(\"LC_CTYPE\", \"Norwegian Bokmål_Norway.utf8\")\n[1] \"Norwegian Bokmål_Norway.utf8\"\n> before <- Sys.getlocale(\"LC_CTYPE\")\n> Sys.setlocale(\"LC_CTYPE\", \"C\")\n[1] \"C\"\n> Sys.setlocale(\"LC_CTYPE\", before)\n[1] \"\"\nWarning message:\nIn Sys.setlocale(\"LC_CTYPE\", before) :\n  OS reports request to set locale to \"Norwegian BokmÃ¥l_Norway.utf8\" cannot be\nhonored\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSetting the locale in this way and resetting it is common when e.g. attempting\nto sort using the C locale."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19143] `Sys.getlocale()` does not mark non-ASCII Windows locale names as UTF-8*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19143>\n\n--- Comment #3 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nThank you for the example! Now I understand, the problem with `CE_NATIVE` is\nthat the string stops being valid after the locale is changed. Does this work\nfor you on Windows 11?\n\n```\n&gt; l &lt;- 'Norwegian Bokmål_Norway.utf8'\n&gt; Encoding(l)\n[1] \"UTF-8\"\n&gt; Sys.setlocale('LC_CTYPE', l)\n[1] \"Norwegian Bokmål_Norway.utf8\"\n&gt; Sys.setlocale('LC_CTYPE', 'C')\n[1] \"C\"\n&gt; enc2native(l)\n[1] \"Norwegian Bokm&lt;U+00E5&gt;l_Norway.utf8\"\n&gt; Sys.setlocale('LC_CTYPE', l)\n[1] \"\"\nWarning message:\nIn Sys.setlocale(\"LC_CTYPE\", l) :\n  OS reports request to set locale to \"Norwegian BokmÃ¥l_Norway.utf8\" cannot be\nhonored\n```\n\nAn experiment shows that I need `Norwegian Bokm\\xe5l_Norway.utf8` instead of\n`Norwegian Bokm\\xc3\\xa5l_Norway.utf8` to get back from `C`, so marking the\nstring as UTF-8 doesn't help me:\n\n```\n#include &lt;locale.h&gt;\n#include &lt;stdio.h&gt;\n\nint main() {\n        const char *bokmaal = \"Norwegian_Norway.UTF-8\";\n        const char *bokmaal_utf8 = \"Norwegian Bokm\\xc3\\xa5l_Norway.utf8\";\n        const char *bokmaal_latin1 = \"Norwegian Bokm\\xe5l_Norway.utf8\";\n        #define p(x) printf(\"%s =&gt; %s\\n\", #x, x)\n        p(setlocale(LC_ALL, \"\"));\n        p(setlocale(LC_CTYPE, bokmaal));\n        p(setlocale(LC_CTYPE, bokmaal_utf8));\n        p(setlocale(LC_CTYPE, \"C\"));\n        p(setlocale(LC_CTYPE, bokmaal_utf8));\n        p(setlocale(LC_CTYPE, bokmaal_latin1));\n}\n```\n```\nsetlocale(LC_ALL, \"\") =&gt; English_United States.utf8\nsetlocale(LC_CTYPE, bokmaal) =&gt; Norwegian_Norway.utf8\nsetlocale(LC_CTYPE, bokmaal_utf8) =&gt; Norwegian Bokmål_Norway.utf8\nsetlocale(LC_CTYPE, \"C\") =&gt; C\nsetlocale(LC_CTYPE, bokmaal_utf8) =&gt; (null)\nsetlocale(LC_CTYPE, bokmaal_latin1) =&gt; Norwegian Bokmål_Norway.utf8\n```\n\nDoes Windows 11 (unlike Windows Server 2022 here) actually understand UTF-8\nlocale names while running in the `C` locale?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1787847502.938539",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "qHNCH",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19143] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "Sys.getlocale()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does not mark non-ASCII Windows locale names as UTF-8",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19143"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you for the example! Now I understand, the problem with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "CE_NATIVE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is\nthat the string stops being valid after the locale is changed. Does this work\nfor you on Windows 11?\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> l <- 'Norwegian Bokmål_Norway.utf8'\n> Encoding(l)\n[1] \"UTF-8\"\n> Sys.setlocale('LC_CTYPE', l)\n[1] \"Norwegian Bokmål_Norway.utf8\"\n> Sys.setlocale('LC_CTYPE', 'C')\n[1] \"C\"\n> enc2native(l)\n[1] \"Norwegian Bokm<U+00E5>l_Norway.utf8\"\n> Sys.setlocale('LC_CTYPE', l)\n[1] \"\"\nWarning message:\nIn Sys.setlocale(\"LC_CTYPE\", l) :\n  OS reports request to set locale to \"Norwegian BokmÃ¥l_Norway.utf8\" cannot be\nhonored\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nAn experiment shows that I need "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Norwegian Bokm\\xe5l_Norway.utf8",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " instead of\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "Norwegian Bokm\\xc3\\xa5l_Norway.utf8",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to get back from "
+                            },
+                            {
+                                "type": "text",
+                                "text": "C",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", so marking the\nstring as UTF-8 doesn't help me:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "#include <locale.h>\n#include <stdio.h>\n\nint main() {\n        const char *bokmaal = \"Norwegian_Norway.UTF-8\";\n        const char *bokmaal_utf8 = \"Norwegian Bokm\\xc3\\xa5l_Norway.utf8\";\n        const char *bokmaal_latin1 = \"Norwegian Bokm\\xe5l_Norway.utf8\";\n        #define p(x) printf(\"%s => %s\\n\", #x, x)\n        p(setlocale(LC_ALL, \"\"));\n        p(setlocale(LC_CTYPE, bokmaal));\n        p(setlocale(LC_CTYPE, bokmaal_utf8));\n        p(setlocale(LC_CTYPE, \"C\"));\n        p(setlocale(LC_CTYPE, bokmaal_utf8));\n        p(setlocale(LC_CTYPE, bokmaal_latin1));\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "setlocale(LC_ALL, \"\") => English_United States.utf8\nsetlocale(LC_CTYPE, bokmaal) => Norwegian_Norway.utf8\nsetlocale(LC_CTYPE, bokmaal_utf8) => Norwegian Bokmål_Norway.utf8\nsetlocale(LC_CTYPE, \"C\") => C\nsetlocale(LC_CTYPE, bokmaal_utf8) => (null)\nsetlocale(LC_CTYPE, bokmaal_latin1) => Norwegian Bokmål_Norway.utf8\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nDoes Windows 11 (unlike Windows Server 2022 here) actually understand UTF-8\nlocale names while running in the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "C",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " locale?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19143] `Sys.getlocale()` does not mark non-ASCII Windows locale names as UTF-8*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19143>\n\n--- Comment #4 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nHmm...\n\n```\n&gt; l &lt;- 'Norwegian Bokmål_Norway.utf8'\n&gt; \n&gt; Encoding(l)\n[1] \"UTF-8\"\n&gt; Sys.setlocale('LC_CTYPE', l)\n[1] \"Norwegian Bokmål_Norway.utf8\"\n&gt; Sys.setlocale('LC_CTYPE', 'C')\n[1] \"C\"\n&gt; enc2native(l)\n[1] \"Norwegian Bokm&lt;U+00E5&gt;l_Norway.utf8\"\n&gt; Sys.setlocale('LC_CTYPE', l)\nWarning in Sys.setlocale(\"LC_CTYPE\", l) :\n  OS reports request to set locale to \"Norwegian BokmÃ¥l_Norway.utf8\" cannot be\nhonored\n[1] \"\"\n&gt; \n&gt; l &lt;- 'Norwegian Bokmål_Norway.utf8'\n&gt; \n&gt; Encoding(l)\n[1] \"unknown\"\n&gt; Sys.setlocale('LC_CTYPE', l)\n[1] \"Norwegian Bokmål_Norway.utf8\"\n&gt; Sys.setlocale('LC_CTYPE', 'C')\n[1] \"C\"\n&gt; enc2native(l)\n[1] \"Norwegian Bokm\\345l_Norway.utf8\"\n&gt; Sys.setlocale('LC_CTYPE', l)\n[1] \"Norwegian Bokmål_Norway.utf8\"\n```\n\nBut at the heart of this, R extracts the requested locale (in do_setlocale)\nwith:\n\n        const char *l = CHAR(STRING_ELT(locale, 0));\n\nand IIUC that will do the wrong thing if the locale itself isn't in the\n(current) native encoding. I guess there are two ways forward: translate that\nlocale to the native encoding before use, or use the \"wide\" APIs for setting\nand getting the locale on Windows.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1787848569.209849",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "otAT",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19143] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "Sys.getlocale()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does not mark non-ASCII Windows locale names as UTF-8",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19143"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #4 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nHmm...\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "> l <- 'Norwegian Bokmål_Norway.utf8'\n> \n> Encoding(l)\n[1] \"UTF-8\"\n> Sys.setlocale('LC_CTYPE', l)\n[1] \"Norwegian Bokmål_Norway.utf8\"\n> Sys.setlocale('LC_CTYPE', 'C')\n[1] \"C\"\n> enc2native(l)\n[1] \"Norwegian Bokm<U+00E5>l_Norway.utf8\"\n> Sys.setlocale('LC_CTYPE', l)\nWarning in Sys.setlocale(\"LC_CTYPE\", l) :\n  OS reports request to set locale to \"Norwegian BokmÃ¥l_Norway.utf8\" cannot be\nhonored\n[1] \"\"\n> \n> l <- 'Norwegian Bokmål_Norway.utf8'\n> \n> Encoding(l)\n[1] \"unknown\"\n> Sys.setlocale('LC_CTYPE', l)\n[1] \"Norwegian Bokmål_Norway.utf8\"\n> Sys.setlocale('LC_CTYPE', 'C')\n[1] \"C\"\n> enc2native(l)\n[1] \"Norwegian Bokm\\345l_Norway.utf8\"\n> Sys.setlocale('LC_CTYPE', l)\n[1] \"Norwegian Bokmål_Norway.utf8\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nBut at the heart of this, R extracts the requested locale (in do_setlocale)\nwith:\n\n        const char *l = CHAR(STRING_ELT(locale, 0));\n\nand IIUC that will do the wrong thing if the locale itself isn't in the\n(current) native encoding. I guess there are two ways forward: translate that\nlocale to the native encoding before use, or use the \"wide\" APIs for setting\nand getting the locale on Windows."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19143] `Sys.getlocale()` does not mark non-ASCII Windows locale names as UTF-8*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19143>\n\nKevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3802|0                           |1\n        is obsolete|                            |\n\n--- Comment #5 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nCreated attachment 3803\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3803&amp;action=edit>\nCandidate patch.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1787849498.323679",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "8k\/K",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19143] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "Sys.getlocale()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does not mark non-ASCII Windows locale names as UTF-8",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19143"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nKevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3802|0                           |1\n        is obsolete|                            |\n\n--- Comment #5 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3803\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3803&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3803&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCandidate patch."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19035] postscript(): PS_Open() is too pessimistic wrt R_popen(), failing in Docker on GitHub Actions*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19035>\n\n--- Comment #5 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nThanks! All my tests now pass, including a fresh R-devel build inside a Docker\ncontainer. Adding `strerror(errno)` is a good idea: `popen()` can fail if the\nuser runs afoul of the file descriptor limit.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1787858753.327189",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "uRG",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19035] postscript(): PS_Open() is too pessimistic wrt R_popen(), failing in Docker on GitHub Actions",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19035"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #5 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks! All my tests now pass, including a fresh R-devel build inside a Docker\ncontainer. Adding "
+                            },
+                            {
+                                "type": "text",
+                                "text": "strerror(errno)",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is a good idea: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "popen()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " can fail if the\nuser runs afoul of the file descriptor limit."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19143] `Sys.getlocale()` does not mark non-ASCII Windows locale names as UTF-8*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19143>\n\n--- Comment #6 from Ivan Krylov (<mailto:ikrylov@disroot.org|ikrylov@disroot.org>) ---\nUnfortunately, unlike the second half of your example in comment 4, a `CE_UTF8`\nstring comes out of `translateChar()` with `C` locale in place containing the\nreplacement sequence `&lt;U+00E5&gt;`, not the desired `0xe5` byte. It might be that\n`_wsetlocale` is the only solution that doesn't rely on undocumented behaviour\n(UCRT assigning meaning to bytes outside ASCII in the `C` locale).",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1787864170.742679",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "jWP",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19143] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "Sys.getlocale()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does not mark non-ASCII Windows locale names as UTF-8",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19143"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #6 from Ivan Krylov ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nUnfortunately, unlike the second half of your example in comment 4, a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "CE_UTF8",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nstring comes out of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "translateChar()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "C",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " locale in place containing the\nreplacement sequence "
+                            },
+                            {
+                                "type": "text",
+                                "text": "<U+00E5>",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", not the desired "
+                            },
+                            {
+                                "type": "text",
+                                "text": "0xe5",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " byte. It might be that\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "_wsetlocale",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is the only solution that doesn't rely on undocumented behaviour\n(UCRT assigning meaning to bytes outside ASCII in the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "C",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " locale)."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19109] `dim&lt;-` dimension vector product can overflow*\nhttps:\/\/bugs.r-project.org\/show_bug.cgi?id=19109\n\n--- Comment #10 from Suharto Anggono (suharto_anggono@yahoo.com) ---\nWith r90446, `dim2total` ends with\n\n```\n#ifdef LONG_VECTOR_SUPPORT\n    if (dn &gt; R_XLEN_T_MAX)\n#else\n    if (dn &gt; INT_MAX)\n#endif\n        *err = true;\n    return (R_xlen_t) dn;\n```\n\nSo, `(R_xlen_t) dn` is also returned if `dn &gt; R_XLEN_T_MAX`.\n\n`(R_xlen_t) dn` has undefined behavior if `dn` value cannot be represented by\n`R_xlen_t`.\n\nIt is better for `dn &gt; R_XLEN_T_MAX` case to return separately. For example,\n\n```\n#ifdef LONG_VECTOR_SUPPORT\n    if (dn &gt; R_XLEN_T_MAX)\n#else\n    if (dn &gt; INT_MAX)\n#endif\n        {*err = true; return 0;}\n    return (R_xlen_t) dn;\n```",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1787879960.612359",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "miZwU",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19109] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "dim<-",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " dimension vector product can overflow",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nhttps:\/\/bugs.r-project.org\/show_bug.cgi?id=19109\n\n--- Comment #10 from Suharto Anggono (suharto_anggono@yahoo.com) ---\nWith r90446, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dim2total",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ends with\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "#ifdef LONG_VECTOR_SUPPORT\n    if (dn > R_XLEN_T_MAX)\n#else\n    if (dn > INT_MAX)\n#endif\n        *err = true;\n    return (R_xlen_t) dn;\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nSo, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(R_xlen_t) dn",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is also returned if "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dn > R_XLEN_T_MAX",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(R_xlen_t) dn",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has undefined behavior if "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dn",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " value cannot be represented by\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_xlen_t",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nIt is better for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dn > R_XLEN_T_MAX",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " case to return separately. For example,\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "#ifdef LONG_VECTOR_SUPPORT\n    if (dn > R_XLEN_T_MAX)\n#else\n    if (dn > INT_MAX)\n#endif\n        {*err = true; return 0;}\n    return (R_xlen_t) dn;\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19143] `Sys.getlocale()` does not mark non-ASCII Windows locale names as UTF-8*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19143>\n\nKevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3803|0                           |1\n        is obsolete|                            |\n\n--- Comment #7 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nCreated attachment 3804\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3804&amp;action=edit>\nCandidate patch; using wide APIs on Windows.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1787886326.124549",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Nr6q",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19143] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "Sys.getlocale()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does not mark non-ASCII Windows locale names as UTF-8",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19143"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nKevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n   Attachment #3803|0                           |1\n        is obsolete|                            |\n\n--- Comment #7 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3804\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3804&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3804&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCandidate patch; using wide APIs on Windows."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19143] `Sys.getlocale()` does not mark non-ASCII Windows locale names as UTF-8*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19143>\n\n--- Comment #8 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nCreated attachment 3805\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3805&amp;action=edit>\nRegression test.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1787887348.554969",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "1RP",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19143] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "Sys.getlocale()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does not mark non-ASCII Windows locale names as UTF-8",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19143"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #8 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3805\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3805&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3805&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nRegression test."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19124] strptime() fails to parse %w of '0' in LC_CTYPE=C*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19124>\n\n--- Comment #1 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nI think this can be closed (r90447)?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1787894746.166269",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "3tYmn",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19124] strptime() fails to parse %w of '0' in LC_CTYPE=C",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19124"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nI think this can be closed (r90447)?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

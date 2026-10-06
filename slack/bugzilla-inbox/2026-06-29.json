@@ -13,7 +13,7 @@
         "blocks": [
             {
                 "type": "rich_text",
-                "block_id": "tJu",
+                "block_id": "fUy",
                 "elements": [
                     {
                         "type": "rich_text_section",
@@ -150,6 +150,235 @@
                             {
                                 "type": "text",
                                 "text": ".  It could be made a logical value and then also be\nused by R CMD build to report the result of:\n\n    * looking to see if a 'data\/datalist' file should be added"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19091] as.numeric on macOS aarch64 rounds \"0.9999999999999999\" to 1.0 instead of the nearest IEEE 754 double*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19091>\n\n--- Comment #6 from Suharto Anggono (<mailto:suharto_anggono@yahoo.com|suharto_anggono@yahoo.com>) ---\n(In reply to Akitada Kasahara from comment #0)\nI think `R_strtod5()` is the culprit. It uses `LDOUBLE`. I guess this happens\nwhen `long double` is the same as `double`.\n\n    for ( ; *p &gt;= '0' &amp;&amp; *p &lt;= '9'; p++, ndigits++) ans = 10*ans + (*p - '0');\n    if (*p == dec)\n        for (p++; *p &gt;= '0' &amp;&amp; *p &lt;= '9'; p++, ndigits++, expn--)\n            ans = 10*ans + (*p - '0');\n\nAfter the above, `expn` is `-16` and `ans` is supposed to hold\n`9999999999999999`. When `long double` is the same as `double`,\n`9999999999999999` cannot be represented exactly and gets rounded instead to\n`10000000000000000` (`10^16`), exactly.\n\n    LDOUBLE p10 = 10., fac = 1.0;\n\nBecause `expn &lt; 0`,\n\n        for (n = -expn, fac = 1.0; n; n &gt;&gt;= 1, p10 *= p10)\n            if (n &amp; 1) fac *= p10;\n        ans \/= fac;\n\nis done. `fac` is `10^16`, exactly.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1782802539.752539",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "PYW",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19091] as.numeric on macOS aarch64 rounds \"0.9999999999999999\" to 1.0 instead of the nearest IEEE 754 double",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19091"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #6 from Suharto Anggono ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:suharto_anggono@yahoo.com",
+                                "text": "suharto_anggono@yahoo.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\n(In reply to Akitada Kasahara from comment #0)\nI think "
+                            },
+                            {
+                                "type": "text",
+                                "text": "R_strtod5()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is the culprit. It uses "
+                            },
+                            {
+                                "type": "text",
+                                "text": "LDOUBLE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". I guess this happens\nwhen "
+                            },
+                            {
+                                "type": "text",
+                                "text": "long double",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is the same as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "double",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\n    for ( ; *p >= '0' && *p <= '9'; p++, ndigits++) ans = 10*ans + (*p - '0');\n    if (*p == dec)\n        for (p++; *p >= '0' && *p <= '9'; p++, ndigits++, expn--)\n            ans = 10*ans + (*p - '0');\n\nAfter the above, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "expn",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "-16",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ans",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is supposed to hold\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "9999999999999999",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". When "
+                            },
+                            {
+                                "type": "text",
+                                "text": "long double",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is the same as "
+                            },
+                            {
+                                "type": "text",
+                                "text": "double",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "9999999999999999",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " cannot be represented exactly and gets rounded instead to\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "10000000000000000",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "10^16",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), exactly.\n\n    LDOUBLE p10 = 10., fac = 1.0;\n\nBecause "
+                            },
+                            {
+                                "type": "text",
+                                "text": "expn < 0",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ",\n\n        for (n = -expn, fac = 1.0; n; n >>= 1, p10 *= p10)\n            if (n & 1) fac *= p10;\n        ans \/= fac;\n\nis done. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "fac",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "10^16",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", exactly."
                             }
                         ]
                     }

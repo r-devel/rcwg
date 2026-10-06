@@ -1,0 +1,522 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19117] New: strptime() parses shortest prefix of localised month name*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19117>\n\n            Bug ID: 19117\n           Summary: strptime() parses shortest prefix of localised month\n                    name\n           Product: R\n           Version: R 4.6.x\n          Hardware: Other\n                OS: All\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:ikrylov@disroot.org|ikrylov@disroot.org>\n\nIn some locales, `strptime()` will misunderstand month names if some of them\nare prefixes of others:\n\n```\n# sudo apt install locales-all,\n#  or add \"vi_VN UTF-8\" to \/etc\/locale.gen and run locale-gen\nSys.setlocale(\"LC_TIME\", \"vi_VN\")\nd &lt;- as.Date('2000-11-01')\nf &lt;- '%Y %d %b'\nd |&gt; strftime(f) |&gt; strptime(f)\n# [1] \"2000-01-01 UTC\"\n```\n\nThis happens because in the vi_VN locale, month names are formatted as \"Tháng\n1\" ... \"Tháng 12\" (`%B`) or \"Thg 1\" ... \"Thg 12\" (`%b`) and R's own internal\n`strptime()` [parses them\nas](<https:\/\/svn.r-project.org\/browse\/R\/trunk\/src\/main\/Rstrptime.h?op=blame&amp;rev=83234#l297>):\n\n```\nif (w_match_string (w_weekday_name[cnt], rp)) break;\n\/\/ ...\nif (w_match_string (w_ab_weekday_name[cnt], rp)) break;\n```\n\n...i.e., as soon as R sees \"Thg 1\", the match is successful. This leads to\nproblems with the `%b` format in the following locales:\n\n* bo_CN\n* bo_IN\n* dz_BT\n* km_KH\n* tok\n* shn_MM (where July (\"လၼသပး\") is a prefix of November (\"လၼသပးသင\"))\n* vi_VN",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785665859.820559",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "S2G",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19117] New: strptime() parses shortest prefix of localised month name",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19117"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19117\n           Summary: strptime() parses shortest prefix of localised month\n                    name\n           Product: R\n           Version: R 4.6.x\n          Hardware: Other\n                OS: All\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:ikrylov@disroot.org",
+                                "text": "ikrylov@disroot.org"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nIn some locales, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "strptime()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " will misunderstand month names if some of them\nare prefixes of others:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "# sudo apt install locales-all,\n#  or add \"vi_VN UTF-8\" to \/etc\/locale.gen and run locale-gen\nSys.setlocale(\"LC_TIME\", \"vi_VN\")\nd <- as.Date('2000-11-01')\nf <- '%Y %d %b'\nd |> strftime(f) |> strptime(f)\n# [1] \"2000-01-01 UTC\"\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nThis happens because in the vi_VN locale, month names are formatted as \"Tháng\n1\" ... \"Tháng 12\" ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "%B",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") or \"Thg 1\" ... \"Thg 12\" ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "%b",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") and R's own internal\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "strptime()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " [parses them\nas]("
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/svn.r-project.org\/browse\/R\/trunk\/src\/main\/Rstrptime.h?op=blame&amp;rev=83234#l297",
+                                "text": "https:\/\/svn.r-project.org\/browse\/R\/trunk\/src\/main\/Rstrptime.h?op=blame&rev=83234#l297"
+                            },
+                            {
+                                "type": "text",
+                                "text": "):\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "if (w_match_string (w_weekday_name[cnt], rp)) break;\n\/\/ ...\nif (w_match_string (w_ab_weekday_name[cnt], rp)) break;\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\n...i.e., as soon as R sees \"Thg 1\", the match is successful. This leads to\nproblems with the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "%b",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " format in the following locales:\n\n* bo_CN\n* bo_IN\n* dz_BT\n* km_KH\n* tok\n* shn_MM (where July (\"လၼသပး\") is a prefix of November (\"လၼသပးသင\"))\n* vi_VN"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19112] `writeChar()` overflows its output buffer when zero-padding a multibyte string*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19112>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|NEW                         |CLOSED\n\n--- Comment #3 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nThank you, Kevin.\nFix committed in svn r90332 , see\n <https:\/\/svn.r-project.org\/browse\/R\/trunk\/?op=revision&amp;rev=90332>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785678468.010769",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "TWH",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19112] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "writeChar()",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " overflows its output buffer when zero-padding a multibyte string",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19112"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|NEW                         |CLOSED\n\n--- Comment #3 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you, Kevin.\nFix committed in svn r90332 , see\n "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/svn.r-project.org\/browse\/R\/trunk\/?op=revision&amp;rev=90332",
+                                "text": "https:\/\/svn.r-project.org\/browse\/R\/trunk\/?op=revision&rev=90332"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19109] `dim&lt;-` dimension vector product can overflow*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19109>\n\nMartin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|NEW                         |CLOSED\n\n--- Comment #1 from Martin Maechler (<mailto:maechler@stat.math.ethz.ch|maechler@stat.math.ethz.ch>) ---\nThank you, Kevin.\nI've slightly modified your patch proposal with a small speedup, only using\n`dtotal` at first, and then setting `total` from it.\n\nsvn rev 90336",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785678623.570799",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "1I1\/m",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19109] ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "dim<-",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " dimension vector product can overflow",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19109"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nMartin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") changed:\n\n           What    |Removed                     |Added\n----------------------------------------------------------------------------\n         Resolution|---                         |FIXED\n                 CC|                            |maechler@stat.math.ethz.ch\n             Status|NEW                         |CLOSED\n\n--- Comment #1 from Martin Maechler ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:maechler@stat.math.ethz.ch",
+                                "text": "maechler@stat.math.ethz.ch",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThank you, Kevin.\nI've slightly modified your patch proposal with a small speedup, only using\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "dtotal",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " at first, and then setting "
+                            },
+                            {
+                                "type": "text",
+                                "text": "total",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " from it.\n\nsvn rev 90336"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19118] New: byte compiler: missing protect in switch handler*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19118>\n\n            Bug ID: 19118\n           Summary: byte compiler: missing protect in switch handler\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\nTo reproduce:\n\n```\noptions(warn = -1)                      # only to keep the transcript short\nmkf &lt;- function() factor(\"b\", levels = c(\"a\", \"b\"))\ng &lt;- compiler::cmpfun(function() switch(mkf(), a = \"GOT_A\", b = \"GOT_B\"))\ngctorture(TRUE)\nfor (k in 1:4) cat(\"call\", k, \"-&gt;\", format(g()), \"\\n\")\ngctorture(FALSE)\n```\n\nIn this case, I see:\n\n```\ncall 1 -&gt; NULL\ncall 2 -&gt; NULL\ncall 3 -&gt; NULL\ncall 4 -&gt; NULL\n```\n\nrather than the expected `GOT_B` result.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785719095.893529",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "T5teP",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19118] New: byte compiler: missing protect in switch handler",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19118"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19118\n           Summary: byte compiler: missing protect in switch handler\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nTo reproduce:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "options(warn = -1)                      # only to keep the transcript short\nmkf <- function() factor(\"b\", levels = c(\"a\", \"b\"))\ng <- compiler::cmpfun(function() switch(mkf(), a = \"GOT_A\", b = \"GOT_B\"))\ngctorture(TRUE)\nfor (k in 1:4) cat(\"call\", k, \"->\", format(g()), \"\\n\")\ngctorture(FALSE)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIn this case, I see:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "call 1 -> NULL\ncall 2 -> NULL\ncall 3 -> NULL\ncall 4 -> NULL\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nrather than the expected "
+                            },
+                            {
+                                "type": "text",
+                                "text": "GOT_B",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " result."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19118] byte compiler: missing protect in switch handler*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19118>\n\n--- Comment #1 from Kevin Ushey (<mailto:kevinushey@gmail.com|kevinushey@gmail.com>) ---\nCreated attachment 3768\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3768&amp;action=edit>\nCandidate patch.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1785719131.980929",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "2eF",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19118] byte compiler: missing protect in switch handler",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19118"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Kevin Ushey ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3768\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3768&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3768&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nCandidate patch."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

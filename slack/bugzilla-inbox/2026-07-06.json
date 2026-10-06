@@ -1,0 +1,202 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19097] New: use-after-free in interactive graphics devices when devices are destroyed while handler is running*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19097>\n\n            Bug ID: 19097\n           Summary: use-after-free in interactive graphics devices when\n                    devices are destroyed while handler is running\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Graphics\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:trevor.l.davis@gmail.com|trevor.l.davis@gmail.com>\n\nCreated attachment 3748\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3748&amp;action=edit>\nFix UAF issues in `gevents.c`\n\nThere are use-after-free issues in interactive graphics devices like `x11()`\nand `windows()` when devices are destroyed while the handler is running e.g. by\n`dev.off()` inside the handler or (on Windows) by a click on the window's close\nbutton while the handler is running.\n\nHere are reproducible examples using the former of calling `dev.off()` within\nthe handler:\n\n```\ndev_open &lt;- function() {\n    if (identical(.Platform$OS.type, \"unix\"))\n        x11(type = \"Xlib\")\n    else\n        windows()\n    plot.new()\n}\nidle_uaf &lt;- function() {\n    dev_open()\n    getGraphicsEvent(\n        onIdle = function() {\n            dev.off()\n        }\n    )\n}\nmouse_uaf &lt;- function() {\n    dev_open()\n    title(\"Click anywhere to trigger\")\n    getGraphicsEvent(\n        onMouseDown = function(buttons, x, y) {\n            dev.off()\n        }\n    )\n}\nkeybd_uaf &lt;- function() {\n    dev_open()\n    title(\"Press any key to trigger\")\n    getGraphicsEvent(\n        onKeybd = function(key) {\n            dev.off()\n        }\n    )\n}\n```\n\nBefore applying the attached patch running `mouse_uaf()` and then clicking\nwithin in the device immediately leads to a segfault on my Linux machine using\n`x11()`.  If you build R with `-fsanitize=address` then `idle_uaf()` and\n`keybd_uaf()` also leads to immediate crashes otherwise the bug shows up as\nsilent heap corruption rather than an instant crash.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1783396994.902619",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Ja4TQ",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19097] New: use-after-free in interactive graphics devices when devices are destroyed while handler is running",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19097"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19097\n           Summary: use-after-free in interactive graphics devices when\n                    devices are destroyed while handler is running\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Linux\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Graphics\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:trevor.l.davis@gmail.com",
+                                "text": "trevor.l.davis@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nCreated attachment 3748\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3748&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3748&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nFix UAF issues in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "gevents.c",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nThere are use-after-free issues in interactive graphics devices like "
+                            },
+                            {
+                                "type": "text",
+                                "text": "x11()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nand "
+                            },
+                            {
+                                "type": "text",
+                                "text": "windows()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " when devices are destroyed while the handler is running e.g. by\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "dev.off()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " inside the handler or (on Windows) by a click on the window's close\nbutton while the handler is running.\n\nHere are reproducible examples using the former of calling "
+                            },
+                            {
+                                "type": "text",
+                                "text": "dev.off()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " within\nthe handler:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "dev_open <- function() {\n    if (identical(.Platform$OS.type, \"unix\"))\n        x11(type = \"Xlib\")\n    else\n        windows()\n    plot.new()\n}\nidle_uaf <- function() {\n    dev_open()\n    getGraphicsEvent(\n        onIdle = function() {\n            dev.off()\n        }\n    )\n}\nmouse_uaf <- function() {\n    dev_open()\n    title(\"Click anywhere to trigger\")\n    getGraphicsEvent(\n        onMouseDown = function(buttons, x, y) {\n            dev.off()\n        }\n    )\n}\nkeybd_uaf <- function() {\n    dev_open()\n    title(\"Press any key to trigger\")\n    getGraphicsEvent(\n        onKeybd = function(key) {\n            dev.off()\n        }\n    )\n}\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nBefore applying the attached patch running "
+                            },
+                            {
+                                "type": "text",
+                                "text": "mouse_uaf()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and then clicking\nwithin in the device immediately leads to a segfault on my Linux machine using\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "x11()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".  If you build R with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "-fsanitize=address",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " then "
+                            },
+                            {
+                                "type": "text",
+                                "text": "idle_uaf()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "keybd_uaf()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " also leads to immediate crashes otherwise the bug shows up as\nsilent heap corruption rather than an instant crash."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

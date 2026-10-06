@@ -1,0 +1,1360 @@
+[
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19135] New: Bug with CHARSXP lifetime assumption by ALTSTRING elt method*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19135>\n\n            Bug ID: 19135\n           Summary: Bug with CHARSXP lifetime assumption by ALTSTRING elt\n                    method\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:traversc@gmail.com|traversc@gmail.com>\n\nHere is a bug report where R functions mistakenly assumes the lifetime of\nALTREP elements from package classes.\n\nAlthough this requires package interaction, I believe the bug is more on the R\nside, because there is no specification on requirements for CHARSXP lifetime\nfrom ALTREP classes. The only relevant discussion I found is in 2021:\n<https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2021-June\/080832.html> but the discussion\ndoes not settle the expectations.\n\nEven if the bug is on the package side, I think it is important and would like\nto bring it to the attention of R-core.\n\nBelow are two reproducible examples with a minimal ALTREP class, but this also\napplies to other ALTREP string packages (vroom, arrow).\n\n  \/\/ minimal ALTREP class\n  \/\/ mre.c\n  #include &lt;R.h&gt;\n  #include &lt;Rinternals.h&gt;\n  #include &lt;R_ext\/Altrep.h&gt;\n\n  static R_altrep_class_t mre_class;\n\n  static R_xlen_t mre_len(SEXP x) { return 1; }\n\n  static SEXP mre_elt(SEXP x, R_xlen_t i)\n  {\n      double *p = REAL(R_altrep_data1(x));\n      int n = (int) p[0];\n      char *buf = R_alloc((size_t) n, 1);\n      for (int k = 0; k &lt; n; k++) buf[k] = 'a';\n      SEXP s = Rf_mkCharLenCE(buf, n, CE_NATIVE);\n      if (p[1]) R_set_altrep_data2(x, s); \/\/ testing switch to anchor CHARSXP\n      return s;\n  }\n\n  SEXP mre_make(SEXP nbytes, SEXP retain)\n  {\n      SEXP d1 = PROTECT(Rf_allocVector(REALSXP, 2));\n      REAL(d1)[0] = Rf_asReal(nbytes);\n      REAL(d1)[1] = Rf_asReal(retain);\n      SEXP x = R_new_altrep(mre_class, d1, R_NilValue);\n      UNPROTECT(1);\n      return x;\n  }\n\n  void R_init_mre(DllInfo *dll)\n  {\n      mre_class = R_make_altstring_class(\"mre\", \"mre\", dll);\n      R_set_altrep_Length_method(mre_class, mre_len);\n      R_set_altstring_Elt_method(mre_class, mre_elt);\n  }\n\nExample with `charmatch`\n\n  # R CMD SHLIB mre.c\n  dyn.load(\"mre.so\")\n  target &lt;- rawToChar(as.raw(c(<http:\/\/rep.int|rep.int>(0x61L, 64L), 0xe9L)))\n  Encoding(target) &lt;- \"latin1\"\n\n  x &lt;- .Call(\"mre_make\", 64*1024*1024, 0)\n  charmatch(x, target)\n   *** caught segfault ***\n  address 0x7a5419901040, cause 'memory not mapped'\n\n\nIn `charmatch()` (src\/main\/unique.c), the input is ASCII, so the first element\n`ss = translateCharUTF8(STRING_ELT(x, i))` returns a pointer to the CHARSXP\ndirectly. However, because it is ALTREP, that CHARSXP is not anchored in a\nvector. Then the 2nd argument needs UTF8 translation because it is latin1,\nwhich causes an allocation and garbage collection of the container of `ss`.\n\nHere is another example using substr:\n\n  # R CMD SHLIB mre.c\n  dyn.load(\"mre.so\")\n\n  x &lt;- .Call(\"mre_make\", 64*1024*1024, 0)   # 0: Elt does not retain the\nCHARSXP\n  substr(x, 1L, 10L)\n  # *** caught segfault ***\n  # address 0x7c9e13fff042, cause 'memory not mapped'\n\n\nSuggested fixes:\n\nImprove ALTREP documentation to require stable lifetime from ALTREP string\nclasses. Document what is expected of ALTREP classes. It is unclear whether\nALTREP classes are required to keep CHARSXPs alive. If that is intended, I\nbelieve it should be documented.\n\nAlternatively: update these functions (and others) to not assume CHARSXP\nlifetime is stable.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1786522108.616399",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "RvSJp",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19135] New: Bug with CHARSXP lifetime assumption by ALTSTRING elt method",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19135"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19135\n           Summary: Bug with CHARSXP lifetime assumption by ALTSTRING elt\n                    method\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: UNCONFIRMED\n          Severity: normal\n          Priority: P5\n         Component: Low-level\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:traversc@gmail.com",
+                                "text": "traversc@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\nHere is a bug report where R functions mistakenly assumes the lifetime of\nALTREP elements from package classes.\n\nAlthough this requires package interaction, I believe the bug is more on the R\nside, because there is no specification on requirements for CHARSXP lifetime\nfrom ALTREP classes. The only relevant discussion I found is in 2021:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/stat.ethz.ch\/pipermail\/r-devel\/2021-June\/080832.html"
+                            },
+                            {
+                                "type": "text",
+                                "text": " but the discussion\ndoes not settle the expectations.\n\nEven if the bug is on the package side, I think it is important and would like\nto bring it to the attention of R-core.\n\nBelow are two reproducible examples with a minimal ALTREP class, but this also\napplies to other ALTREP string packages (vroom, arrow).\n\n  \/\/ minimal ALTREP class\n  \/\/ mre.c\n  #include <R.h>\n  #include <Rinternals.h>\n  #include <R_ext\/Altrep.h>\n\n  static R_altrep_class_t mre_class;\n\n  static R_xlen_t mre_len(SEXP x) { return 1; }\n\n  static SEXP mre_elt(SEXP x, R_xlen_t i)\n  {\n      double *p = REAL(R_altrep_data1(x));\n      int n = (int) p[0];\n      char *buf = R_alloc((size_t) n, 1);\n      for (int k = 0; k < n; k++) buf[k] = 'a';\n      SEXP s = Rf_mkCharLenCE(buf, n, CE_NATIVE);\n      if (p[1]) R_set_altrep_data2(x, s); \/\/ testing switch to anchor CHARSXP\n      return s;\n  }\n\n  SEXP mre_make(SEXP nbytes, SEXP retain)\n  {\n      SEXP d1 = PROTECT(Rf_allocVector(REALSXP, 2));\n      REAL(d1)[0] = Rf_asReal(nbytes);\n      REAL(d1)[1] = Rf_asReal(retain);\n      SEXP x = R_new_altrep(mre_class, d1, R_NilValue);\n      UNPROTECT(1);\n      return x;\n  }\n\n  void R_init_mre(DllInfo *dll)\n  {\n      mre_class = R_make_altstring_class(\"mre\", \"mre\", dll);\n      R_set_altrep_Length_method(mre_class, mre_len);\n      R_set_altstring_Elt_method(mre_class, mre_elt);\n  }\n\nExample with "
+                            },
+                            {
+                                "type": "text",
+                                "text": "charmatch",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n  # R CMD SHLIB mre.c\n  dyn.load(\"mre.so\")\n  target <- rawToChar(as.raw(c("
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/rep.int",
+                                "text": "rep.int"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(0x61L, 64L), 0xe9L)))\n  Encoding(target) <- \"latin1\"\n\n  x <- .Call(\"mre_make\", 64*1024*1024, 0)\n  charmatch(x, target)\n   *** caught segfault ***\n  address 0x7a5419901040, cause 'memory not mapped'\n\n\n\nIn "
+                            },
+                            {
+                                "type": "text",
+                                "text": "charmatch()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (src\/main\/unique.c), the input is ASCII, so the first element\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "ss = translateCharUTF8(STRING_ELT(x, i))",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " returns a pointer to the CHARSXP\ndirectly. However, because it is ALTREP, that CHARSXP is not anchored in a\nvector. Then the 2nd argument needs UTF8 translation because it is latin1,\nwhich causes an allocation and garbage collection of the container of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "ss",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nHere is another example using substr:\n\n  # R CMD SHLIB mre.c\n  dyn.load(\"mre.so\")\n\n  x <- .Call(\"mre_make\", 64*1024*1024, 0)   # 0: Elt does not retain the\nCHARSXP\n  substr(x, 1L, 10L)\n  # *** caught segfault ***\n  # address 0x7c9e13fff042, cause 'memory not mapped'\n\n\n\nSuggested fixes:\n\nImprove ALTREP documentation to require stable lifetime from ALTREP string\nclasses. Document what is expected of ALTREP classes. It is unclear whether\nALTREP classes are required to keep CHARSXPs alive. If that is intended, I\nbelieve it should be documented.\n\nAlternatively: update these functions (and others) to not assume CHARSXP\nlifetime is stable."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19136] New: person() role-matching doesn't work*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19136>\n\n            Bug ID: 19136\n           Summary: person() role-matching doesn't work\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Misc\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:kevinushey@gmail.com|kevinushey@gmail.com>\n\n`.canonicalize_person_role()` (`citation.R:194`) validates `person()` roles\nagainst the MARC relator codes and, per its own comment, intends to be nice\nabout it:\n\n```\n    ## Be nice.  Given roles must either exactly match the role code,\n    ## or be uniquely pmatchable modulo case against the role terms.\n    pos &lt;- which(<http:\/\/is.na|is.na>(match(role, MARC_relator_db$code)))\n    if(length(pos)) {\n        ind &lt;- pmatch(tolower(role[pos]),\n                      tolower(MARC_relator_db$name),   # &lt;- no such column\n                      0L)\n```\n\nHowever, this fails as the `MARC_relator_db` has no column called 'name'; I\nsuspect the matching here should be against 'term'. Quick patch:\n\n```\nIndex: src\/library\/utils\/R\/citation.R\n===================================================================\n--- src\/library\/utils\/R\/citation.R      (revision 90394)\n+++ src\/library\/utils\/R\/citation.R      (working copy)\n@@ -199,7 +199,7 @@\n     pos &lt;- which(<http:\/\/is.na|is.na>(match(role, MARC_relator_db$code)))\n     if(length(pos)) {\n         ind &lt;- pmatch(tolower(role[pos]),\n-                      tolower(MARC_relator_db$name),\n+                      tolower(MARC_relator_db$term),\n                       0L)\n         role[pos[ind &gt; 0L]] &lt;- MARC_relator_db$code[ind]\n         if(any(ind &lt;- (ind == 0L))) {\n```\n\nOr, alternatively, if the intention is to preserve the current behavior, that\nblock of code could be removed.\n\n(Strictly speaking, from what I can see, R-exts doesn't document the use of the\nfull term variants here either.)",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1786555572.383359",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "BfKkt",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19136] New: person() role-matching doesn't work",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19136"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19136\n           Summary: person() role-matching doesn't work\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: Other\n                OS: Other\n            Status: NEW\n          Severity: normal\n          Priority: P5\n         Component: Misc\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:kevinushey@gmail.com",
+                                "text": "kevinushey@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": ".canonicalize_person_role()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "citation.R:194",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ") validates "
+                            },
+                            {
+                                "type": "text",
+                                "text": "person()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " roles\nagainst the MARC relator codes and, per its own comment, intends to be nice\nabout it:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "    ## Be nice.  Given roles must either exactly match the role code,\n    ## or be uniquely pmatchable modulo case against the role terms.\n    pos <- which("
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(match(role, MARC_relator_db$code)))\n    if(length(pos)) {\n        ind <- pmatch(tolower(role[pos]),\n                      tolower(MARC_relator_db$name),   # <- no such column\n                      0L)\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nHowever, this fails as the "
+                            },
+                            {
+                                "type": "text",
+                                "text": "MARC_relator_db",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " has no column called 'name'; I\nsuspect the matching here should be against 'term'. Quick patch:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Index: src\/library\/utils\/R\/citation.R\n===================================================================\n--- src\/library\/utils\/R\/citation.R      (revision 90394)\n+++ src\/library\/utils\/R\/citation.R      (working copy)\n@@ -199,7 +199,7 @@\n     pos <- which("
+                            },
+                            {
+                                "type": "link",
+                                "url": "http:\/\/is.na",
+                                "text": "is.na"
+                            },
+                            {
+                                "type": "text",
+                                "text": "(match(role, MARC_relator_db$code)))\n     if(length(pos)) {\n         ind <- pmatch(tolower(role[pos]),\n-                      tolower(MARC_relator_db$name),\n+                      tolower(MARC_relator_db$term),\n                       0L)\n         role[pos[ind > 0L]] <- MARC_relator_db$code[ind]\n         if(any(ind <- (ind == 0L))) {\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nOr, alternatively, if the intention is to preserve the current behavior, that\nblock of code could be removed.\n\n(Strictly speaking, from what I can see, R-exts doesn't document the use of the\nfull term variants here either.)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19137] New: LINE_DIRECTIVE nodes get parent=0 in getParseData*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19137>\n\n            Bug ID: 19137\n           Summary: LINE_DIRECTIVE nodes get parent=0 in getParseData\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: NEW\n          Severity: minor\n          Priority: P5\n         Component: Language\n          Assignee: <mailto:R-core@R-project.org|R-core@R-project.org>\n          Reporter: <mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>\n\n```\ns = '\n{\n#line 1 \"file.R\"\n  x &lt;- 1\n}\n'\ncat(s, file=tmp&lt;-tempfile())\ngetParseData(parse(tmp))\n```\n\nhas structure:\n\n```\n   line1 col1 line2 col2 id parent          token terminal             text\n18     2    1     5    1 18      0           expr    FALSE                 \n3      2    1     2    1  3     18            '{'     TRUE                {\n5      3    1     3   16  5      0 LINE_DIRECTIVE     TRUE #line 1 \"file.R\"\n13     4    3     4    8 13     18           expr    FALSE                 \n7      4    3     4    3  7      9         SYMBOL     TRUE                x\n9      4    3     4    3  9     13           expr    FALSE                 \n8      4    5     4    6  8     13    LEFT_ASSIGN     TRUE               &lt;-\n10     4    8     4    8 10     11      NUM_CONST     TRUE                1\n11     4    8     4    8 11     13           expr    FALSE                 \n16     5    1     5    1 16     18            '}'     TRUE                }\n```\n\nIINM, it makes most sense for `LINE_DIRECTIVE` to get the same `parent` as\nwould a `COMMENT`. I'm not the most familiar with this feature of the language,\nbut having `parent=0` does strike me as incorrect for a directive inside an `{`\nexpression.\n\nThis came about from {lintr} making the (IMHO correct) assumption that such\n`parent==0` for a non-top-level expression is impossible:\n\n```\nlintr::lint(tmp)\n# Error in expression_xmls[[i]] : subscript out of bounds\n```\n\nWhich I encountered in the R test suite:\n\n<https:\/\/svn.r-project.org\/browse\/R\/trunk\/tests\/reg-tests-2.R?op=blame&amp;rev=88200#l3394>\n\n(PS my first time trying the \/browse\/ view to share a source link, is this the\neasiest way to share a perma-link? Computing the 'blame' page took several\nminutes. The GitHub mirror can generate such perma-links ~instantly:\n<https:\/\/github.com\/r-devel\/r-svn\/blob\/084423720a65e00a4bec911e66cffd2881f925ac\/tests\/reg-tests-2.R#L3391-L3396)>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1786565533.620449",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "\/Wi+h",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19137] New: LINE_DIRECTIVE nodes get parent=0 in getParseData",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19137"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n            Bug ID: 19137\n           Summary: LINE_DIRECTIVE nodes get parent=0 in getParseData\n           Product: R\n           Version: R-devel (trunk)\n          Hardware: All\n                OS: All\n            Status: NEW\n          Severity: minor\n          Priority: P5\n         Component: Language\n          Assignee: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:R-core@R-project.org",
+                                "text": "R-core@R-project.org",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n          Reporter: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "s = '\n{\n#line 1 \"file.R\"\n  x <- 1\n}\n'\ncat(s, file=tmp<-tempfile())\ngetParseData(parse(tmp))\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nhas structure:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "   line1 col1 line2 col2 id parent          token terminal             text\n18     2    1     5    1 18      0           expr    FALSE                 \n3      2    1     2    1  3     18            '{'     TRUE                {\n5      3    1     3   16  5      0 LINE_DIRECTIVE     TRUE #line 1 \"file.R\"\n13     4    3     4    8 13     18           expr    FALSE                 \n7      4    3     4    3  7      9         SYMBOL     TRUE                x\n9      4    3     4    3  9     13           expr    FALSE                 \n8      4    5     4    6  8     13    LEFT_ASSIGN     TRUE               <-\n10     4    8     4    8 10     11      NUM_CONST     TRUE                1\n11     4    8     4    8 11     13           expr    FALSE                 \n16     5    1     5    1 16     18            '}'     TRUE                }\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nIINM, it makes most sense for "
+                            },
+                            {
+                                "type": "text",
+                                "text": "LINE_DIRECTIVE",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " to get the same "
+                            },
+                            {
+                                "type": "text",
+                                "text": "parent",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " as\nwould a "
+                            },
+                            {
+                                "type": "text",
+                                "text": "COMMENT",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". I'm not the most familiar with this feature of the language,\nbut having "
+                            },
+                            {
+                                "type": "text",
+                                "text": "parent=0",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does strike me as incorrect for a directive inside an "
+                            },
+                            {
+                                "type": "text",
+                                "text": "{",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nexpression.\n\nThis came about from {lintr} making the (IMHO correct) assumption that such\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "parent==0",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " for a non-top-level expression is impossible:\n\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_preformatted",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "lintr::lint(tmp)\n# Error in expression_xmls[[i]] : subscript out of bounds\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "\n\nWhich I encountered in the R test suite:\n\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/svn.r-project.org\/browse\/R\/trunk\/tests\/reg-tests-2.R?op=blame&amp;rev=88200#l3394",
+                                "text": "https:\/\/svn.r-project.org\/browse\/R\/trunk\/tests\/reg-tests-2.R?op=blame&rev=88200#l3394"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n(PS my first time trying the \/browse\/ view to share a source link, is this the\neasiest way to share a perma-link? Computing the 'blame' page took several\nminutes. The GitHub mirror can generate such perma-links ~instantly:\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/blob\/084423720a65e00a4bec911e66cffd2881f925ac\/tests\/reg-tests-2.R#L3391-L3396)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19137] LINE_DIRECTIVE nodes get parent=0 in getParseData*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19137>\n\n--- Comment #1 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nCreated attachment 3783\n  --&gt; <https:\/\/bugs.r-project.org\/attachment.cgi?id=3783&amp;action=edit>\nHandle LINE_DIRECTIVE like COMMENT for getParseData\n\nTesting here: <https:\/\/github.com\/r-devel\/r-svn\/pull\/299>",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1786568848.596069",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "ADsm1",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19137] LINE_DIRECTIVE nodes get parent=0 in getParseData",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19137"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #1 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nCreated attachment 3783\n  --> "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3783&amp;action=edit",
+                                "text": "https:\/\/bugs.r-project.org\/attachment.cgi?id=3783&action=edit"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nHandle LINE_DIRECTIVE like COMMENT for getParseData\n\nTesting here: "
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/github.com\/r-devel\/r-svn\/pull\/299"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19127] Sys.timezone() gives strange warning in non-UTF-8 encoding*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19127>\n\n--- Comment #2 from Michael Chirico (<mailto:michaelchirico4@gmail.com|michaelchirico4@gmail.com>) ---\nFor future reference: this originated from a patched version of `systemd 260`.\n\nGemini offers the following diagnosis (unverified, looks plausible, run\nalongside local clone of systemd):\n\n---\n\n### Verification on systemd 255 vs Ubuntu 24.04 &amp; openSUSE\n\nThe issue **is present in systemd 255 as well**; it did not break between 255\nand 261. The difference observed between Ubuntu 24.04 and openSUSE Tumbleweed\nis caused by distribution locale packaging and the specific day of the week\ntested:\n\n1. **Ubuntu 24.04 (`locales` package)**:\n   - Ubuntu and Debian do not compile legacy 8-bit locales by default. Unless\n`lv_LV ISO-8859-13` is manually added to `\/etc\/locale.gen` and compiled via\n`locale-gen` (or `localedef`), `lv_LV` does not exist on the system (only\n`lv_LV.UTF-8` exists if Latvian was installed).\n   - When running `LC_TIME=lv_LV timedatectl status` without the locale\ninstalled, `setlocale(LC_ALL, \"\")` in `timedatectl.c:1019` fails to load\n`lv_LV` and silently falls back to `C` \/ `C.UTF-8`. In `C` locale, `strftime`\nemits ASCII weekday names (`Wed ...`), which are valid UTF-8, so `timedatectl`\nsucceeded.\n   - If `lv_LV` (ISO-8859-13) is compiled on Ubuntu 24.04 using `localedef -i\nlv_LV -f ISO-8859-13 lv_LV`, **systemd 255 fails with the exact same error**:\n\n     Failed to print table: Invalid argument\n\n2. **openSUSE Tumbleweed (`glibc-locale-base`)**:\n   - openSUSE packages pre-compiled legacy glibc locales out of the box.\n`LC_TIME=lv_LV` successfully activates `lv_LV.ISO-8859-13` (Latin-7).\n\n3. **Weekday dependency (`strftime(\"%a\")`)**:\n   - In `lv_LV.ISO-8859-13`, the Latvian abbreviated weekday names defined in\nglibc locale data include non-breaking spaces (byte `0xA0` in Latin-7 \/\nISO-8859-13):\n     - Monday: `P\\xa0`\n     - Tuesday: `O\\xa0`\n     - Wednesday: `T\\xa0`\n     - Thursday: `C\\xa0`\n     - Friday: `Pk` *(pure ASCII)*\n     - Saturday: `S\\xa0`\n     - Sunday: `Sv` *(pure ASCII)*\n   - On **Friday** and **Sunday**, `strftime(\"%a\")` produces pure ASCII, so\n`timedatectl status` will actually succeed even in `lv_LV.ISO-8859-13`. On the\nother 5 weekdays, byte `0xA0` triggers the UTF-8 parser failure.\n\n---\n\n### 2. Culprit Commits and Root Cause\n\nThe failure occurs through the following call chain:\n\n1. `print_status_info()` (timedatectl.c#L101-L108) calls `strftime(a, sizeof a,\n\"%a %Y-%m-%d %H:%M:%S %Z\", &amp;tm)` and passes the string into the table formatter\nvia `table_add_many()`.\n2. `table_print_full()` (format-table.c#L2316) calls\n`table_data_requested_width_height()` (format-table.c#L2004) -&gt;\n`console_width_height()` (format-table.c#L1958).\n3. `console_width_height()` (format-table.c#L1984-L1988) calls\n`utf8_console_width()` (src\/basic\/utf8.c#L601) to compute character cell\nwidths.\n4. `utf8_char_console_width()` (src\/basic\/utf8.c#L178) calls\n`utf8_encoded_to_unichar()` (src\/basic\/utf8.c#L61). When it encounters byte\n`0xA0` without a UTF-8 multi-byte prefix, it returns `-EINVAL`.\n5. `utf8_console_width()` (src\/basic\/utf8.c#L616) returns `SIZE_MAX`.\n6. `console_width_height()` (src\/shared\/format-table.c#L1988) catches `k ==\nSIZE_MAX` and returns `-EINVAL`.\n7. `table_print_or_warn()` (src\/shared\/format-table.c#L2678) catches `-EINVAL`\nand logs `Failed to print table: %m` (`Invalid argument`).\n\n#### Working As Intended (WAI):\n\nsystemd strictly assumes UTF-8 across all internal tools, logs, configuration\nfiles, IPC interfaces, and terminal output formatting. Non-UTF-8 locales are\nexplicitly considered legacy\/obsolete upstream:\n* Commit `a7d9fccd0e` (*\"locale-util: suppress non-UTF-8 locales when\nenumerating them\"*, v243) explicitly filters out legacy non-UTF-8 locales by\ndefault (*\"Filter out non-UTF-8 locales, because it's 2019, by default\"*).\n",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1786573157.738799",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "PDZw",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19127] Sys.timezone() gives strange warning in non-UTF-8 encoding",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19127"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #2 from Michael Chirico ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:michaelchirico4@gmail.com",
+                                "text": "michaelchirico4@gmail.com"
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nFor future reference: this originated from a patched version of "
+                            },
+                            {
+                                "type": "text",
+                                "text": "systemd 260",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n\nGemini offers the following diagnosis (unverified, looks plausible, run\nalongside local clone of systemd):\n\n---\n\n### Verification on systemd 255 vs Ubuntu 24.04 & openSUSE\n\nThe issue **is present in systemd 255 as well**; it did not break between 255\nand 261. The difference observed between Ubuntu 24.04 and openSUSE Tumbleweed\nis caused by distribution locale packaging and the specific day of the week\ntested:\n\n1. **Ubuntu 24.04 ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "locales",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " package)**:\n   - Ubuntu and Debian do not compile legacy 8-bit locales by default. Unless\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "lv_LV ISO-8859-13",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is manually added to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "\/etc\/locale.gen",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and compiled via\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "locale-gen",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (or "
+                            },
+                            {
+                                "type": "text",
+                                "text": "localedef",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lv_LV",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " does not exist on the system (only\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "lv_LV.UTF-8",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " exists if Latvian was installed).\n   - When running "
+                            },
+                            {
+                                "type": "text",
+                                "text": "LC_TIME=lv_LV timedatectl status",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " without the locale\ninstalled, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "setlocale(LC_ALL, \"\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "timedatectl.c:1019",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " fails to load\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "lv_LV",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " and silently falls back to "
+                            },
+                            {
+                                "type": "text",
+                                "text": "C",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " \/ "
+                            },
+                            {
+                                "type": "text",
+                                "text": "C.UTF-8",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". In "
+                            },
+                            {
+                                "type": "text",
+                                "text": "C",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " locale, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "strftime",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nemits ASCII weekday names ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "Wed ...",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "), which are valid UTF-8, so "
+                            },
+                            {
+                                "type": "text",
+                                "text": "timedatectl",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nsucceeded.\n   - If "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lv_LV",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (ISO-8859-13) is compiled on Ubuntu 24.04 using `localedef -i\nlv_LV -f ISO-8859-13 lv_LV`, **systemd 255 fails with the exact same error**:\n\n     Failed to print table: Invalid argument\n\n2. **openSUSE Tumbleweed ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "glibc-locale-base",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")**:\n   - openSUSE packages pre-compiled legacy glibc locales out of the box.\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "LC_TIME=lv_LV",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " successfully activates "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lv_LV.ISO-8859-13",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (Latin-7).\n\n3. **Weekday dependency ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "strftime(\"%a\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")**:\n   - In "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lv_LV.ISO-8859-13",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ", the Latvian abbreviated weekday names defined in\nglibc locale data include non-breaking spaces (byte "
+                            },
+                            {
+                                "type": "text",
+                                "text": "0xA0",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " in Latin-7 \/\nISO-8859-13):\n     - Monday: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "P\\xa0",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n     - Tuesday: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "O\\xa0",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n     - Wednesday: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "T\\xa0",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n     - Thursday: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "C\\xa0",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n     - Friday: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Pk",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(pure ASCII)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n     - Saturday: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "S\\xa0",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n     - Sunday: "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Sv",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " "
+                            },
+                            {
+                                "type": "text",
+                                "text": "(pure ASCII)",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n   - On **Friday** and **Sunday**, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "strftime(\"%a\")",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " produces pure ASCII, so\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "timedatectl status",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " will actually succeed even in "
+                            },
+                            {
+                                "type": "text",
+                                "text": "lv_LV.ISO-8859-13",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". On the\nother 5 weekdays, byte "
+                            },
+                            {
+                                "type": "text",
+                                "text": "0xA0",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " triggers the UTF-8 parser failure.\n\n---\n\n### 2. Culprit Commits and Root Cause\n\nThe failure occurs through the following call chain:\n\n1. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "print_status_info()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (timedatectl.c#L101-L108) calls `strftime(a, sizeof a,\n\"%a %Y-%m-%d %H:%M:%S %Z\", &tm)` and passes the string into the table formatter\nvia "
+                            },
+                            {
+                                "type": "text",
+                                "text": "table_add_many()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n2. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "table_print_full()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (format-table.c#L2316) calls\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "table_data_requested_width_height()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (format-table.c#L2004) ->\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "console_width_height()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (format-table.c#L1958).\n3. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "console_width_height()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (format-table.c#L1984-L1988) calls\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "utf8_console_width()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (src\/basic\/utf8.c#L601) to compute character cell\nwidths.\n4. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "utf8_char_console_width()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (src\/basic\/utf8.c#L178) calls\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "utf8_encoded_to_unichar()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (src\/basic\/utf8.c#L61). When it encounters byte\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "0xA0",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " without a UTF-8 multi-byte prefix, it returns "
+                            },
+                            {
+                                "type": "text",
+                                "text": "-EINVAL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n5. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "utf8_console_width()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (src\/basic\/utf8.c#L616) returns "
+                            },
+                            {
+                                "type": "text",
+                                "text": "SIZE_MAX",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n6. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "console_width_height()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (src\/shared\/format-table.c#L1988) catches `k ==\nSIZE_MAX` and returns "
+                            },
+                            {
+                                "type": "text",
+                                "text": "-EINVAL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ".\n7. "
+                            },
+                            {
+                                "type": "text",
+                                "text": "table_print_or_warn()",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (src\/shared\/format-table.c#L2678) catches "
+                            },
+                            {
+                                "type": "text",
+                                "text": "-EINVAL",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\nand logs "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Failed to print table: %m",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "Invalid argument",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ").\n\n#### Working As Intended (WAI):\n\nsystemd strictly assumes UTF-8 across all internal tools, logs, configuration\nfiles, IPC interfaces, and terminal output formatting. Non-UTF-8 locales are\nexplicitly considered legacy\/obsolete upstream:\n"
+                            },
+                            {
+                                "type": "text",
+                                "text": " Commit ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "a7d9fccd0e",
+                                "style": {
+                                    "bold": true,
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " (",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"locale-util: suppress non-UTF-8 locales when\nenumerating them\"*, v243) explicitly filters out legacy non-UTF-8 locales by\ndefault ("
+                            },
+                            {
+                                "type": "text",
+                                "text": "\"Filter out non-UTF-8 locales, because it's 2019, by default\"",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ")."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "* `format-table` computes terminal column alignment, text wrapping, and\ntruncation based on UTF-8 Unicode codepoint widths.",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1786573157.760279",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "pgB9",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "* "
+                            },
+                            {
+                                "type": "text",
+                                "text": "format-table",
+                                "style": {
+                                    "code": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " computes terminal column alignment, text wrapping, and\ntruncation based on UTF-8 Unicode codepoint widths."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "bot_message",
+        "text": "*[Bug 19131] Stale lazy-load database cache after re-installing a package in the same session*\n<https:\/\/bugs.r-project.org\/show_bug.cgi?id=19131>\n\n--- Comment #3 from Kurt Hornik (<mailto:Kurt.Hornik@wu.ac.at|Kurt.Hornik@wu.ac.at>) ---\nThanks.  Alternate patch applied to the trunk now with c90396.\nOk to close the PR?",
+        "username": "r-bugs notifier",
+        "icons": {
+            "emoji": ":robot_face:"
+        },
+        "type": "message",
+        "ts": "1786600824.363979",
+        "bot_id": "B06769YJX9Q",
+        "app_id": "A024R9PQM",
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "tGk",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "[Bug 19131] Stale lazy-load database cache after re-installing a package in the same session",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n"
+                            },
+                            {
+                                "type": "link",
+                                "url": "https:\/\/bugs.r-project.org\/show_bug.cgi?id=19131"
+                            },
+                            {
+                                "type": "text",
+                                "text": "\n\n--- Comment #3 from Kurt Hornik ("
+                            },
+                            {
+                                "type": "link",
+                                "url": "mailto:Kurt.Hornik@wu.ac.at",
+                                "text": "Kurt.Hornik@wu.ac.at",
+                                "unsafe": true
+                            },
+                            {
+                                "type": "text",
+                                "text": ") ---\nThanks.  Alternate patch applied to the trunk now with c90396.\nOk to close the PR?"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

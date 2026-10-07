@@ -13,7 +13,7 @@ buffer_signin <- function(browser, page, username, key = "Buffer password"){
     elem$sendKeysToElement(list(username))
     elem <- browser$findElement(using = 'id', "password")
     elem$sendKeysToElement(list(keyring::key_get(key)))
-    elem <- browser$findElement(using = 'id', "login-form-submit")
+    elem <- browser$findElement(using = 'css', "[type='submit']")
     elem$clickElement()
 
     # team plan promotion
@@ -51,7 +51,7 @@ buffer_createpost <- function(
 
     if (!"linkedin" %in% venue) {
         elem <- browser$findElement(using = 'xpath',
-                                    "//button[@aria-label='linkedin channel (selected)']")
+                                    "//div[@data-channel='linkedin']/following-sibling::button[1]")
         elem$clickElement()
     }
 
@@ -86,6 +86,8 @@ buffer_createpost <- function(
 
 sendChar <- function(elem, text){
     text <- as.list(strsplit(text, "", useBytes = TRUE)[[1]])
+    emoji <- FALSE
+    textbox <- elem
     for (i in seq_along(text)){
         # emojis stop working if use new line
         if (text[i] == "\n") {
@@ -93,6 +95,23 @@ sendChar <- function(elem, text){
             next
         }
         elem$sendKeysToElement(text[i])
+        # switch to emoji editor as required
+        if (text[i] == ":") {
+            if (!emoji){
+                # see if editor opened
+                elem <- browser$findElements(
+                    using = "css selector",
+                    "input[aria-label='Search emoji']")
+                emoji <- length(elem)
+                if (emoji) {
+                    elem <- elem[[1]]
+                } else elem <- textbox
+            } else {
+                elem$sendKeysToElement(list(key = "enter"))
+                elem <- textbox
+                emoji <- FALSE
+            }
+        }
     }
 }
 

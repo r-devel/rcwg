@@ -1,20 +1,26 @@
 # Data for next office hours ----------------------------------------------
 
-# UTC times (for Mar - Sept, UTC time is stable)
-# Mar 10 09:00 16:00
+# regular times
+# 2nd Tuesday at 9am UK time (EMEA-APAC friendly)
+# 2nd Thursday at 9am PST | 5pm UK time (AMER-friendly)
 
-day <- 11 # day number
-month <- "August"
+# Dates
+# Tue Oct 13 | Nov 10 | Dec 8 | Jan 12 | Feb 9 | Mar 9
+# Thu Oct 15 (actually 3rd Thu, so same week as EMEA-APAC hour )
+# Thu Nov 12 | Dec 10 | Jan 14 | Feb 11 | Mar 11
+
+day <- c(13, 15) # day number
+month <- "October"
 utc_times <- c("08:00", "16:00")
 
-meetup <- c(emea = "https://www.meetup.com/r-contributors/events/313883487",
-            amer = "https://www.meetup.com/r-contributors/events/315520557")
+signup <- c(emea = "https://teamup.com/event/show/id/dtJKR6xq7ttCTERehZrNX2GzokRvg9",
+            amer = "https://teamup.com/event/show/id/UD5yxSWDAqrMDVurT22pXidT3CZECi")
 
-# check the zoom matches the meetup page!
-zoom <- c(emea = "https://us02web.zoom.us/j/81682101653?pwd=O6WTmHTbrNCvJW8x0gCOYBMD3W2HmK.1",
-          amer = "https://us02web.zoom.us/j/86226876200?pwd=MNcmrFiUzYjj7CXYbNHZraORkK8dQV.1")
+# check the zoom matches the teamup page!
+zoom <- c(emea = "https://us02web.zoom.us/j/85332559654?pwd=nN3JQKyQHajlxKzjsTCWoXCsVp3M5P.1",
+          amer = "https://us02web.zoom.us/j/89475468831?pwd=bsAYsW8Ly6pjhAOwv3dp7kJ6Q6lkEX.1")
 
-# Ensure office hour announced on meetup (see rcwg_tasks.md) --------------
+# [ignore while trialing teamup] Ensure office hour announced on meetup (see rcwg_tasks.md) --------------
 # - may not see banner, but not announce if Announce button showing!
 
 # Send calendar invite to r-contribution-wg@r-project.org contacts --------
@@ -76,8 +82,8 @@ source("admin/R/social_post.R")
 # use "office_hour" for main post,
 # "office_hour_reminder" for mastodon/slack reminders
 post <- office_hour_post(month, day, utc_times,
-                         meetup, zoom,
-                         venue = "slack",
+                         signup, zoom,
+                         venue = "zulip",
                          templates = "admin/posts/office_hour")
 
 # Mastodon via Buffer ------------------------------------
@@ -86,7 +92,7 @@ post <- office_hour_post(month, day, utc_times,
 # This could replaced by rtoot now, but won't schedule in advance
 
 post <- office_hour_post(month, day, utc_times,
-                         meetup, zoom,
+                         signup, zoom,
                          venue = "mastodon",
                          templates = "admin/posts/office_hour")
 
@@ -181,7 +187,7 @@ linkedin_createevent(browser = browser,
                      startmonth = month,
                      starttime = "09:00", #UTC time
                      endtime = "10:00",
-                     eventlink = meetup["emea"],
+                     eventlink = signup["emea"],
                      description = description,
                      postcontent = postcontent)
 
@@ -208,7 +214,7 @@ linkedin_createevent(browser = browser,
                      startmonth = month,
                      starttime = "09:00",
                      endtime = "10:00",
-                     eventlink = meetup["amer"],
+                     eventlink = signup["amer"],
                      description = description,
                      postcontent = postcontent)
 

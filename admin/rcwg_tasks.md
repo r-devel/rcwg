@@ -2,85 +2,80 @@
 
 ## Setting up R Contribution Working Group Meeting (scripts/rcwg.R)
 
-1. Update GitHub README with dates for next month via R script
-   - Based on usual pattern (n'th day of month at particular times)
-   - Check dates and adjust if necessary
-2.  Prepare agenda (check minutes were saved from last meeting: https://github.com/r-devel/rcwg/tree/main/team_minutes)
-     - https://developer.r-project.org/etherpad/p/rcwg.
-3.  Create Google event +Zoom (use Method 2)
-    - Method 1: Create event on Google calendar, make Zoom event. Makes a mess of Zoom instructions in description on Teamup, but just about usable.
-    - Method 2: Create event on Zoom, add to Google calendar. Need to make sure on Forwards account
-        - Add to Forward Calendar (RSVPs work better from main calender - at least Outlook and fastmail, RSVPs don't work to (public?) group calendar). DO NOT INVITE ANYONE YET ELSE THEY GET MULTIPLE INVITES!!
-        - Copy event to R Contribution Working Group calendar for sharing via Teamup.
-        - Now add guest: r-contribution-wg@r-project.org on Forwards Calendar event.
-            - N.B. if change event in recurring series will send invite for series + invite for each changed event.
-            There for may be better to note intended change for self and just adjust individual event when advertising meeting/
-            writing up minutes of next meeting
-            - !! Maybe in future, better to add https://calendar.google.com/calendar/ical/nc4tg39nam44itn9uhnf751hbk%40group.calendar.google.com/public/basic.ics
-            as an attachment to email sent from Forwards account (avoiding Outlook messing with links). Also giving link to Google calendar and events calendar in body of email.
-            See e.g. email from 2025-01-15 as example to set up for the year.
-    - Cannot log in to Zoom or Gmail with RSelenium.
-4.  Will automatically show on Team up in 12 hours, or
+### Set up recurring meeting
+
+Usually do for 6 months Oct-Mar / Apr-Sep in two series. Zoom can 
+cope with clocks changing if set local time, e.g. in PST, but good to review 
+every 6 months anyway.
+
+1. Set up recurring meetings on Zoom
+    - Adjust/delete dates in each series here before moving on
+2. Note dates in scripts/rcwg.R
+    - Use code in script to update GitHub README with dates for next two months
+    - Copy over Zoom links for future promo
+3. Add to Forwards Google calendar
+    - Add each series to R Contribution Working Group Calendar
+    - Update event content (see example below)
+    - Use code in script to get current RCWG subscribers and invite to series
+        - Uncheck "can see guest list"
+4. Will automatically show on Team up in 12 hours, or
     - Login to Team up 
-    - R Contributor Events > Settings > Calendars (https://teamup.com/c/fb4ohx/r-contributor-events/settings/calendars/edit/10129900)
+    - R Contributor Events > Settings > Calendars (https://teamup.com/c/fb4ohx/settings/calendars/edit/10129900)
     - Edit RCWG meetings refresh interval, save, then change back.
-    Guests are not shown on Teamup (but are on shared google calendar, if added)
-5. Add to Slack
+5. Add reminder on personal calendar one week before event to promote
+    
+Notes
 
-:loudspeaker: R Contribution Working Group
-:date: Mon 24 July, 15:00 - 16:00 UTC - UPDATED DATE AND TIME
-Agenda includes:
-- Preparation for R Project Sprint 2023
-- Updates on GSoC projects (R Development Container, Translations Dashboard)
-Details: https://contributor.r-project.org/events
+ - If change event in recurring series (on Zoom) will send invite for series 
+and invite for each changed event. Therefore it may be better to note intended 
+change for self and just adjust individual event when advertising 
+meeting/writing up minutes of previous meeting
+ - Guests are not shown on Teamup
     
-6. 1-2 days before meeting:
-    - Update event with highlights from agenda: will send reminders to people.
-    - Post reminder on Slack and Mastodon.
-    
-    
-## Content for calendar event
+#### Example meeting details
 
-R Contribution Working Group
-    
-Set date and time in UTC
-    
-Make it a Zoom meeting (make sure title, date and time set first!)
-    
-Add to R Contribution Working Group Calendar
+Working agenda is here: https://developer.r-project.org/etherpad/p/rcwg, this month including:
 
-Working agenda is here: https://hackmd.io/@hturner/HyISuE97D/edit including
- - Preparation for R Project Sprint 2023
- - Updates on GSoC projects (R Development Container, Translations Dashboard)
+TBA
+
+Minutes of previous meetings: https://github.com/r-devel/rcwg/tree/main/team_minutes
 
 Issues: https://github.com/r-devel/rcwg/issues
 
-Minutes of previous meetings: https://github.com/r-devel/rcwg/tree/main/team_minutes
+Calendar invites are sent to subscribers of the R-Contribution-WG mailing list, please visit 
+https://stat.ethz.ch/mailman/listinfo/r-contribution-wg if you wish to unsubscribe.
+
+### Promote single meeting ~1 week in advance
+
+1. Update GitHub README with dates for next month via R script (scripts/rcwg.R)
+2. Prepare agenda https://developer.r-project.org/etherpad/p/rcwg
+    - check minutes were saved from last meeting: https://github.com/r-devel/rcwg/tree/main/team_minutes
+3. Add agenda items to Google calendar event (will send update acting as 
+reminder)
+4. Promote via Zulip and Mastodon as in scripts/rcwg.R
     
 ## Setting up Office Hours
 
-1. Create event on Zoom
-    - Set up to recur until clocks change (can always edit specific date)
-    - Seems that it can cope with clocks changing if set local time in PST,
-    but stick with doing it this way for now.
-2. Create event on Meetup [cannot automate this part without paying, e.g. https://integrately.com/integrations/meetup/zoom] **or announce if not yet done**.
-    - [Consider editing current recurring meeting to extend end date]
-    - Copy past event
-    - Don't require registration
-    - Make a recurring event
-    - Set end date
-    - Don't integrate Zoom - for a recurring event it created a duplicated zoom meeting, on the wrong day, that does not recur!
-    - Don't announce till one week before (only announces one event at a time in any case)
-3. Add to Forwards Calendars
-    - Add to Forwards Office Hours calendar and invite facilitators directly
-   [ - Add to Forward Calendar from Zoom and edit description (RSVPs work better from main calender - at least Outlook and fastmail, RSVPs don't work to (public?) group calendar). DO NOT INVITE ANYONE YET ELSE THEY GET MULTIPLE INVITES!!
-   [ - Copy event to Office Hours calendar for sharing via Teamup.]
-   [ - Add guests: r-contribution-wg@r-project.org on Forwards Calendar event. FOR ALL EVENTS!!
-        TODO FOR APR 2025 ONWARDS]
-4. Add reminder on personal calendar (gmail) one week before office hours to promote
-5. [Automated] Add to contributor.r-project.org/events
-    - If need to force change refresh settings on Teamup
-6. Post on social media with help from scripts/office_hours.R
+1. Set up recurring meetings on Zoom
+    - Adjust/delete dates in each series here before moving on
+2. Add to Forwards Google calendar
+    - Add to Forwards Office Hours calendar
+    - Update event content (see example below)
+3. Create event on Teamup
+    - Copy past event and update title if necessary (description also given below)
+    - Update Zoom link (add hyperlink)
+    - Update recurring times for this series **in UTC** (timezone feature does not work)
+    - Edit specific event/times as necessary
+    - Check on https://contributor.r-project.org/events/ (updates immediately)
+4. Once all looks good add invitees to Forwards Google Calendar event
+    - Invite facilitators directly
+    - Use code in script to get current RCWG subscribers and invite to series
+        - Uncheck "can see guest list"
+5. Add reminder on personal calendar (gmail) one week before office hours to promote
+    
+### Promote single meeting ~1 week in advance
+
+Post on social media with help from scripts/office_hours.R
 
 ### Content for Forwards calendar
 
@@ -89,3 +84,55 @@ Join the online Office Hour to
 - discuss how to get started contributing to R
 - get help/feedback on contributions you are working on
 - look at open bugs/work on translations together
+
+<zoom details>
+
+Etherpad
+https://developer.r-project.org/etherpad/p/office-hour-EMEA-APAC
+https://developer.r-project.org/etherpad/p/office-hour-AMER
+
+Calendar invites are sent to subscribers of the R-Contribution-WG mailing list, please visit
+https://stat.ethz.ch/mailman/listinfo/r-contribution-wg if you wish to unsubscribe.
+
+### Content for Teamup calendar
+
+Join the online Office Hour to
+
+- discuss how to get started contributing to R
+- get help/feedback on contributions you are working on
+- look at open bugs/work on translations together
+---
+**Please sign up to let us know you plan to attend and to receive a calendar invite by email.**
+---
+Join Zoom Meeting
+
+### Considering meetup alternatives
+
+- Zoom registration: okay, but then everyone must register, too much overhead 
+for people invited via mailing list
+- Pretix: better for workshop or similar where commit people commit to dates 
+up front - else need to register for each event, not as easy as RSVP on Meetup
+- Google series - can only use invite link on main calendar
+- LinkedIn - people often sign up as attending then don't show
+- Teamup can enable signups but need to put all detail in event (including Zoom) 
+so people probably wouldn't bother signing up.
+     - Need to create events directly on Teamup else have to enable signup on 
+     all events to add signup to events generate from Google calendar feed.
+     - Trial and see if signup used/preferred to Meetup
+     
+#### Previous instructions for Meetup
+
+* Create event on Meetup https://www.meetup.com/r-contributors/events/ 
+[cannot automate this part without paying, e.g. https://integrately.com/integrations/meetup/zoom] **or announce if not yet done**.
+    - [Consider editing current recurring meeting to extend end date]
+    - Copy past event
+    - Don't require registration
+    - Make a recurring event
+    - Set end date
+    - Don't integrate Zoom - for a recurring event it created a duplicated zoom meeting, on the wrong day, that does not recur!
+    - Don't announce till one week before (only announces one event at a time in any case)
+    
+Also as previously created Teamup message from Google calendar, there was an extra step:
+
+* [Automated] Add to contributor.r-project.org/events
+    - If need to force change refresh settings on Teamup

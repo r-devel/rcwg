@@ -3,27 +3,34 @@
 source("admin/R/update_readme_dates.R")
 
 ### Usual times
-# 4th Thu 15:30 - 16:30 UK
-# 4th Thu 20:30 - 21:30 UK
+# 4th Mon 20:00 - 21:00 UK (Even month)
+# 4th Thu 15:30 - 21:30 UK (Odd month)
 
-### 2026 dates
+### 2026-2027 dates
 
-# Aug 27 19:30 UTC
-# next meeting:
-- Thursday, August 27, 2026, 19:30-20:30 UTC ([find your local time](https://arewemeetingyet.com/UTC/2026-08-27/19:30/R%20Contribution%20Working%20Group)).
--> need to update Zoom and Google invite
-# Sep 24 14:30 UTC
+# Oct 26 20:00
+# Nov 23 15:30 (not Nov 26)
+# Dec -- no meeting
+# Jan 28 15:30
+# Feb 22 20:00
+# Mar 25 15:30
 
-month <- "August"
-day <- 27
-time <- "19:30" # UTC !!
-zoom <- "https://us02web.zoom.us/j/89350851297?pwd=6thgJaE8VtBzG6eGMEU68tffnWJWWq.1"
+
+month <- "October"
+day <- 26
+time <- "20:00" # UTC !!
+
+### Zoom for even months till Feb
+zoom <- "https://us02web.zoom.us/j/86723662154?pwd=faZwFPGPegY4RslGBrlDm2C1WsQJG2.1"
+
+### Zoom for odd months till Mar
+zoom <- "https://us02web.zoom.us/j/81718465416?pwd=jlFbWlbKli0KC5oOAKaNMDKulXI7ot.1"
 
 # times here are UK times!
 # second number is n'th 'day' of the month, e.g. `3, "Friday"` = 3rd Friday
 # !! Think I have inconsistency here: Slack message and Twitter/Mastodon were wrong last time
-update_readme_dates(1, "August", 4, "Thursday", "20:30", 2026)
-update_readme_dates(2, "September", 4, "Thursday", "15:30", 2026)
+update_readme_dates(1, "October", 4, "Monday", "20:00", 2026)
+update_readme_dates(2, "November", 4, "Monday", "15:30", 2026)
 
 # Update RCWG contacts ---------------------------------------------------------
 
@@ -37,7 +44,7 @@ source("admin/R/r_contribution_wg_subscribers.R")
 # start Selenium server on my machine
 # using ~ rather than ${HOME} here does not work!
 # stick with standalone sever from http://selenium-release.storage.googleapis.com/index.html
-# geckodriver from homebrew ` brew install geckodriver`
+# geckodriver from homebrew `brew install geckodriver`
 # Java as advised https://cran.r-project.org/doc/manuals/r-patched/R-admin.html#Java-_0028macOS_0029
 system("java -jar ~/Selenium/selenium-server-standalone-3.9.1.jar -port 5556 \\
        &>/dev/null &")
@@ -79,9 +86,9 @@ source("admin/R/buffer_post.R")
 # slack announcement
 weekday <- get_weekday(day, month, abbreviate = TRUE)
 agenda = c(
-"- Plans for R Project Sprint 2026
-- Update on multilingual documentation
-- Zulip"
+"- Full launch of Zulip
+- Follow-up from R Project Sprint
+- Future events"
 )
 
 post <- social_post(weekday = weekday,

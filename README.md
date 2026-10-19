@@ -27,7 +27,7 @@ We meet (on Zoom) every 1-2 months, usually alternating between the fourth Thurs
 
 Next planned meeting(s):
  - Monday, October 26, 2026, 20:00-21:00 UTC ([find your local time](https://arewemeetingyet.com/UTC/2026-10-26/20:00/R%20Contribution%20Working%20Group)).
- - Monday, November 23, 2026, 15:30-16:30 UTC ([find your local time](https://arewemeetingyet.com/UTC/2026-11-23/15:30/R%20Contribution%20Working%20Group)).
+ - Thursday, November 26, 2026, 15:30-16:30 UTC ([find your local time](https://arewemeetingyet.com/UTC/2026-11-26/15:30/R%20Contribution%20Working%20Group)).
 
 Meeting details will be posted on the [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), or you can email rowforwards@gmail.com to be added to/removed from the mailing list to receive meeting invitations.
 
@@ -38,7 +38,7 @@ Nos reunimos (en Zoom) cada 1-2 meses, alternando entre el cuarto jueves del mes
 
 Próximas reuniones planificadas:
  - lunes 26 de octubre de 2026, 20:00-21:00 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2026-10-26/20:00/Grupo%20de%20trabajo%20de%20contribución%20R)).
- - lunes 23 de noviembre de 2026, 15:30-16:30 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2026-11-23/15:30/Grupo%20de%20trabajo%20de%20contribución%20R)).
+ - jueves 26 de noviembre de 2026, 15:30-16:30 UTC ([encuentre su hora local](https://arewemeetingyet.com/UTC/2026-11-26/15:30/Grupo%20de%20trabajo%20de%20contribución%20R)).
 
 Los detalles de la reunión se publicarán en [R-Devel Slack Group](https://forwards.github.io/rcontribution/slack), o puede enviar un correo electrónico a rowforwards@gmail.com para que lo agreguen o eliminen de la lista de correo para recibir invitaciones a reuniones.
 

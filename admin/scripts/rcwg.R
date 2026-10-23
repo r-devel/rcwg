@@ -3,34 +3,28 @@
 source("admin/R/update_readme_dates.R")
 
 ### Usual times
-# 4th Mon 20:00 - 21:00 UK (Even month)
-# 4th Thu 15:30 - 21:30 UK (Odd month)
+# 4th Thu 15:30 - 16:30 UK
+# 4th Thu 20:30 - 21:30 UK
 
-### 2026-2027 dates
+### 2026 dates
 
-# Oct 26 20:00
-# Nov 23 15:30 (not Nov 26)
-# Dec -- no meeting
-# Jan 28 15:30
-# Feb 22 20:00
-# Mar 25 15:30
-
-
-month <- "October"
-day <- 26
-time <- "20:00" # UTC !!
-
-### Zoom for even months till Feb
-zoom <- "https://us02web.zoom.us/j/86723662154?pwd=faZwFPGPegY4RslGBrlDm2C1WsQJG2.1"
-
-### Zoom for odd months till Mar
-zoom <- "https://us02web.zoom.us/j/81718465416?pwd=jlFbWlbKli0KC5oOAKaNMDKulXI7ot.1"
+# Oct 26 20:00 UTC
+# Nov 23 15:30 UTC
+# No December Meeting
+# Jan 28 15:30 UTC
+# Feb 22 20:00 UTC
+# Mar 25 15:30 UTC
 
 # times here are UK times!
 # second number is n'th 'day' of the month, e.g. `3, "Friday"` = 3rd Friday
 # !! Think I have inconsistency here: Slack message and Twitter/Mastodon were wrong last time
 update_readme_dates(1, "October", 4, "Monday", "20:00", 2026)
-update_readme_dates(2, "November", 4, "Monday", "15:30", 2026)
+update_readme_dates(2, "November", 4, "Thursday", "15:30", 2026)
+
+month <- "October"
+day <- 26
+time <- "20:00" # UTC !!
+zoom <- "https://us02web.zoom.us/j/86723662154?pwd=faZwFPGPegY4RslGBrlDm2C1WsQJG2.1"
 
 # Update RCWG contacts ---------------------------------------------------------
 
@@ -44,7 +38,7 @@ source("admin/R/r_contribution_wg_subscribers.R")
 # start Selenium server on my machine
 # using ~ rather than ${HOME} here does not work!
 # stick with standalone sever from http://selenium-release.storage.googleapis.com/index.html
-# geckodriver from homebrew `brew install geckodriver`
+# geckodriver from homebrew ` brew install geckodriver`
 # Java as advised https://cran.r-project.org/doc/manuals/r-patched/R-admin.html#Java-_0028macOS_0029
 system("java -jar ~/Selenium/selenium-server-standalone-3.9.1.jar -port 5556 \\
        &>/dev/null &")
@@ -86,9 +80,9 @@ source("admin/R/buffer_post.R")
 # slack announcement
 weekday <- get_weekday(day, month, abbreviate = TRUE)
 agenda = c(
-"- Full launch of Zulip
-- Follow-up from R Project Sprint
-- Future events"
+"- Hackathon at LatinR 2026
+- Plans for R Project Sprint 2027
+- Progress on other activities"
 )
 
 post <- social_post(weekday = weekday,
@@ -135,7 +129,7 @@ buffer_createpost(browser = browser,
                   day = NULL, # number, day of month
                   month = NULL, # month number
                   time = time, # UTC
-                  venue = c("mastodon", "linkedin"),
+                  venue = c("mastodon"),
                   postcontent = post)
 
 browser$close()

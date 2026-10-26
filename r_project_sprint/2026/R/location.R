@@ -53,3 +53,7 @@ location |>
 location |>
   count(Region, `Country of residence`) |>
   arrange(Region, n)
+
+location |>
+  count(Region) |>
+  arrange(Region, n)

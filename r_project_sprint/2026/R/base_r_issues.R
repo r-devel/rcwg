@@ -82,7 +82,11 @@ p <- status |>
 ggsave("bug_review.svg", path = file.path(dir, "figures"),
        device = svg, width = 8, height = 3)
 
-status1
+# overall at end of sprint
+status1 |>
+    ungroup() |>
+    group_by(Status) |>
+    summarise(n = sum(n))
 
 # overall issues
 issues |>
@@ -94,5 +98,7 @@ issues |>
         .default = "Base R"
     )) |>
     count(group)
+
+
 
 
